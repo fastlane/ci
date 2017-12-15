@@ -38,7 +38,7 @@ Metrics/ModuleLength:
   Enabled: false
 
 # certificate_1 is an okay variable name
-Style/VariableNumber:
+Naming/VariableNumber:
   Enabled: false
 
 # This rule isn't useful, lots of discussion happening around it also
@@ -96,10 +96,6 @@ Style/DoubleNegation:
 
 # Prevent to replace [] into %i
 Style/SymbolArray:
-  Enabled: false
-
-# We still support Ruby 2.0.0
-Layout/IndentHeredoc:
   Enabled: false
 
 # This cop would not work fine with rspec
@@ -208,7 +204,7 @@ Lint/ParenthesesAsGroupedExpression:
 
 # This would reject is_ in front of methods
 # We use `is_supported?` everywhere already
-Style/PredicateName:
+Naming/PredicateName:
   Enabled: false
 
 # We allow the $
@@ -216,12 +212,12 @@ Style/PerlBackrefs:
   Enabled: false
 
 AllCops:
-  TargetRubyVersion: 2.0
+  TargetRubyVersion: 2.3
   Exclude:
     - './vendor/**/*'
 
 # They have not to be snake_case
-Style/FileName:
+Naming/FileName:
   Exclude:
     - '**/*.gemspec'
 
