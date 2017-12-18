@@ -11,7 +11,7 @@ bundle update
 ## Local development
 
 ```
-rackup config.ru
+bundle execute rackup -p 8080
 ```
 
-Visit [127.0.0.1:9292](http://127.0.0.1:9292/)
+Visit [127.0.0.1:8080](http://127.0.0.1:8080/)
