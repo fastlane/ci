@@ -1,5 +1,7 @@
 ## from https://github.com/github/gitignore/blob/master/Ruby.gitignore
 
+.DS_STORE
+
 *.gem
 *.rbc
 /.config
