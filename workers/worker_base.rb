@@ -4,7 +4,12 @@ module FastlaneCI
       Thread.new do
         loop do
           sleep(self.timeout)
-          self.work
+          begin
+            self.work
+          rescue => ex
+            puts "[#{self.class} Exception]: #{ex}: "
+            puts caller.join("\n")
+          end
         end
       end
     end
