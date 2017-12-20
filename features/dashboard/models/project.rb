@@ -10,7 +10,7 @@ module FastlaneCI
     attr_reader :builds
 
     def attributes_to_persist
-      [
+      super + [
         :repo_url,
         :enabled
       ]
