@@ -1,1 +1,7 @@
 <h1><%= "Loading from ERB with " + taco_count.to_s + " tacos" %></h1>
+
+<ul>
+  <% projects.each do |project| %>
+    <li><%= project.repo_url %> (<%= project.enabled ? "Enabled" : "Disabled" %>)</li>
+  <% end %>
+</ul>
