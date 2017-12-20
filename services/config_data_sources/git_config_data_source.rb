@@ -46,7 +46,7 @@ module FastlaneCI
     def setup_repo
       if File.directory?(local_git_directory)
         Dir.chdir(local_git_directory) do
-          # FastlaneApp::CMD.run("git pull") # TODO for now
+          FastlaneApp::CMD.run("git pull")
         end
       else
         FastlaneApp::CMD.run("git clone", self.git_url, local_git_directory)
