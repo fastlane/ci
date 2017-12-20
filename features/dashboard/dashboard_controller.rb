@@ -6,14 +6,14 @@ module FastlaneCI
     HOME = "/dashboard"
 
     get HOME do
-      erb(:dashboard,
-          locals: {
-            taco_count: 18,
-            projects: Services::CONFIG_SERVICE.projects
-          })
+      locals = {
+        projects: Services::CONFIG_SERVICE.projects,
+        title: "Dashboard"
+      }
+      erb(:dashboard, locals: locals, layout: :"../../global/layout") # TODO: find a way to set the layout for all controllers
     end
 
-    # Example of json endpoint if you want to use ajax to asyn load stuff
+    # Example of json endpoint if you want to use ajax to async load stuff
     get "#{HOME}/build_list" do
       Services::BUILD_SERVICE.builds do |builds, paging_token|
         "builds #{builds}, paging token: #{paging_token}"

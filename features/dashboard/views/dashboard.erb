@@ -1,7 +1,41 @@
-<h1><%= "Loading from ERB with " + taco_count.to_s + " tacos" %></h1>
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
+  <header class="mdl-layout__header">
+    <div class="mdl-layout__header-row">
+      <span class="mdl-layout__title"><%= title %></span>
+    </div>
+  </header>
+  <div class="mdl-layout__drawer">
+    <span class="mdl-layout__title">fastlane.ci</span>
+    <nav class="mdl-navigation">
+      <a class="mdl-navigation__link" href="#">Dashboard</a>
+      <a class="mdl-navigation__link" href="#">Settings</a>
+    </nav>
+  </div>
+  <main class="mdl-layout__content" style="padding: 40px">
+    <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th style="width: 300px; text-align: center">Project Name</th>
+          <th>Enabled</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% projects.each do |project| %>
+          <tr style="cursor: pointer;">
+            <td>💚</td>
+            <td style="text-align: center;"><%= project.project_name %></td>
+            <td><%= project.enabled ? "✅" : "🚫" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
 
-<ul>
-  <% projects.each do |project| %>
-    <li><%= project.repo_url %> (<%= project.enabled ? "Enabled" : "Disabled" %>)</li>
-  <% end %>
-</ul>
+    <br />
+
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+      Add new Project
+    </button>
+
+  </main>
+</div>
