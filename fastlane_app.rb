@@ -9,6 +9,7 @@ require_relative "services/data_sources/json_data_source"
 require_relative "services/config_data_sources/git_config_data_source"
 require_relative "services/config_data_sources/config_base" # TODO: we don't want to import this here
 require_relative "features/dashboard/models/project" # TODO: we don't want to import this here
+require_relative "workers/refresh_config_data_sources_worker"
 
 module FastlaneCI
   class FastlaneApp < Sinatra::Base
@@ -31,5 +32,10 @@ module FastlaneCI
     get "/favico.ico" do
       "nope"
     end
+
+    # Initialize the workers
+    # For now, we're not using a fancy framework that adds multiple heavy dependencies
+    # including a database, etc.
+    FastlaneCI::RefreshConfigDataSourcesWorker.new
   end
 end
