@@ -7,7 +7,8 @@ require "json" # TODO: move somewhere else
 # Internal
 require_relative "services/data_sources/json_data_source"
 require_relative "services/config_data_sources/git_config_data_source"
-require_relative "features/dashboard/models/project" # TODO: we don't want to import this here, consult with Manu
+require_relative "services/config_data_sources/config_base" # TODO: we don't want to import this here
+require_relative "features/dashboard/models/project" # TODO: we don't want to import this here
 
 module FastlaneCI
   class FastlaneApp < Sinatra::Base

@@ -1,20 +1,6 @@
 require_relative "config_data_source"
 
 module FastlaneCI
-  # TODO: move this somewhere else, where @taquitos?
-  class ConfigBase
-    def attributes_to_persist
-      not_implemented(__method__)
-    end
-
-    # Basic output of class name + important attributes
-    def to_s
-      "#<#{self.class} " + attributes_to_persist.collect do |key|
-        "@#{key}=#{self.send(key)}"
-      end.join(", ") + ">"
-    end
-  end
-
   # (default) Store configuration in git
   class GitConfigDataSource < DataSource
     attr_accessor :git_url
