@@ -36,6 +36,7 @@ module FastlaneCI
 
     def projects=(projects)
       File.write(file_path("projects.json"), projects.to_json)
+      commit_changes!
     end
 
     # Helper methods
@@ -47,8 +48,6 @@ module FastlaneCI
       FileUtils.mkdir_p(local_git_directory) unless File.directory?(local_git_directory)
       return local_git_directory
     end
-
-
 
     private
 
@@ -68,7 +67,7 @@ module FastlaneCI
       end
     end
 
-    def commit_changes
+    def commit_changes!
       Dir.chdir(local_git_directory) do
         FastlaneApp::CMD.run("git add -A")
         FastlaneApp::CMD.run("git commit -m", commit_message)

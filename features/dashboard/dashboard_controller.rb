@@ -20,5 +20,14 @@ module FastlaneCI
         "builds #{builds}, paging token: #{paging_token}"
       end
     end
+
+    # TODO: we'll have to build the whole "Add Project flow"
+    # This is the code that can be used to add a new project
+    #
+    # post "#{HOME}/new" do
+    #   projects = Services::CONFIG_SERVICE.projects
+    #   projects << Project.new(repo_url: "https://github.com/fastlane/fastlane", enabled: true)
+    #   Services::CONFIG_SERVICE.projects = projects
+    # end
   end
 end
