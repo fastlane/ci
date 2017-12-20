@@ -12,7 +12,8 @@ module FastlaneCI
       return self.config_data_source.projects.collect do |raw_project|
         Project.new(
           repo_url: raw_project["repo_url"],
-          enabled: raw_project["enabled"]
+          enabled: raw_project["enabled"],
+          project_name: raw_project["project_name"]
         )
       end
     end
@@ -21,7 +22,8 @@ module FastlaneCI
       self.config_data_source.projects = projects.collect do |project|
         {
           repo_url: project.repo_url,
-          enabled: project.enabled
+          enabled: project.enabled,
+          project_name: project.project_name
         }
       end
     end
