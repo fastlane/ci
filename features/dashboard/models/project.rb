@@ -6,7 +6,7 @@ module FastlaneCI
     # @return [Boolean]
     attr_accessor :enabled
 
-    # @return [Array] A list of builds 
+    # @return [Array] A list of builds
     attr_reader :builds
 
     def attributes_to_persist

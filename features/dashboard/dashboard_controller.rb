@@ -6,12 +6,11 @@ module FastlaneCI
     HOME = "/dashboard"
 
     get HOME do
-      erb(:dashboard, 
-        locals: { 
-          taco_count: 18,
-          projects: Services::CONFIG_SERVICE.projects
-        }
-      )
+      erb(:dashboard,
+          locals: {
+            taco_count: 18,
+            projects: Services::CONFIG_SERVICE.projects
+          })
     end
 
     # Example of json endpoint if you want to use ajax to asyn load stuff
