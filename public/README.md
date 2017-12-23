@@ -1,0 +1,1 @@
+This directory contains all static, public files
