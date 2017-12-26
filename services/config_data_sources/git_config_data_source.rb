@@ -21,7 +21,7 @@ module FastlaneCI
     end
 
     def projects=(projects)
-      File.write(file_path("projects.json"), projects.to_json)
+      File.write(file_path("projects.json"), JSON.pretty_generate(projects))
       commit_changes!
     end
 
