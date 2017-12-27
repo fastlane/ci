@@ -10,7 +10,7 @@ module FastlaneCI
       locals = {
         title: "Login"
       }
-      erb(:login, locals: locals, layout: :"../../global/layout") # TODO: find a way to set the layout for all controllers
+      erb(:login, locals: locals)
     end
 
     post "/login/submit" do
