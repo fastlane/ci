@@ -6,7 +6,7 @@ module FastlaneCI
           sleep(self.timeout)
           begin
             self.work
-          rescue => ex
+          rescue StandardError => ex
             puts "[#{self.class} Exception]: #{ex}: "
             puts caller.join("\n")
           end

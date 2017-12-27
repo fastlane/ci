@@ -5,12 +5,25 @@ module FastlaneCI
   class DashboardController < Sinatra::Base
     HOME = "/dashboard"
 
+    before("#{HOME}*") do
+      # If the user isn't logged in, redirect to login
+      redirect("/login") if FastlaneCI::Services.code_hosting_sources.count == 0
+    end
+
     get HOME do
       locals = {
         projects: Services::CONFIG_SERVICE.projects,
         title: "Dashboard"
       }
       erb(:dashboard, locals: locals, layout: :"../../global/layout") # TODO: find a way to set the layout for all controllers
+    end
+
+    get "#{HOME}/add_project" do
+      locals = {
+        title: "Add new project",
+        repos: FastlaneCI::Services.code_hosting_sources.first.repos # TODO: .first, ugh. Should we allow only one sesion for now?
+      }
+      erb(:new_project, locals: locals, layout: :"../../global/layout") # TODO: find a way to set the layout for all controllers
     end
 
     # Example of json endpoint if you want to use ajax to async load stuff

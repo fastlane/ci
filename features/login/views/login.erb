@@ -1,0 +1,47 @@
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
+  <header class="mdl-layout__header">
+    <div class="mdl-layout__header-row">
+      <span class="mdl-layout__title"><%= title %></span>
+    </div>
+  </header>
+  <div class="mdl-layout__drawer">
+    <span class="mdl-layout__title">fastlane.ci</span>
+    <nav class="mdl-navigation">
+      <a class="mdl-navigation__link" href="#">Dashboard</a>
+      <a class="mdl-navigation__link" href="#">Settings</a>
+    </nav>
+  </div>
+  <main class="mdl-layout__content" style="padding: 40px;">
+    <div class="mdl-card mdl-shadow--8dp" style="width: 800px">
+      <div style="padding: 25px;">
+        <form action="/login/submit" method="post">
+          <h3>Login with GitHub</h3>
+          <p>Since fastlane.ci is self-hosted, you'll have to generate a <code>Personal Access Token</code> on GitHub.</p>
+          <p>Please select the following permissions</p>
+          <ul style="text-align: left">
+            <li><code>repo:status</code></li>
+            <li><code>repo_deployment</code></li>
+          </ul>
+
+          <p><a class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" target="_blank" href="https://github.com/settings/tokens/new">
+            Generate Personal Access Token
+          </a></p>
+
+          <hr />
+
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input" type="text" name="email" id="email">
+            <label class="mdl-textfield__label" for="email">Email</label>
+          </div>
+
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input" name="personal_access_token" type="password" id="personal_access_token">
+            <label class="mdl-textfield__label" for="personal_access_token">Personal Access Token</label>
+          </div>
+
+          <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Login</button>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>

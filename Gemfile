@@ -16,7 +16,7 @@ gem "octokit", ">= 4.8.0", "< 5.0.0"
 group :test, :development do
   gem "pry"
   gem "rack-test", require: "rack/test"
+  gem "rake"
   gem "rspec"
   gem "rubocop"
-  gem "rake"
 end

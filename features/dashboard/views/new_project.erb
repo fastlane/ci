@@ -16,26 +16,17 @@
       <thead>
         <tr>
           <th>Status</th>
-          <th style="width: 300px; text-align: center">Project Name</th>
-          <th>Enabled</th>
+          <th style="width: 300px;">Project Name</th>
         </tr>
       </thead>
       <tbody>
-        <% projects.each do |project| %>
+        <% repos.each do |repo| %>
           <tr style="cursor: pointer;">
             <td>💚</td>
-            <td style="text-align: center;"><%= project.project_name %></td>
-            <td><%= project.enabled ? "✅" : "🚫" %></td>
+            <td><%= repo[:name] %></td>
           </tr>
         <% end %>
       </tbody>
     </table>
-
-    <br />
-
-    <a href="/dashboard/add_project" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-      Add new Project
-    </a>
-
   </main>
 </div>
