@@ -1,4 +1,4 @@
-task :development do
+task :dev do
   sh "bundle exec rackup -p 8080 --env development"
 end
 
