@@ -1,4 +1,7 @@
-## from https://github.com/github/gitignore/blob/master/Ruby.gitignore
+# Added by fastlane.ci team
+.keys
+
+# from https://github.com/github/gitignore/blob/master/Ruby.gitignore
 
 .DS_STORE
 
