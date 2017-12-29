@@ -3,6 +3,7 @@ require "sinatra/base"
 require "sinatra/reloader"
 require "tty-command"
 require "json" # TODO: move somewhere else
+require "securerandom"
 
 # Internal
 require_relative "services/fastlane_ci_error" # TODO: move somewhere else, both the file and the `require`
@@ -14,6 +15,12 @@ require_relative "features/dashboard/models/project" # TODO: we don't want to im
 require_relative "workers/refresh_config_data_sources_worker"
 
 module FastlaneCI
+  # Used to use the same layout file across all views
+  # https://stackoverflow.com/questions/26080599/sinatra-method-to-set-layout
+  def self.default_layout
+    ("../../../features/global/layout").to_sym
+  end
+
   class FastlaneApp < Sinatra::Base
     configure(:development) do |configuration|
       register Sinatra::Reloader
@@ -27,8 +34,6 @@ module FastlaneCI
     CMD = TTY::Command.new # Fx: not 100% sure if we want to keep this global, but might be good to have shared config and go from there (e.g. dupe object if we need to run a one-off)
     CONFIG_DATA_SOURCE = GitConfigDataSource.new(git_url: "https://github.com/KrauseFx/ci-config")
 
-    # Set the default layout file across all controllers
-    set :erb, :layout => ("../../../features/global/layout").to_sym
 
     get "/" do
       redirect("/login")

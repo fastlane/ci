@@ -16,7 +16,7 @@ module FastlaneCI
         project: project,
         title: "Project #{project.project_name}"
       }
-      erb(:project, locals: locals)
+      erb(:project, locals: locals, layout: FastlaneCI.default_layout)
     end
   end
 end

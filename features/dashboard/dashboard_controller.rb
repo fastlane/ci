@@ -15,7 +15,7 @@ module FastlaneCI
         projects: Services::CONFIG_SERVICE.projects,
         title: "Dashboard"
       }
-      erb(:dashboard, locals: locals)
+      erb(:dashboard, locals: locals, layout: FastlaneCI.default_layout)
     end
 
     get "#{HOME}/add_project" do
@@ -23,7 +23,7 @@ module FastlaneCI
         title: "Add new project",
         repos: FastlaneCI::Services.code_hosting_sources.first.repos # TODO: .first, ugh. Should we allow only one sesion for now?
       }
-      erb(:new_project, locals: locals)
+      erb(:new_project, locals: locals, layout: FastlaneCI.default_layout)
     end
 
     # Example of json endpoint if you want to use ajax to async load stuff
