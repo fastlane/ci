@@ -12,29 +12,12 @@
     </nav>
   </div>
   <main class="mdl-layout__content" style="padding: 40px">
-    <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
-      <thead>
-        <tr>
-          <th>Status</th>
-          <th style="width: 300px; text-align: center">Project Name</th>
-          <th>Enabled</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% projects.each do |project| %>
-          <tr style="cursor: pointer;" onclick="location.href='/projects/<%= project.id %>'">
-            <td>💚</td>
-            <td style="text-align: center;"><%= project.project_name %></td>
-            <td><%= project.enabled ? "✅" : "🚫" %></td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+    
 
     <br />
 
     <a href="/dashboard/add_project" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-      Add new Project
+      Edit Project
     </a>
 
   </main>

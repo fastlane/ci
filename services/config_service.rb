@@ -13,7 +13,8 @@ module FastlaneCI
         Project.new(
           repo_url: raw_project["repo_url"],
           enabled: raw_project["enabled"],
-          project_name: raw_project["project_name"]
+          project_name: raw_project["project_name"],
+          id: raw_project["id"]
         )
       end
     end
@@ -23,7 +24,8 @@ module FastlaneCI
         {
           repo_url: project.repo_url,
           enabled: project.enabled,
-          project_name: project.project_name
+          project_name: project.project_name,
+          id: project.id
         }
       end
     end
