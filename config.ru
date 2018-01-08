@@ -6,9 +6,9 @@ require_relative "features/login/login_controller"
 require_relative "features/project/project_controller"
 
 # Load up all the available controllers
-use FastlaneCI::DashboardController
-use FastlaneCI::LoginController
-use FastlaneCI::ProjectController
+use(FastlaneCI::DashboardController)
+use(FastlaneCI::LoginController)
+use(FastlaneCI::ProjectController)
 
 # Start the CI app
-run FastlaneCI::FastlaneApp
+run(FastlaneCI::FastlaneApp)

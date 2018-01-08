@@ -1,4 +1,4 @@
-source "https://rubygems.org"
+source("https://rubygems.org")
 
 # Sinatra
 gem "sinatra", ">= 2.0.0", "< 3.0"

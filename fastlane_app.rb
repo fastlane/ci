@@ -18,13 +18,13 @@ module FastlaneCI
   # Used to use the same layout file across all views
   # https://stackoverflow.com/questions/26080599/sinatra-method-to-set-layout
   def self.default_layout
-    ("../../../features/global/layout").to_sym
+    "../../../features/global/layout".to_sym
   end
 
   class FastlaneApp < Sinatra::Base
     configure(:development) do |configuration|
       register Sinatra::Reloader
-      configuration.also_reload "features/dashboard/dashboard_controller.rb"
+      configuration.also_reload("features/dashboard/dashboard_controller.rb")
       configuration.after_reload do
         puts "reloaded"
       end

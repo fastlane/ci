@@ -1,7 +1,7 @@
 require "rack/test"
 require "rspec"
 
-require File.expand_path "../../fastlane_app.rb", __FILE__
+require File.expand_path("../../fastlane_app.rb", __FILE__)
 
 ENV["RACK_ENV"] = "test"
 
@@ -13,7 +13,7 @@ module RSpecMixin
 end
 
 RSpec.configure do |config|
-  config.include RSpecMixin
+  config.include(RSpecMixin)
 
   config.formatter = :documentation
   config.tty = true

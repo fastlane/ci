@@ -1,5 +1,5 @@
 require_relative "spec_helper.rb"
-require File.expand_path "../../features/dashboard/dashboard_controller.rb", __FILE__
+require File.expand_path("../../features/dashboard/dashboard_controller.rb", __FILE__)
 
 describe FastlaneCI::DashboardController do
   # This fails because Rack Test doesn't seem to be loading things from config.ru

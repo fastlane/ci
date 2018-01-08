@@ -7,8 +7,8 @@ module FastlaneCI
           begin
             self.work
           rescue StandardError => ex
-            puts "[#{self.class} Exception]: #{ex}: "
-            puts caller.join("\n")
+            puts("[#{self.class} Exception]: #{ex}: ")
+            puts(caller.join("\n"))
           end
         end
       end
