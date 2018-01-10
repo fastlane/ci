@@ -19,7 +19,6 @@ module FastlaneCI
 
       git_hub_service = FastlaneCI::GitHubSource.new(email: email, personal_access_token: personal_access_token)
       if git_hub_service.session_valid?
-        # TODO: How do we want to be the relationship between GitHubSouce with the session
         require 'pry'; binding.pry
         session["GITHUB_SESSION_API_TOKEN"] = personal_access_token
         redirect("/dashboard")
