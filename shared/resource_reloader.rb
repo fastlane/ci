@@ -3,7 +3,9 @@ require "sinatra/reloader"
 require_relative "logging_module"
 
 module FastlaneCI
-  # This doesn't work just yet
+  # TODO: This doesn't work just yet
+  # This mixin allows automatic resource reloading
+  # call enable_resource_reloading with the file path with an optional block to be executed after reload
   module ResourceReloader
     include FastlaneCI::Logging
 

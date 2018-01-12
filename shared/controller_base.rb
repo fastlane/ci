@@ -10,11 +10,13 @@ require_relative "../services/services"
 module FastlaneCI
   #
   # Base class for all controllers
+  # Handles default configuration like auto-reloading, session management, and erb path correcting
   #
   class ControllerBase < Sinatra::Base
     include FastlaneCI::Logging
 
     # I don't like this here, I'd rather use the mixin for organization, but that isn't done
+    # TODO: use mixin
     configure :development do
       register Sinatra::Reloader
     end
@@ -31,26 +33,28 @@ module FastlaneCI
       obj._file = caller(1..1).first[/^[^:]+/]
     end
 
-    def home_route
-      return self.class::HOME
-    end
-
     def initialize(app = nil)
+      # Always expect HOME to be defined, if not, we need to fail on startup
       raise "#{self} missing `HOME` variable" unless defined?(self.class::HOME)
 
       setup_common_controller_configuration
-      add_common_routes(app)
       super(app)
     end
 
+    # setup all the common configuration required for the controller,
+    # this includes various sinatra specific things
     def setup_common_controller_configuration(is_called_during_reload: false)
+      # by default, the erb root incorrectly uses __FILE__ and it picks up the wrong directory
+      # we need to correct that here
       erb_root = File.dirname(self.class._file)
       logger.debug("setting erb root to #{erb_root}")
       self.class.set(:root, erb_root)
 
+      # /dashboard and /dashboard/ should route the same
       logger.debug("turning off strict paths")
       self.class.set(:strict_paths, false)
 
+      # enable access to the session in this class
       logger.debug("enabling sessions")
       self.class.enable(:sessions)
 
@@ -61,9 +65,6 @@ module FastlaneCI
       #     setup_common_controller_configuration(is_called_during_reload: true)
       #   }
       # end
-    end
-
-    def add_common_routes(app)
     end
   end
 end
