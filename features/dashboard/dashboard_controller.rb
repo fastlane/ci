@@ -1,14 +1,8 @@
-require "sinatra/base"
-require_relative "../../services/services"
+require_relative "../../shared/authenticated_controller_base"
 
 module FastlaneCI
-  class DashboardController < Sinatra::Base
+  class DashboardController < AuthenticatedControllerBase
     HOME = "/dashboard"
-
-    before("#{HOME}*") do
-      # If the user isn't logged in, redirect to login
-      redirect("/login") if FastlaneCI::Services.code_hosting_sources.count == 0
-    end
 
     get HOME do
       locals = {

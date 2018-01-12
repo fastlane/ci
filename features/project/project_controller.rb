@@ -1,14 +1,8 @@
-require "sinatra/base"
-require_relative "../../services/services"
+require_relative "../../shared/controller_base"
 
 module FastlaneCI
-  class ProjectController < Sinatra::Base
+  class ProjectController < ControllerBase
     HOME = "/projects"
-
-    before("#{HOME}*") do
-      # If the user isn't logged in, redirect to login
-      redirect("/login") if FastlaneCI::Services.code_hosting_sources.count == 0
-    end
 
     get "#{HOME}/*" do |project_id|
       project = Services::CONFIG_SERVICE.projects.find { |a| a.id == project_id }
