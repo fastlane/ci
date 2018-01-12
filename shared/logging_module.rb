@@ -2,6 +2,7 @@ require "sinatra/custom_logger"
 require "logger"
 
 module FastlaneCI
+  # Logging mixin, can be used wherever
   module Logging
     def logger
       @logger ||= Logger.new(STDOUT).tap do |logger|
