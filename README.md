@@ -11,7 +11,7 @@ bundle update
 ## Local development
 
 ```
-bundle exec rackup -p 8080
+bundle exec rackup -p 8080 --env development
 ```
 
 Visit [127.0.0.1:8080](http://127.0.0.1:8080/)
@@ -27,4 +27,3 @@ bundle exec rspec
 ```
 bundle exec rubocop -a
 ```
-

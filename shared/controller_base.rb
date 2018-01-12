@@ -25,6 +25,9 @@ module FastlaneCI
 
     def self.inherited(obj)
       super(obj)
+      # __FILE__ returns the file we're in (always controller_base.rb in this case)
+      # We actually want the file that inherited this class
+      # When this class inherited, we set a new variable which contains the __FILE__ of the subclass
       obj._file = caller(1..1).first[/^[^:]+/]
     end
 
@@ -51,7 +54,7 @@ module FastlaneCI
       logger.debug("enabling sessions")
       self.class.enable(:sessions)
 
-      # # this doesn't work, just yet
+      # TODO: Ideally we figure out how to get this working, but for now things work
       # unless is_called_during_reload
       #   enable_resource_reloading(file_path: self.class._file) {
       #     logger.debug("Doing my thing")

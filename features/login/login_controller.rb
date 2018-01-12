@@ -6,7 +6,10 @@ module FastlaneCI
     HOME = "/login"
 
     get HOME do
-      "hi"
+      locals = {
+        title: "Login"
+      }
+      erb(:login, locals: locals, layout: FastlaneCI.default_layout)
     end
 
     post "/login/submit" do

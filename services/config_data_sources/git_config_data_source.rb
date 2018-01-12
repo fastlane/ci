@@ -30,13 +30,13 @@ module FastlaneCI
     # Clones the repo if necessary
     # Pulls the latest changes from remote repo
     def setup_repo
-      # if File.directory?(local_git_directory)
-      #   Dir.chdir(local_git_directory) do
-      #     FastlaneApp::CMD.run("git pull")
-      #   end
-      # else
-      #   FastlaneApp::CMD.run("git clone", self.git_url, local_git_directory)
-      # end
+      if File.directory?(local_git_directory)
+        Dir.chdir(local_git_directory) do
+          FastlaneApp::CMD.run("git pull")
+        end
+      else
+        FastlaneApp::CMD.run("git clone", self.git_url, local_git_directory)
+      end
     end
 
     # This is where we store the local git repo
