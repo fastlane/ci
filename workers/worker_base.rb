@@ -1,4 +1,6 @@
 module FastlaneCI
+  # super class for all fastlane.ci workers
+  # Subclass this class, and implement `work` and `timeout`
   class WorkerBase
     def initialize
       Thread.new do
