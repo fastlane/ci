@@ -1,3 +1,7 @@
+# We're not joking around
+Style/Documentation:
+  Enabled: true
+
 Style/MultipleComparison:
   Enabled: false
 
@@ -220,10 +224,6 @@ AllCops:
 Naming/FileName:
   Exclude:
     - '**/*.gemspec'
-
-# We're not there yet
-Style/Documentation:
-  Enabled: false
 
 # Added after upgrade to 0.38.0
 Style/MutableConstant:
