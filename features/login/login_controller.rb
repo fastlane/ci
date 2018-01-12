@@ -1,16 +1,12 @@
-# External
-require "sinatra/base"
-
 # Internal
-require_relative "../../services/services"
+require_relative "../../shared/controller_base"
 
 module FastlaneCI
-  class LoginController < Sinatra::Base
-    get "/login" do
-      locals = {
-        title: "Login"
-      }
-      erb(:login, locals: locals, layout: FastlaneCI.default_layout)
+  class LoginController < ControllerBase
+    HOME = "/login"
+
+    get HOME do
+      "hi"
     end
 
     post "/login/submit" do
@@ -20,7 +16,6 @@ module FastlaneCI
       git_hub_service = FastlaneCI::GitHubSource.new(email: email, personal_access_token: personal_access_token)
       if git_hub_service.session_valid?
         # TODO: How do we want to be the relationship between GitHubSouce with the session
-        require 'pry'; binding.pry
         session["GITHUB_SESSION_API_TOKEN"] = personal_access_token
         redirect("/dashboard")
       else

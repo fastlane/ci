@@ -16,8 +16,6 @@ module FastlaneCI
       # TODO: This is just temporary, as this won't actually store the session anywhere
       # We'll have to store the session in the Keychain, as they're important GitHub API tokens
       # This part has to be rewritten, consult with @taquitos
-      attr_accessor :code_hosting_sources
-
       def code_hosting_sources
         @code_hosting_sources ||= []
       end
