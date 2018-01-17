@@ -15,7 +15,7 @@ module FastlaneCI
     get "#{HOME}/add_project" do
       locals = {
         title: "Add new project",
-        repos: FastlaneCI::Services.code_hosting_sources.first.repos # TODO: .first, ugh. Should we allow only one sesion for now?
+        repos: FastlaneCI::GitHubSource.source_from_session(session).repos
       }
       erb(:new_project, locals: locals, layout: FastlaneCI.default_layout)
     end

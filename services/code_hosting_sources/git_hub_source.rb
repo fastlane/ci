@@ -3,6 +3,14 @@ require "octokit"
 
 module FastlaneCI
   class GitHubSource < CodeHosting
+    class << self
+      # Generate a GitHub source based on the user's session
+      def source_from_session(session)
+        return self.new(email: session["GITHUB_SESSION_EMAIL"], 
+                        personal_access_token: session["GITHUB_SESSION_API_TOKEN"])
+      end
+    end
+
     # The email is actually optional for API access
     # However we ask for the email on login, as we also plan on doing commits for the user
     # and this way we can make sure to configure things properly for git to use the email

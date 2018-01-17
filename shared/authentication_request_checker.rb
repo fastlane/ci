@@ -22,13 +22,20 @@ module FastlaneCI
         raise "ensure_logged_in requires a `route`" if route.nil?
 
         logger.debug("checking if user is logged in... ")
-        hosting_sources_length = Services.code_hosting_sources.length
-        if hosting_sources_length == 0
-          logger.debug("nope, redirecting to login")
+
+        # TODO: we don't want to directly access `session` here, abstract out
+        # We could use
+        # ```
+        # FastlaneCI::GitHubSource.source_from_session(session).session_valid?
+        # ```
+        # however this would send a request every single time
+        # Let's revisit later on
+        if session["GITHUB_SESSION_API_TOKEN"].to_s.length == 0
+          logger.debug("No valid auth token found, redirecting to login")
+          redirect("/login")
         else
-          logger.debug("yup, good to access #{route}")
+          logger.debug("Yes, user got access to #{route}")
         end
-        redirect("/login") if hosting_sources_length == 0
       end
     end
   end
