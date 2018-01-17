@@ -16,7 +16,7 @@ module FastlaneCI
     # @return [Boolean] Does the currently logged in user have access to this
     #   repo? This value can't be changed, as it depends on the GitHub permission system
     attr_reader :current_user_has_access
-    alias :current_user_has_access? :current_user_has_access
+    alias current_user_has_access? current_user_has_access
 
     # @return [Array] A list of builds
     attr_reader :builds

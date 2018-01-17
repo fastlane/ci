@@ -6,7 +6,7 @@ module FastlaneCI
     class << self
       # Generate a GitHub source based on the user's session
       def source_from_session(session)
-        return self.new(email: session["GITHUB_SESSION_EMAIL"], 
+        return self.new(email: session["GITHUB_SESSION_EMAIL"],
                         personal_access_token: session["GITHUB_SESSION_API_TOKEN"])
       end
     end

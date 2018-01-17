@@ -9,8 +9,8 @@ module FastlaneCI
       # we need access to the `session` from Sinatra to get the GitHub
       # auth token. What to do?
       all_projects = Services::CONFIG_SERVICE.projects(FastlaneCI::GitHubSource.source_from_session(session))
-      projects_with_access = all_projects.select { |p| p.current_user_has_access? }
-      projects_without_access = all_projects.select { |p| !p.current_user_has_access? }
+      projects_with_access = all_projects.select(&:current_user_has_access?)
+      projects_without_access = all_projects.reject(&:current_user_has_access?)
 
       locals = {
         projects_with_access: projects_with_access,
