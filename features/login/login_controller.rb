@@ -6,6 +6,10 @@ module FastlaneCI
     HOME = "/login"
 
     get HOME do
+      if FastlaneCI::GitHubSource.source_from_session(session).session_valid?
+        redirect("/dashboard")
+      end
+
       locals = {
         title: "Login"
       }

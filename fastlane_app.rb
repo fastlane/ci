@@ -28,7 +28,11 @@ module FastlaneCI
     CONFIG_DATA_SOURCE = GitConfigDataSource.new(git_url: "https://github.com/KrauseFx/ci-config")
 
     get "/" do
-      redirect("/login")
+      if FastlaneCI::GitHubSource.source_from_session(session).session_valid?
+        redirect("/dashboard")
+      else
+        redirect("/login")
+      end
     end
 
     get "/favico.ico" do
