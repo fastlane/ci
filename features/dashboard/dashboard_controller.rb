@@ -5,8 +5,11 @@ module FastlaneCI
     HOME = "/dashboard"
 
     get HOME do
+      # TODO: passing the session to a service seems off, but also
+      # we need access to the `session` from Sinatra to get the GitHub
+      # auth token. What to do?
       locals = {
-        projects: Services::CONFIG_SERVICE.projects,
+        projects: Services::CONFIG_SERVICE.projects(FastlaneCI::GitHubSource.source_from_session(session)),
         title: "Dashboard"
       }
       erb(:dashboard, locals: locals, layout: FastlaneCI.default_layout)
