@@ -39,5 +39,23 @@ module FastlaneCI
     def repos
       client.repos
     end
+
+    # The `target_url`, `description` and `context` parameters are optional
+    def set_build_status(repo: nil, sha: nil, state: nil, target_url: nil, description: nil, context: nil)
+      available_states = ["error", "failure", "pending", "success"]
+      raise "Invalid state '#{state}'" unless available_states.include?(state)
+
+      # TODO: this will use the user's session, so their face probably appears there
+      # As Josh already predicted, we're gonna need a fastlane.ci account also
+      # that we use for all non-user actions.
+      # This includes scheduled things, commit status reporting and probably more in the future
+
+      # Full docs for `create_status` over here https://octokit.github.io/octokit.rb/Octokit/Client/Statuses.html
+      client.create_status(repo: repo, sha: sha, state: state, {
+        target_url: target_url,
+        description: description,
+        context: context
+      })
+    end
   end
 end
