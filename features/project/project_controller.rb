@@ -11,10 +11,8 @@ module FastlaneCI
     get "#{HOME}/*/trigger" do |project_id|
       # TODO: fetching the project always like this, unify it
       project = Services::CONFIG_SERVICE.projects(FastlaneCI::GitHubSource.source_from_session(session)).find { |a| a.id == project_id }
-      repo = FastlaneCI::GitRepo.new(
-        git_url: project.repo_url,
-        repo_id: project.id
-      )
+      # TODO: Verify access to project here also
+      repo = project.repo
 
       # TODO: Obviously we're not gonna run fastlane
       # - on the web thread
@@ -26,8 +24,8 @@ module FastlaneCI
       current_sha = repo.git.log.first.sha
       # Tell GitHub we're running CI for this...
       FastlaneCI::GitHubSource.source_from_session(session).set_build_status!(
-        repo: project.repo_url, 
-        sha: current_sha, 
+        repo: project.repo_url,
+        sha: current_sha,
         state: :pending,
         target_url: nil
       )
@@ -40,13 +38,13 @@ module FastlaneCI
             # cmd.run("bundle exec fastlane tests")
           end
         end
-      rescue => ex
+      rescue StandardError => ex
         # TODO: this will be refactored anyway, to the proper fastlane runner
       end
 
       FastlaneCI::GitHubSource.source_from_session(session).set_build_status!(
-        repo: project.repo_url, 
-        sha: current_sha, 
+        repo: project.repo_url,
+        sha: current_sha,
         state: :success,
         target_url: nil
       )
@@ -61,6 +59,7 @@ module FastlaneCI
 
     get "#{HOME}/*" do |project_id|
       project = Services::CONFIG_SERVICE.projects(FastlaneCI::GitHubSource.source_from_session(session)).find { |a| a.id == project_id }
+      # TODO: Verify access to project here also
 
       # TODO: don't hardcode this
       builds = [

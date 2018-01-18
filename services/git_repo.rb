@@ -79,9 +79,9 @@ module FastlaneCI
       # TODO: performance implications of settings this every time?
       # TODO: Set actual name + email here
       # TODO: see if we can set credentials here also
-      @_git.config('user.name', 'Scott Chacon')
-      @_git.config('user.email', 'email@email.com')
-      
+      @_git.config("user.name", "Scott Chacon")
+      @_git.config("user.email", "email@email.com")
+
       return @_git
     end
 

@@ -38,5 +38,13 @@ module FastlaneCI
       @current_user_has_access = current_user_has_access # @ as there is no `setter`
       self.id = id || SecureRandom.uuid
     end
+
+    # Prepare the FastlaneCI::GitRepo object for you
+    def repo
+      return FastlaneCI::GitRepo.new(
+        git_url: self.repo_url,
+        repo_id: self.id
+      )
+    end
   end
 end

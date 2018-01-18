@@ -74,6 +74,11 @@ module FastlaneCI
       if git_hub_service.session_valid?
         session["GITHUB_SESSION_API_TOKEN"] = personal_access_token
         session["GITHUB_SESSION_EMAIL"] = email
+        # TODO: we don't actually want to start this here
+        # but since we don't have a fastlane.ci session yet
+        # we're just gonna abuse the user's token for now
+        # in the future we're not gonna share the user's session
+        FastlaneCI::CheckForNewCommitsWorker.new(session: session)
         redirect("/dashboard")
       else
         # TODO: show error to user
