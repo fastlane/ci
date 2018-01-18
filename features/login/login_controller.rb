@@ -32,7 +32,7 @@ module FastlaneCI
       password = params[:password]
       user = USER_SERVICE.login(email: email, password: password)
       if user.nil?
-        redirect("#{HOME}/test")
+        redirect("#{HOME}/ci_login")
       else
         session[:user] = user
         redirect("/dashboard")
@@ -44,6 +44,7 @@ module FastlaneCI
     end
 
     def present_create_account(failed: false)
+      # failed not used yet, but should display create error
       locals = {
         title: "Create fastlane.ci account"
       }
