@@ -1,0 +1,36 @@
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
+  <header class="mdl-layout__header">
+    <div class="mdl-layout__header-row">
+      <span class="mdl-layout__title"><%= title %></span>
+    </div>
+  </header>
+  <div class="mdl-layout__drawer">
+    <span class="mdl-layout__title">fastlane.ci</span>
+    <nav class="mdl-navigation">
+      <a class="mdl-navigation__link" href="/">Dashboard</a>
+      <a class="mdl-navigation__link" href="#">Settings</a>
+    </nav>
+  </div>
+  <main class="mdl-layout__content" style="padding: 40px;">
+    <div class="mdl-card mdl-shadow--8dp" style="width: 800px">
+      <div style="padding: 25px;">
+        <form action="/login/create_account" method="post">
+          <h3>Create Account</h3>
+          <hr />
+
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input" type="text" name="email" id="email">
+            <label class="mdl-textfield__label" for="email">Email</label>
+          </div>
+
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input" name="password" type="password" id="password">
+            <label class="mdl-textfield__label" for="password">Password</label>
+          </div>
+
+          <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Create account</button>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>

@@ -4,6 +4,9 @@ source("https://rubygems.org")
 gem "sinatra", ">= 2.0.0", "< 3.0"
 gem "sinatra-contrib", ">= 2.0.0", "< 3.0" # TODO: document why we have this here @taquitos
 
+# Best password hashing to-date
+gem "bcrypt", ">= 3.1.11", "< 4.0.0"
+
 # Running shell commands
 gem "tty-command", ">= 0.7.0", "< 1.0.0"
 

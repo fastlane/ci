@@ -1,7 +1,6 @@
-require_relative "data_source"
-
 module FastlaneCI
-  class JSONDataSource < DataSource
+  # Data source for all things related to builds
+  class BuildDataSource
     def initialize
       # load up the json file here
       # parse all data into objects so we can fail fast on error

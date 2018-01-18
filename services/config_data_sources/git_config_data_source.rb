@@ -2,7 +2,7 @@ require_relative "config_data_source"
 
 module FastlaneCI
   # (default) Store configuration in git
-  class GitConfigDataSource < DataSource
+  class GitConfigDataSource
     attr_accessor :git_url
 
     def initialize(git_url: nil)
