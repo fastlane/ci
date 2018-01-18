@@ -1,4 +1,4 @@
-require_relative "data_sources/json_data_source"
+require_relative "data_sources/build_data_source"
 
 module FastlaneCI
   # Provides service-level access to build information
@@ -11,7 +11,7 @@ module FastlaneCI
 
     attr_accessor :data_source
 
-    def initialize(data_source: FastlaneCI::FastlaneApp::DATA_SOURCE)
+    def initialize(data_source: BuildDataSource.new)
       self.data_source = data_source
     end
 
