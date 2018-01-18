@@ -5,7 +5,7 @@ Requires ruby 2.3.0 or higher
 ## Development installation
 
 ```
-bundle update
+bundle install --path vendor/bundle
 ```
 
 ## Local development
