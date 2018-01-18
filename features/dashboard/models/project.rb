@@ -19,7 +19,8 @@ module FastlaneCI
     alias current_user_has_access? current_user_has_access
 
     # @return [Array] A list of builds
-    attr_reader :builds
+    # TODO: this should be `attr_reader` only
+    attr_accessor :builds
 
     def attributes_to_persist
       super + [

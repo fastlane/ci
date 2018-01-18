@@ -9,6 +9,7 @@ require_relative "services/config_data_sources/git_config_data_source"
 require_relative "services/code_hosting_sources/git_hub_source"
 require_relative "services/config_data_sources/config_base" # TODO: we don't want to import this here
 require_relative "features/dashboard/models/project" # TODO: we don't want to import this here
+require_relative "features/dashboard/models/build" # TODO: we don't want to import this here
 require_relative "workers/refresh_config_data_sources_worker"
 require_relative "shared/logging_module"
 
@@ -22,7 +23,6 @@ module FastlaneCI
   end
 
   class FastlaneApp < Sinatra::Base
-    CMD = TTY::Command.new # Fx: not 100% sure if we want to keep this global, but might be good to have shared config and go from there (e.g. dupe object if we need to run a one-off)
     CONFIG_DATA_SOURCE = GitConfigDataSource.new(git_url: "https://github.com/KrauseFx/ci-config")
 
     get "/" do
