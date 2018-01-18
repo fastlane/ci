@@ -23,7 +23,6 @@ module FastlaneCI
   end
 
   class FastlaneApp < Sinatra::Base
-    CMD = TTY::Command.new # Fx: not 100% sure if we want to keep this global, but might be good to have shared config and go from there (e.g. dupe object if we need to run a one-off)
     CONFIG_DATA_SOURCE = GitConfigDataSource.new(git_url: "https://github.com/KrauseFx/ci-config")
 
     get "/" do
