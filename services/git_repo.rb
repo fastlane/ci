@@ -47,6 +47,7 @@ module FastlaneCI
       else
         self.clone
       end
+      logger.debug("Using #{path} for config repo")
     end
 
     def clear_directory
@@ -91,7 +92,9 @@ module FastlaneCI
     end
 
     def pull
-      logger.debug("[#{self.repo_id}]: Pulling latest changes")
+      if ENV["super_verbose"] # because this repeats a ton
+        logger.debug("[#{self.repo_id}]: Pulling latest changes")
+      end
       git.pull
     end
 

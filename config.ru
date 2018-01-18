@@ -4,7 +4,7 @@ require "bundler"
 Bundler.require
 
 # before running, call `bundle install --path vendor/bundle`
-# this isolates the gems for bundler 
+# this isolates the gems for bundler
 
 require "./fastlane_app"
 

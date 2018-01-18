@@ -7,13 +7,13 @@ module FastlaneCI
       github: "github"
     }
 
-    PROVIDER_TYPES = {}
+    doubled_types = {}
     simple_provider_types.each do |key, value|
-      PROVIDER_TYPES[key] = value
-      PROVIDER_TYPES[key.to_s] = value
+      doubled_types[key] = value
+      doubled_types[key.to_s] = value
     end
 
-    PROVIDER_TYPES = PROVIDER_TYPES.freeze
+    PROVIDER_TYPES = doubled_types.freeze
 
     attr_accessor :type # must be defined in sub class
 
