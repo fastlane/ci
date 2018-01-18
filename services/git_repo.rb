@@ -26,8 +26,6 @@ module FastlaneCI
       raise "No git URL provided" if self.git_url.to_s.length == 0
       raise "No repo id provided" if self.repo_id.to_s.length == 0
 
-      # TODO: only clone if it isn't there yet
-      # TODO: migrate configs code over also
       if File.directory?(self.path)
         # TODO: test if this crashes if it's not a git directory
         if Git.open(self.path).index.writable?
