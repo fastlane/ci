@@ -19,6 +19,7 @@ module FastlaneCI
     def initialize(email: nil, personal_access_token: nil)
       self.email = email
       @_client = Octokit::Client.new(access_token: personal_access_token)
+      Octokit.auto_paginate = true # TODO: just for now, we probably should do smart pagination in the future
     end
 
     def client
@@ -51,7 +52,7 @@ module FastlaneCI
       # This includes scheduled things, commit status reporting and probably more in the future
 
       # Full docs for `create_status` over here https://octokit.github.io/octokit.rb/Octokit/Client/Statuses.html
-      client.create_status(repo: repo, sha: sha, state: state, {
+      client.create_status(repo: repo, sha: sha, state: state, options: {
         target_url: target_url,
         description: description,
         context: context

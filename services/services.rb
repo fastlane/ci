@@ -1,6 +1,7 @@
 require_relative "build_service"
 require_relative "config_service"
 require_relative "code_hosting_service"
+require_relative "git_repo"
 
 module FastlaneCI
   # All services available to the app
