@@ -26,7 +26,7 @@ module FastlaneCI
       attr_accessor :file_semaphore
     end
 
-    # can't have us reading and writing to a file at the same time, now can we?
+    # can't have us reading and writing to a file at the same time
     UserDataSource.file_semaphore = Mutex.new
 
     def initialize(json_folder_path: nil)
