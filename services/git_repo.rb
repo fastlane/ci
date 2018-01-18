@@ -28,15 +28,29 @@ module FastlaneCI
 
       if File.directory?(self.path)
         # TODO: test if this crashes if it's not a git directory
-        if Git.open(self.path).index.writable?
-          self.pull
+        repo = Git.open(self.path)
+        if repo.index.writable?
+          # Things are looking legit so far
+          # Now we have to check if the repo is actually from the
+          # same repo URL
+          if repo.remote("origin").url == self.git_url
+            self.pull
+          else
+            logger.debug("[#{self.repo_id}] Repo URL seems to have changed... deleting the old directory and cloning again")
+            clear_directory
+            self.clone
+          end
         else
-          FileUtils.rm_rf(self.path)
+          clear_directory
           self.clone
         end
       else
         self.clone
       end
+    end
+
+    def clear_directory
+      FileUtils.rm_rf(self.path)
     end
 
     # This is where we store the local git repo
