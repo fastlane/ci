@@ -1,3 +1,4 @@
+$LOAD_PATH << "shared"
 require "rack/test"
 require "rspec"
 

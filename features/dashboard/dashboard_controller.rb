@@ -8,7 +8,7 @@ module FastlaneCI
       # TODO: passing the session to a service seems off, but also
       # we need access to the `session` from Sinatra to get the GitHub
       # auth token.
-      # @felix-> you can pass the user's FastlaneCI::Provider through and then use the API token there 
+      # @felix-> you can pass the user's FastlaneCI::Provider through and then use the API token there
       all_projects = Services::CONFIG_SERVICE.projects(FastlaneCI::GitHubSource.source_from_session(session))
 
       # TODO: we need a service call for this, projects shouldn't know permissions
@@ -43,7 +43,7 @@ module FastlaneCI
     #   repo_id = params[:repo_id]
     #   project_name = params[:project_name]
     #   project_name = params[:lane]
-    #   
+    #
     # end
   end
 end

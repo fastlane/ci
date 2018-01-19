@@ -28,6 +28,5 @@ module FastlaneCI
       self.id = id || SecureRandom.uuid
       self.lane = lane
     end
-
   end
 end
