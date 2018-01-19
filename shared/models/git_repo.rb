@@ -1,5 +1,5 @@
 require "git"
-require_relative "../shared/logging_module"
+require_relative "../logging_module"
 
 module FastlaneCI
   # This class is responsible for managing git repos
@@ -11,20 +11,12 @@ module FastlaneCI
   class GitRepo
     include FastlaneCI::Logging
 
-    # @return [String]
-    attr_accessor :git_url
+    # @return [GitRepoConfig]
+    attr_accessor :git_config
 
-    # @return [String] This is the name of the directory in which we clone the repo in
-    #   This is important to either `pull` from an existing repo, or to clone a new one
-    #   make sure it's unique
-    attr_accessor :repo_id
-
-    def initialize(git_url: nil, repo_id: nil)
-      self.git_url = git_url
-      self.repo_id = repo_id
-
-      raise "No git URL provided" if self.git_url.to_s.length == 0
-      raise "No repo id provided" if self.repo_id.to_s.length == 0
+    def initialize(git_config: nil)
+      raise "No git config provided" if git_config.nil?
+      @git_config = git_config
 
       if File.directory?(self.path)
         # TODO: test if this crashes if it's not a git directory
@@ -33,10 +25,10 @@ module FastlaneCI
           # Things are looking legit so far
           # Now we have to check if the repo is actually from the
           # same repo URL
-          if repo.remote("origin").url == self.git_url
+          if repo.remote("origin").url == self.git_config.git_url
             self.pull
           else
-            logger.debug("[#{self.repo_id}] Repo URL seems to have changed... deleting the old directory and cloning again")
+            logger.debug("[#{self.git_config.id}] Repo URL seems to have changed... deleting the old directory and cloning again")
             clear_directory
             self.clone
           end
@@ -64,7 +56,7 @@ module FastlaneCI
 
     # @return [String] Path to the actual folder
     def path
-      File.join(containing_path, self.repo_id)
+      File.join(containing_path, self.git_config.id)
     end
 
     # Returns the absolute path to a file from inside the git repo
@@ -87,13 +79,13 @@ module FastlaneCI
     end
 
     def clone
-      logger.debug("[#{self.repo_id}]: Cloning git repo #{self.git_url}")
-      Git.clone(self.git_url, self.repo_id, path: self.containing_path)
+      logger.debug("[#{self.git_config.id}]: Cloning git repo #{self.git_config.git_url}")
+      Git.clone(self.git_config.git_url, self.git_config.id, path: self.containing_path)
     end
 
     def pull
       if ENV["super_verbose"] # because this repeats a ton
-        logger.debug("[#{self.repo_id}]: Pulling latest changes")
+        logger.debug("[#{self.git_config.id}]: Pulling latest changes")
       end
       git.pull
     end

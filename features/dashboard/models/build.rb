@@ -2,7 +2,7 @@ module FastlaneCI
   # Represents a build, part of a project, usually many builds per project
   # TODO: This class is currently only full of dummy data
   # We don't actually persist or load Build objects from anywhere
-  class Build < ConfigBase
+  class Build
     BUILD_STATUSES = [
       :success,
       :in_progress,
@@ -20,16 +20,6 @@ module FastlaneCI
 
     # @return [DateTime]
     attr_accessor :timestamp
-
-    # TODO
-    # def attributes_to_persist
-    #   super + [
-    #     :repo_url,
-    #     :enabled,
-    #     :project_name,
-    #     :id
-    #   ]
-    # end
 
     def initialize(project: nil, number: nil, status: nil, timestamp: nil)
       self.project = project

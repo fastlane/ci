@@ -8,6 +8,9 @@ Bundler.require
 
 require "./fastlane_app"
 
+# allow use of `require` for all things under `shared`, helps with some cycle issues
+$LOAD_PATH << 'shared'
+
 # require all controllers
 require_relative "features/dashboard/dashboard_controller"
 require_relative "features/login/login_controller"

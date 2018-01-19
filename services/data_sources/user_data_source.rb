@@ -65,7 +65,7 @@ module FastlaneCI
     # TODO: this could be automatic
     def load_providers_from_provider_hash_array(provider_array: nil)
       return provider_array.map do |provider_hash|
-        type = provider_hash["@type"]
+        type = provider_hash["type"]
 
         # currently only supports 1 type, but we could automate this part too
         if type == FastlaneCI::Provider::PROVIDER_TYPES[:github]
