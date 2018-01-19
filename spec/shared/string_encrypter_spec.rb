@@ -33,7 +33,7 @@ module FastlaneCI
         expect(hi_string1).to eq(hi_string2)
       end
 
-      it "should decode" do
+      it "should decode file with wrong password" do
         fixture_folder = File.join(File.dirname(__FILE__), "fixture")
         encrypted_binary = File.binread(File.join(fixture_folder, "encrypted_hi"))
 
