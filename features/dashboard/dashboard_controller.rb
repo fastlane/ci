@@ -7,8 +7,11 @@ module FastlaneCI
     get HOME do
       # TODO: passing the session to a service seems off, but also
       # we need access to the `session` from Sinatra to get the GitHub
-      # auth token. What to do?
+      # auth token.
+      # @felix-> you can pass the user's FastlaneCI::Provider through and then use the API token there 
       all_projects = Services::CONFIG_SERVICE.projects(FastlaneCI::GitHubSource.source_from_session(session))
+
+      # TODO: we need a service call for this, projects shouldn't know permissions
       projects_with_access = all_projects.select(&:current_user_has_access?)
       projects_without_access = all_projects.reject(&:current_user_has_access?)
 
@@ -35,13 +38,12 @@ module FastlaneCI
       end
     end
 
-    # TODO: we'll have to build the whole "Add Project flow"
-    # This is the code that can be used to add a new project
-    #
     # post "#{HOME}/new" do
-    #   projects = Services::CONFIG_SERVICE.projects
-    #   projects << Project.new(repo_url: "https://github.com/fastlane/fastlane", enabled: true)
-    #   Services::CONFIG_SERVICE.projects = projects
+    #   # id of GitRepoConfig
+    #   repo_id = params[:repo_id]
+    #   project_name = params[:project_name]
+    #   project_name = params[:lane]
+    #   
     # end
   end
 end

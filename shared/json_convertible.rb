@@ -18,7 +18,8 @@ module FastlaneCI
         object_hash = {}
         self.instance_variables.each do |var|
           instance_variable_value = self.instance_variable_get(var)
-          object_hash[var] = instance_variable_value
+          var_name = var.to_s[1..-1]
+          object_hash[var_name] = instance_variable_value
         end
         return object_hash
       end
@@ -29,7 +30,7 @@ module FastlaneCI
       def from_json!(json_object)
         instance = self.new
         json_object.each do |var, val|
-          instance.instance_variable_set(var, val)
+          instance.instance_variable_set("@#{var}".to_sym, val)
         end
         return instance
       end

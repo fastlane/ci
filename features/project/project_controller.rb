@@ -12,7 +12,7 @@ module FastlaneCI
       # TODO: fetching the project always like this, unify it
       project = Services::CONFIG_SERVICE.projects(FastlaneCI::GitHubSource.source_from_session(session)).find { |a| a.id == project_id }
       # TODO: Verify access to project here also
-      repo = project.repo
+      repo = FastlaneCI::GitRepo.new(git_config: project.repo_config)
 
       # TODO: Obviously we're not gonna run fastlane
       # - on the web thread
@@ -24,7 +24,7 @@ module FastlaneCI
       current_sha = repo.git.log.first.sha
       # Tell GitHub we're running CI for this...
       FastlaneCI::GitHubSource.source_from_session(session).set_build_status!(
-        repo: project.repo_url,
+        repo: project.repo_config.git_url,
         sha: current_sha,
         state: :pending,
         target_url: nil
@@ -43,7 +43,7 @@ module FastlaneCI
       end
 
       FastlaneCI::GitHubSource.source_from_session(session).set_build_status!(
-        repo: project.repo_url,
+        repo: project.repo_config.git_url,
         sha: current_sha,
         state: :success,
         target_url: nil
