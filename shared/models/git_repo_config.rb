@@ -8,9 +8,9 @@ module FastlaneCI
 
     attr_accessor :id
     attr_accessor :git_url
-    attr_accessor :description   
-    attr_accessor :name 
-    attr_accessor :hidden # Do we want normal users to be able to see this?   
+    attr_accessor :description
+    attr_accessor :name
+    attr_accessor :hidden # Do we want normal users to be able to see this?
 
     def self.new_id
       return SecureRandom.uuid

@@ -22,13 +22,13 @@ module FastlaneCI
       raise "No git_url provided" if git_url.to_s.length == 0
 
       git_repo_config = GitRepoConfig.new(
-        id: "fastlane-ci-config", 
-        git_url: git_url, 
-        description: "Contains the fastlane.ci configuration", 
+        id: "fastlane-ci-config",
+        git_url: git_url,
+        description: "Contains the fastlane.ci configuration",
         name: "fastlane ci",
         hidden: true
       )
-      
+
       @git_repo = FastlaneCI::GitRepo.new(git_config: git_repo_config)
 
       projects
@@ -44,7 +44,7 @@ module FastlaneCI
       path = self.git_repo.file_path("projects.json")
       return [] unless File.exist?(path)
 
-      saved_projects = JSON.parse(File.read(path)).map do |project_hash| 
+      saved_projects = JSON.parse(File.read(path)).map do |project_hash|
         project = Project.from_json!(project_hash)
 
         # need to grab the 'repo_config' because it doesn't convert automatically
@@ -64,13 +64,13 @@ module FastlaneCI
       path = self.git_repo.file_path("repos.json")
       return [] unless File.exist?(path)
 
-      saved_git_repos = JSON.parse(File.read(path)).map { |repo_config_hash| GitRepoConfig.from_json!(repo_config_hash)}
+      saved_git_repos = JSON.parse(File.read(path)).map { |repo_config_hash| GitRepoConfig.from_json!(repo_config_hash) }
       return saved_git_repos
-    end 
+    end
 
     def save_git_repo_configs!(git_repo_configs: nil)
       path = self.git_repo.file_path("repos.json")
-      File.write(self.git_repo.file_path("repos.json"), JSON.pretty_generate(git_repo_configs.map(&:to_object_dictionary)))
+      File.write(path, JSON.pretty_generate(git_repo_configs.map(&:to_object_dictionary)))
     end
   end
 end

@@ -3,6 +3,7 @@ require "sinatra/base"
 require "tty-command"
 require "json" # TODO: move somewhere else
 require "securerandom"
+
 # Internal
 require_relative "services/fastlane_ci_error" # TODO: move somewhere else, both the file and the `require`
 require_relative "services/config_data_sources/git_config_data_source"
@@ -12,6 +13,7 @@ require_relative "workers/refresh_config_data_sources_worker"
 require_relative "workers/check_for_new_commits_worker"
 require_relative "shared/logging_module"
 
+# All things fastlane ci related go in this module
 module FastlaneCI
   include FastlaneCI::Logging
 
@@ -21,6 +23,7 @@ module FastlaneCI
     "../../../features/global/layout".to_sym
   end
 
+  # Our CI app main class
   class FastlaneApp < Sinatra::Base
     CONFIG_DATA_SOURCE = GitConfigDataSource.new(git_url: "https://github.com/KrauseFx/ci-config")
 

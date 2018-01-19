@@ -3,13 +3,26 @@ require "bundler"
 
 Bundler.require
 
+# Don't even try to run without this
+begin
+  require "openssl"
+rescue LoadError
+  warn("Error: no such file to load -- openssl. Make sure you have openssl installed")
+  exit(1)
+end
+
+if ENV["FASTLANE_CI_ENCRYPTION_KEY"].nil?
+  warn("Error: unable to decrypt sensitive data without environment variable `FASTLANE_CI_ENCRYPTION_KEY` set")
+  exit(1)
+end
+
 # before running, call `bundle install --path vendor/bundle`
 # this isolates the gems for bundler
 
 require "./fastlane_app"
 
 # allow use of `require` for all things under `shared`, helps with some cycle issues
-$LOAD_PATH << 'shared'
+$LOAD_PATH << "shared"
 
 # require all controllers
 require_relative "features/dashboard/dashboard_controller"
