@@ -3,12 +3,6 @@ require_relative "data_sources/build_data_source"
 module FastlaneCI
   # Provides service-level access to build information
   class BuildService
-    BUILD_FILTERS = {
-      all_builds: "all_builds",
-      building: "building",
-      completed: "completed"
-    }.freeze
-
     attr_accessor :data_source
 
     def initialize(data_source: BuildDataSource.new)
