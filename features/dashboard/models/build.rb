@@ -38,7 +38,7 @@ module FastlaneCI
 
     def status=(new_value)
       return if new_value.nil? # as during init we might init with 0 when filling in JSON values
-      raise "Invalid build status '#{status}'" unless BUILD_STATUSES.include?(new_value)
+      raise "Invalid build status '#{new_value}'" unless BUILD_STATUSES.include?(new_value)
       @status = new_value
     end
   end
