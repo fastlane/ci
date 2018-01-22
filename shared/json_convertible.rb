@@ -14,9 +14,16 @@ module FastlaneCI
         self.to_object_dictionary.to_json(options)
       end
 
-      def to_object_dictionary
+      # @ignore_instance_variables: optional to provide a list of
+      #   variables to attributes to ignore
+      #   @example
+      #
+      #     ignore_instance_variables: [:@project, :@something_else]
+      #
+      def to_object_dictionary(ignore_instance_variables: nil)
         object_hash = {}
         self.instance_variables.each do |var|
+          next if ignore_instance_variables.include?(var)
           instance_variable_value = self.instance_variable_get(var)
           var_name = var.to_s[1..-1]
           object_hash[var_name] = instance_variable_value
