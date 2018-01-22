@@ -9,12 +9,12 @@ module FastlaneCI
       self.data_source = data_source
     end
 
-    # query builds and return them along with a paging token if more builds exist
-    def builds(filter: BUILD_FILTERS[:all_builds], maximum_builds_returned: 10)
-      print("reminder: filter value: #{filter} is currently unused")
-      data_source.load_builds(max: maximum_builds_returned) do |builds, paging_token|
-        yield(builds, paging_token)
-      end
+    def list_builds(project: nil, max_number_of_builds: nil)
+      self.data_source.list_build(project: project, max_number_of_builds: max_number_of_builds)
+    end
+
+    def add_build!(project: nil, build: nil)
+      self.data_source.add_build!(project: project, build: build)
     end
   end
 end
