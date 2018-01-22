@@ -53,13 +53,14 @@ module FastlaneCI
 
     def add_build!(project: nil, build: nil)
       containing_path = builds_path(project: project)
-      full_path = File.join(containing_path, build.id)
+      full_path = File.join(containing_path, "#{build.number}.json")
       if File.exist?(full_path)
         # TODO: What do we do here?
         raise "File at directory '#{full_path}' already exists"
       else
         # TODO: on storing the build, we do NOT want to store any information about the project
-        File.write(JSON.pretty_generate(build.to_object_dictionary))
+        hash_to_store = build.to_object_dictionary(ignore_instance_variables: [:@project])
+        File.write(full_path, JSON.pretty_generate(hash_to_store))
       end
     end
   end
