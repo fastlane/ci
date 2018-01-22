@@ -8,7 +8,16 @@ module FastlaneCI
     def initialize(email: nil, api_token: nil)
       @email = email
       @api_token = api_token
+      @provider_name = "GitHub"
       @type = PROVIDER_TYPES[:github]
+    end
+
+    def type
+      return @type
+    end
+
+    def provider_name
+      return @provider_name
     end
 
     # TODO

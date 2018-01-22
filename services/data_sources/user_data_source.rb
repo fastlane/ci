@@ -1,4 +1,5 @@
 require "bcrypt"
+require "securerandom"
 require_relative "../../shared/logging_module"
 require_relative "../../shared/json_convertible"
 require_relative "../../shared/models/user"
@@ -103,9 +104,36 @@ module FastlaneCI
       end
     end
 
+    def update_user!(user: nil)
+      UserDataSource.file_semaphore.synchronize do
+        user_index = nil
+        existing_user = nil
+        @users.each.with_index do |old_user, index|
+          if old_user.email.casecmp(user.email.downcase).zero?
+            user_index = index
+            existing_user = old_user
+            break
+          end
+        end
+
+        if existing_user.nil?
+          logger.debug("Couldn't update user #{user.email} because they don't exist")
+          raise "Couldn't update user #{user.email} because they don't exist"
+        else
+          @users[user_index] = user # swap the old user record with the user
+          logger.debug("Updating user #{existing_user.email}, writing out users.json to #{user_file_path}")
+          File.write(user_file_path, JSON.pretty_generate(@users.map(&:to_object_dictionary)))
+        end
+      end
+    end
+
     def create_user!(email: nil, password: nil, provider: nil)
-      password_hash = BCrypt::Password.create(password)
-      new_user = User.new(email: email, password_hash: password_hash, providers: [provider])
+      new_user = User.new(
+        id: SecureRandom.uuid,
+        email: email,
+        password_hash: BCrypt::Password.create(password),
+        providers: [provider]
+      )
       UserDataSource.file_semaphore.synchronize do
         existing_user = @users.select { |user| user.email.casecmp(email.downcase).zero? }.first
         if existing_user.nil?

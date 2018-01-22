@@ -58,6 +58,13 @@ module FastlaneCI
       logger.debug("enabling sessions")
       self.class.enable(:sessions)
 
+      # TODO: use session pool for server-side storage
+      # generate a secret too
+      # see http://sinatrarb.com/intro.html#Using%20Sessions
+      # use Rack::Session::Pool, :expire_after => 2592000
+      # use Rack::Protection::RemoteToken
+      # use Rack::Protection::SessionHijacking
+
       # TODO: Ideally we figure out how to get this working, but for now things work
       # unless is_called_during_reload
       #   enable_resource_reloading(file_path: self.class._file) {

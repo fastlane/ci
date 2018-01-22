@@ -31,6 +31,10 @@ module FastlaneCI
       return nil
     end
 
+    def update_user!(user: nil)
+      self.data_source.update_user!(user: user)
+    end
+
     def login(email: nil, password: nil)
       email.strip!
 

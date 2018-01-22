@@ -17,14 +17,10 @@ module FastlaneCI
     # @return [String] Is a UDID so we're not open to ID guessing attacks
     attr_accessor :id
 
-    attr_reader :current_user_has_access
-    alias current_user_has_access? current_user_has_access
-
     def initialize(repo_config: nil, enabled: nil, project_name: nil, lane: nil, id: nil)
       self.repo_config = repo_config
       self.enabled = enabled
       self.project_name = project_name
-      @current_user_has_access = current_user_has_access # @ as there is no `setter`
       self.id = id || SecureRandom.uuid
       self.lane = lane
     end

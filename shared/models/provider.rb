@@ -16,8 +16,14 @@ module FastlaneCI
     PROVIDER_TYPES = doubled_types.freeze
 
     attr_accessor :type # must be defined in sub class
+    attr_accessor :ci_user # user associated with this provider
+    attr_accessor :provider_name # MUST be unique, not a problem right now with just supporting GitHub
 
     def type
+      not_implemented(__method__)
+    end
+
+    def provider_name
       not_implemented(__method__)
     end
 

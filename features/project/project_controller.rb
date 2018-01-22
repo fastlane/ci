@@ -1,7 +1,7 @@
-require_relative "../../shared/controller_base"
+require_relative "../../shared/authenticated_controller_base"
 
 module FastlaneCI
-  class ProjectController < ControllerBase
+  class ProjectController < AuthenticatedControllerBase
     HOME = "/projects"
 
     # Note: The order IS important for Sinatra, so this has to be
@@ -9,9 +9,8 @@ module FastlaneCI
     #
     # TODO: this should actually be a POST request
     get "#{HOME}/*/trigger" do |project_id|
-      # TODO: fetching the project always like this, unify it
-      project = Services::CONFIG_SERVICE.projects(FastlaneCI::GitHubSource.source_from_session(session)).find { |a| a.id == project_id }
-      # TODO: Verify access to project here also
+      project = self.user_project_with_id(project_id: project_id)
+
       repo = FastlaneCI::GitRepo.new(git_config: project.repo_config)
 
       # TODO: Obviously we're not gonna run fastlane
@@ -20,10 +19,11 @@ module FastlaneCI
       # but this is just for the prototype (best type)
       # So all the code below can basically be moved over
       # to some kind of job queue that will be worked off
+      current_github_provider = self.check_and_get_provider
 
       current_sha = repo.git.log.first.sha
       # Tell GitHub we're running CI for this...
-      FastlaneCI::GitHubSource.source_from_session(session).set_build_status!(
+      FastlaneCI::GitHubSource.source_from_provider(provider: current_github_provider).set_build_status!(
         repo: project.repo_config.git_url,
         sha: current_sha,
         state: :pending,
@@ -42,7 +42,7 @@ module FastlaneCI
         # TODO: this will be refactored anyway, to the proper fastlane runner
       end
 
-      FastlaneCI::GitHubSource.source_from_session(session).set_build_status!(
+      FastlaneCI::GitHubSource.source_from_provider(provider).set_build_status!(
         repo: project.repo_config.git_url,
         sha: current_sha,
         state: :success,
@@ -58,8 +58,7 @@ module FastlaneCI
     end
 
     get "#{HOME}/*" do |project_id|
-      project = Services::CONFIG_SERVICE.projects(FastlaneCI::GitHubSource.source_from_session(session)).find { |a| a.id == project_id }
-      # TODO: Verify access to project here also
+      project = self.user_project_with_id(project_id: project_id)
 
       # TODO: don't hardcode this
       builds = [

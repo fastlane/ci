@@ -28,7 +28,7 @@ module FastlaneCI
     CONFIG_DATA_SOURCE = GitConfigDataSource.new(git_url: "https://github.com/KrauseFx/ci-config")
 
     get "/" do
-      if FastlaneCI::GitHubSource.source_from_session(session).session_valid?
+      if session[:user]
         redirect("/dashboard")
       else
         redirect("/login")
