@@ -83,7 +83,7 @@ module FastlaneCI
         FastlaneCI::Build.new(
           project: project,
           number: 4,
-          status: :in_progress,
+          status: :pending,
           timestamp: Time.now
         )
       ]

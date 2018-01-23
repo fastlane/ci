@@ -10,11 +10,13 @@ module FastlaneCI
     end
 
     def list_builds(project: nil, max_number_of_builds: nil)
-      self.data_source.list_build(project: project, max_number_of_builds: max_number_of_builds)
+      self.data_source.list_builds(project: project, max_number_of_builds: max_number_of_builds)
     end
 
     def add_build!(project: nil, build: nil)
       self.data_source.add_build!(project: project, build: build)
+
+      # TODO: commit changes here
     end
   end
 end

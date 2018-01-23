@@ -5,7 +5,7 @@ module FastlaneCI
   class Build
     BUILD_STATUSES = [
       :success,
-      :in_progress,
+      :pending,
       :failure
     ]
 

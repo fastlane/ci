@@ -1,4 +1,5 @@
 require_relative "worker_base"
+require_relative "../services/build_service"
 require_relative "../shared/models/provider_credential"
 
 module FastlaneCI
@@ -27,21 +28,64 @@ module FastlaneCI
       repo = self.git_repo
       repo.git.fetch # is needed to see if there are new branches
 
+      # TODO: Services::BUILD_SERVICE doesn't work as the file isn't included
+      # TODO: ugh, I'm doing something wrong, I think?
+      json_folder_path = FastlaneCI::FastlaneApp::CONFIG_DATA_SOURCE.git_repo.path
+      build_service = FastlaneCI::BuildService.new(data_source: BuildDataSource.new(json_folder_path: json_folder_path))
+
       repo.git.branches.remote.each do |branch|
         next if branch.name.start_with?("HEAD ->") # not sure what this is for
-
-        # TODO: remember which commits we ran tests for already
 
         # Check out the specific branch
         # this will detach our current head
         branch.checkout
         current_sha = repo.git.log.first.sha
-        # TODO: run tests here
-        # The code below has to be merged with what's currently in
-        # project_controller
-        FastlaneCI::GitHubSource.source_from_provider(
+
+        builds = build_service.list_builds(project: self.project)
+        if builds.map { |b| b.sha }.include?(current_sha)
+          puts "Already ran a build for sha '#{current_sha}'"
+          next
+        end
+
+        github_source = FastlaneCI::GitHubSource.source_from_provider(
           provider_credential: self.provider_credential
-        ).set_build_status!(
+        )
+        # Store the current build output + artifacts
+        current_build = FastlaneCI::Build.new(
+          project: self.project,
+          number: builds.count + 1,
+          status: :pending,
+          timestamp: Time.now,
+          duration: -1,
+          sha: current_sha
+        )
+        build_service.add_build!(
+          project: self.project, 
+          build: current_build
+        )
+
+        # Let GitHub know we're already running the tests
+        github_source.set_build_status!(
+          repo: project.repo_config.git_url,
+          sha: current_sha,
+          state: :pending,
+          target_url: nil
+        )
+
+        start_time = Time.now
+        sleep 20
+        # TODO: run tests here!
+        # TODO: Replace project_controller code with code from here
+        duration = Time.now - start_time
+
+        current_build.duration = duration
+        current_build.status = :success
+        build_service.add_build!(
+          project: self.project, 
+          build: current_build
+        )
+        # Report the build status to GitHub
+        github_source.set_build_status!(
           repo: project.repo_config.git_url,
           sha: current_sha,
           state: :success,
@@ -51,7 +95,7 @@ module FastlaneCI
     end
 
     def timeout
-      10 # 10 seconds seems reasonable
+      5
     end
   end
 end

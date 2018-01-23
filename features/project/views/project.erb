@@ -33,7 +33,7 @@
             <td>
               <% if build.status == :success %>
                 <%= "✅" %>
-              <% elsif build.status == :in_progress %>
+              <% elsif build.status == :pending %>
                 <%= "🌕" %>
               <% else %>
                 <%= "🚫" %>

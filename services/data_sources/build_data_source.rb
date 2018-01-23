@@ -28,7 +28,9 @@ module FastlaneCI
       File.join(self.json_folder_path, "projects", project.id)
     end
 
-    def list_builds(project: nil, max_number_of_builds: 20)
+    def list_builds(project: nil, max_number_of_builds: nil)
+      max_number_of_builds ||= 20
+
       containing_path = builds_path(project: project)
       file_names = Dir[File.join(containing_path, "*.json")]
       build_numbers = file_names.map { |f| File.basename(f, ".*").to_i }
@@ -51,17 +53,15 @@ module FastlaneCI
       return most_recent_builds
     end
 
+    # Add or update a build
     def add_build!(project: nil, build: nil)
       containing_path = builds_path(project: project)
       full_path = File.join(containing_path, "#{build.number}.json")
-      if File.exist?(full_path)
-        # TODO: What do we do here?
-        raise "File at directory '#{full_path}' already exists"
-      else
-        # TODO: on storing the build, we do NOT want to store any information about the project
-        hash_to_store = build.to_object_dictionary(ignore_instance_variables: [:@project])
-        File.write(full_path, JSON.pretty_generate(hash_to_store))
-      end
+
+      puts "Writing to '#{full_path}'"
+      hash_to_store = build.to_object_dictionary(ignore_instance_variables: [:@project])
+      FileUtils.mkdir_p(containing_path)
+      File.write(full_path, JSON.pretty_generate(hash_to_store))
     end
   end
 end
