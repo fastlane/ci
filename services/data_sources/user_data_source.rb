@@ -57,14 +57,14 @@ module FastlaneCI
 
         @users = JSON.parse(File.read(user_file_path)).map do |user_object_hash|
           user = User.from_json!(user_object_hash)
-          user.providers = load_providers_from_provider_hash_array(user: user, provider_array: user.providers)
+          user.providers = providers_from_provider_hash_array(user: user, provider_array: user.providers)
           user
         end
       end
     end
 
     # TODO: this could be automatic
-    def load_providers_from_provider_hash_array(user: nil, provider_array: nil)
+    def providers_from_provider_hash_array(user: nil, provider_array: nil)
       return provider_array.map do |provider_hash|
         type = provider_hash["type"]
 
