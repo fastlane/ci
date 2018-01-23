@@ -4,8 +4,7 @@ require "sinatra/custom_logger"
 require "logger"
 
 require_relative "logging_module"
-require_relative "resource_reloader.rb"
-require_relative "../services/services"
+require_relative "resource_reloader"
 
 module FastlaneCI
   #

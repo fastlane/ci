@@ -14,60 +14,60 @@ module FastlaneCI
       self.active_code_hosts = {}
     end
 
-    # if the provider is for user B, but the service was initialized using user A,
+    # if the provider_credential is for user B, but the service was initialized using user A,
     # that means user A is doing things on behalf of user B
-    def process_on_behalf?(provider: nil)
-      return provider.ci_user != self.ci_user
+    def process_on_behalf?(provider_credential: nil)
+      return provider_credential.ci_user != self.ci_user
     end
 
-    def active_code_hosting_key(provider: nil)
-      return "#{provider.provider_name}_#{self.ci_user.id}"
+    def active_code_hosting_key(provider_credential: nil)
+      return "#{provider_credential.provider_name}_#{self.ci_user.id}"
     end
 
-    # Find the active code host for the provider/user combination
+    # Find the active code host for the provider_credential/user combination
     # or instantiate one if none are available
-    def code_host(provider: nil)
-      code_host_key = active_code_hosting_key(provider: provider)
+    def code_host(provider_credential: nil)
+      code_host_key = active_code_hosting_key(provider_credential: provider_credential)
       code_host = self.active_code_hosts[code_host_key]
       return code_host unless code_host.nil?
 
-      case provider.type
-      when FastlaneCI::Provider::PROVIDER_TYPES[:github]
-        code_host = GitHubSource.new(email: provider.email, personal_access_token: provider.api_token)
+      case provider_credential.type
+      when FastlaneCI::ProviderCredential::PROVIDER_TYPES[:github]
+        code_host = GitHubSource.new(email: provider_credential.email, personal_access_token: provider_credential.api_token)
         active_code_hosts[code_host_key] = code_host
       else
-        raise "Unrecognized provider #{provider.type}"
+        raise "Unrecognized provider_credential #{provider_credential.type}"
       end
 
       return code_host
     end
 
-    def octokit_projects(provider: nil)
+    def octokit_projects(provider_credential: nil)
       # Get a list of all the repos `provider` has access to
-      current_code_host = self.code_host(provider: provider)
+      current_code_host = self.code_host(provider_credential: provider_credential)
 
-      # current set of `GitRepoConfig.name`s that `provider` has access to
+      # current set of `GitRepoConfig.name`s that `provider_credential` has access to
       current_repo_git_url_set = current_code_host.repos.map(&:git_url).to_set
 
       projects = self.config_data_source.projects.select do |project|
         current_repo_git_url_set.include?(project.repo_config.git_url)
       end
 
-      # return all projects that are the union of this current user's provider, and the passed in provider
+      # return all projects that are the union of this current user's provider_credential, and the passed in provider_credential
       return projects
     end
 
-    def project(id: nil, provider: nil)
-      current_ci_user_projects = self.projects(provider: provider)
+    def project(id: nil, provider_credential: nil)
+      current_ci_user_projects = self.projects(provider_credential: provider_credential)
       current_project = current_ci_user_projects.select { |project| project.id == id }.first
       return current_project
     end
 
-    def projects(provider: nil)
-      if provider.type == FastlaneCI::Provider::PROVIDER_TYPES[:github]
-        return self.octokit_projects(provider: provider)
+    def projects(provider_credential: nil)
+      if provider_credential.type == FastlaneCI::ProviderCredential::PROVIDER_TYPES[:github]
+        return self.octokit_projects(provider_credential: provider_credential)
       else
-        raise "Unrecognized provider #{provider.type}"
+        raise "Unrecognized provider_credential #{provider_credential.type}"
       end
     end
   end

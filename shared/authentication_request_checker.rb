@@ -1,5 +1,5 @@
 require_relative "logging_module"
-require_relative "models/provider"
+require_relative "models/provider_credential"
 
 module FastlaneCI
   # by registering this module in your controller you can call `ensure_logged_in` for any route
@@ -37,7 +37,7 @@ module FastlaneCI
           redirect("/login/ci_login")
         end
 
-        if user.provider(type: FastlaneCI::Provider::PROVIDER_TYPES[:github]).nil?
+        if user.provider(type: FastlaneCI::ProviderCredential::PROVIDER_TYPES[:github]).nil?
           logger.debug("No providers found, redirecting to GitHub provider page")
           redirect("/login")
         else

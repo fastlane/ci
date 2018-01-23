@@ -1,4 +1,4 @@
-require_relative "../../shared/models/provider"
+require_relative "../../shared/models/provider_credential"
 module FastlaneCI
   # Abstract base class for all code hosting data sources
   class CodeHosting
@@ -6,7 +6,7 @@ module FastlaneCI
       not_implemented(__method__)
     end
 
-    # FastlaneCI::Provider::PROVIDER_TYPES
+    # FastlaneCI::ProviderCredential::PROVIDER_TYPES
     def provider_type
       not_implemented(__method__)
     end

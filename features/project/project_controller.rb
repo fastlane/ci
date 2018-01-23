@@ -23,7 +23,7 @@ module FastlaneCI
 
       current_sha = repo.git.log.first.sha
       # Tell GitHub we're running CI for this...
-      FastlaneCI::GitHubSource.source_from_provider(provider: current_github_provider).set_build_status!(
+      FastlaneCI::GitHubSource.source_from_provider(provider_credential: current_github_provider).set_build_status!(
         repo: project.repo_config.git_url,
         sha: current_sha,
         state: :pending,
@@ -31,13 +31,13 @@ module FastlaneCI
       )
 
       begin
-        Dir.chdir(repo.path) do
-          Bundler.with_clean_env do
-            cmd = TTY::Command.new
-            # cmd.run("bundle update")
-            # cmd.run("bundle exec fastlane tests")
-          end
-        end
+        # Dir.chdir(repo.path) do
+        # Bundler.with_clean_env do
+        # cmd = TTY::Command.new
+        # cmd.run("bundle update")
+        # cmd.run("bundle exec fastlane tests")
+        # end
+        # end
       rescue StandardError => ex
         # TODO: this will be refactored anyway, to the proper fastlane runner
       end

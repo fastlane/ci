@@ -5,9 +5,9 @@ module FastlaneCI
   class GitHubSource < CodeHosting
     class << self
       # Generate a GitHub source based on the user's session
-      def source_from_provider(provider: nil)
-        return self.new(email: provider.email,
-                        personal_access_token: provider.api_token)
+      def source_from_provider(provider_credential: nil)
+        return self.new(email: provider_credential.email,
+                        personal_access_token: provider_credential.api_token)
       end
     end
 

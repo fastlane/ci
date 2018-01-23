@@ -1,25 +1,30 @@
 require_relative "worker_base"
+require_relative "../shared/models/provider_credential"
 
 module FastlaneCI
   # Responsible for checking if there have been new commits
   # We have to poll, as there is no easy way to hear about
   # new commits from web events, as the CI system might be behind
   # firewalls
-  class CheckForNewCommitsWorker < WorkerBase
-    attr_accessor :user
+  class CheckForNewCommitsOnGithubWorker < WorkerBase
+    attr_accessor :provider_credential
+    attr_accessor :project
     attr_accessor :user_config_service
-    attr_accessor :provider
+    attr_accessor :git_repo
 
-    def initialize(user: nil, provider: nil, project: nil)
-      self.user = user
-      self.provider = provider
+    def provider_type
+      return FastlaneCI::ProviderCredential::PROVIDER_TYPES[:github]
+    end
+
+    def initialize(provider_credential: nil, project: nil)
+      self.provider_credential = provider_credential
       self.project = project
-      self.user_config_service = FastlaneCI::ConfigService.new(ci_user: user)
+      self.git_repo = GitRepo.new(git_config: project.repo_config)
       super()
     end
 
     def work
-      repo = self.project.repo
+      repo = self.git_repo
       repo.git.fetch # is needed to see if there are new branches
 
       repo.git.branches.remote.each do |branch|
@@ -34,7 +39,7 @@ module FastlaneCI
         # TODO: run tests here
         # The code below has to be merged with what's currently in
         # project_controller
-        FastlaneCI::GitHubSource.source_from_provider(provider: self.provider).set_build_status!(
+        FastlaneCI::GitHubSource.source_from_provider(provider_credential: self.provider_credential).set_build_status!(
           repo: project.repo_url,
           sha: current_sha,
           state: :success,
@@ -44,7 +49,7 @@ module FastlaneCI
     end
 
     def timeout
-      3
+      10 # 10 seconds seems reasonable
     end
   end
 end
