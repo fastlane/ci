@@ -17,7 +17,7 @@ module FastlaneCI
             self.work unless self.should_stop
           rescue StandardError => ex
             puts("[#{self.class} Exception]: #{ex}: ")
-            puts(caller.join("\n"))
+            puts(ex.backtrace.join("\n"))
           end
         end
       end
