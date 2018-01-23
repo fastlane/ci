@@ -39,8 +39,10 @@ module FastlaneCI
         # TODO: run tests here
         # The code below has to be merged with what's currently in
         # project_controller
-        FastlaneCI::GitHubSource.source_from_provider(provider_credential: self.provider_credential).set_build_status!(
-          repo: project.repo_url,
+        FastlaneCI::GitHubSource.source_from_provider(
+          provider_credential: self.provider_credential
+        ).set_build_status!(
+          repo: project.repo_config.git_url,
           sha: current_sha,
           state: :success,
           target_url: nil
