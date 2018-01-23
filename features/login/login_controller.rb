@@ -144,7 +144,7 @@ module FastlaneCI
         # in the future we're not gonna share the user's session
 
         # TODO: find a better place for this
-        # FastlaneCI::CheckForNewCommitsWorker.new(session: session)
+        # FastlaneCI::CheckForNewCommitsWorker.new(user: <what user?>, provider: <what provider?>, project: <worker per project>)
 
         redirect("/dashboard")
       else
