@@ -1,7 +1,7 @@
 # Internal
 require_relative "../../shared/controller_base"
 require_relative "../../services/user_service"
-require_relative "../../shared/models/github_provider"
+require_relative "../../shared/models/github_provider_credential"
 
 module FastlaneCI
   class LoginController < ControllerBase
@@ -18,7 +18,7 @@ module FastlaneCI
       end
 
       # Cool, we're logged in, but have we setup a provider?
-      if user_has_valid_github_token?(providers: user.providers)
+      if user_has_valid_github_token?(provider_credentials: user.provider_credentials)
         # Yup, we setup a provider, so let's go to the dashboard
         redirect("/dashboard")
       end
@@ -58,7 +58,7 @@ module FastlaneCI
         redirect("#{HOME}/ci_login")
       else
         session[:user] = user
-        if user_has_valid_github_token?(providers: user.providers)
+        if user_has_valid_github_token?(provider_credentials: user.provider_credentials)
           redirect("/dashboard")
         else
           redirect("/login")
@@ -88,30 +88,30 @@ module FastlaneCI
       # check if we already have an account like this, if we do we might need to clean out their old :personal_access_token
       email = params[:email]
       personal_access_token = params[:personal_access_token]
-      github_provider = FastlaneCI::GitHubProvider.new(email: email, api_token: personal_access_token)
+      github_provider_credential = FastlaneCI::GitHubProviderCredential.new(email: email, api_token: personal_access_token)
       user = session[:user]
 
       if user
-        # needs github_provider?
-        needs_github_provider = true
+        # needs github_provider_credential?
+        needs_github_provider_credential = true
         updated_user = false
-        providers = user.providers
-        providers ||= []
-        providers.each do |provider_credential|
-          next unless provider_credential.type == FastlaneCI::ProviderCredential::PROVIDER_TYPES[:github]
+        provider_credentials = user.provider_credentials
+        provider_credentials ||= []
+        provider_credentials.each do |provider_credential|
+          next unless provider_credential.type == FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
           if provider_credential.api_token.nil?
             # update out sample data
-            provider_credential.api_token = github_provider.api_token
-            provider_credential.email = github_provider.email
+            provider_credential.api_token = github_provider_credential.api_token
+            provider_credential.email = github_provider_credential.email
           end
-          needs_github_provider = false
+          needs_github_provider_credential = false
           updated_user = true
         end
 
-        if needs_github_provider
-          logger.debug("account #{github_provider.email} needs updating")
-          providers << github_provider
-          user.providers = providers
+        if needs_github_provider_credential
+          logger.debug("account #{github_provider_credential.email} needs updating")
+          provider_credentials << github_provider_credential
+          user.provider_credentials = provider_credentials
           updated_user = true
         end
 
@@ -121,7 +121,7 @@ module FastlaneCI
         session[:user] = user
       end
 
-      git_hub_service = FastlaneCI::GitHubSource.source_from_provider(provider_credential: github_provider)
+      git_hub_service = FastlaneCI::GitHubSource.source_from_provider_credential(provider_credential: github_provider_credential)
 
       if git_hub_service.session_valid?
         redirect("/dashboard")
@@ -131,9 +131,9 @@ module FastlaneCI
       end
     end
 
-    def user_has_valid_github_token?(providers: [])
-      providers.each do |provider_credential|
-        if provider_credential.type == FastlaneCI::ProviderCredential::PROVIDER_TYPES[:github]
+    def user_has_valid_github_token?(provider_credentials: [])
+      provider_credentials.each do |provider_credential|
+        if provider_credential.type == FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
           if provider_credential.api_token.nil?
             return false
           else

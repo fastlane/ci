@@ -4,7 +4,7 @@ require_relative "../../shared/logging_module"
 require_relative "../../shared/json_convertible"
 require_relative "../../shared/models/user"
 require_relative "../../shared/models/provider_credential"
-require_relative "../../shared/models/github_provider"
+require_relative "../../shared/models/github_provider_credential"
 
 module FastlaneCI
   # Mixin the JSONConvertible class for User
@@ -57,24 +57,24 @@ module FastlaneCI
 
         @users = JSON.parse(File.read(user_file_path)).map do |user_object_hash|
           user = User.from_json!(user_object_hash)
-          user.providers = providers_from_provider_hash_array(user: user, provider_array: user.providers)
+          user.provider_credentials = provider_credentials_from_provider_hash_array(user: user, provider_credential_array: user.provider_credentials)
           user
         end
       end
     end
 
     # TODO: this could be automatic
-    def providers_from_provider_hash_array(user: nil, provider_array: nil)
-      return provider_array.map do |provider_hash|
-        type = provider_hash["type"]
+    def provider_credentials_from_provider_hash_array(user: nil, provider_credential_array: nil)
+      return provider_credential_array.map do |provider_credential_hash|
+        type = provider_credential_hash["type"]
 
         # currently only supports 1 type, but we could automate this part too
-        provider = nil
-        if type == FastlaneCI::ProviderCredential::PROVIDER_TYPES[:github]
-          provider = GitHubProvider.from_json!(provider_hash)
-          provider.ci_user = user # provide backreference
+        provider_credential = nil
+        if type == FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
+          provider_credential = GitHubProviderCredential.from_json!(provider_credential_hash)
+          provider_credential.ci_user = user # provide backreference
         end
-        provider
+        provider_credential
       end
     end
 
@@ -135,7 +135,7 @@ module FastlaneCI
         id: SecureRandom.uuid,
         email: email,
         password_hash: BCrypt::Password.create(password),
-        providers: [provider_credential]
+        provider_credentials: [provider_credential]
       )
       UserDataSource.file_semaphore.synchronize do
         existing_user = @users.select { |user| user.email.casecmp(email.downcase).zero? }.first

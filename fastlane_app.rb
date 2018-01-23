@@ -56,8 +56,8 @@ module FastlaneCI
     # Grab a config service that is configured for the CI user
     @ci_user_config_service = FastlaneCI::ConfigService.new(ci_user: @ci_user)
 
-    # Iterate through all providers and their projects and start a worker for each project
-    @ci_user.providers.each do |provider_credential|
+    # Iterate through all provider credentials and their projects and start a worker for each project
+    @ci_user.provider_credentials.each do |provider_credential|
       projects = @ci_user_config_service.projects(provider_credential: provider_credential)
       projects.each do |project|
         @worker_service.start_worker_for_provider_credential_and_config(

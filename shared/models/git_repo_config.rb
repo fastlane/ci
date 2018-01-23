@@ -13,7 +13,7 @@ module FastlaneCI
       super(
         id: id,
         git_url: git_url,
-        provider_type_needed: FastlaneCI::ProviderCredential::PROVIDER_TYPES[:github],
+        provider_credential_type_needed: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github],
         description: description,
         name: name,
         hidden: hidden

@@ -1,5 +1,5 @@
 require_relative "data_sources/user_data_source"
-require_relative "../shared/models/github_provider"
+require_relative "../shared/models/github_provider_credential"
 require_relative "../shared/logging_module"
 
 module FastlaneCI
@@ -10,7 +10,7 @@ module FastlaneCI
 
     def initialize(data_source: nil)
       if data_source.nil?
-        logger.debug("data_source is nil, using `ENV[\"data_store_folder\"]` if available, or `sample_data` folder")
+        logger.debug("data_source is new, using `ENV[\"data_store_folder\"]` if available, or `sample_data` folder")
         data_store_folder = ENV["data_store_folder"] # you can set it at runtime!
         data_store_folder ||= File.join(FastlaneCI::FastlaneApp.settings.root, "sample_data")
         data_source = UserDataSource.new(json_folder_path: data_store_folder)
@@ -24,7 +24,7 @@ module FastlaneCI
 
       unless self.data_source.user_exist?(email: email)
         logger.debug("creating account #{email}")
-        provider_credential = GitHubProvider.new(email: email)
+        provider_credential = GitHubProviderCredential.new(email: email)
         return self.data_source.create_user!(email: email, password: password, provider_credential: provider_credential)
       end
 
