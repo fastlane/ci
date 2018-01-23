@@ -9,6 +9,7 @@ require_relative "services/config_data_sources/git_config_data_source"
 require_relative "services/config_service"
 require_relative "services/worker_service"
 require_relative "services/user_service"
+require_relative "services/data_sources/user_data_source"
 require_relative "services/test_runner_service"
 require_relative "services/fastlane_ci_error" # TODO: move somewhere else, both the file and the `require`
 
@@ -30,7 +31,9 @@ module FastlaneCI
   # Our CI app main class
   class FastlaneApp < Sinatra::Base
     CONFIG_DATA_SOURCE = FastlaneCI::GitConfigDataSource.new(git_url: "https://github.com/KrauseFx/ci-config")
-    USER_SERVICE = FastlaneCI::UserService.new
+    json_folder_path = CONFIG_DATA_SOURCE.git_repo.path
+    user_data_source = UserDataSource.new(json_folder_path: json_folder_path)
+    USER_SERVICE = FastlaneCI::UserService.new(data_source: user_data_source)
 
     get "/" do
       if session[:user]
