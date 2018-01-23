@@ -30,7 +30,7 @@ module FastlaneCI
 
   # Our CI app main class
   class FastlaneApp < Sinatra::Base
-    CONFIG_DATA_SOURCE = FastlaneCI::GitConfigDataSource.new(git_url: "https://github.com/KrauseFx/ci-config")
+    CONFIG_DATA_SOURCE = FastlaneCI::GitConfigDataSource.new(git_url: ENV["FASTLANE_CI_REPO_URL"])
     json_folder_path = CONFIG_DATA_SOURCE.git_repo.path
     user_data_source = UserDataSource.new(json_folder_path: json_folder_path)
     USER_SERVICE = FastlaneCI::UserService.new(data_source: user_data_source)

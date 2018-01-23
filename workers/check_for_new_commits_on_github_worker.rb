@@ -14,7 +14,7 @@ module FastlaneCI
     attr_accessor :git_repo
 
     def provider_type
-      return FastlaneCI::ProviderCredential::PROVIDER_TYPES[:github]
+      return FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
     end
 
     def initialize(provider_credential: nil, project: nil)
