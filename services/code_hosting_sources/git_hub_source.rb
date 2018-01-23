@@ -42,6 +42,7 @@ module FastlaneCI
     end
 
     # The `target_url`, `description` and `context` parameters are optional
+    # @repo [String] Repo URL as string
     def set_build_status!(repo: nil, sha: nil, state: nil, target_url: nil, description: nil, context: nil)
       state = state.to_s
 

@@ -47,7 +47,7 @@ module FastlaneCI
       current_code_host = self.code_host(provider_credential: provider_credential)
 
       # current set of `GitRepoConfig.name`s that `provider_credential` has access to
-      current_repo_git_url_set = current_code_host.repos.map(&:git_url).to_set
+      current_repo_git_url_set = current_code_host.repos.map(&:html_url).to_set
 
       projects = self.config_data_source.projects.select do |project|
         current_repo_git_url_set.include?(project.repo_config.git_url)
