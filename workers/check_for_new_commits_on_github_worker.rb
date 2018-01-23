@@ -43,7 +43,6 @@ module FastlaneCI
 
         builds = build_service.list_builds(project: self.project)
         if builds.map { |b| b.sha }.include?(current_sha)
-          puts "Already ran a build for sha '#{current_sha}'"
           next
         end
 

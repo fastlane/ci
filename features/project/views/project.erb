@@ -31,9 +31,9 @@
         <% project.builds.each do |build| %>
           <tr style="cursor: pointer;" onclick="location.href='/projects/'">
             <td>
-              <% if build.status == :success %>
+              <% if build.status == "success" %>
                 <%= "✅" %>
-              <% elsif build.status == :pending %>
+              <% elsif build.status == "pending" %>
                 <%= "🌕" %>
               <% else %>
                 <%= "🚫" %>

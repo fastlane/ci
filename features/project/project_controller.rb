@@ -60,35 +60,6 @@ module FastlaneCI
     get "#{HOME}/*" do |project_id|
       project = self.user_project_with_id(project_id: project_id)
 
-      # TODO: don't hardcode this
-      builds = [
-        FastlaneCI::Build.new(
-          project: project,
-          number: 1,
-          status: :failure,
-          timestamp: Time.now
-        ),
-        FastlaneCI::Build.new(
-          project: project,
-          number: 2,
-          status: :success,
-          timestamp: Time.now
-        ),
-        FastlaneCI::Build.new(
-          project: project,
-          number: 3,
-          status: :success,
-          timestamp: Time.now
-        ),
-        FastlaneCI::Build.new(
-          project: project,
-          number: 4,
-          status: :pending,
-          timestamp: Time.now
-        )
-      ]
-      project.builds = builds.reverse # TODO: just for now for the dummy data
-
       locals = {
         project: project,
         title: "Project #{project.project_name}"
