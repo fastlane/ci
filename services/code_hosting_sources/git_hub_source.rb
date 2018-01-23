@@ -74,6 +74,11 @@ module FastlaneCI
         description: description,
         context: context || "fastlane.ci tests"
       })
+    rescue => ex
+      # TODO: how do we handle GitHub errors
+      # In this case `create_status` will cause an exception
+      # if the user doesn't have write permission for the repo
+      raise ex
     end
   end
 end
