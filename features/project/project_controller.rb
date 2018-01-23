@@ -12,49 +12,20 @@ module FastlaneCI
       project = self.user_project_with_id(project_id: project_id)
 
       repo = FastlaneCI::GitRepo.new(git_config: project.repo_config)
+      current_sha = repo.git.log.first.sha
 
-      # TODO: Obviously we're not gonna run fastlane
-      # - on the web thread
-      # - through a shell command, but using a socket instead
-      # but this is just for the prototype (best type)
-      # So all the code below can basically be moved over
-      # to some kind of job queue that will be worked off
       current_github_provider = self.check_and_get_provider
 
-      current_sha = repo.git.log.first.sha
-      # Tell GitHub we're running CI for this...
-      FastlaneCI::GitHubSource.source_from_provider(provider_credential: current_github_provider).set_build_status!(
-        repo: project.repo_config.git_url,
-        sha: current_sha,
-        state: :pending,
-        target_url: nil
-      )
-
-      begin
-        # Dir.chdir(repo.path) do
-        # Bundler.with_clean_env do
-        # cmd = TTY::Command.new
-        # cmd.run("bundle update")
-        # cmd.run("bundle exec fastlane tests")
-        # end
-        # end
-      rescue StandardError => ex
-        # TODO: this will be refactored anyway, to the proper fastlane runner
+      # TODO: not the best approach to spawn a thread
+      Thread.new do
+        FastlaneCI::TestRunnerService.new(
+            project: project,
+            sha: current_sha,
+            provider_credential: current_github_provider
+          ).run
       end
 
-      FastlaneCI::GitHubSource.source_from_provider(provider).set_build_status!(
-        repo: project.repo_config.git_url,
-        sha: current_sha,
-        state: :success,
-        target_url: nil
-      )
-      # We don't even need danger to post test results
-      # we can post the test results as a nice table as a GitHub comment
-      # easily here, as we already have access to the test failures
-      # None of the CI does that for whatever reason, but we can actually show the messages
-
-      # redirect("#{HOME}/#{project_id}")
-      "All done"
+      redirect("#{HOME}/#{project_id}")
     end
 
     get "#{HOME}/*" do |project_id|

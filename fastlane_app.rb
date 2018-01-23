@@ -9,6 +9,7 @@ require_relative "services/config_data_sources/git_config_data_source"
 require_relative "services/config_service"
 require_relative "services/worker_service"
 require_relative "services/user_service"
+require_relative "services/test_runner_service"
 require_relative "services/fastlane_ci_error" # TODO: move somewhere else, both the file and the `require`
 
 require_relative "services/code_hosting_sources/git_hub_source"

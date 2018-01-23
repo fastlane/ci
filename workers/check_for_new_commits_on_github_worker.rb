@@ -46,50 +46,11 @@ module FastlaneCI
           next
         end
 
-        github_source = FastlaneCI::GitHubSource.source_from_provider(
-          provider_credential: self.provider_credential
-        )
-        # Store the current build output + artifacts
-        current_build = FastlaneCI::Build.new(
+        FastlaneCI::TestRunnerService.new(
           project: self.project,
-          number: builds.count + 1,
-          status: :pending,
-          timestamp: Time.now,
-          duration: -1,
-          sha: current_sha
-        )
-        build_service.add_build!(
-          project: self.project, 
-          build: current_build
-        )
-
-        # Let GitHub know we're already running the tests
-        github_source.set_build_status!(
-          repo: project.repo_config.git_url,
           sha: current_sha,
-          state: :pending,
-          target_url: nil
-        )
-
-        start_time = Time.now
-        sleep 20
-        # TODO: run tests here!
-        # TODO: Replace project_controller code with code from here
-        duration = Time.now - start_time
-
-        current_build.duration = duration
-        current_build.status = :success
-        build_service.add_build!(
-          project: self.project, 
-          build: current_build
-        )
-        # Report the build status to GitHub
-        github_source.set_build_status!(
-          repo: project.repo_config.git_url,
-          sha: current_sha,
-          state: :success,
-          target_url: nil
-        )
+          provider_credential: self.provider_credential
+        ).run
       end
     end
 
