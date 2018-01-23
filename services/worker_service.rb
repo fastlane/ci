@@ -35,8 +35,7 @@ module FastlaneCI
       end
 
       self.resource_workers_dictionary[worker_key] = new_worker
-      logger.debug("Starting worker for #{project.name}, on behalf of #{user_responsible.email}")
-      new_worker.start
+      logger.debug("Starting worker for #{project.project_name}, on behalf of #{user_responsible.email}")
     end
 
     def stop_worker(project: nil, user_responsible: nil)
