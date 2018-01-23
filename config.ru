@@ -16,6 +16,11 @@ if ENV["FASTLANE_CI_ENCRYPTION_KEY"].nil?
   exit(1)
 end
 
+if ENV["FASTLANE_CI_USER"].nil? || ENV["FASTLANE_CI_PASSWORD"].nil?
+  warn("Error: ensure you have your `FASTLANE_CI_USER` and  `FASTLANE_CI_PASSWORD`environment variables set")
+  exit(1)
+end
+
 # before running, call `bundle install --path vendor/bundle`
 # this isolates the gems for bundler
 

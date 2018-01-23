@@ -1,4 +1,5 @@
 require_relative "logging_module"
+require_relative "models/provider_credential"
 
 module FastlaneCI
   # by registering this module in your controller you can call `ensure_logged_in` for any route
@@ -26,15 +27,21 @@ module FastlaneCI
         # TODO: we don't want to directly access `session` here, abstract out
         # We could use
         # ```
-        # FastlaneCI::GitHubSource.source_from_session(session).session_valid?
+        # FastlaneCI::GitHubSource.source_from_provider(provider).session_valid?
         # ```
         # however this would send a request every single time
         # Let's revisit later on
-        if session["GITHUB_SESSION_API_TOKEN"].to_s.length == 0
-          logger.debug("No valid auth token found, redirecting to login")
+        user = session[:user]
+        if user.nil?
+          logger.debug("No fastlane.ci account found, redirecting to login")
+          redirect("/login/ci_login")
+        end
+
+        if user.provider(type: FastlaneCI::ProviderCredential::PROVIDER_TYPES[:github]).nil?
+          logger.debug("No providers found, redirecting to GitHub provider page")
           redirect("/login")
         else
-          logger.debug("Yes, user got access to #{route}")
+          logger.debug("User is authenticated, accessing #{route}")
         end
       end
     end

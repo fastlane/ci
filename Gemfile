@@ -20,6 +20,7 @@ gem "git", ">= 1.3.0", "< 2.0.0"
 
 group :test, :development do
   gem "pry"
+  gem "pry-byebug"
   gem "rack-test", require: "rack/test"
   gem "rake"
   gem "rspec"

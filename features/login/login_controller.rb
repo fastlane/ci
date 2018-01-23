@@ -1,19 +1,31 @@
 # Internal
 require_relative "../../shared/controller_base"
 require_relative "../../services/user_service"
+require_relative "../../shared/models/github_provider"
 
 module FastlaneCI
   class LoginController < ControllerBase
     HOME = "/login"
-    USER_SERVICE = UserService.new
 
     get HOME do
-      if FastlaneCI::GitHubSource.source_from_session(session).session_valid?
+      user = session[:user]
+
+      # Are we logged into fastlane.ci?
+      if user.nil?
+        # nope, redirect to login to fastlane.com
+        logger.debug("No fastlane.ci account found, redirecting to login")
+        redirect("/login/ci_login")
+      end
+
+      # Cool, we're logged in, but have we setup a provider?
+      if user_has_valid_github_token?(providers: user.providers)
+        # Yup, we setup a provider, so let's go to the dashboard
         redirect("/dashboard")
       end
 
+      # Oh, no valid github provider? That's ok, let's add a github credential
       locals = {
-        title: "Login with GitHub"
+        title: "Connect fastlane.ci with GitHub"
       }
       erb(:login, locals: locals, layout: FastlaneCI.default_layout)
     end
@@ -27,63 +39,109 @@ module FastlaneCI
       erb(:login_fastlane_ci, locals: locals, layout: FastlaneCI.default_layout)
     end
 
+    get "/logout" do
+      session[:user] = nil
+
+      locals = {
+        title: "You are now logged out. You can log back in with your fastlane.ci account"
+      }
+
+      erb(:login_fastlane_ci, locals: locals, layout: FastlaneCI.default_layout)
+    end
+
+    # CI login
     post "/login" do
       email = params[:email]
       password = params[:password]
-      user = USER_SERVICE.login(email: email, password: password)
+      user = FastlaneApp::USER_SERVICE.login(email: email, password: password)
       if user.nil?
         redirect("#{HOME}/ci_login")
       else
         session[:user] = user
-        redirect("/dashboard")
+        if user_has_valid_github_token?(providers: user.providers)
+          redirect("/dashboard")
+        else
+          redirect("/login")
+        end
       end
     end
 
     get "#{HOME}/create_account" do
-      present_create_account
-    end
-
-    def present_create_account(failed: false)
-      # failed not used yet, but should display create error
-      locals = {
-        title: "Create fastlane.ci account"
-      }
-
+      locals = { title: "Create fastlane.ci account", create_failed: false }
       erb(:create_account, locals: locals, layout: FastlaneCI.default_layout)
     end
 
     post "#{HOME}/create_account" do
       email = params[:email]
       password = params[:password]
-      user = USER_SERVICE.create_user!(email: email, password: password)
+      user = FastlaneApp::USER_SERVICE.create_user!(email: email, password: password)
       if user.nil?
-        present_create_account(failed: true)
+        locals = { title: "Create fastlane.ci account", create_failed: true }
+        erb(:create_account, locals: locals, layout: FastlaneCI.default_layout)
       end
       session[:user] = user
-      redirect("/dashboard")
+      redirect("/login")
     end
 
-    # Login with github credentials
+    # Submit an email and api token
     post "/login/submit" do
       # check if we already have an account like this, if we do we might need to clean out their old :personal_access_token
       email = params[:email]
       personal_access_token = params[:personal_access_token]
+      github_provider = FastlaneCI::GitHubProvider.new(email: email, api_token: personal_access_token)
+      user = session[:user]
 
-      git_hub_service = FastlaneCI::GitHubSource.new(email: email, personal_access_token: personal_access_token)
+      if user
+        # needs github_provider?
+        needs_github_provider = true
+        updated_user = false
+        providers = user.providers
+        providers ||= []
+        providers.each do |provider_credential|
+          next unless provider_credential.type == FastlaneCI::ProviderCredential::PROVIDER_TYPES[:github]
+          if provider_credential.api_token.nil?
+            # update out sample data
+            provider_credential.api_token = github_provider.api_token
+            provider_credential.email = github_provider.email
+          end
+          needs_github_provider = false
+          updated_user = true
+        end
+
+        if needs_github_provider
+          logger.debug("account #{github_provider.email} needs updating")
+          providers << github_provider
+          user.providers = providers
+          updated_user = true
+        end
+
+        FastlaneApp::USER_SERVICE.update_user!(user: user) if updated_user
+
+        # update session user
+        session[:user] = user
+      end
+
+      git_hub_service = FastlaneCI::GitHubSource.source_from_provider(provider_credential: github_provider)
 
       if git_hub_service.session_valid?
-        session["GITHUB_SESSION_API_TOKEN"] = personal_access_token
-        session["GITHUB_SESSION_EMAIL"] = email
-        # TODO: we don't actually want to start this here
-        # but since we don't have a fastlane.ci session yet
-        # we're just gonna abuse the user's token for now
-        # in the future we're not gonna share the user's session
-        FastlaneCI::CheckForNewCommitsWorker.new(session: session)
         redirect("/dashboard")
       else
         # TODO: show error to user
         redirect("/login")
       end
+    end
+
+    def user_has_valid_github_token?(providers: [])
+      providers.each do |provider_credential|
+        if provider_credential.type == FastlaneCI::ProviderCredential::PROVIDER_TYPES[:github]
+          if provider_credential.api_token.nil?
+            return false
+          else
+            return true
+          end
+        end
+      end
+      return false
     end
   end
 end

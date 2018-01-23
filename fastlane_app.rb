@@ -5,12 +5,15 @@ require "json" # TODO: move somewhere else
 require "securerandom"
 
 # Internal
-require_relative "services/fastlane_ci_error" # TODO: move somewhere else, both the file and the `require`
 require_relative "services/config_data_sources/git_config_data_source"
+require_relative "services/config_service"
+require_relative "services/worker_service"
+require_relative "services/user_service"
+require_relative "services/fastlane_ci_error" # TODO: move somewhere else, both the file and the `require`
+
 require_relative "services/code_hosting_sources/git_hub_source"
 require_relative "features/dashboard/models/build" # TODO: we don't want to import this here
 require_relative "workers/refresh_config_data_sources_worker"
-require_relative "workers/check_for_new_commits_worker"
 require_relative "shared/logging_module"
 
 # All things fastlane ci related go in this module
@@ -25,10 +28,11 @@ module FastlaneCI
 
   # Our CI app main class
   class FastlaneApp < Sinatra::Base
-    CONFIG_DATA_SOURCE = GitConfigDataSource.new(git_url: "https://github.com/KrauseFx/ci-config")
+    CONFIG_DATA_SOURCE = FastlaneCI::GitConfigDataSource.new(git_url: "https://github.com/KrauseFx/ci-config")
+    USER_SERVICE = FastlaneCI::UserService.new
 
     get "/" do
-      if FastlaneCI::GitHubSource.source_from_session(session).session_valid?
+      if session[:user]
         redirect("/dashboard")
       else
         redirect("/login")
@@ -37,6 +41,26 @@ module FastlaneCI
 
     get "/favico.ico" do
       "nope"
+    end
+
+    # Going ot start our workers
+    @worker_service = FastlaneCI::WorkerService.new
+
+    # Login the CI user
+    @ci_user = USER_SERVICE.login(email: ENV["FASTLANE_CI_USER"], password: ENV["FASTLANE_CI_PASSWORD"])
+
+    # Grab a config service that is configured for the CI user
+    @ci_user_config_service = FastlaneCI::ConfigService.new(ci_user: @ci_user)
+
+    # Iterate through all providers and their projects and start a worker for each project
+    @ci_user.providers.each do |provider_credential|
+      projects = @ci_user_config_service.projects(provider_credential: provider_credential)
+      projects.each do |project|
+        @worker_service.start_worker_for_provider_credential_and_config(
+          project: project,
+          provider_credential: provider_credential
+        )
+      end
     end
 
     # Initialize the workers

@@ -4,8 +4,7 @@ require "sinatra/custom_logger"
 require "logger"
 
 require_relative "logging_module"
-require_relative "resource_reloader.rb"
-require_relative "../services/services"
+require_relative "resource_reloader"
 
 module FastlaneCI
   #
@@ -57,6 +56,13 @@ module FastlaneCI
       # enable access to the session in this class
       logger.debug("enabling sessions")
       self.class.enable(:sessions)
+
+      # TODO: use session pool for server-side storage
+      # generate a secret too
+      # see http://sinatrarb.com/intro.html#Using%20Sessions
+      # use Rack::Session::Pool, :expire_after => 2592000
+      # use Rack::Protection::RemoteToken
+      # use Rack::Protection::SessionHijacking
 
       # TODO: Ideally we figure out how to get this working, but for now things work
       # unless is_called_during_reload

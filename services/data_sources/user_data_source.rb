@@ -1,8 +1,9 @@
 require "bcrypt"
+require "securerandom"
 require_relative "../../shared/logging_module"
 require_relative "../../shared/json_convertible"
 require_relative "../../shared/models/user"
-require_relative "../../shared/models/provider"
+require_relative "../../shared/models/provider_credential"
 require_relative "../../shared/models/github_provider"
 
 module FastlaneCI
@@ -12,7 +13,7 @@ module FastlaneCI
   end
 
   # Mixin the JSONConvertible class for all Providers
-  class Provider
+  class ProviderCredential
     include FastlaneCI::JSONConvertible
   end
 
@@ -56,21 +57,24 @@ module FastlaneCI
 
         @users = JSON.parse(File.read(user_file_path)).map do |user_object_hash|
           user = User.from_json!(user_object_hash)
-          user.providers = load_providers_from_provider_hash_array(provider_array: user.providers)
+          user.providers = load_providers_from_provider_hash_array(user: user, provider_array: user.providers)
           user
         end
       end
     end
 
     # TODO: this could be automatic
-    def load_providers_from_provider_hash_array(provider_array: nil)
+    def load_providers_from_provider_hash_array(user: nil, provider_array: nil)
       return provider_array.map do |provider_hash|
         type = provider_hash["type"]
 
         # currently only supports 1 type, but we could automate this part too
-        if type == FastlaneCI::Provider::PROVIDER_TYPES[:github]
-          GitHubProvider.from_json!(provider_hash)
+        provider = nil
+        if type == FastlaneCI::ProviderCredential::PROVIDER_TYPES[:github]
+          provider = GitHubProvider.from_json!(provider_hash)
+          provider.ci_user = user # provide backreference
         end
+        provider
       end
     end
 
@@ -103,9 +107,36 @@ module FastlaneCI
       end
     end
 
-    def create_user!(email: nil, password: nil, provider: nil)
-      password_hash = BCrypt::Password.create(password)
-      new_user = User.new(email: email, password_hash: password_hash, providers: [provider])
+    def update_user!(user: nil)
+      UserDataSource.file_semaphore.synchronize do
+        user_index = nil
+        existing_user = nil
+        @users.each.with_index do |old_user, index|
+          if old_user.email.casecmp(user.email.downcase).zero?
+            user_index = index
+            existing_user = old_user
+            break
+          end
+        end
+
+        if existing_user.nil?
+          logger.debug("Couldn't update user #{user.email} because they don't exist")
+          raise "Couldn't update user #{user.email} because they don't exist"
+        else
+          @users[user_index] = user # swap the old user record with the user
+          logger.debug("Updating user #{existing_user.email}, writing out users.json to #{user_file_path}")
+          File.write(user_file_path, JSON.pretty_generate(@users.map(&:to_object_dictionary)))
+        end
+      end
+    end
+
+    def create_user!(email: nil, password: nil, provider_credential: nil)
+      new_user = User.new(
+        id: SecureRandom.uuid,
+        email: email,
+        password_hash: BCrypt::Password.create(password),
+        providers: [provider_credential]
+      )
       UserDataSource.file_semaphore.synchronize do
         existing_user = @users.select { |user| user.email.casecmp(email.downcase).zero? }.first
         if existing_user.nil?

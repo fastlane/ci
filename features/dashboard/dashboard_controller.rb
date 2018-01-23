@@ -5,28 +5,25 @@ module FastlaneCI
     HOME = "/dashboard"
 
     get HOME do
-      # TODO: passing the session to a service seems off, but also
-      # we need access to the `session` from Sinatra to get the GitHub
-      # auth token.
-      # @felix-> you can pass the user's FastlaneCI::Provider through and then use the API token there
-      all_projects = Services::CONFIG_SERVICE.projects(FastlaneCI::GitHubSource.source_from_session(session))
+      provider_credential = self.check_and_get_provider
+      user_config_service = self.current_user_config_service
+      all_projects = user_config_service.projects(provider_credential: provider_credential)
 
-      # TODO: we need a service call for this, projects shouldn't know permissions
-      projects_with_access = all_projects.select(&:current_user_has_access?)
-      projects_without_access = all_projects.reject(&:current_user_has_access?)
+      projects_with_access = all_projects
 
       locals = {
         projects_with_access: projects_with_access,
-        projects_without_access: projects_without_access,
+        projects_without_access: [], # we don't expose an API for this, yet
         title: "Dashboard"
       }
       erb(:dashboard, locals: locals, layout: FastlaneCI.default_layout)
     end
 
     get "#{HOME}/add_project" do
+      provider_credential = check_and_get_provider(type: FastlaneCI::ProviderCredential::PROVIDER_TYPES[:github])
       locals = {
         title: "Add new project",
-        repos: FastlaneCI::GitHubSource.source_from_session(session).repos
+        repos: FastlaneCI::GitHubSource.source_from_provider(provider_credential: provider_credential).repos
       }
       erb(:new_project, locals: locals, layout: FastlaneCI.default_layout)
     end
@@ -37,13 +34,5 @@ module FastlaneCI
         "builds #{builds}, paging token: #{paging_token}"
       end
     end
-
-    # post "#{HOME}/new" do
-    #   # id of GitRepoConfig
-    #   repo_id = params[:repo_id]
-    #   project_name = params[:project_name]
-    #   project_name = params[:lane]
-    #
-    # end
   end
 end
