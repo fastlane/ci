@@ -6,7 +6,7 @@ module FastlaneCI
       not_implemented(__method__)
     end
 
-    # FastlaneCI::ProviderCredential::PROVIDER_TYPES
+    # FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES
     def provider_type
       not_implemented(__method__)
     end

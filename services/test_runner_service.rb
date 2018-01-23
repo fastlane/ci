@@ -15,7 +15,7 @@ module FastlaneCI
       json_folder_path = FastlaneCI::FastlaneApp::CONFIG_DATA_SOURCE.git_repo.path
       self.build_service = FastlaneCI::BuildService.new(data_source: BuildDataSource.new(json_folder_path: json_folder_path))
 
-      self.source = FastlaneCI::GitHubSource.source_from_provider(
+      self.source = FastlaneCI::GitHubSource.source_from_provider_credential(
         provider_credential: provider_credential
       )
     end

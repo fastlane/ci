@@ -24,11 +24,11 @@ module FastlaneCI
       raise "Worker already exists for project: #{project.name}, for user #{user_responsible.email}" unless self.resource_workers_dictionary[worker_key].nil?
 
       repo_config = project.repo_config
-      raise "incompatible repo_config and provider_credential" if provider_credential.type != repo_config.provider_type_needed
+      raise "incompatible repo_config and provider_credential" if provider_credential.type != repo_config.provider_credential_type_needed
 
       new_worker = nil
       case provider_credential.type
-      when FastlaneCI::ProviderCredential::PROVIDER_TYPES[:github]
+      when FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
         new_worker = FastlaneCI::CheckForNewCommitsOnGithubWorker.new(provider_credential: provider_credential, project: project)
       else
         raise "unrecognized provider_type: #{provider_credential.type}"

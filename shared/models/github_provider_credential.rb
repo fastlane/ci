@@ -5,7 +5,7 @@ require_relative "../string_encrypter"
 
 module FastlaneCI
   # GitHub ProviderCredential class
-  class GitHubProvider < ProviderCredential
+  class GitHubProviderCredential < ProviderCredential
     attr_accessor :email # email used on github
     attr_accessor :encrypted_api_token
 
@@ -13,7 +13,7 @@ module FastlaneCI
       self.email = email
       self.api_token = api_token
       self.provider_name = "GitHub"
-      self.type = PROVIDER_TYPES[:github]
+      self.type = PROVIDER_CREDENTIAL_TYPES[:github]
     end
 
     def api_token=(value)

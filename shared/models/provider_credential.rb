@@ -1,6 +1,6 @@
 require "json"
 module FastlaneCI
-  # base class for all providers, see GitHubProvider as an example
+  # base class for all provider credentials, see GitHubProviderCredential as an example
   class ProviderCredential
     # we'll transform this list so the enum can be sym => string, and string => string
     simple_provider_types = {
@@ -13,7 +13,7 @@ module FastlaneCI
       doubled_types[key.to_s] = value
     end
 
-    PROVIDER_TYPES = doubled_types.freeze
+    PROVIDER_CREDENTIAL_TYPES = doubled_types.freeze
 
     attr_accessor :type # must be defined in sub class
     attr_accessor :ci_user # user associated with this provider

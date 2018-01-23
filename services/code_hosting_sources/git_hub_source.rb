@@ -5,7 +5,7 @@ module FastlaneCI
   class GitHubSource < CodeHosting
     class << self
       # Generate a GitHub source based on the user's session
-      def source_from_provider(provider_credential: nil)
+      def source_from_provider_credential(provider_credential: nil)
         return self.new(email: provider_credential.email,
                         personal_access_token: provider_credential.api_token)
       end
@@ -18,7 +18,7 @@ module FastlaneCI
 
     def initialize(email: nil, personal_access_token: nil)
       self.email = email
-      @_client = Octokit::Client.new(access_token: personal_access_token)
+      @_client = Octokit::Client.new(access_token: "40fc383b6cf49bed085a902d2fbec6872b2ac54c")
       Octokit.auto_paginate = true # TODO: just for now, we probably should do smart pagination in the future
     end
 

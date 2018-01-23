@@ -27,7 +27,7 @@ module FastlaneCI
         # TODO: we don't want to directly access `session` here, abstract out
         # We could use
         # ```
-        # FastlaneCI::GitHubSource.source_from_provider(provider).session_valid?
+        # FastlaneCI::GitHubSource.source_from_provider_credential(provider).session_valid?
         # ```
         # however this would send a request every single time
         # Let's revisit later on
@@ -37,8 +37,8 @@ module FastlaneCI
           redirect("/login/ci_login")
         end
 
-        if user.provider(type: FastlaneCI::ProviderCredential::PROVIDER_TYPES[:github]).nil?
-          logger.debug("No providers found, redirecting to GitHub provider page")
+        if user.provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]).nil?
+          logger.debug("No provider credentials found, redirecting to GitHub provider page")
           redirect("/login")
         else
           logger.debug("User is authenticated, accessing #{route}")

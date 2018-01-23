@@ -5,7 +5,7 @@ module FastlaneCI
     HOME = "/dashboard"
 
     get HOME do
-      provider_credential = self.check_and_get_provider
+      provider_credential = self.check_and_get_provider_credential
       user_config_service = self.current_user_config_service
       all_projects = user_config_service.projects(provider_credential: provider_credential)
 
@@ -20,10 +20,10 @@ module FastlaneCI
     end
 
     get "#{HOME}/add_project" do
-      provider_credential = check_and_get_provider(type: FastlaneCI::ProviderCredential::PROVIDER_TYPES[:github])
+      provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
       locals = {
         title: "Add new project",
-        repos: FastlaneCI::GitHubSource.source_from_provider(provider_credential: provider_credential).repos
+        repos: FastlaneCI::GitHubSource.source_from_provider_credential(provider_credential: provider_credential).repos
       }
       erb(:new_project, locals: locals, layout: FastlaneCI.default_layout)
     end

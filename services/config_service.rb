@@ -1,6 +1,6 @@
 require_relative "code_hosting_sources/git_hub_source"
 require_relative "config_data_sources/git_config_data_source"
-require_relative "../shared/models/github_provider"
+require_relative "../shared/models/github_provider_credential"
 
 module FastlaneCI
   class ConfigService
@@ -32,7 +32,7 @@ module FastlaneCI
       return code_host unless code_host.nil?
 
       case provider_credential.type
-      when FastlaneCI::ProviderCredential::PROVIDER_TYPES[:github]
+      when FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
         code_host = GitHubSource.new(email: provider_credential.email, personal_access_token: provider_credential.api_token)
         active_code_hosts[code_host_key] = code_host
       else
@@ -64,7 +64,7 @@ module FastlaneCI
     end
 
     def projects(provider_credential: nil)
-      if provider_credential.type == FastlaneCI::ProviderCredential::PROVIDER_TYPES[:github]
+      if provider_credential.type == FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
         return self.octokit_projects(provider_credential: provider_credential)
       else
         raise "Unrecognized provider_credential #{provider_credential.type}"

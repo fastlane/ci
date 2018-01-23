@@ -14,14 +14,14 @@ module FastlaneCI
       repo = FastlaneCI::GitRepo.new(git_config: project.repo_config)
       current_sha = repo.git.log.first.sha
 
-      current_github_provider = self.check_and_get_provider
+      current_github_provider_credential = self.check_and_get_provider_credential
 
       # TODO: not the best approach to spawn a thread
       Thread.new do
         FastlaneCI::TestRunnerService.new(
           project: project,
           sha: current_sha,
-          provider_credential: current_github_provider
+          provider_credential: current_github_provider_credential
         ).run
       end
 
