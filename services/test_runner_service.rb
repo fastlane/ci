@@ -24,7 +24,7 @@ module FastlaneCI
     # and on GitHub
     def update_build_status!
       build_service.add_build!(
-        project: self.project, 
+        project: self.project,
         build: self.current_build
       )
 
@@ -51,7 +51,7 @@ module FastlaneCI
       update_build_status!
 
       start_time = Time.now
-      sleep 20
+      sleep(20)
       # TODO: run tests here!
       duration = Time.now - start_time
 

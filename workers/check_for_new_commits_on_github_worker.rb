@@ -42,7 +42,7 @@ module FastlaneCI
         current_sha = repo.git.log.first.sha
 
         builds = build_service.list_builds(project: self.project)
-        if builds.map { |b| b.sha }.include?(current_sha)
+        if builds.map(&:sha).include?(current_sha)
           next
         end
 

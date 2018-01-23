@@ -19,10 +19,10 @@ module FastlaneCI
       # TODO: not the best approach to spawn a thread
       Thread.new do
         FastlaneCI::TestRunnerService.new(
-            project: project,
-            sha: current_sha,
-            provider_credential: current_github_provider
-          ).run
+          project: project,
+          sha: current_sha,
+          provider_credential: current_github_provider
+        ).run
       end
 
       redirect("#{HOME}/#{project_id}")

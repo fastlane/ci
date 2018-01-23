@@ -35,7 +35,7 @@ module FastlaneCI
       file_names = Dir[File.join(containing_path, "*.json")]
       build_numbers = file_names.map { |f| File.basename(f, ".*").to_i }
       most_recent_build_number = build_numbers.max
-      
+
       # Trim down the list to just the last `max_number_of_builds`
       most_recent_build_numbers = build_numbers[-[build_numbers.length, max_number_of_builds].min..-1]
 
@@ -58,7 +58,7 @@ module FastlaneCI
       containing_path = builds_path(project: project)
       full_path = File.join(containing_path, "#{build.number}.json")
 
-      puts "Writing to '#{full_path}'"
+      puts("Writing to '#{full_path}'")
       hash_to_store = build.to_object_dictionary(ignore_instance_variables: [:@project])
       FileUtils.mkdir_p(containing_path)
       File.write(full_path, JSON.pretty_generate(hash_to_store))
