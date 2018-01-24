@@ -99,6 +99,8 @@ module FastlaneCI
       username = session[:user]
       token = session[:token]
 
+      # More details: https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
+
       storage_path = File.join(temporary_git_storage, "git-auth-#{SecureRandom.uuid}")
       store_credentials_command = "git credential-store --file #{storage_path.shellescape} store"
       content = [
