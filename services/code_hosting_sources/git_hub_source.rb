@@ -18,7 +18,7 @@ module FastlaneCI
 
     def initialize(email: nil, personal_access_token: nil)
       self.email = email
-      @_client = Octokit::Client.new(access_token: "40fc383b6cf49bed085a902d2fbec6872b2ac54c")
+      @_client = Octokit::Client.new(access_token: personal_access_token)
       Octokit.auto_paginate = true # TODO: just for now, we probably should do smart pagination in the future
     end
 
