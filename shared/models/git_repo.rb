@@ -69,18 +69,28 @@ module FastlaneCI
         @_git = Git.open(self.path)
       end
 
-      # TODO: performance implications of settings this every time?
-      # TODO: Set actual name + email here
-      # TODO: see if we can set credentials here also
-      @_git.config("user.name", "Scott Chacon")
-      @_git.config("user.email", "email@email.com")
-
       return @_git
     end
 
-    def clone
+    def clone(session: nil)
+      self.setup_auth(session: session)
       logger.debug("[#{self.git_config.id}]: Cloning git repo #{self.git_config.git_url}")
       Git.clone(self.git_config.git_url, self.git_config.id, path: self.containing_path)
+    end
+
+    # Responsible for setting the author information when committing a change
+    def setup_author(session: nil)
+      # TODO: performance implications of settings this every time?
+      # TODO: Set actual name + email here
+      # TODO: see if we can set credentials here also
+      git.config("user.name", "Felix Krause")
+      git.config("user.email", "KrauseFx@gmail.com")
+    end
+
+    # Responsible for using the auth token to be able to push/pull changes
+    # from git remote
+    def setup_auth(session: nil)
+      # TODO
     end
 
     def pull
@@ -93,10 +103,13 @@ module FastlaneCI
     # This method commits and pushes all changes
     # if `file_to_commit` is `nil`, all files will be added
     # TODO: this method isn't actually tested yet
-    def commit_changes!(commit_message: nil, file_to_commit: nil)
+    def commit_changes!(commit_message: nil, file_to_commit: nil, session: nil)
       raise "file_to_commit not yet implemented" if file_to_commit
       commit_message ||= "Automatic commit by fastlane.ci"
 
+      setup_auth(session: session)
+
+      setup_author(session: session)
       git.add(all: true) # TODO: for now we only add all files
       git.commit(commit_message)
       git.push
