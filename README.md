@@ -6,6 +6,7 @@ Open source, self hosted, mobile optimized CI powered by [fastlane](https://fast
 
 - [VISION.md](VISION.md): Describes the overall vision and idea of this project, with its core principials
 - [docs/SystemArchitecture.md](docs/SystemArchitecture.md): Describes the overall design architecture of `fastlane.ci`, including the controllers, services, data sources and data objects
+- [How we store builds](https://github.com/fastlane/ci/issues/40#issuecomment-359507244)
 
 ## System Requirements
 
