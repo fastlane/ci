@@ -18,5 +18,9 @@ module FastlaneCI
 
       # TODO: commit changes here
     end
+
+    def commit!
+      self.data_source
+    end
   end
 end

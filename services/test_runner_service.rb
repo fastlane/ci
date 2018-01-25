@@ -23,10 +23,14 @@ module FastlaneCI
     # Responsible for updating the build status in our local config
     # and on GitHub
     def update_build_status!
+      # Create or update the local build file in the config directory
       build_service.add_build!(
         project: self.project,
         build: self.current_build
       )
+
+      # Commit & Push the changes
+      FastlaneCI::FastlaneApp::CONFIG_DATA_SOURCE.git_repo.commit_changes!
 
       # Let GitHub know we're already running the tests
       self.source.set_build_status!(
