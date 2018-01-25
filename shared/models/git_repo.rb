@@ -65,7 +65,7 @@ module FastlaneCI
           # Things are looking legit so far
           # Now we have to check if the repo is actually from the
           # same repo URL
-          if repo.remote("origin").url == self.git_config.git_url
+          if repo.remote("origin").url.downcase == self.git_config.git_url.downcase
             self.pull
           else
             logger.debug("[#{self.git_config.id}] Repo URL seems to have changed... deleting the old directory and cloning again")
