@@ -40,9 +40,15 @@ module FastlaneCI
     def run
       builds = build_service.list_builds(project: self.project)
 
+      if builds.count > 0
+        new_build_number = builds.sort_by { |b| b.number }.last.number + 1
+      else
+        new_build_number = 1 # do we start with 1?
+      end
+
       self.current_build = FastlaneCI::Build.new(
         project: self.project,
-        number: builds.count + 1,
+        number: new_build_number,
         status: :pending,
         timestamp: Time.now,
         duration: -1,
