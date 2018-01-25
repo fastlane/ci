@@ -3,7 +3,27 @@ require_relative "../logging_module"
 require "securerandom"
 
 module FastlaneCI
-  # This class is responsible for managing git repos
+  # Encapsulates all the data that is needed by GitRepo
+  # We can have various provider_credentials, but they all need to be turned into `GitRepoAuth`s
+  # This is because different git providers can have different needs for data
+  # What github needs is an `api_token`, but a local git repo might only need a `password`.
+  # We'll call both of these "auth_tokens" here, this way we can use GitRepoAuth
+  # as a way to unify those, and prevent overloading names at the data source.
+  # Otherwise, in the JSON we'd see "password" but for some repos that might be an auth_token, or an api_token, or password
+  class GitRepoAuth
+    attr_accessor :remote_host # in the case of github, this is usually `github.com`
+    attr_accessor :username    # whatever the git repo needs for a username, usually just an email, usually CI
+    attr_accessor :full_name   # whatever the git repo needs for a username, usually just an email, usually fastlane.CI
+    attr_accessor :auth_token  # usually an API key, but could be a password, usually fastlane.CI's auth_token
+    def initialize(remote_host: nil, username: nil, full_name: nil, auth_token: nil)
+      @remote_host = remote_host
+      @username = username
+      @full_name = full_name
+      @auth_token = auth_token
+    end
+  end
+
+  # Responsible for managing git repos
   # This includes the configs repo, but also the actual source code repos
   # This class makes sure to use the right credentials, does proper cloning,
   # pulling, pushing, git commit messages, etc.
@@ -14,10 +34,27 @@ module FastlaneCI
 
     # @return [GitRepoConfig]
     attr_accessor :git_config
+    # @return [GitRepoAuth]
+    attr_accessor :repo_auth # whatever pieces of information that can change between git users
 
-    def initialize(git_config: nil, session: nil)
-      raise "No git config provided" if git_config.nil?
+    def initialize(git_config: nil, provider_credential: nil)
+      self.validate_initialization_params!(git_config: git_config, provider_credential: provider_credential)
       @git_config = git_config
+
+      # Ok, so now we need to pull the bit of information from the credentials that we know we need for git repos
+      case provider_credential.type
+      when FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
+        # Package up the authentication parts that are required
+        @repo_auth = GitRepoAuth.new(
+          remote_host: provider_credential.remote_host,
+          username: provider_credential.email,
+          full_name: provider_credential.full_name,
+          auth_token: provider_credential.api_token
+        )
+      else
+        # if we add another ProviderCredential type, we'll need to figure out what parts of the credential go where
+        raise "unsupported credential type: #{provider_credential.type}"
+      end
 
       if File.directory?(self.path)
         # TODO: test if this crashes if it's not a git directory
@@ -27,20 +64,31 @@ module FastlaneCI
           # Now we have to check if the repo is actually from the
           # same repo URL
           if repo.remote("origin").url == self.git_config.git_url
-            self.pull(session: session)
+            self.pull
           else
             logger.debug("[#{self.git_config.id}] Repo URL seems to have changed... deleting the old directory and cloning again")
             clear_directory
-            self.clone(session: session)
+            self.clone
           end
         else
           clear_directory
-          self.clone(session: session)
+          self.clone
         end
       else
-        self.clone(session: session)
+        self.clone
       end
-      logger.debug("Using #{path} for config repo")
+      logger.debug("Using #{self.path} for config repo")
+    end
+
+    def validate_initialization_params!(git_config: nil, provider_credential: nil)
+      raise "No git config provided" if git_config.nil?
+      raise "No provider_credential provided" if provider_credential.nil?
+
+      credential_type = provider_credential.type
+      git_config_credential_type = git_config.provider_credential_type_needed
+
+      credential_mismatch = credential_type != git_config_credential_type
+      raise "provider_credential.type and git_config.provider_credential_type_needed mismatch: #{credential_type} vs #{git_config_credential_type}" if credential_mismatch
     end
 
     def clear_directory
@@ -57,7 +105,7 @@ module FastlaneCI
 
     # @return [String] Path to the actual folder
     def path
-      File.join(containing_path, self.git_config.id)
+      File.join(self.containing_path, self.git_config.id)
     end
 
     # Returns the absolute path to a file from inside the git repo
@@ -74,14 +122,13 @@ module FastlaneCI
     end
 
     # Responsible for setting the author information when committing a change
-    def setup_author(session: nil)
-      raise "No session provided" unless session
+    def setup_author(full_name: self.repo_auth.full_name, username: self.repo_auth.username)
       # TODO: performance implications of settings this every time?
       # TODO: Set actual name + email here
       # TODO: see if we can set credentials here also
-      puts("Using #{session[:full_name]} with #{session[:email]} as author information")
-      git.config("user.name", session[:full_name])
-      git.config("user.email", session[:email])
+      puts("Using #{full_name} with #{username} as author information")
+      git.config("user.name", full_name)
+      git.config("user.email", username)
     end
 
     def temporary_git_storage
@@ -92,22 +139,16 @@ module FastlaneCI
 
     # Responsible for using the auth token to be able to push/pull changes
     # from git remote
-    def setup_auth(session: nil)
-      raise "No session provided" unless session
-      # require 'pry'; binding.pry;
-
-      username = session[:user]
-      token = session[:token]
-
+    def setup_auth(repo_auth: self.repo_auth)
       # More details: https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
 
       storage_path = File.join(temporary_git_storage, "git-auth-#{SecureRandom.uuid}")
       store_credentials_command = "git credential-store --file #{storage_path.shellescape} store"
       content = [
-        "protocol=https",
-        "host=github.com", # TODO: support other remote hosts
-        "username=#{username}",
-        "password=#{token}",
+        "protocol=https", # TODO: we should be able to figure this out, maybe stuff it in GitRepoAuth?
+        "host=#{repo_auth.remote_host}",
+        "username=#{repo_auth.username}",
+        "password=#{repo_auth.auth_token}",
         ""
       ].join("\n")
 
@@ -126,11 +167,11 @@ module FastlaneCI
       FileUtils.rm(storage_path)
     end
 
-    def pull(session: nil)
+    def pull(repo_auth: self.repo_auth)
       if ENV["super_verbose"] # because this repeats a ton
         logger.debug("[#{self.git_config.id}]: Pulling latest changes")
       end
-      storage_path = setup_auth(session: session)
+      storage_path = self.setup_auth(repo_auth: repo_auth)
       git.pull
     ensure
       unset_auth(storage_path: storage_path)
@@ -139,20 +180,24 @@ module FastlaneCI
     # This method commits and pushes all changes
     # if `file_to_commit` is `nil`, all files will be added
     # TODO: this method isn't actually tested yet
-    def commit_changes!(commit_message: nil, file_to_commit: nil, session: nil)
+    def commit_changes!(commit_message: nil, file_to_commit: nil, repo_auth: repo_auth)
       raise "file_to_commit not yet implemented" if file_to_commit
       commit_message ||= "Automatic commit by fastlane.ci"
 
-      setup_author(session: session)
+      self.setup_author(full_name: repo_auth.full_name, username: repo_auth.username)
 
       git.add(all: true) # TODO: for now we only add all files
       git.commit(commit_message)
-      git.push
+      git.push(
+        remote_host: repo_auth.remote_host,
+        username: repo_auth.username,
+        auth_token: repo_auth.auth_token
+      )
     end
 
-    def push(session: nil)
-      setup_author(session: session)
-      storage_path = setup_auth(session: session)
+    def push(repo_auth: self.repo_auth)
+      setup_author(full_name: repo_auth.full_name, username: repo_auth.username)
+      storage_path = self.setup_auth(repo_auth: repo_auth)
 
       # TODO: how do we handle branches
       self.git.push
@@ -162,8 +207,8 @@ module FastlaneCI
 
     private
 
-    def clone(session: nil)
-      storage_path = self.setup_auth(session: session)
+    def clone(repo_auth: self.repo_auth)
+      storage_path = self.setup_auth(repo_auth: repo_auth)
       logger.debug("[#{self.git_config.id}]: Cloning git repo #{self.git_config.git_url}")
       Git.clone(self.git_config.git_url, self.git_config.id, path: self.containing_path)
     ensure
