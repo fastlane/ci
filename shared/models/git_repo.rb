@@ -185,11 +185,7 @@ module FastlaneCI
 
       git.add(all: true) # TODO: for now we only add all files
       git.commit(commit_message)
-      git.push(
-        remote_host: repo_auth.remote_host,
-        username: repo_auth.username,
-        auth_token: repo_auth.auth_token
-      )
+      git.push
     end
 
     def push(repo_auth: self.repo_auth)
