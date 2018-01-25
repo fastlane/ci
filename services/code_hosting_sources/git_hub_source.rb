@@ -67,13 +67,15 @@ module FastlaneCI
         description = "Something went wrong" if state == "error"
       end
 
+      # TODO: Enable once the GitHub token is fixed
+      #
       # Full docs for `create_status` over here
       # https://octokit.github.io/octokit.rb/Octokit/Client/Statuses.html
-      client.create_status(repo, sha, state, {
-        target_url: target_url,
-        description: description,
-        context: context || "fastlane.ci tests"
-      })
+      # client.create_status(repo, sha, state, {
+      #   target_url: target_url,
+      #   description: description,
+      #   context: context || "fastlane.ci tests"
+      # })
     rescue StandardError => ex
       # TODO: how do we handle GitHub errors
       # In this case `create_status` will cause an exception
