@@ -82,6 +82,13 @@ module FastlaneCI
       logger.debug("Using #{self.git_config.local_repo_path} for config repo")
     end
 
+    # This is where we store the local git repo
+    # fastlane.ci will also delete this directory if it breaks
+    # and just re-clones. So make sure it's fine if it gets deleted
+    def containing_path
+      self.git_config.containing_path
+    end
+
     def validate_initialization_params!(git_config: nil, provider_credential: nil)
       raise "No git config provided" if git_config.nil?
       raise "No provider_credential provided" if provider_credential.nil?
@@ -198,6 +205,8 @@ module FastlaneCI
     end
 
     def clone(repo_auth: self.repo_auth)
+      raise "No containing path available" unless self.containing_path
+
       storage_path = self.setup_auth(repo_auth: repo_auth)
       logger.debug("[#{self.git_config.id}]: Cloning git repo #{self.git_config.git_url}")
       Git.clone(self.git_config.git_url, self.git_config.id, path: self.containing_path)

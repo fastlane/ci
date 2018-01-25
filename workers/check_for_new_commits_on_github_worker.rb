@@ -20,7 +20,10 @@ module FastlaneCI
     def initialize(provider_credential: nil, project: nil)
       self.provider_credential = provider_credential
       self.project = project
-      self.git_repo = GitRepo.new(git_config: project.repo_config, provider_credential: provider_credential)
+      self.git_repo = GitRepo.new(
+        git_config: project.repo_config, 
+        provider_credential: provider_credential
+      )
       super()
     end
 
