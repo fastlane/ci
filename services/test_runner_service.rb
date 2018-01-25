@@ -12,7 +12,7 @@ module FastlaneCI
 
       # TODO: Services::BUILD_SERVICE doesn't work as the file isn't included
       # TODO: ugh, I'm doing something wrong, I think?
-      json_folder_path = FastlaneCI::FastlaneApp::CONFIG_DATA_SOURCE.git_repo.path
+      json_folder_path = FastlaneCI::FastlaneApp::CONFIG_DATA_SOURCE.git_repo.git_config.local_repo_path
       self.build_service = FastlaneCI::BuildService.new(data_source: BuildDataSource.new(json_folder_path: json_folder_path))
 
       self.source = FastlaneCI::GitHubSource.source_from_provider_credential(
