@@ -37,6 +37,8 @@ module FastlaneCI
     # @return [GitRepoAuth]
     attr_accessor :repo_auth # whatever pieces of information that can change between git users
 
+    attr_accessor :containing_path
+
     def initialize(git_config: nil, provider_credential: nil)
       self.validate_initialization_params!(git_config: git_config, provider_credential: provider_credential)
       @git_config = git_config
@@ -56,9 +58,9 @@ module FastlaneCI
         raise "unsupported credential type: #{provider_credential.type}"
       end
 
-      if File.directory?(self.path)
+      if File.directory?(self.git_config.local_repo_path)
         # TODO: test if this crashes if it's not a git directory
-        repo = Git.open(self.path)
+        repo = Git.open(self.git_config.local_repo_path)
         if repo.index.writable?
           # Things are looking legit so far
           # Now we have to check if the repo is actually from the
@@ -77,7 +79,7 @@ module FastlaneCI
       else
         self.clone
       end
-      logger.debug("Using #{self.path} for config repo")
+      logger.debug("Using #{self.git_config.local_repo_path} for config repo")
     end
 
     def validate_initialization_params!(git_config: nil, provider_credential: nil)
@@ -92,30 +94,17 @@ module FastlaneCI
     end
 
     def clear_directory
-      FileUtils.rm_rf(self.path)
-    end
-
-    # This is where we store the local git repo
-    # fastlane.ci will also delete this directory if it breaks
-    # and just re-clones. So make sure it's fine if it gets deleted
-    def containing_path
-      # TODO: fallback to use /tmp if we don't have the permission to write to this directory
-      File.expand_path("~/.fastlane/ci/")
-    end
-
-    # @return [String] Path to the actual folder
-    def path
-      File.join(self.containing_path, self.git_config.id)
+      FileUtils.rm_rf(self.git_config.local_repo_path)
     end
 
     # Returns the absolute path to a file from inside the git repo
     def file_path(file_path)
-      File.join(self.path, file_path)
+      File.join(self.git_config.local_repo_path, file_path)
     end
 
     def git
       if @_git.nil?
-        @_git = Git.open(self.path)
+        @_git = Git.open(self.git_config.local_repo_path)
       end
 
       return @_git
@@ -142,7 +131,8 @@ module FastlaneCI
     def setup_auth(repo_auth: self.repo_auth)
       # More details: https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
 
-      storage_path = File.join(temporary_git_storage, "git-auth-#{SecureRandom.uuid}")
+      storage_path = File.join(self.temporary_git_storage, "git-auth-#{SecureRandom.uuid}")
+
       store_credentials_command = "git credential-store --file #{storage_path.shellescape} store"
       content = [
         "protocol=https", # TODO: we should be able to figure this out, maybe stuff it in GitRepoAuth?
@@ -154,7 +144,7 @@ module FastlaneCI
 
       use_credentials_command = "git config --local credential.helper 'store --file #{storage_path.shellescape}'"
 
-      Dir.chdir(self.path) do
+      Dir.chdir(self.git_config.local_repo_path) do
         cmd = TTY::Command.new
         cmd.run(store_credentials_command, input: content)
         cmd.run(use_credentials_command)
@@ -164,6 +154,8 @@ module FastlaneCI
     end
 
     def unset_auth(storage_path: nil)
+      require "pry"
+      binding.pry
       FileUtils.rm(storage_path)
     end
 
@@ -180,7 +172,7 @@ module FastlaneCI
     # This method commits and pushes all changes
     # if `file_to_commit` is `nil`, all files will be added
     # TODO: this method isn't actually tested yet
-    def commit_changes!(commit_message: nil, file_to_commit: nil, repo_auth: repo_auth)
+    def commit_changes!(commit_message: nil, file_to_commit: nil, repo_auth: self.repo_auth)
       raise "file_to_commit not yet implemented" if file_to_commit
       commit_message ||= "Automatic commit by fastlane.ci"
 
@@ -205,9 +197,9 @@ module FastlaneCI
       unset_auth(storage_path: storage_path)
     end
 
-    private
-
     def clone(repo_auth: self.repo_auth)
+      require "pry"
+      binding.pry
       storage_path = self.setup_auth(repo_auth: repo_auth)
       logger.debug("[#{self.git_config.id}]: Cloning git repo #{self.git_config.git_url}")
       Git.clone(self.git_config.git_url, self.git_config.id, path: self.containing_path)
