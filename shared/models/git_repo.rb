@@ -37,8 +37,6 @@ module FastlaneCI
     # @return [GitRepoAuth]
     attr_accessor :repo_auth # whatever pieces of information that can change between git users
 
-    attr_accessor :containing_path
-
     def initialize(git_config: nil, provider_credential: nil)
       self.validate_initialization_params!(git_config: git_config, provider_credential: provider_credential)
       @git_config = git_config
