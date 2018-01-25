@@ -30,6 +30,17 @@ module FastlaneCI
 
   # Our CI app main class
   class FastlaneApp < Sinatra::Base
+    get "/" do
+      if session[:user]
+        redirect("/dashboard")
+      else
+        redirect("/login")
+      end
+    end
+
+    get "/favico.ico" do
+      "nope"
+    end
     # Setup the fastlane.ci GitRepoConfig
     ci_config_repo = GitRepoConfig.new(
       id: "fastlane-ci-config",
@@ -53,18 +64,6 @@ module FastlaneCI
 
     # Start our configuration datasource TODO: Shoud be renamed Project data source
     CONFIG_DATA_SOURCE = FastlaneCI::GitConfigDataSource.new(git_repo_config: ci_config_repo, user: @ci_user)
-
-    get "/" do
-      if session[:user]
-        redirect("/dashboard")
-      else
-        redirect("/login")
-      end
-    end
-
-    get "/favico.ico" do
-      "nope"
-    end
 
     # Going ot start our workers
     @worker_service = FastlaneCI::WorkerService.new

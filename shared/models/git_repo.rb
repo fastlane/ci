@@ -115,7 +115,7 @@ module FastlaneCI
       # TODO: performance implications of settings this every time?
       # TODO: Set actual name + email here
       # TODO: see if we can set credentials here also
-      puts("Using #{full_name} with #{username} as author information")
+      logger.debug("Using #{full_name} with #{username} as author information")
       git.config("user.name", full_name)
       git.config("user.email", username)
     end
@@ -130,8 +130,10 @@ module FastlaneCI
     # from git remote
     def setup_auth(repo_auth: self.repo_auth)
       # More details: https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
-
       storage_path = File.join(self.temporary_git_storage, "git-auth-#{SecureRandom.uuid}")
+
+      local_repo_path = self.git_config.local_repo_path
+      FileUtils.mkdir_p(local_repo_path) unless File.directory?(local_repo_path)
 
       store_credentials_command = "git credential-store --file #{storage_path.shellescape} store"
       content = [
@@ -144,7 +146,7 @@ module FastlaneCI
 
       use_credentials_command = "git config --local credential.helper 'store --file #{storage_path.shellescape}'"
 
-      Dir.chdir(self.git_config.local_repo_path) do
+      Dir.chdir(local_repo_path) do
         cmd = TTY::Command.new
         cmd.run(store_credentials_command, input: content)
         cmd.run(use_credentials_command)
@@ -186,7 +188,7 @@ module FastlaneCI
     end
 
     def push(repo_auth: self.repo_auth)
-      setup_author(full_name: repo_auth.full_name, username: repo_auth.username)
+      self.setup_author(full_name: repo_auth.full_name, username: repo_auth.username)
       storage_path = self.setup_auth(repo_auth: repo_auth)
 
       # TODO: how do we handle branches

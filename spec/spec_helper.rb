@@ -2,9 +2,8 @@ $LOAD_PATH << "shared"
 require "rack/test"
 require "rspec"
 
-require File.expand_path("../../fastlane_app.rb", __FILE__)
-
 ENV["RACK_ENV"] = "test"
+require File.expand_path("../../fastlane_app.rb", __FILE__)
 
 module RSpecMixin
   include Rack::Test::Methods
