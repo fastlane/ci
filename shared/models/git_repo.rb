@@ -154,8 +154,6 @@ module FastlaneCI
     end
 
     def unset_auth(storage_path: nil)
-      require "pry"
-      binding.pry
       FileUtils.rm(storage_path)
     end
 
@@ -198,8 +196,6 @@ module FastlaneCI
     end
 
     def clone(repo_auth: self.repo_auth)
-      require "pry"
-      binding.pry
       storage_path = self.setup_auth(repo_auth: repo_auth)
       logger.debug("[#{self.git_config.id}]: Cloning git repo #{self.git_config.git_url}")
       Git.clone(self.git_config.git_url, self.git_config.id, path: self.containing_path)
