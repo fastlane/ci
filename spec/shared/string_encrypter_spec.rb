@@ -8,7 +8,7 @@ module FastlaneCI
         hi_string = StringEncrypter.encode("hi", key: "ThisIsAPassword")
 
         expect(hi_string.length).to be > 5
-        expect(StringEncrypter.decode(hi_string, key: "ThisIsAPassword")).to eq("hi")
+        expect(StringEncrypter.decode(hi_string, key: "ThisIsAPassword")).to eq("yolo")
       end
 
       # we use a randomized iv so each encoded string output should be different
