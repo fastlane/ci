@@ -18,7 +18,6 @@ module FastlaneCI
 
     def initialize(json_folder_path: nil)
       raise "json_folder_path has to be provided" if json_folder_path.to_s.length == 0
-      logger.debug("Using folder path for data: #{json_folder_path}")
       @json_folder_path = json_folder_path
     end
 

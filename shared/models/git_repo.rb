@@ -142,7 +142,7 @@ module FastlaneCI
 
       store_credentials_command = "git credential-store --file #{storage_path.shellescape} store"
       content = [
-        "protocol=https", # TODO: we should be able to figure this out, maybe stuff it in GitRepoAuth?
+        "protocol=https",
         "host=#{repo_auth.remote_host}",
         "username=#{repo_auth.username}",
         "password=#{repo_auth.auth_token}",
@@ -152,7 +152,7 @@ module FastlaneCI
       use_credentials_command = "git config --local credential.helper 'store --file #{storage_path.shellescape}'"
 
       Dir.chdir(local_repo_path) do
-        cmd = TTY::Command.new
+        cmd = TTY::Command.new(printer: :quiet)
         cmd.run(store_credentials_command, input: content)
         cmd.run(use_credentials_command)
       end
