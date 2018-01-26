@@ -12,6 +12,7 @@ require_relative "services/user_service"
 require_relative "services/data_sources/user_data_source"
 require_relative "services/test_runner_service"
 require_relative "services/fastlane_ci_error" # TODO: move somewhere else, both the file and the `require`
+require_relative "./fastfile-parser/fastfile_parser"
 
 require_relative "services/code_hosting_sources/git_hub_source"
 require_relative "features/dashboard/models/build" # TODO: we don't want to import this here
