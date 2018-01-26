@@ -13,6 +13,7 @@ gem "tty-command", ">= 0.7.0", "< 1.0.0"
 # Communication with GitHub
 gem "octokit", ">= 4.8.0", "< 5.0.0"
 
+# Local git checkouts, commits, etc.
 gem "git", ">= 1.3.0", "< 2.0.0"
 
 # fastlane dependencies
