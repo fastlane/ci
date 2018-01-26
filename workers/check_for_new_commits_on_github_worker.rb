@@ -62,7 +62,7 @@ module FastlaneCI
     end
 
     def timeout
-      15
+      5
     end
   end
 end
