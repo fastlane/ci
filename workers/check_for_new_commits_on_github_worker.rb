@@ -51,16 +51,18 @@ module FastlaneCI
         end
 
         puts "Detected new branch #{branch.name} with sha #{current_sha}"
-        FastlaneCI::TestRunnerService.new(
-          project: self.project,
-          sha: current_sha,
-          provider_credential: self.provider_credential
-        ).run
+        Thread.new do
+          FastlaneCI::TestRunnerService.new(
+            project: self.project,
+            sha: current_sha,
+            provider_credential: self.provider_credential
+          ).run
+        end
       end
     end
 
     def timeout
-      5
+      15
     end
   end
 end
