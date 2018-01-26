@@ -17,13 +17,23 @@ module FastlaneCI
 
     attr_accessor :type # must be defined in sub class
     attr_accessor :ci_user # user associated with this provider
+    attr_accessor :full_name # full name that the user intends to be in the commit author
     attr_accessor :provider_name # MUST be unique, not a problem right now with just supporting GitHub
+    attr_accessor :remote_host # usually github.com
 
     def type
       not_implemented(__method__)
     end
 
     def provider_name
+      not_implemented(__method__)
+    end
+
+    def full_name
+      not_implemented(__method__)
+    end
+
+    def remote_host
       not_implemented(__method__)
     end
 

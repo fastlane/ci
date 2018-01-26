@@ -10,11 +10,10 @@ module FastlaneCI
     # TODO: this should actually be a POST request
     get "#{HOME}/*/trigger" do |project_id|
       project = self.user_project_with_id(project_id: project_id)
-
-      repo = FastlaneCI::GitRepo.new(git_config: project.repo_config)
-      current_sha = repo.git.log.first.sha
-
       current_github_provider_credential = self.check_and_get_provider_credential
+
+      repo = FastlaneCI::GitRepo.new(git_config: project.repo_config, provider_credential: current_github_provider_credential)
+      current_sha = repo.git.log.first.sha
 
       # TODO: not the best approach to spawn a thread
       Thread.new do

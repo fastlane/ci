@@ -20,7 +20,10 @@ module FastlaneCI
     def initialize(provider_credential: nil, project: nil)
       self.provider_credential = provider_credential
       self.project = project
-      self.git_repo = GitRepo.new(git_config: project.repo_config)
+      self.git_repo = GitRepo.new(
+        git_config: project.repo_config, 
+        provider_credential: provider_credential
+      )
       super()
     end
 
@@ -30,7 +33,7 @@ module FastlaneCI
 
       # TODO: Services::BUILD_SERVICE doesn't work as the file isn't included
       # TODO: ugh, I'm doing something wrong, I think?
-      json_folder_path = FastlaneCI::FastlaneApp::CONFIG_DATA_SOURCE.git_repo.path
+      json_folder_path = FastlaneCI::FastlaneApp::CONFIG_DATA_SOURCE.git_repo.git_config.local_repo_path # that's super long, is that by design?
       build_service = FastlaneCI::BuildService.new(data_source: BuildDataSource.new(json_folder_path: json_folder_path))
 
       repo.git.branches.remote.each do |branch|

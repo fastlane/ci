@@ -9,11 +9,13 @@ module FastlaneCI
     attr_accessor :email # email used on github
     attr_accessor :encrypted_api_token
 
-    def initialize(email: nil, api_token: nil)
+    def initialize(email: nil, full_name: nil, api_token: nil)
       self.email = email
+      self.full_name = full_name
       self.api_token = api_token
       self.provider_name = "GitHub"
       self.type = PROVIDER_CREDENTIAL_TYPES[:github]
+      self.remote_host = "github.com"
     end
 
     def api_token=(value)
@@ -36,6 +38,14 @@ module FastlaneCI
 
     def provider_name
       return @provider_name
+    end
+
+    def full_name
+      return @full_name
+    end
+
+    def remote_host
+      return @remote_host
     end
 
     # TODO, this shouldn't be necesary, but we don't recurse properly in JSONConvertible

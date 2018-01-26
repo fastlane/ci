@@ -3,7 +3,7 @@ GEM
   specs:
     addressable (2.5.2)
       public_suffix (>= 2.0.2, < 4.0)
-    ast (2.3.0)
+    ast (2.4.0)
     backports (3.11.0)
     bcrypt (3.1.11)
     byebug (9.1.0)

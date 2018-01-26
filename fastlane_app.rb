@@ -30,11 +30,6 @@ module FastlaneCI
 
   # Our CI app main class
   class FastlaneApp < Sinatra::Base
-    CONFIG_DATA_SOURCE = FastlaneCI::GitConfigDataSource.new(git_url: ENV["FASTLANE_CI_REPO_URL"])
-    json_folder_path = CONFIG_DATA_SOURCE.git_repo.path
-    user_data_source = UserDataSource.new(json_folder_path: json_folder_path)
-    USER_SERVICE = FastlaneCI::UserService.new(data_source: user_data_source)
-
     get "/" do
       if session[:user]
         redirect("/dashboard")
@@ -46,12 +41,32 @@ module FastlaneCI
     get "/favico.ico" do
       "nope"
     end
+    # Setup the fastlane.ci GitRepoConfig
+    ci_config_repo = GitRepoConfig.new(
+      id: "fastlane-ci-config",
+      git_url: ENV["FASTLANE_CI_REPO_URL"],
+      description: "Contains the fastlane.ci configuration",
+      name: "fastlane ci",
+      hidden: true
+    )
+
+    # Get the path to where we store fastlane.ci configuration
+    ci_config_git_repo_path = ci_config_repo.local_repo_path
+
+    # Create a UserDataSource from the configuration git repo
+    user_data_source = UserDataSource.new(json_folder_path: ci_config_git_repo_path)
+
+    # Start up a UserService from our UserDataSource
+    USER_SERVICE = FastlaneCI::UserService.new(data_source: user_data_source)
+
+    # Find our fastlane.ci system user
+    @ci_user = USER_SERVICE.login(email: ENV["FASTLANE_CI_USER"], password: ENV["FASTLANE_CI_PASSWORD"])
+
+    # Start our configuration datasource TODO: Shoud be renamed Project data source
+    CONFIG_DATA_SOURCE = FastlaneCI::GitConfigDataSource.new(git_repo_config: ci_config_repo, user: @ci_user)
 
     # Going ot start our workers
     @worker_service = FastlaneCI::WorkerService.new
-
-    # Login the CI user
-    @ci_user = USER_SERVICE.login(email: ENV["FASTLANE_CI_USER"], password: ENV["FASTLANE_CI_PASSWORD"])
 
     # Grab a config service that is configured for the CI user
     @ci_user_config_service = FastlaneCI::ConfigService.new(ci_user: @ci_user)

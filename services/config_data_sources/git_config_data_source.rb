@@ -3,6 +3,7 @@ require_relative "../../shared/json_convertible"
 require_relative "../../shared/models/git_repo"
 require_relative "../../shared/models/git_repo_config"
 require_relative "../../shared/models/project"
+require_relative "../../shared/models/provider_credential"
 
 module FastlaneCI
   class Project
@@ -18,21 +19,12 @@ module FastlaneCI
     # Reference to FastlaneCI::GitRepo
     attr_accessor :git_repo
 
-    def initialize(git_url: nil)
-      raise "No git_url provided" if git_url.to_s.length == 0
+    def initialize(git_repo_config: nil, user: nil)
+      raise "No git_repo_config provided" if git_repo_config.nil?
 
-      git_repo_config = GitRepoConfig.new(
-        id: "fastlane-ci-config",
-        git_url: git_url,
-        description: "Contains the fastlane.ci configuration",
-        name: "fastlane ci",
-        hidden: true
-      )
+      provider_credential = user.provider_credential(type: ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
-      @git_repo = FastlaneCI::GitRepo.new(git_config: git_repo_config)
-
-      projects
-      git_repos
+      @git_repo = FastlaneCI::GitRepo.new(git_config: git_repo_config, provider_credential: provider_credential)
     end
 
     def refresh_repo
