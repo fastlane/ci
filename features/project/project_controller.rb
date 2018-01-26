@@ -67,6 +67,15 @@ module FastlaneCI
       erb(:edit_project, locals: locals, layout: FastlaneCI.default_layout)
     end
 
+    post "#{HOME}/*/save" do |project_id|
+      project = self.user_project_with_id(project_id: project_id)
+      project.lane = params["selected_lane"]
+      project.project_name = params["project_name"]
+
+      # TODO: what's the best way to store that project in the config?
+      # Wait for Josh' input
+    end
+
     get "#{HOME}/*" do |project_id|
       project = self.user_project_with_id(project_id: project_id)
 

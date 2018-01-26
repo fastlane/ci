@@ -14,7 +14,13 @@
   <main class="mdl-layout__content" style="padding: 40px">
     <h3>Editing <%= title %></h3>
     
-    <form>
+    <form method="POST" action="/projects/<%= project.id %>/save">
+      <h5>Project Name</h5>
+      <div class="mdl-textfield mdl-js-textfield">
+        <input class="mdl-textfield__input" type="text" name="project_name" value="<%= project.project_name %>">
+        <label class="mdl-textfield__label" for="project_name">Project Name</label>
+      </div>
+      <br />
       <h5>Lane to run</h5>
       <p><code>Fastfile</code> located at path <code><%= fastfile_path %></code></p>
       <select name="selected_lane">
@@ -24,9 +30,7 @@
       </select>
       <br />
       <br />
-      <submit class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-        Save
-      </submit>
+      <input class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" type="submit" title="Save">
     </form>
   </main>
 </div>
