@@ -42,6 +42,7 @@ module FastlaneCI
     get "/favico.ico" do
       "nope"
     end
+
     # Setup the fastlane.ci GitRepoConfig
     ci_config_repo = GitRepoConfig.new(
       id: "fastlane-ci-config",
