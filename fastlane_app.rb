@@ -85,7 +85,6 @@ module FastlaneCI
         number_of_workers_started += 1
       end
     end
-    require 'pry'; binding.pry
     puts "Seems like no workers were started to monitor your projects" if number_of_workers_started == 0 # TODO: use logger class
 
     # Initialize the workers
