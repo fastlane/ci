@@ -18,7 +18,8 @@ module FastlaneCI
 
     def initialize(email: nil, personal_access_token: nil)
       self.email = email
-      @_client = Octokit::Client.new(access_token: personal_access_token)
+      # TODO: Remove the ENV["INITIAL_CLONE_API_TOKEN"] from here, this was just for testing
+      @_client = Octokit::Client.new(access_token: ENV["INITIAL_CLONE_API_TOKEN"] || personal_access_token)
       Octokit.auto_paginate = true # TODO: just for now, we probably should do smart pagination in the future
     end
 
@@ -71,11 +72,11 @@ module FastlaneCI
       #
       # Full docs for `create_status` over here
       # https://octokit.github.io/octokit.rb/Octokit/Client/Statuses.html
-      # client.create_status(repo, sha, state, {
-      #   target_url: target_url,
-      #   description: description,
-      #   context: context || "fastlane.ci tests"
-      # })
+      client.create_status(repo, sha, state, {
+        target_url: target_url,
+        description: description,
+        context: context || "fastlane.ci tests"
+      })
     rescue StandardError => ex
       # TODO: how do we handle GitHub errors
       # In this case `create_status` will cause an exception
