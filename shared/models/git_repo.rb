@@ -149,7 +149,14 @@ module FastlaneCI
         ""
       ].join("\n")
 
-      use_credentials_command = "git config --local credential.helper 'store --file #{storage_path.shellescape}'"
+      scope = "local"
+      
+      unless File.directory?(File.join(local_repo_path, ".git"))
+        # we don't have a git repo yet, we have no choice
+        # TODO: check if we find a better way for the initial clone to work without setting system global state
+        scope = "global"
+      end
+      use_credentials_command = "git config --#{scope} credential.helper 'store --file #{storage_path.shellescape}'"
 
       Dir.chdir(local_repo_path) do
         cmd = TTY::Command.new(printer: :quiet)

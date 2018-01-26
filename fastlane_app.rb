@@ -62,9 +62,9 @@ module FastlaneCI
     USER_SERVICE = FastlaneCI::UserService.new(data_source: user_data_source)
 
     # Find our fastlane.ci system user
-    @ci_user = USER_SERVICE.login(email: ENV["FASTLANE_CI_USER"], password: ENV["FASTLANE_CI_PASSWORD"])
+    @ci_user = USER_SERVICE.login(email: ENV["FASTLANE_CI_USER"], password: ENV["FASTLANE_CI_PASSWORD"], ci_config_repo: ci_config_repo)
 
-    # Start our configuration datasource TODO: Shoud be renamed Project data source
+    # Start our configuration datasource # TODO: Shoud be renamed Project data source
     CONFIG_DATA_SOURCE = FastlaneCI::GitConfigDataSource.new(git_repo_config: ci_config_repo, user: @ci_user)
 
     # Going ot start our workers
