@@ -52,6 +52,7 @@ module FastlaneCI
       # proper paging, or we ask for specific repos instead
       # Either way, my account has access to too many repos, so for now, let's just workaround using this
       current_repo_git_url_set << "https://github.com/taquitos/ci-sample-repo"
+      current_repo_git_url_set << "https://github.com/fastlane/ci"
 
       projects = self.config_data_source.projects.select do |project|
         current_repo_git_url_set.include?(project.repo_config.git_url)
