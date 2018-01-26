@@ -1,0 +1,3 @@
+[submodule "fastfile-parser"]
+	path = fastfile-parser
+	url = https://github.com/fastlane/fastfile-parser
