@@ -28,6 +28,7 @@ module FastlaneCI
     end
 
     def work
+      puts "Checking for new commits on GitHub"
       repo = self.git_repo
       repo.git.fetch # is needed to see if there are new branches
 
@@ -49,6 +50,7 @@ module FastlaneCI
           next
         end
 
+        puts "Detected new branch #{branch.name} with sha #{current_sha}"
         FastlaneCI::TestRunnerService.new(
           project: self.project,
           sha: current_sha,
