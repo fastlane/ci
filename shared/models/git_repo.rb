@@ -168,7 +168,8 @@ module FastlaneCI
     end
 
     def unset_auth(storage_path: nil)
-      FileUtils.rm(storage_path)
+      # TODO: Also auto-clean those files from time to time, on server re-launch maybe, or background worker
+      FileUtils.rm(storage_path) if File.exist?(storage_path)
     end
 
     def pull(repo_auth: self.repo_auth)
