@@ -27,18 +27,13 @@ module FastlaneCI
       File.join(self.json_folder_path, "projects", project.id)
     end
 
-    def list_builds(project: nil, max_number_of_builds: nil)
-      max_number_of_builds ||= 20
-
+    def list_builds(project: nil)
       containing_path = builds_path(project: project)
       file_names = Dir[File.join(containing_path, "*.json")]
       build_numbers = file_names.map { |f| File.basename(f, ".*").to_i }
       most_recent_build_number = build_numbers.max
 
-      # Trim down the list to just the last `max_number_of_builds`
-      most_recent_build_numbers = build_numbers[-[build_numbers.length, max_number_of_builds].min..-1]
-
-      build_files = most_recent_build_numbers.map do |build_number|
+      build_files = build_numbers.map do |build_number|
         File.join(containing_path, "#{build_number}.json")
       end
 
