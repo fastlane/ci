@@ -61,13 +61,26 @@ module FastlaneCI
       update_build_status!
 
       start_time = Time.now
-      sleep(20)
+      
+      # TODO: Replace with fastlane runner here
+      command = "bundle exec rspec"
+      puts "Running #{command}"
+      Dir.chdir(project.repo_config.local_repo_path) do
+        cmd = TTY::Command.new
+        cmd.run(command)
+      end
+
       # TODO: run tests here!
       duration = Time.now - start_time
 
       current_build.duration = duration
-      current_build.status = :success # TODO: also handle failure
+      current_build.status = :success
 
+      self.update_build_status!
+    rescue => ex
+      # TODO: better error handling
+      puts ex
+      current_build.status = :failure # TODO: also handle failure
       self.update_build_status!
     end
   end
