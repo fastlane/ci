@@ -75,17 +75,17 @@ module FastlaneCI
 
     # Iterate through all provider credentials and their projects and start a worker for each project
     number_of_workers_started = 0
-    @ci_user.provider_credentials.each do |provider_credential|
-      projects = @ci_user_config_service.projects(provider_credential: provider_credential)
-      projects.each do |project|
-        @worker_service.start_worker_for_provider_credential_and_config(
-          project: project,
-          provider_credential: provider_credential
-        )
-        number_of_workers_started += 1
-      end
-    end
-    puts "Seems like no workers were started to monitor your projects" if number_of_workers_started == 0 # TODO: use logger class
+    # @ci_user.provider_credentials.each do |provider_credential|
+    #   projects = @ci_user_config_service.projects(provider_credential: provider_credential)
+    #   projects.each do |project|
+    #     # @worker_service.start_worker_for_provider_credential_and_config(
+    #     #   project: project,
+    #     #   provider_credential: provider_credential
+    #     # )
+    #     number_of_workers_started += 1
+    #   end
+    # end
+    puts "Seems like no workers were started to monitor your projects" if number_of_workers_started == 0 # TODO: use logger
 
     # Initialize the workers
     # For now, we're not using a fancy framework that adds multiple heavy dependencies
