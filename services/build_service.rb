@@ -9,8 +9,8 @@ module FastlaneCI
       self.data_source = data_source
     end
 
-    def list_builds(project: nil, max_number_of_builds: nil)
-      self.data_source.list_builds(project: project, max_number_of_builds: max_number_of_builds)
+    def list_builds(project: nil)
+      self.data_source.list_builds(project: project)
     end
 
     def add_build!(project: nil, build: nil)

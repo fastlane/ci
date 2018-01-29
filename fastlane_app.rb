@@ -21,8 +21,6 @@ require_relative "shared/logging_module"
 
 # All things fastlane ci related go in this module
 module FastlaneCI
-  include FastlaneCI::Logging
-
   # Used to use the same layout file across all views
   # https://stackoverflow.com/questions/26080599/sinatra-method-to-set-layout
   def self.default_layout
@@ -31,6 +29,8 @@ module FastlaneCI
 
   # Our CI app main class
   class FastlaneApp < Sinatra::Base
+    include FastlaneCI::Logging
+
     get "/" do
       if session[:user]
         redirect("/dashboard")
@@ -62,9 +62,9 @@ module FastlaneCI
     USER_SERVICE = FastlaneCI::UserService.new(data_source: user_data_source)
 
     # Find our fastlane.ci system user
-    @ci_user = USER_SERVICE.login(email: ENV["FASTLANE_CI_USER"], password: ENV["FASTLANE_CI_PASSWORD"])
+    @ci_user = USER_SERVICE.login(email: ENV["FASTLANE_CI_USER"], password: ENV["FASTLANE_CI_PASSWORD"], ci_config_repo: ci_config_repo)
 
-    # Start our configuration datasource TODO: Shoud be renamed Project data source
+    # Start our configuration datasource # TODO: Shoud be renamed Project data source
     CONFIG_DATA_SOURCE = FastlaneCI::GitConfigDataSource.new(git_repo_config: ci_config_repo, user: @ci_user)
 
     # Going ot start our workers
@@ -74,15 +74,18 @@ module FastlaneCI
     @ci_user_config_service = FastlaneCI::ConfigService.new(ci_user: @ci_user)
 
     # Iterate through all provider credentials and their projects and start a worker for each project
-    @ci_user.provider_credentials.each do |provider_credential|
-      projects = @ci_user_config_service.projects(provider_credential: provider_credential)
-      projects.each do |project|
-        @worker_service.start_worker_for_provider_credential_and_config(
-          project: project,
-          provider_credential: provider_credential
-        )
-      end
-    end
+    number_of_workers_started = 0
+    # @ci_user.provider_credentials.each do |provider_credential|
+    #   projects = @ci_user_config_service.projects(provider_credential: provider_credential)
+    #   projects.each do |project|
+    #     # @worker_service.start_worker_for_provider_credential_and_config(
+    #     #   project: project,
+    #     #   provider_credential: provider_credential
+    #     # )
+    #     number_of_workers_started += 1
+    #   end
+    # end
+    puts "Seems like no workers were started to monitor your projects" if number_of_workers_started == 0 # TODO: use logger
 
     # Initialize the workers
     # For now, we're not using a fancy framework that adds multiple heavy dependencies

@@ -48,6 +48,11 @@ module FastlaneCI
 
       # current set of `GitRepoConfig.name`s that `provider_credential` has access to
       current_repo_git_url_set = current_code_host.repos.map(&:html_url).to_set
+      # TODO: we have to improve repo handling, as it seems like we either have to implement
+      # proper paging, or we ask for specific repos instead
+      # Either way, my account has access to too many repos, so for now, let's just workaround using this
+      current_repo_git_url_set << "https://github.com/taquitos/ci-sample-repo"
+      current_repo_git_url_set << "https://github.com/fastlane/ci"
 
       projects = self.config_data_source.projects.select do |project|
         current_repo_git_url_set.include?(project.repo_config.git_url)

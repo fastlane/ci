@@ -28,6 +28,7 @@ module FastlaneCI
     end
 
     def work
+      puts "Checking for new commits on GitHub"
       repo = self.git_repo
       repo.git.fetch # is needed to see if there are new branches
 
@@ -41,6 +42,9 @@ module FastlaneCI
 
         # Check out the specific branch
         # this will detach our current head
+        # TODO: we probably have to add a lock system for repos
+        # as we access repos here, and also in the test runners
+        repo.git.reset_hard # as there might be un-committed changes in there
         branch.checkout
         current_sha = repo.git.log.first.sha
 
@@ -49,11 +53,14 @@ module FastlaneCI
           next
         end
 
-        FastlaneCI::TestRunnerService.new(
-          project: self.project,
-          sha: current_sha,
-          provider_credential: self.provider_credential
-        ).run
+        puts "Detected new branch #{branch.name} with sha #{current_sha}"
+        Thread.new do
+          FastlaneCI::TestRunnerService.new(
+            project: self.project,
+            sha: current_sha,
+            provider_credential: self.provider_credential
+          ).run
+        end
       end
     end
 

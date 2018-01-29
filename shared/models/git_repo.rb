@@ -64,6 +64,7 @@ module FastlaneCI
           # Now we have to check if the repo is actually from the
           # same repo URL
           if repo.remote("origin").url.downcase == self.git_config.git_url.downcase
+            self.git.reset_hard
             self.pull
           else
             logger.debug("[#{self.git_config.id}] Repo URL seems to have changed... deleting the old directory and cloning again")
@@ -149,7 +150,14 @@ module FastlaneCI
         ""
       ].join("\n")
 
-      use_credentials_command = "git config --local credential.helper 'store --file #{storage_path.shellescape}'"
+      scope = "local"
+      
+      unless File.directory?(File.join(local_repo_path, ".git"))
+        # we don't have a git repo yet, we have no choice
+        # TODO: check if we find a better way for the initial clone to work without setting system global state
+        scope = "global"
+      end
+      use_credentials_command = "git config --#{scope} credential.helper 'store --file #{storage_path.shellescape}'"
 
       Dir.chdir(local_repo_path) do
         cmd = TTY::Command.new(printer: :quiet)
@@ -161,7 +169,8 @@ module FastlaneCI
     end
 
     def unset_auth(storage_path: nil)
-      FileUtils.rm(storage_path)
+      # TODO: Also auto-clean those files from time to time, on server re-launch maybe, or background worker
+      FileUtils.rm(storage_path) if File.exist?(storage_path)
     end
 
     def pull(repo_auth: self.repo_auth)

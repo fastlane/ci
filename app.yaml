@@ -1,0 +1,3 @@
+runtime: ruby
+env: flex
+entrypoint: bundle exec rackup --env development

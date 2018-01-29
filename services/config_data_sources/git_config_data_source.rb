@@ -19,10 +19,12 @@ module FastlaneCI
     # Reference to FastlaneCI::GitRepo
     attr_accessor :git_repo
 
-    def initialize(git_repo_config: nil, user: nil)
+    # You can provide either a `user` or `provider_credential`
+    # TODO: should it be just `provider_credential`?
+    def initialize(git_repo_config: nil, user: nil, provider_credential: nil)
       raise "No git_repo_config provided" if git_repo_config.nil?
 
-      provider_credential = user.provider_credential(type: ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
+      provider_credential ||= user.provider_credential(type: ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
       @git_repo = FastlaneCI::GitRepo.new(git_config: git_repo_config, provider_credential: provider_credential)
     end
