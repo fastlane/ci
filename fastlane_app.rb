@@ -21,8 +21,6 @@ require_relative "shared/logging_module"
 
 # All things fastlane ci related go in this module
 module FastlaneCI
-  include FastlaneCI::Logging
-
   # Used to use the same layout file across all views
   # https://stackoverflow.com/questions/26080599/sinatra-method-to-set-layout
   def self.default_layout
@@ -31,6 +29,8 @@ module FastlaneCI
 
   # Our CI app main class
   class FastlaneApp < Sinatra::Base
+    include FastlaneCI::Logging
+
     get "/" do
       if session[:user]
         redirect("/dashboard")
