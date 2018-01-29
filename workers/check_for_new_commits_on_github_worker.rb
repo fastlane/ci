@@ -42,6 +42,9 @@ module FastlaneCI
 
         # Check out the specific branch
         # this will detach our current head
+        # TODO: we probably have to add a lock system for repos
+        # as we access repos here, and also in the test runners
+        repo.git.reset_hard # as there might be un-committed changes in there
         branch.checkout
         current_sha = repo.git.log.first.sha
 
