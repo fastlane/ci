@@ -22,46 +22,6 @@ module FastlaneCI
       )
     end
 
-    # Responsible for updating the build status in our local config
-    # and on GitHub
-    def update_build_status!
-      begin
-        # Create or update the local build file in the config directory
-        build_service.add_build!(
-          project: self.project,
-          build: self.current_build
-        )
-
-        # Commit & Push the changes to git remote
-        FastlaneCI::FastlaneApp::CONFIG_DATA_SOURCE.git_repo.commit_changes!
-      rescue => ex
-        logger.error("Error setting the build status as part of the config repo")
-        logger.error(ex.to_s)
-        logger.error(ex.backtrace.join("\n"))
-        # If setting the build status inside the git repo fails
-        # this is actually a big deal, and we can't proceed.
-        # For setting the build status, if that fails, it's fine
-        # as the source of truth is the git repo
-        raise ex
-      end
-
-      # Using a `begin end` block here is important
-      # As the build is still green, even though we couldn't set the GH status
-      begin
-        # Let GitHub know about the current state of the build
-        self.source.set_build_status!(
-          repo: self.project.repo_config.git_url,
-          sha: self.sha,
-          state: self.current_build.status,
-          target_url: nil
-        )
-      rescue => ex
-        logger.error("Error setting the build status as part of the config repo")
-        logger.error(ex.to_s)
-        logger.error(ex.backtrace.join("\n"))
-      end
-    end
-
     def run
       builds = build_service.list_builds(project: self.project)
 
@@ -104,6 +64,50 @@ module FastlaneCI
       puts(ex)
       current_build.status = :failure # TODO: also handle failure
       self.update_build_status!
+    end
+
+    # Responsible for updating the build status in our local config
+    # and on GitHub
+    def update_build_status!
+      update_build_status_locally!
+      update_build_status_source!
+    end
+
+    private
+    def update_build_status_locally!
+      # Create or update the local build file in the config directory
+      build_service.add_build!(
+        project: self.project,
+        build: self.current_build
+      )
+
+      # Commit & Push the changes to git remote
+      FastlaneCI::FastlaneApp::CONFIG_DATA_SOURCE.git_repo.commit_changes!
+    rescue => ex
+      logger.error("Error setting the build status as part of the config repo")
+      logger.error(ex.to_s)
+      logger.error(ex.backtrace.join("\n"))
+      # If setting the build status inside the git repo fails
+      # this is actually a big deal, and we can't proceed.
+      # For setting the build status, if that fails, it's fine
+      # as the source of truth is the git repo
+      raise ex
+    end
+
+    # Let GitHub know about the current state of the build
+    # Using a `rescue` block here is important
+    # As the build is still green, even though we couldn't set the GH status
+    def update_build_status_source!
+      self.source.set_build_status!(
+        repo: self.project.repo_config.git_url,
+        sha: self.sha,
+        state: self.current_build.status,
+        target_url: nil
+      )
+    rescue => ex
+      logger.error("Error setting the build status as part of the config repo")
+      logger.error(ex.to_s)
+      logger.error(ex.backtrace.join("\n"))
     end
   end
 end
