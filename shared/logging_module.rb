@@ -16,7 +16,7 @@ module FastlaneCI
 
           thread_id = ""
 
-          if ENV["super_verbose"]
+          if ENV["FASTLANE_CI_SUPER_VERBOSE"]
             # this gets noisey really quickly
             thread_id = " #{Thread.current[:thread_id]}" unless Thread.current[:thread_id].nil?
           end
