@@ -21,7 +21,7 @@ Here's how you can contribute:
 - Before starting, assign yourself to one of the issues
 - Look into our docs for a feature description and requirements/vision
   - Don't worry if you can't find one, that means you get to be the first person to help build it!
-- You can then start a dialog on the issue with https://github.com/taquitos and https://github.com/KrauseFx
+- You can then start a dialog on the issue with @taquitos and @KrauseFx
   - Ideally you'll talk about how you think it should be built, what information you think is missing, and anything else you need.
 - Build it!
   - Fork the repo, and make a branch!
