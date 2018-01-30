@@ -57,6 +57,13 @@ module FastlaneCI
       logger.debug("enabling sessions")
       self.class.enable(:sessions)
 
+      # TODO: This should be removed once it's used in production
+      # By setting a seed here, the session will persist across server restarts
+      # which is extremely useful for development
+      if ENV["RACK_ENV"] == "development"
+        self.class.set(:session_secret, "DEVELOPMENT_ENV_FASTLANE_CI")
+      end
+
       # TODO: use session pool for server-side storage
       # generate a secret too
       # see http://sinatrarb.com/intro.html#Using%20Sessions
