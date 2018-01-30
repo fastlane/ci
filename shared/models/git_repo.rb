@@ -203,6 +203,7 @@ module FastlaneCI
     def push(repo_auth: self.repo_auth)
       self.setup_author(full_name: repo_auth.full_name, username: repo_auth.username)
       storage_path = self.setup_auth(repo_auth: repo_auth)
+      logger.debug("Pushing git repo....")
 
       # TODO: how do we handle branches
       self.git.push
@@ -212,6 +213,7 @@ module FastlaneCI
 
     def clone(repo_auth: self.repo_auth)
       raise "No containing path available" unless self.containing_path
+      logger.debug("Cloning git repo #{self.git_config.git_url}....")
 
       storage_path = self.setup_auth(repo_auth: repo_auth)
       logger.debug("[#{self.git_config.id}]: Cloning git repo #{self.git_config.git_url}")
