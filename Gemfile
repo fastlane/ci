@@ -16,6 +16,8 @@ gem "octokit", ">= 4.8.0", "< 5.0.0"
 # Local git checkouts, commits, etc.
 gem "git", ">= 1.3.0", "< 2.0.0"
 
+gem "dotenv", ">= 2.2.1", "< 3.0.0"
+
 # Related to fastfile-parser project, Ruby language parsing
 gem "unparser", ">= 0.2.6", "< 1.0.0"
 gem "parser", ">= 2.4.0.2", "< 2.5.0.0"
