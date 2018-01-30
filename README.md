@@ -1,6 +1,6 @@
 # `[WIP] fastlane.ci`
 
-Open source, self hosted, mobile optimized CI powered by [fastlane](https://fastlane.tools).
+Open source, self hosted, mobile optimized CI powered by [fastlane](https://fastlane.tools) from the same team that built _fastlane_.
 
 - **Git first**: 100% of the configuration files are stored in git, on a server of your choice
 - **Configuration files first**: Human readable and editable config files, fully transparent
