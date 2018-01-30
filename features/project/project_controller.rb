@@ -14,7 +14,7 @@ module FastlaneCI
       current_github_provider_credential = self.check_and_get_provider_credential
 
       repo = FastlaneCI::GitRepo.new(git_config: project.repo_config, provider_credential: current_github_provider_credential)
-      current_sha = repo.git.log.first.sha
+      current_sha = repo.most_recent_commit.sha
 
       # TODO: not the best approach to spawn a thread
       Thread.new do

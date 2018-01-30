@@ -65,7 +65,7 @@ module FastlaneCI
         # as we access repos here, and also in the test runners
         repo.git.reset_hard # as there might be un-committed changes in there
         branch.checkout
-        current_sha = repo.git.log.first.sha
+        current_sha = repo.most_recent_commit.sha
 
         builds = build_service.list_builds(project: self.project)
         if builds.map(&:sha).include?(current_sha)
