@@ -10,12 +10,19 @@ module FastlaneCI
 
     def initialize
       self.should_stop = false
+      # TODO: investigate what `abort_on_exception` does
+      #   and what to use it for
+      # Thread.abort_on_exception = true
+
       Thread.new do
         until self.should_stop
-          sleep(self.timeout)
+          Kernel.sleep(self.timeout)
+
+          # We have the `work` inside a `begin rescue`
+          # so that if something fails, the thread still is alive
           begin
             self.work unless self.should_stop
-          rescue StandardError => ex
+          rescue Exception => ex
             puts("[#{self.class} Exception]: #{ex}: ")
             puts(ex.backtrace.join("\n"))
           end
