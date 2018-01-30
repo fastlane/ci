@@ -1,3 +1,5 @@
+# We're using https://github.com/ruby-git/ruby-git
+# for all git interactions
 require "git"
 require_relative "../logging_module"
 require "securerandom"
@@ -213,7 +215,10 @@ module FastlaneCI
 
       storage_path = self.setup_auth(repo_auth: repo_auth)
       logger.debug("[#{self.git_config.id}]: Cloning git repo #{self.git_config.git_url}")
-      Git.clone(self.git_config.git_url, self.git_config.id, path: self.containing_path)
+      Git.clone(self.git_config.git_url, self.git_config.id, 
+        path: self.containing_path,
+        recursive: true
+      )
     ensure
       unset_auth(storage_path: storage_path)
     end
