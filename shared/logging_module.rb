@@ -14,7 +14,14 @@ module FastlaneCI
             class_name = self.name.split("::").last
           end
 
-          "[#{datetime.strftime('%Y-%m-%d %H:%M:%S')}] #{severity} #{class_name}:  #{msg}\n"
+          thread_id = ""
+
+          if ENV["super_verbose"]
+            # this gets noisey really quickly
+            thread_id = " #{Thread.current[:thread_id]}" unless Thread.current[:thread_id].nil?
+          end
+
+          "[#{datetime.strftime('%Y-%m-%d %H:%M:%S')}#{thread_id}] #{severity} #{class_name}:  #{msg}\n"
         end
       end
       return @logger

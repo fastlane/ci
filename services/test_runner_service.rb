@@ -45,7 +45,7 @@ module FastlaneCI
       builds = build_service.list_builds(project: self.project)
 
       if builds.count > 0
-        new_build_number = builds.sort_by { |b| b.number }.last.number + 1
+        new_build_number = builds.sort_by(&:number).last.number + 1
       else
         new_build_number = 1 # do we start with 1?
       end
@@ -61,10 +61,10 @@ module FastlaneCI
       update_build_status!
 
       start_time = Time.now
-      
+
       # TODO: Replace with fastlane runner here
       command = "bundle exec rspec"
-      puts "Running #{command}"
+      puts("Running #{command}")
       Dir.chdir(project.repo_config.local_repo_path) do
         cmd = TTY::Command.new
         cmd.run(command)
@@ -77,9 +77,9 @@ module FastlaneCI
       current_build.status = :success
 
       self.update_build_status!
-    rescue => ex
-      # TODO: better error handling
-      puts ex
+    rescue StandardError => ex
+      # TODO: better error handling, don't catch all Exception
+      puts(ex)
       current_build.status = :failure # TODO: also handle failure
       self.update_build_status!
     end

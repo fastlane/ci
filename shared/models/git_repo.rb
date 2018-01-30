@@ -65,7 +65,7 @@ module FastlaneCI
           # Things are looking legit so far
           # Now we have to check if the repo is actually from the
           # same repo URL
-          if repo.remote("origin").url.downcase == self.git_config.git_url.downcase
+          if repo.remote("origin").url.casecmp(self.git_config.git_url.downcase).zero?
             self.git.reset_hard
             self.pull
           else
@@ -153,7 +153,7 @@ module FastlaneCI
       ].join("\n")
 
       scope = "local"
-      
+
       unless File.directory?(File.join(local_repo_path, ".git"))
         # we don't have a git repo yet, we have no choice
         # TODO: check if we find a better way for the initial clone to work without setting system global state
