@@ -177,7 +177,7 @@ module FastlaneCI
     end
 
     def pull(repo_auth: self.repo_auth)
-      if ENV["super_verbose"] # because this repeats a ton
+      if ENV["FASTLANE_EXTRA_VERBOSE"] # because this repeats a ton
         logger.debug("[#{self.git_config.id}]: Pulling latest changes")
       end
       storage_path = self.setup_auth(repo_auth: repo_auth)
