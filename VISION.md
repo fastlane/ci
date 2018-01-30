@@ -1,5 +1,15 @@
 # Vision for fastlane.ci
 
+
+## Table of Contents:
+- [Until the first public release](#until-the-first-public-release)
+- [Long-term goals](#long-term-goals)
+  * [Notes](#notes)
+- [How to contribute](https://github.com/fastlane/ci/blob/master/CONTRIBUTING.md#contributing)
+  * [GitHub Project](https://github.com/fastlane/ci/blob/master/CONTRIBUTING.md#github-project)
+  * [Project Milestones](https://github.com/fastlane/ci/blob/master/CONTRIBUTING.md#project-milestones)
+  * [Before You Start](https://github.com/fastlane/ci/blob/master/CONTRIBUTING.md#before-you-start)
+
 ## Until the first public release:
 
 - Open Source and completely self-hosted
@@ -12,7 +22,7 @@
 - Sensible defaults
 - Use of the GitHub permission system to avoid having YetAnotherAccount and permission system to maintain
 
-## Long term goals
+## Long-term goals
 
 - Support common projects like React Native out of the box with zero configuration
 - Manage Xcode installations for the user
