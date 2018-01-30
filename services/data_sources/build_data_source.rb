@@ -24,7 +24,7 @@ module FastlaneCI
     def builds_path(project: nil)
       raise "No project provided: #{project}" unless project.kind_of?(FastlaneCI::Project)
 
-      File.join(self.json_folder_path, "projects", project.id)
+      File.join(self.json_folder_path, "projects", project.id, "builds")
     end
 
     def list_builds(project: nil)
