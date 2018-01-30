@@ -1,5 +1,7 @@
 module FastlaneCI
   class TestRunnerService
+    include FastlaneCI::Logging
+
     attr_accessor :project
     attr_accessor :build_service
     attr_accessor :source
@@ -23,22 +25,41 @@ module FastlaneCI
     # Responsible for updating the build status in our local config
     # and on GitHub
     def update_build_status!
-      # Create or update the local build file in the config directory
-      build_service.add_build!(
-        project: self.project,
-        build: self.current_build
-      )
+      begin
+        # Create or update the local build file in the config directory
+        build_service.add_build!(
+          project: self.project,
+          build: self.current_build
+        )
 
-      # Commit & Push the changes
-      FastlaneCI::FastlaneApp::CONFIG_DATA_SOURCE.git_repo.commit_changes!
+        # Commit & Push the changes to git remote
+        FastlaneCI::FastlaneApp::CONFIG_DATA_SOURCE.git_repo.commit_changes!
+      rescue => ex
+        logger.error("Error setting the build status as part of the config repo")
+        logger.error(ex.to_s)
+        logger.error(ex.backtrace.join("\n"))
+        # If setting the build status inside the git repo fails
+        # this is actually a big deal, and we can't proceed.
+        # For setting the build status, if that fails, it's fine
+        # as the source of truth is the git repo
+        raise ex
+      end
 
-      # Let GitHub know we're already running the tests
-      self.source.set_build_status!(
-        repo: self.project.repo_config.git_url,
-        sha: self.sha,
-        state: self.current_build.status,
-        target_url: nil
-      )
+      # Using a `begin end` block here is important
+      # As the build is still green, even though we couldn't set the GH status
+      begin
+        # Let GitHub know about the current state of the build
+        self.source.set_build_status!(
+          repo: self.project.repo_config.git_url,
+          sha: self.sha,
+          state: self.current_build.status,
+          target_url: nil
+        )
+      rescue => ex
+        logger.error("Error setting the build status as part of the config repo")
+        logger.error(ex.to_s)
+        logger.error(ex.backtrace.join("\n"))
+      end
     end
 
     def run
