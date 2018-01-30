@@ -1,5 +1,5 @@
 require_relative "../../shared/authenticated_controller_base"
-require 'pathname'
+require "pathname"
 
 module FastlaneCI
   class ProjectController < AuthenticatedControllerBase
@@ -27,7 +27,6 @@ module FastlaneCI
 
       redirect("#{HOME}/#{project_id}")
     end
-
 
     # Edit a project settings
     get "#{HOME}/*/edit" do |project_id|

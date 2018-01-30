@@ -5,9 +5,11 @@ module FastlaneCI
     HOME = "/dashboard"
 
     get HOME do
-      provider_credential = self.check_and_get_provider_credential
-      user_config_service = self.current_user_config_service
-      all_projects = user_config_service.projects(provider_credential: provider_credential)
+      current_provider_credential = self.check_and_get_provider_credential
+
+      current_user_config_service = self.current_user_config_service
+
+      all_projects = current_user_config_service.projects(provider_credential: current_provider_credential)
 
       projects_with_access = all_projects
 

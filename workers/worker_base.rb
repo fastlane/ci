@@ -7,6 +7,15 @@ module FastlaneCI
     include FastlaneCI::Logging
 
     attr_accessor :should_stop
+    attr_accessor :worker_id
+
+    def thread_id=(new_value)
+      @thread[:thread_id] = new_value
+    end
+
+    def thread_id
+      return @thread[:thread_id]
+    end
 
     def initialize
       self.should_stop = false
@@ -14,7 +23,7 @@ module FastlaneCI
       #   and what to use it for
       # Thread.abort_on_exception = true
 
-      Thread.new do
+      @thread = Thread.new do
         until self.should_stop
           Kernel.sleep(self.timeout)
 
@@ -25,6 +34,8 @@ module FastlaneCI
           rescue Exception => ex
             puts("[#{self.class} Exception]: #{ex}: ")
             puts(ex.backtrace.join("\n"))
+            puts("[#{self.class}] Killing thread #{self.thread_id} due to exception\n")
+            self.should_stop = true
           end
         end
       end

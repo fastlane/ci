@@ -16,6 +16,10 @@ rescue LoadError
   exit(1)
 end
 
+if ENV["RACK_ENV"] == "development"
+  Thread.abort_on_exception = true
+end
+
 if ENV["FASTLANE_CI_ENCRYPTION_KEY"].nil?
   warn("Error: unable to decrypt sensitive data without environment variable `FASTLANE_CI_ENCRYPTION_KEY` set")
   exit(1)

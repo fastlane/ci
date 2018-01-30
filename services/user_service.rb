@@ -49,7 +49,7 @@ module FastlaneCI
     end
 
     def trigger_initial_ci_setup(email: nil, password: nil, ci_config_repo: nil)
-      logger.info "No config repo cloned yet, doing that now"
+      logger.info("No config repo cloned yet, doing that now")
 
       # This happens on the first launch of CI
       # We don't have access to the config directory yet

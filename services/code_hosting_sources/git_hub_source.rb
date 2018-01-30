@@ -39,7 +39,7 @@ module FastlaneCI
 
     # TODO: parse those here or in service layer?
     def repos
-      client.all_repositories
+      client.repos({}, query: { sort: "asc" })
     end
 
     # The `target_url`, `description` and `context` parameters are optional
