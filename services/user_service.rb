@@ -59,13 +59,17 @@ module FastlaneCI
       # as part of a web UI. But for containers (e.g. Google Cloud App Engine)
       # we'll have to support ENV variables also, for the initial clone, so that's the code below
       # Clone the repo, and login the user
-      provider_credential = GitHubProviderCredential.new(email: ENV["INITIAL_CLONE_EMAIL"],
-                                                       api_token: ENV["INITIAL_CLONE_API_TOKEN"])
+      provider_credential = GitHubProviderCredential.new(email: ENV["FASTLANE_CI_INITIAL_CLONE_EMAIL"],
+                                                       api_token: ENV["FASTLANE_CI_INITIAL_CLONE_API_TOKEN"])
       FastlaneCI::GitConfigDataSource.new(git_repo_config: ci_config_repo, provider_credential: provider_credential)
       self.data_source = UserDataSource.new(json_folder_path: ci_config_repo.local_repo_path)
 
       logger.debug("attempting to login user with email #{email}")
       return self.data_source.login(email: email, password: password)
+    rescue => ex
+      logger.error("Something went wrong on the initial clone")
+      logger.error("Make sure to provide your `FASTLANE_CI_INITIAL_CLONE_EMAIL` and `FASTLANE_CI_INITIAL_CLONE_API_TOKEN` ENV variables")
+      raise ex
     end
   end
 end
