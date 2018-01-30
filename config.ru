@@ -3,6 +3,12 @@ require "bundler"
 
 Bundler.require
 
+if File.exist?(".keys")
+  require 'dotenv'
+  Dotenv.load(".keys")
+end
+puts "updated code"
+
 # Don't even try to run without this
 begin
   require "openssl"
