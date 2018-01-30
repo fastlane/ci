@@ -17,6 +17,7 @@ rescue LoadError
 end
 
 if ENV["RACK_ENV"] == "development"
+  puts("development mode, aborting on any thread exceptions")
   Thread.abort_on_exception = true
 end
 

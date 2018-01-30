@@ -47,7 +47,7 @@ module FastlaneCI
 
     def octokit_projects(provider_credential: nil)
       # Get a list of all the repos `provider` has access to
-      if ENV["super_verbose"]
+      if ENV["FASTLANE_CI_SUPER_VERBOSE"]
         logger.debug("Getting code host for #{provider_credential.ci_user.email}, #{provider_credential.type}")
       end
       current_code_host = self.code_host(provider_credential: provider_credential)
@@ -60,7 +60,7 @@ module FastlaneCI
       current_repo_git_url_set << "https://github.com/taquitos/ci-sample-repo"
       current_repo_git_url_set << "https://github.com/fastlane/ci"
 
-      if ENV["super_verbose"]
+      if ENV["FASTLANE_CI_SUPER_VERBOSE"]
         logger.debug("Finding projects we have access to with #{provider_credential.ci_user.email}, #{provider_credential.type}")
       end
       projects = self.config_data_source.projects.select do |project|
