@@ -20,11 +20,17 @@ module FastlaneCI
     def initialize(provider_credential: nil, project: nil)
       self.provider_credential = provider_credential
       self.project = project
-      self.git_repo = GitRepo.new(
+      super()
+    end
+
+    # This is a separate method, so it's lazy loaded
+    # since it will be run on the "main" thread if it were
+    # part of the #initialize method
+    def git_repo
+      @git_repo ||= GitRepo.new(
         git_config: project.repo_config, 
         provider_credential: provider_credential
       )
-      super()
     end
 
     def work
