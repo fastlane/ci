@@ -169,6 +169,7 @@ module FastlaneCI
     end
 
     def unset_auth(storage_path: nil)
+      return unless storage_path.kind_of?(String)
       # TODO: Also auto-clean those files from time to time, on server re-launch maybe, or background worker
       FileUtils.rm(storage_path) if File.exist?(storage_path)
     end
