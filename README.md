@@ -39,6 +39,10 @@ bundle install --path vendor/bundle
 ```sh
 bundle exec rackup -p 8080 --env development
 ```
+If you're having trouble and need to debug, you can add the following environment variables:
+`super_verbose=1` and `DEBUG=1`
+
+`super_verbose` enables extra logging which includes thread ids, and other non-essential information that could be useful during debugging.
 
 Visit [127.0.0.1:8080](http://127.0.0.1:8080/) to open the login
 
