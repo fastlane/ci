@@ -1,6 +1,7 @@
 require_relative "worker_base"
 require_relative "../services/build_service"
 require_relative "../shared/models/provider_credential"
+require_relative "../shared/logging_module"
 
 module FastlaneCI
   # Responsible for checking if there have been new commits
@@ -8,6 +9,8 @@ module FastlaneCI
   # new commits from web events, as the CI system might be behind
   # firewalls
   class CheckForNewCommitsOnGithubWorker < WorkerBase
+    include FastlaneCI::Logging
+
     attr_accessor :provider_credential
     attr_accessor :project
     attr_accessor :user_config_service
@@ -21,6 +24,14 @@ module FastlaneCI
       self.provider_credential = provider_credential
       self.project = project
       super()
+      time_nano = Time.now.nsec
+      project_full_name = project.repo_config.git_url
+
+      if project.repo_config.kind_of?(FastlaneCI::GitRepoConfig)
+        project_full_name = project.repo_config.full_name unless project.repo_config.full_name.nil?
+      end
+
+      self.thread_id = "GithubWorker:#{time_nano}: #{project_full_name}: #{provider_credential.ci_user.email}"
     end
 
     # This is a separate method, so it's lazy loaded
@@ -28,13 +39,15 @@ module FastlaneCI
     # part of the #initialize method
     def git_repo
       @git_repo ||= GitRepo.new(
-        git_config: project.repo_config, 
+        git_config: project.repo_config,
         provider_credential: provider_credential
       )
     end
 
     def work
-      puts "Checking for new commits on GitHub"
+      if ENV["super_verbose"]
+        logger.debug("Checking for new commits on GitHub")
+      end
       repo = self.git_repo
       repo.git.fetch # is needed to see if there are new branches
 
@@ -58,15 +71,25 @@ module FastlaneCI
         if builds.map(&:sha).include?(current_sha)
           next
         end
-
-        puts "Detected new branch #{branch.name} with sha #{current_sha}"
-        Thread.new do
+        if ENV["super_verbose"]
+          logger.debug("Detected new branch #{branch.name} with sha #{current_sha}")
+        end
+        credential = self.provider_credential
+        current_project = self.project
+        thread = Thread.new do
           FastlaneCI::TestRunnerService.new(
-            project: self.project,
+            project: current_project,
             sha: current_sha,
-            provider_credential: self.provider_credential
+            provider_credential: credential
           ).run
         end
+
+        project_full_name = current_project.repo_config.git_url
+        if current_project.repo_config.kind_of?(FastlaneCI::GitRepoConfig)
+          project_full_name = current_project.repo_config.full_name unless current_project.repo_config.full_name.nil?
+        end
+
+        thread[:thread_id] = "GithubWorkerChild: #{project_full_name}: #{credential.ci_user.email}: #{current_sha[-6..-1]}"
       end
     end
 
