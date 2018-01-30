@@ -1,3 +1,7 @@
+<h3 align="center">
+  <img src="fastlane/assets/fastlane_text.png" alt="fastlane Logo" width=500 />
+</h3>
+
 # `[WIP] fastlane.ci`
 
 Open source, self hosted, mobile optimized CI powered by [fastlane](https://fastlane.tools) from the same team that built _fastlane_.
