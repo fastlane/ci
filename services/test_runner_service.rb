@@ -105,7 +105,7 @@ module FastlaneCI
         target_url: nil
       )
     rescue => ex
-      logger.error("Error setting the build status as part of the config repo")
+      logger.error("Error setting the build status on remote service")
       logger.error(ex.to_s)
       logger.error(ex.backtrace.join("\n"))
     end
