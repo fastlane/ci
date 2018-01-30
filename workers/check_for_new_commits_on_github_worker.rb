@@ -45,7 +45,7 @@ module FastlaneCI
     end
 
     def work
-      if ENV["super_verbose"]
+      if ENV["FASTLANE_CI_SUPER_VERBOSE"]
         logger.debug("Checking for new commits on GitHub")
       end
       repo = self.git_repo
@@ -71,7 +71,7 @@ module FastlaneCI
         if builds.map(&:sha).include?(current_sha)
           next
         end
-        if ENV["super_verbose"]
+        if ENV["FASTLANE_CI_SUPER_VERBOSE"]
           logger.debug("Detected new branch #{branch.name} with sha #{current_sha}")
         end
         credential = self.provider_credential

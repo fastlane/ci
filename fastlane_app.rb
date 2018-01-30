@@ -32,11 +32,6 @@ module FastlaneCI
     include FastlaneCI::Logging
     Thread.current[:thread_id] = "main"
 
-    if ENV["RACK_ENV"] == "development"
-      puts("development mode, aborting on any thread exceptions")
-      Thread.abort_on_exception = true
-    end
-
     get "/" do
       if session[:user]
         redirect("/dashboard")
