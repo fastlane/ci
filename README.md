@@ -23,12 +23,14 @@ We strongly believe in making Continuous Integration systems for mobile app deve
 
 With this project, we don't only making using CI much easier, but it will allow us to put [fastlane](https://fastlane.tools) to the next level also. Things like previewing your Fastfile visually, automatically clearing old TestFlight testers from your account and getting notifications when your app gets approved will soon all be part of your _fastlane_ flow.
 
+[Interested? Be the first to hear about the official release](https://tinyletter.com/fastlane-tools)
+
 ## Project Status
 
-- This project is a very early Work In Progress (WIP)
+- This project is a very early Work In Progress (WIP) and can't be used yet
 - The idea is to build and iterate with the mobile development community and build this project in the open
-- You're welcome to help shape the product, check out [CONTRIBUTING.md](CONTRIBUTING.md) for more info
-- Our complete task list is available on our [GitHub board](https://github.com/fastlane/ci/projects/1)
+- We'd love your help to shape the product, check out [CONTRIBUTING.md](CONTRIBUTING.md) for more info
+- Our complete task list is available on our public [GitHub board](https://github.com/fastlane/ci/projects/1)
 
 <img src="docs/assets/github_pr_status.png" width="600" />
 
