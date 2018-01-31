@@ -74,6 +74,7 @@ module FastlaneCI
     end
 
     private
+
     def update_build_status_locally!
       # Create or update the local build file in the config directory
       build_service.add_build!(
@@ -83,7 +84,7 @@ module FastlaneCI
 
       # Commit & Push the changes to git remote
       FastlaneCI::FastlaneApp::CONFIG_DATA_SOURCE.git_repo.commit_changes!
-    rescue => ex
+    rescue StandardError => ex
       logger.error("Error setting the build status as part of the config repo")
       logger.error(ex.to_s)
       logger.error(ex.backtrace.join("\n"))
@@ -104,7 +105,7 @@ module FastlaneCI
         state: self.current_build.status,
         target_url: nil
       )
-    rescue => ex
+    rescue StandardError => ex
       logger.error("Error setting the build status on remote service")
       logger.error(ex.to_s)
       logger.error(ex.backtrace.join("\n"))

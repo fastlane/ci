@@ -228,10 +228,9 @@ module FastlaneCI
 
       storage_path = self.setup_auth(repo_auth: repo_auth)
       logger.debug("[#{self.git_config.id}]: Cloning git repo #{self.git_config.git_url}")
-      Git.clone(self.git_config.git_url, self.git_config.id, 
-        path: self.containing_path,
-        recursive: true
-      )
+      Git.clone(self.git_config.git_url, self.git_config.id,
+                path: self.containing_path,
+                recursive: true)
     ensure
       unset_auth(storage_path: storage_path)
     end

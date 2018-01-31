@@ -4,7 +4,7 @@ require "bundler"
 Bundler.require
 
 if File.exist?(".keys")
-  require 'dotenv'
+  require "dotenv"
   Dotenv.load(".keys")
 end
 
