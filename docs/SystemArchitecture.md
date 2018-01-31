@@ -52,7 +52,7 @@ Where you get data from, where you store it. If you have a database, you'll conn
 
 ### Data Objects ###
 These objects are typically returned from [Data Sources](#data-sources). Each object is generally meant to only contain properties, with little-to-no logic. Data objects do not know where they came from, or how to perform any mutating operations. 
-Some examples of Data Objects: 'Project`, `User`, `GitRepoConfig` and `ProviderCredential`. None of these objects handle their own storage. You use [Services](#services) to query as well as any other [CRUD operation](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) needed.
+Some examples of Data Objects: `Project`, `User`, `GitRepoConfig` and `ProviderCredential`. None of these objects handle their own storage. You use [Services](#services) to query as well as any other [CRUD operation](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) needed.
 
 ## Anti-Patterns ##
 With this design, the biggest anti-pattern would be creating a tradition ruby "model" and having it manage its own persistence/querying/[CRUD operation](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete). An example of this would be if you created an object like this:
@@ -85,7 +85,7 @@ Instead, what you want is to utilize [dependency injection](https://en.wikipedia
 
 ```ruby
 # this is only set 1 time during app startup
-user_service = UserService.new(user_data_source: JSONUserDataSource.new(path:"my_users.json"))
+user_service = UserService.new(user_data_source: JSONUserDataSource.new(path: "my_users.json"))
 
 taquitos_user = user_service.login(email: "taquitos@gmail.com", password: "tacos_are_delicious")
 
@@ -94,7 +94,6 @@ taquitos_user.first_name = "Josh"
 
 # very explicit about what you want, in order to update this user, you must ask a service to do it
 user_service.update_user!(user: taquitos_user)
-
 ```
 
 This enables us to quickly adopt new data sources, test logic, and not have as many merge conflicts or schema update problems.
