@@ -14,12 +14,7 @@ module FastlaneCI
       self.project = project
       self.sha = sha
 
-      # TODO: Services::BUILD_SERVICE doesn't work as the file isn't included
-      # TODO: ugh, I'm doing something wrong, I think?
-      # @Felix: If this should be a singleton, we probably want to instantiate it in the FastlaneApp
-      # and then just reference it like we do with FastlaneCI::FastlaneApp::CONFIG_DATA_SOURCE
-      json_folder_path = FastlaneCI::FastlaneApp::CONFIG_DATA_SOURCE.git_repo.git_config.local_repo_path
-      self.build_service = FastlaneCI::BuildService.new(data_source: BuildDataSource.new(json_folder_path: json_folder_path))
+      self.build_service = FastlaneCI::FastlaneApp::BUILD_SERVICE
 
       self.source = FastlaneCI::GitHubSource.source_from_provider_credential(
         provider_credential: provider_credential

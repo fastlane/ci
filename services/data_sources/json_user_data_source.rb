@@ -33,7 +33,7 @@ module FastlaneCI
 
     def initialize(json_folder_path: nil)
       @json_folder_path = json_folder_path
-      logger.debug("Using folder path for data: #{self.user_file_path}")
+      logger.debug("Using folder path for user data: #{json_folder_path}")
       # load up the json file here
       # parse all data into objects so we can fail fast on error
       reload_users

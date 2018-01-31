@@ -52,10 +52,8 @@ module FastlaneCI
       repo = self.git_repo
       repo.git.fetch # is needed to see if there are new branches
 
-      # TODO: Services::BUILD_SERVICE doesn't work as the file isn't included
-      # TODO: ugh, I'm doing something wrong, I think?
-      json_folder_path = FastlaneCI::FastlaneApp::CONFIG_DATA_SOURCE.git_repo.git_config.local_repo_path # that's super long, is that by design?
-      build_service = FastlaneCI::BuildService.new(data_source: BuildDataSource.new(json_folder_path: json_folder_path))
+      # TODO: ensure BuildService subclasses are thread-safe
+      build_service = FastlaneCI::FastlaneApp::BUILD_SERVICE
 
       repo.git.branches.remote.each do |branch|
         next if branch.name.start_with?("HEAD ->") # not sure what this is for

@@ -10,6 +10,7 @@ require_relative "services/config_service"
 require_relative "services/worker_service"
 require_relative "services/user_service"
 require_relative "services/data_sources/json_user_data_source"
+require_relative "services/data_sources/json_build_data_source"
 require_relative "services/test_runner_service"
 require_relative "services/fastlane_ci_error" # TODO: move somewhere else, both the file and the `require`
 require_relative "./fastfile-parser/fastfile_parser"
@@ -56,11 +57,15 @@ module FastlaneCI
     # Get the path to where we store fastlane.ci configuration
     ci_config_git_repo_path = ci_config_repo.local_repo_path
 
-    # Create a UserDataSource from the configuration git repo
+    # Create JSON data sources from the configuration git repo
     user_data_source = JSONUserDataSource.new(json_folder_path: ci_config_git_repo_path)
+    build_data_source = JSONBuildDataSource.new(json_folder_path: ci_config_git_repo_path)
 
-    # Start up a UserService from our UserDataSource
+    # Start up a UserService from our JSONUserDataSource
     USER_SERVICE = FastlaneCI::UserService.new(user_data_source: user_data_source)
+
+    # Start up the BuildService
+    BUILD_SERVICE = FastlaneCI::BuildService.new(build_data_source: build_data_source)
 
     # Find our fastlane.ci system user
     @ci_user = USER_SERVICE.login(email: ENV["FASTLANE_CI_USER"], password: ENV["FASTLANE_CI_PASSWORD"], ci_config_repo: ci_config_repo)
