@@ -15,8 +15,6 @@ Open source, self hosted, mobile optimized CI powered by [fastlane](https://fast
 - **Mobile first, mobile only**: For now, we focus exclusively on building the best CI system for mobile app devs
 - **Built in the open**: Together with all of you, MIT licensed
 
-For more details on the vision of the project, check out [VISION.md](VISION.md)
-
 ## Statement
 
 We strongly believe in making Continuous Integration systems for mobile app developers better. While CI is a solved problem for back-end and front-end applications, the mobile ecosystem saw almost no improvements in their workflow. With _fastlane_ we successfully solved the problem of mobile app deployment three years ago, with the long term vision to automate every single aspect of your daily development workflow. We have the experience, and the know-how to build a world-class mobile-only CI, fully self-hosted, open source and extremely easy to use. 
