@@ -1,7 +1,5 @@
 module FastlaneCI
   # Represents a build, part of a project, usually many builds per project
-  # TODO: This class is currently only full of dummy data
-  # We don't actually persist or load Build objects from anywhere yet
   class Build
     BUILD_STATUSES = [
       :success,
