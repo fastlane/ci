@@ -1,8 +1,7 @@
 # External
 require "sinatra/base"
-require "tty-command"
-require "json" # TODO: move somewhere else
-require "securerandom"
+
+require_relative "./fastfile-parser/fastfile_parser"
 
 # Internal
 require_relative "services/config_data_sources/git_config_data_source"
@@ -11,14 +10,12 @@ require_relative "services/worker_service"
 require_relative "services/user_service"
 require_relative "services/data_sources/json_user_data_source"
 require_relative "services/data_sources/json_build_data_source"
-require_relative "services/test_runner_service"
-require_relative "services/fastlane_ci_error" # TODO: move somewhere else, both the file and the `require`
-require_relative "./fastfile-parser/fastfile_parser"
-
 require_relative "services/code_hosting_sources/git_hub_source"
-require_relative "features/dashboard/models/build" # TODO: we don't want to import this here
+
 require_relative "workers/refresh_config_data_sources_worker"
+
 require_relative "shared/logging_module"
+require_relative "shared/fastlane_ci_error" # TODO: move somewhere else
 
 # All things fastlane ci related go in this module
 module FastlaneCI
