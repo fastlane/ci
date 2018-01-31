@@ -34,7 +34,9 @@ With this project, we don't just want to make using CI easier, we want to bring 
 - We also have our current [milestones listed](https://github.com/fastlane/ci/milestones)
 - We started a [poll](https://github.com/fastlane/ci/issues/93) to get a better feeling of how you'd be using `fastlane.ci`, please comment and let us know.
 
-<img src="docs/assets/github_milestones.png" width="600" />
+<a href="https://github.com/fastlane/ci/milestones">
+  <img src="docs/assets/github_milestones.png" width="600" />
+</a>
 
 ## Docs
 
@@ -48,13 +50,13 @@ Requires Ruby 2.3.0 or higher
 
 ## Development installation
 
-```sh
+```
 bundle install --path vendor/bundle
 ```
 
 ## Local development
 
-```sh
+```
 bundle exec rackup -p 8080 --env development
 ```
 
@@ -68,12 +70,12 @@ If you're having trouble and need to debug, you can add the following environmen
 
 ## Run tests
 
-```sh
+```
 bundle exec rspec
 ```
 
 ## Code style
 
-```sh
+```
 bundle exec rubocop -a
 ```
