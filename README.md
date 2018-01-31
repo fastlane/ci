@@ -31,7 +31,7 @@ With this project, we don't just want to make using CI easier, we want to bring 
 
 ## Project Status
 
-- This project is a very early Work In Progress (WIP) and can't be used yet
+- This project is a very early work in progress (WIP) and can't be used yet
 - The idea is to build and iterate with the mobile development community out in the open
 - We'd love your help to shape the product, check out [CONTRIBUTING.md](CONTRIBUTING.md) for more info
 - Our complete task list is available on our public [GitHub board](https://github.com/fastlane/ci/projects/1)
