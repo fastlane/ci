@@ -223,6 +223,15 @@ module FastlaneCI
       unset_auth(storage_path: storage_path)
     end
 
+    def status
+      self.git.status
+    end
+
+    # Discard any changes
+    def reset_hard!
+      self.git.reset_hard
+    end
+
     def clone(repo_auth: self.repo_auth)
       raise "No containing path available" unless self.containing_path
       logger.debug("Cloning git repo #{self.git_config.git_url}....")
