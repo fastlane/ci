@@ -1,8 +1,9 @@
 # We're using https://github.com/ruby-git/ruby-git
 # for all git interactions
 require "git"
-require_relative "../logging_module"
+require "tty-command"
 require "securerandom"
+require_relative "../logging_module"
 
 module FastlaneCI
   # Encapsulates all the data that is needed by GitRepo

@@ -1,8 +1,8 @@
 require "json"
 require_relative "build_data_source"
-require_relative "../../shared/logging_module"
 require_relative "../../shared/json_convertible"
-require_relative "../../features/dashboard/models/build.rb"
+require_relative "../../shared/logging_module"
+require_relative "../../shared/models/build"
 
 module FastlaneCI
   # Mixin the JSONConvertible class for Build
