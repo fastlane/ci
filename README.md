@@ -4,7 +4,7 @@
 
 # [WIP] fastlane.ci
 
-Open source, self-hosted, mobile-optimized CI powered by [fastlane](https://fastlane.tools) brought to you by the same team that built _fastlane_.
+Open source, self-hosted, mobile-optimized CI powered by [fastlane](https://fastlane.tools) brought to you by the _fastlane_ team.
 
 - **Git first**: 100% of your configuration files are stored in git, wherever you want
 - **Configuration files first**: Human readable and editable config files, fully transparent
@@ -23,6 +23,8 @@ With this project, we don't just want to make using CI easier, we want to bring 
 
 [Interested? Be the first to hear about the official release](https://tinyletter.com/fastlane-tools)
 
+<img src="docs/assets/github_pr_status.png" width="600" />
+
 ## Project Status
 
 - This project is a very early Work In Progress (WIP) and can't be used yet
@@ -32,7 +34,7 @@ With this project, we don't just want to make using CI easier, we want to bring 
 - We also have our current [milestones listed](https://github.com/fastlane/ci/milestones)
 - We started a [poll](https://github.com/fastlane/ci/issues/93) to get a better feeling of how you'd be using `fastlane.ci`, please comment and let us know.
 
-<img src="docs/assets/github_pr_status.png" width="600" />
+<img src="docs/assets/github_milestones.png" width="600" />
 
 ## Docs
 
