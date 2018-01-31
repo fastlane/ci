@@ -6,15 +6,13 @@ module FastlaneCI
   class StringEncrypter
     include FastlaneCI::Logging
 
-    class << self
-      attr_accessor :_key
+    def self.default_key
+      @_key ||= Digest::SHA256.digest(ENV["FASTLANE_CI_ENCRYPTION_KEY"])
     end
 
-    self._key = Digest::SHA256.digest(ENV["FASTLANE_CI_ENCRYPTION_KEY"])
-
-    def self.encode(string, key: StringEncrypter._key)
+    def self.encode(string, key: StringEncrypter.default_key)
       # not using the default key
-      key = Digest::SHA256.digest(key) if key != StringEncrypter._key
+      key = Digest::SHA256.digest(key) if key != StringEncrypter.default_key
 
       cipher = OpenSSL::Cipher::AES256.new(:CBC)
       cipher.encrypt
@@ -25,9 +23,9 @@ module FastlaneCI
       return iv + encrypted_text
     end
 
-    def self.decode(string, key: StringEncrypter._key)
+    def self.decode(string, key: StringEncrypter.default_key)
       # not using the default key
-      key = Digest::SHA256.digest(key) if key != StringEncrypter._key
+      key = Digest::SHA256.digest(key) if key != StringEncrypter.default_key
 
       decipher = OpenSSL::Cipher::AES256.new(:CBC)
       decipher.decrypt
