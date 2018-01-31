@@ -31,6 +31,7 @@ With this project, we don't only making using CI much easier, but it will allow 
 - The idea is to build and iterate with the mobile development community and build this project in the open
 - We'd love your help to shape the product, check out [CONTRIBUTING.md](CONTRIBUTING.md) for more info
 - Our complete task list is available on our public [GitHub board](https://github.com/fastlane/ci/projects/1)
+- We started a [poll](https://github.com/fastlane/ci/issues/93) to get a better feeling of how you'd be using `fastlane.ci`
 
 <img src="docs/assets/github_pr_status.png" width="600" />
 
