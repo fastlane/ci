@@ -1,9 +1,10 @@
-require_relative "config_data_source"
+require_relative "project_data_source"
 require_relative "../../shared/json_convertible"
 require_relative "../../shared/models/git_repo"
 require_relative "../../shared/models/git_repo_config"
 require_relative "../../shared/models/project"
 require_relative "../../shared/models/provider_credential"
+require_relative "../../shared/logging_module"
 
 module FastlaneCI
   # Mixin for Project to enable some basic JSON marshalling and unmarshalling
@@ -17,7 +18,9 @@ module FastlaneCI
   end
 
   # (default) Store configuration in git
-  class GitConfigDataSource
+  class JSONProjectDataSource < ProjectDataSource
+    include FastlaneCI::Logging
+
     # Reference to FastlaneCI::GitRepo
     attr_accessor :git_repo
 
@@ -25,6 +28,8 @@ module FastlaneCI
     # TODO: should it be just `provider_credential`?
     def initialize(git_repo_config: nil, user: nil, provider_credential: nil)
       raise "No git_repo_config provided" if git_repo_config.nil?
+
+      logger.debug("Using #{git_repo_config.local_repo_path} for project storage")
 
       provider_credential ||= user.provider_credential(type: ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 

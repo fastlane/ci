@@ -82,7 +82,7 @@ module FastlaneCI
       )
 
       # Commit & Push the changes to git remote
-      FastlaneCI::FastlaneApp::CONFIG_DATA_SOURCE.git_repo.commit_changes!
+      FastlaneCI::FastlaneApp::PROJECT_DATA_SOURCE.git_repo.commit_changes!
     rescue StandardError => ex
       logger.error("Error setting the build status as part of the config repo")
       logger.error(ex.to_s)
