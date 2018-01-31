@@ -1,4 +1,4 @@
-require_relative "data_sources/user_data_source"
+require_relative "data_sources/json_user_data_source"
 require_relative "../shared/models/github_provider_credential"
 require_relative "../shared/logging_module"
 
@@ -6,27 +6,31 @@ module FastlaneCI
   # Provides access to user stuff
   class UserService
     include FastlaneCI::Logging
-    attr_accessor :data_source
+    attr_accessor :user_data_source
 
-    def initialize(data_source: nil)
-      if data_source.nil?
-        # TODO: From @KrauseFx: I don't understand those defaults, do we want to keep them?
-        logger.debug("data_source is new, using `ENV[\"data_store_folder\"]` if available, or `sample_data` folder")
-        data_store_folder = ENV["data_store_folder"] # you can set it at runtime!
-        data_store_folder ||= File.join(FastlaneCI::FastlaneApp.settings.root, "sample_data")
-        data_source = UserDataSource.new(json_folder_path: data_store_folder)
+    def initialize(user_data_source: nil)
+      unless user_data_source.nil?
+        raise "user_data_source must be descendant of #{UserDataSource.name}" unless user_data_source.class <= UserDataSource
       end
 
-      self.data_source = data_source
+      if user_data_source.nil?
+        # Default to JSONUserDataSource
+        logger.debug("user_data_source is new, using `ENV[\"data_store_folder\"]` if available, or `sample_data` folder")
+        data_store_folder = ENV["data_store_folder"] # you can set it at runtime!
+        data_store_folder ||= File.join(FastlaneCI::FastlaneApp.settings.root, "sample_data")
+        user_data_source = JSONUserDataSource.new(json_folder_path: data_store_folder)
+      end
+
+      self.user_data_source = user_data_source
     end
 
     def create_user!(email: nil, password: nil)
       email = email.strip
 
-      unless self.data_source.user_exist?(email: email)
+      unless self.user_data_source.user_exist?(email: email)
         logger.debug("creating account #{email}")
         provider_credential = GitHubProviderCredential.new(email: email)
-        return self.data_source.create_user!(email: email, password: password, provider_credential: provider_credential)
+        return self.user_data_source.create_user!(email: email, password: password, provider_credential: provider_credential)
       end
 
       logger.debug("account #{email} already exists!")
@@ -34,14 +38,14 @@ module FastlaneCI
     end
 
     def update_user!(user: nil)
-      self.data_source.update_user!(user: user)
+      self.user_data_source.update_user!(user: user)
     end
 
     def login(email: nil, password: nil, ci_config_repo: nil)
       email = email.strip
 
       logger.debug("attempting to login user with email #{email}")
-      user = self.data_source.login(email: email, password: password)
+      user = self.user_data_source.login(email: email, password: password)
       if user.nil?
         user = trigger_initial_ci_setup(email: email, password: password, ci_config_repo: ci_config_repo)
       end
@@ -62,11 +66,11 @@ module FastlaneCI
       provider_credential = GitHubProviderCredential.new(email: ENV["FASTLANE_CI_INITIAL_CLONE_EMAIL"],
                                                        api_token: ENV["FASTLANE_CI_INITIAL_CLONE_API_TOKEN"])
       FastlaneCI::GitConfigDataSource.new(git_repo_config: ci_config_repo, provider_credential: provider_credential)
-      self.data_source = UserDataSource.new(json_folder_path: ci_config_repo.local_repo_path)
+      self.user_data_source = UserDataSource.new(json_folder_path: ci_config_repo.local_repo_path)
 
       logger.debug("attempting to login user with email #{email}")
-      return self.data_source.login(email: email, password: password)
-    rescue => ex
+      return self.user_data_source.login(email: email, password: password)
+    rescue StandardError => ex
       logger.error("Something went wrong on the initial clone")
 
       if ENV["FASTLANE_CI_INITIAL_CLONE_API_TOKEN"].to_s.length == 0 || ENV["FASTLANE_CI_INITIAL_CLONE_EMAIL"].to_s.length == 0
