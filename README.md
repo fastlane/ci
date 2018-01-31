@@ -8,9 +8,9 @@ Open source, self-hosted, mobile-optimized CI powered by [fastlane](https://fast
 
 - **Git first**: 100% of your configuration files are stored in git, wherever you want
 - **Configuration files first**: Human readable and editable config files, fully transparent
-- **Open source**: Just like _fastlane_, fastlane.ci is open source and community driven
+- **Open source**: Just like _fastlane_, `fastlane.ci` is open source and community driven
 - **Self hosted**: You should be able to own your CI systems, and scale up as needed
-- **Adapters**: Integrate with the services you already use like GitHub, and store artifacts where you want them, locally, or even in the cloud, like S3
+- **Adapters**: Store your configuration and artifacts on services you already use, like GitHub or your own git server
 - **Native fastlane integration**: Already use _fastlane_? `fastlane.ci` will work right out of the box for you
 - **Mobile first, mobile only**: For now, we're focusing exclusively on building the best CI system for mobile app devs
 - **Built in the open**: Together with all of you, MIT licensed
