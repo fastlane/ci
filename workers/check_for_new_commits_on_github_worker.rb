@@ -2,6 +2,7 @@ require_relative "worker_base"
 require_relative "../services/build_service"
 require_relative "../shared/models/provider_credential"
 require_relative "../shared/logging_module"
+require_relative "../services/test_runner_service"
 
 module FastlaneCI
   # Responsible for checking if there have been new commits
