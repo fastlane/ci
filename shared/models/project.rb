@@ -33,7 +33,7 @@ module FastlaneCI
       # TODO: ugh, I'm doing something wrong, I think?
       #
       # TODO: Yup, don't call .builds here, use build_server and pass a project in to an api like: builds(project: project)
-      json_folder_path = FastlaneCI::FastlaneApp::CONFIG_DATA_SOURCE.git_repo.git_config.local_repo_path
+      json_folder_path = FastlaneCI::FastlaneApp::PROJECT_DATA_SOURCE.git_repo.git_config.local_repo_path
       build_service = FastlaneCI::BuildService.new(data_source: BuildDataSource.new(json_folder_path: json_folder_path))
       builds = build_service.list_builds(project: self)
 

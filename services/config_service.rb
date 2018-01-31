@@ -1,5 +1,5 @@
 require_relative "code_hosting_sources/git_hub_source"
-require_relative "config_data_sources/git_config_data_source"
+require_relative "config_data_sources/json_project_data_source"
 require_relative "../shared/models/github_provider_credential"
 require_relative "../shared/logging_module"
 
@@ -8,12 +8,12 @@ module FastlaneCI
   class ConfigService
     include FastlaneCI::Logging
 
-    attr_accessor :config_data_source
+    attr_accessor :project_data_source
     attr_accessor :ci_user
     attr_accessor :active_code_hosts # dictionary of active_code_hosting_key to CodeHosting
 
-    def initialize(config_data_source: FastlaneCI::FastlaneApp::CONFIG_DATA_SOURCE, ci_user: nil)
-      self.config_data_source = config_data_source
+    def initialize(project_data_source: FastlaneCI::FastlaneApp::PROJECT_DATA_SOURCE, ci_user: nil)
+      self.project_data_source = project_data_source
       self.ci_user = ci_user
       self.active_code_hosts = {}
     end
@@ -64,7 +64,7 @@ module FastlaneCI
       if ENV["FASTLANE_CI_SUPER_VERBOSE"]
         logger.debug("Finding projects we have access to with #{provider_credential.ci_user.email}, #{provider_credential.type}")
       end
-      projects = self.config_data_source.projects.select do |project|
+      projects = self.project_data_source.projects.select do |project|
         current_repo_git_url_set.include?(project.repo_config.git_url)
       end
 
