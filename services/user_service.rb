@@ -66,7 +66,9 @@ module FastlaneCI
       provider_credential = GitHubProviderCredential.new(email: ENV["FASTLANE_CI_INITIAL_CLONE_EMAIL"],
                                                        api_token: ENV["FASTLANE_CI_INITIAL_CLONE_API_TOKEN"])
       FastlaneCI::JSONProjectDataSource.new(git_repo_config: ci_config_repo, provider_credential: provider_credential)
-      self.user_data_source = UserDataSource.new(json_folder_path: ci_config_repo.local_repo_path)
+
+      # Use the same class as the user_data_source, but with different credentials
+      self.user_data_source = self.user_data_source.class.new(json_folder_path: ci_config_repo.local_repo_path)
 
       logger.debug("attempting to login user with email #{email}")
       return self.user_data_source.login(email: email, password: password)
