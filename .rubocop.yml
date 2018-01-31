@@ -219,6 +219,7 @@ AllCops:
   TargetRubyVersion: 2.3
   Exclude:
     - './vendor/**/*'
+    - './fastfile-parser/**/*'
 
 # They have not to be snake_case
 Naming/FileName:
