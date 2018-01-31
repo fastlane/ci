@@ -4,6 +4,7 @@ require_relative "../../services/user_service"
 require_relative "../../shared/models/github_provider_credential"
 
 module FastlaneCI
+  # Displays CI login, user creation, as well as linking github api tokens, and logging out
   class LoginController < ControllerBase
     HOME = "/login"
 

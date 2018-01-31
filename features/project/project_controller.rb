@@ -2,6 +2,7 @@ require_relative "../../shared/authenticated_controller_base"
 require "pathname"
 
 module FastlaneCI
+  # Controller for a single project view. Responsible for updates, triggering builds, and displaying project info
   class ProjectController < AuthenticatedControllerBase
     HOME = "/projects"
 

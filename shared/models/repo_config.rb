@@ -12,7 +12,7 @@ module FastlaneCI
     attr_accessor :name # for example: "fastlane ci app"
     attr_accessor :hidden # Do we want normal users to be able to see this?
     attr_accessor :provider_credential_type_needed # what kind of provider is needed? PROVIDER_CREDENTIAL_TYPES[]
-    attr_accessor :containing_path # directory containing the `local_repo_path`
+    attr_writer :containing_path # directory containing the `local_repo_path`
 
     def initialize(id: nil,
                    git_url: nil,

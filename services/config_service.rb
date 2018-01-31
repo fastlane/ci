@@ -4,6 +4,7 @@ require_relative "../shared/models/github_provider_credential"
 require_relative "../shared/logging_module"
 
 module FastlaneCI
+  # Provides access to the fastlane.ci configuration, like which projects we're hosting
   class ConfigService
     include FastlaneCI::Logging
 

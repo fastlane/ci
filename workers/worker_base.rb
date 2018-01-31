@@ -31,7 +31,7 @@ module FastlaneCI
           # so that if something fails, the thread still is alive
           begin
             self.work unless self.should_stop
-          rescue Exception => ex
+          rescue StandardError => ex
             puts("[#{self.class} Exception]: #{ex}: ")
             puts(ex.backtrace.join("\n"))
             puts("[#{self.class}] Killing thread #{self.thread_id} due to exception\n")

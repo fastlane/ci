@@ -16,7 +16,7 @@ module FastlaneCI
     attr_accessor :number
 
     # @return [String]
-    attr_accessor :status
+    attr_reader :status
 
     # @return [DateTime] Start time
     attr_accessor :timestamp

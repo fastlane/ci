@@ -2,6 +2,8 @@ require_relative "code_hosting"
 require "octokit"
 
 module FastlaneCI
+  # Data source that interacts with GitHub
+  # TODO: should probably be renamed GitHubService
   class GitHubSource < CodeHosting
     class << self
       # Generate a GitHub source based on the user's session

@@ -31,7 +31,6 @@ module FastlaneCI
       containing_path = builds_path(project: project)
       file_names = Dir[File.join(containing_path, "*.json")]
       build_numbers = file_names.map { |f| File.basename(f, ".*").to_i }
-      most_recent_build_number = build_numbers.max
 
       build_files = build_numbers.map do |build_number|
         File.join(containing_path, "#{build_number}.json")

@@ -14,7 +14,8 @@ module FastlaneCI
     attr_accessor :provider_credential
     attr_accessor :project
     attr_accessor :user_config_service
-    attr_accessor :git_repo
+
+    attr_writer :git_repo
 
     def provider_type
       return FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]

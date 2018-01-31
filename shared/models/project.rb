@@ -1,6 +1,8 @@
 require "securerandom"
 
 module FastlaneCI
+  # All metadata about a project.
+  # A project is usually a git url, a lane, and a project name, like "Production Build"
   class Project
     # @return [GitRepoConfig] URL to the Git repo
     attr_accessor :repo_config

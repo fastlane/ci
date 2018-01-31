@@ -1,6 +1,7 @@
 require_relative "../../shared/authenticated_controller_base"
 
 module FastlaneCI
+  # Displays the main landing page, which is the project list right now
   class DashboardController < AuthenticatedControllerBase
     HOME = "/dashboard"
 

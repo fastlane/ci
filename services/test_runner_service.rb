@@ -1,4 +1,6 @@
 module FastlaneCI
+  # Service that will interact with fastlane to run tests/lanes
+  # TODO: move github specific stuff out into GitHubService (GitHubSource right now)
   class TestRunnerService
     include FastlaneCI::Logging
 
@@ -14,6 +16,8 @@ module FastlaneCI
 
       # TODO: Services::BUILD_SERVICE doesn't work as the file isn't included
       # TODO: ugh, I'm doing something wrong, I think?
+      # @Felix: If this should be a singleton, we probably want to instantiate it in the FastlaneApp
+      # and then just reference it like we do with FastlaneCI::FastlaneApp::CONFIG_DATA_SOURCE
       json_folder_path = FastlaneCI::FastlaneApp::CONFIG_DATA_SOURCE.git_repo.git_config.local_repo_path
       self.build_service = FastlaneCI::BuildService.new(data_source: BuildDataSource.new(json_folder_path: json_folder_path))
 

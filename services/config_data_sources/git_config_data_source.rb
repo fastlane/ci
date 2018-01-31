@@ -6,10 +6,12 @@ require_relative "../../shared/models/project"
 require_relative "../../shared/models/provider_credential"
 
 module FastlaneCI
+  # Mixin for Project to enable some basic JSON marshalling and unmarshalling
   class Project
     include FastlaneCI::JSONConvertible
   end
 
+  # Mixin for GitRepoConfig to enable some basic JSON marshalling and unmarshalling
   class GitRepoConfig
     include FastlaneCI::JSONConvertible
   end
