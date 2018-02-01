@@ -37,5 +37,3 @@ group :test, :development do
   gem "rake"
   gem "rspec"
 end
-
-
