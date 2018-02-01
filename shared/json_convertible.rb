@@ -20,7 +20,7 @@ module FastlaneCI
       #
       #     ignore_instance_variables: [:@project, :@something_else]
       #
-      def to_object_dictionary(ignore_instance_variables: nil)
+      def to_object_dictionary(ignore_instance_variables: [])
         object_hash = {}
         self.instance_variables.each do |var|
           next if ignore_instance_variables.include?(var)

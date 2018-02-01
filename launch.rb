@@ -22,6 +22,7 @@ module FastlaneCI
 
     def self.load_dot_env
       return unless File.exist?(".keys")
+
       require "dotenv"
       Dotenv.load(".keys")
     end
@@ -64,7 +65,7 @@ module FastlaneCI
     # and with that, have the initial `users.json`, etc.
     # If not, this is where we do the initial clone
     def self.check_for_existing_setup
-      # TODO: check if it already exists
+      # TODO: should we also trigger a blocking `git pull` here?
       unless self.ci_config_repo.exists?
         self.trigger_initial_ci_setup
       end
