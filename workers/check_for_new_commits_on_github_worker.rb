@@ -51,7 +51,7 @@ module FastlaneCI
         logger.debug("Checking for new commits on GitHub")
       end
       repo = self.git_repo
-      repo.git.fetch # is needed to see if there are new branches
+      repo.fetch # is needed to see if there are new branches
 
       # TODO: ensure BuildService subclasses are thread-safe
       build_service = FastlaneCI::Services.build_service

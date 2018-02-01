@@ -30,8 +30,9 @@ module FastlaneCI
   # This includes the configs repo, but also the actual source code repos
   # This class makes sure to use the right credentials, does proper cloning,
   # pulling, pushing, git commit messages, etc.
-  # TODO: @josh: do we need to move this somewhere? We only want to support git
-  #   so no need to have super class, etc, right?
+  # It is **important** that from the outside you don't access `GitRepoObject.git.something` directly
+  # as the auth won't be setup. This system is designed to authenticate the user per action, meaning
+  # that each pull, push, fetch etc. is performed using a specific user
   class GitRepo
     include FastlaneCI::Logging
 
@@ -230,6 +231,16 @@ module FastlaneCI
     # Discard any changes
     def reset_hard!
       self.git.reset_hard
+    end
+    
+    def fetch
+      if ENV["FASTLANE_EXTRA_VERBOSE"] # because this repeats a ton
+        logger.debug("[#{self.git_config.id}]: Running git fetch")
+      end
+      storage_path = self.setup_auth(repo_auth: repo_auth)
+      self.git.fetch
+    ensure
+      unset_auth(storage_path: storage_path)
     end
 
     def clone(repo_auth: self.repo_auth)
