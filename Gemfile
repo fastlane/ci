@@ -22,6 +22,11 @@ gem "dotenv", ">= 2.2.1", "< 3.0.0"
 gem "parser", ">= 2.4.0.2", "< 2.5.0.0"
 gem "unparser", ">= 0.2.6", "< 1.0.0"
 
+# We have rubocop as runtime dependency for now
+# as we run code style verification for fastlane.ci
+# TODO: We should remove this before the public release
+gem "rubocop"
+
 # fastlane dependencies
 # gem "fastlane" # disabled for now, until we need it
 
@@ -31,5 +36,6 @@ group :test, :development do
   gem "rack-test", require: "rack/test"
   gem "rake"
   gem "rspec"
-  gem "rubocop"
 end
+
+
