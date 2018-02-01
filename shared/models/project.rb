@@ -24,10 +24,16 @@ module FastlaneCI
       self.enabled = enabled
       self.project_name = project_name
       self.id = id || SecureRandom.uuid
-      self.lane = lane
+      self.lane=lane
     end
 
-    def builds
+    
+    
+    
+    
+    
+    
+    def builds  
       builds = FastlaneCI::Services.build_service.list_builds(project: self)
 
       return builds.sort_by(&:number).reverse
