@@ -8,7 +8,7 @@ module FastlaneCI
       require_fastlane_ci
       check_for_existing_setup
       prepare_server
-      # launch_workers
+      # launch_workers # TODO: enable
     end
 
     def self.require_fastlane_ci
