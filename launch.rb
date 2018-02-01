@@ -1,4 +1,8 @@
 module FastlaneCI
+  # Launch is responsible for spawning up the whole
+  # fastlane.ci server, this includes all needed classes
+  # workers, check for .env, env variables and dependencies
+  # This is being called from `config.ru`
   class Launch
     def self.take_off
       verify_dependencies
@@ -28,12 +32,10 @@ module FastlaneCI
     end
 
     def self.verify_dependencies
-      begin
-        require "openssl"
-      rescue LoadError
-        warn("Error: no such file to load -- openssl. Make sure you have openssl installed")
-        exit(1)
-      end
+      require "openssl"
+    rescue LoadError
+      warn("Error: no such file to load -- openssl. Make sure you have openssl installed")
+      exit(1)
     end
 
     def self.verify_env_variables
@@ -124,7 +126,7 @@ module FastlaneCI
     # Verify that fastlane.ci is already set up on this machine.
     # If that's not the case, we have to make sure to trigger the initial clone
     def self.trigger_initial_ci_setup
-      puts "No config repo cloned yet, doing that now" # TODO: use logger if possible
+      puts("No config repo cloned yet, doing that now") # TODO: use logger if possible
 
       # This happens on the first launch of CI
       # We don't have access to the config directory yet
@@ -138,10 +140,10 @@ module FastlaneCI
                                                        api_token: ENV["FASTLANE_CI_INITIAL_CLONE_API_TOKEN"])
       # Trigger the initial clone
       FastlaneCI::JSONProjectDataSource.new(
-        git_repo_config: ci_config_repo, 
+        git_repo_config: ci_config_repo,
         provider_credential: provider_credential
       )
-      puts "Successfully did the initial clone on this machine"
+      puts("Successfully did the initial clone on this machine")
     rescue StandardError => ex
       puts("Something went wrong on the initial clone")
 

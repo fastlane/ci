@@ -232,7 +232,7 @@ module FastlaneCI
     def reset_hard!
       self.git.reset_hard
     end
-    
+
     def fetch
       if ENV["FASTLANE_EXTRA_VERBOSE"] # because this repeats a ton
         logger.debug("[#{self.git_config.id}]: Running git fetch")

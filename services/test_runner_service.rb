@@ -43,7 +43,7 @@ module FastlaneCI
       start_time = Time.now
 
       # TODO: Replace with fastlane runner here
-      command = "bundle update"
+      command = "bundle exec rubocop"
       puts("Running #{command}")
 
       Dir.chdir(project.repo_config.local_repo_path) do

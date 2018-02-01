@@ -11,7 +11,7 @@ module FastlaneCI
   # service we provide
   class Services
     class << self
-      attr_accessor :ci_config_repo
+      attr_reader :ci_config_repo
 
       def ci_config_repo=(value)
         # When setting a new CI config repo
