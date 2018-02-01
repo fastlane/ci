@@ -22,6 +22,7 @@ module FastlaneCI
     end
 
     def run
+      start_time = Time.now
       builds = build_service.list_builds(project: self.project)
 
       if builds.count > 0
@@ -40,8 +41,6 @@ module FastlaneCI
       )
       update_build_status!
 
-      start_time = Time.now
-
       # TODO: Replace with fastlane runner here
       command = "rubocop"
       puts("Running #{command}")
@@ -51,7 +50,6 @@ module FastlaneCI
         cmd.run(command)
       end
 
-      # TODO: run tests here!
       duration = Time.now - start_time
 
       current_build.duration = duration
@@ -61,6 +59,8 @@ module FastlaneCI
     rescue StandardError => ex
       # TODO: better error handling, don't catch all Exception
       puts(ex)
+      duration = Time.now - start_time
+      current_build.duration = duration
       current_build.status = :failure # TODO: also handle failure
       self.update_build_status!
     end
