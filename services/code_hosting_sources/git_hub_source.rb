@@ -77,7 +77,7 @@ module FastlaneCI
       client.create_status(repo, sha, state, {
         target_url: target_url,
         description: description,
-        context: context || "fastlane.ci tests"
+        context: context || "fastlane.ci"
       })
     rescue StandardError => ex
       # TODO: how do we handle GitHub errors
