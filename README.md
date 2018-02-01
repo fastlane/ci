@@ -74,6 +74,8 @@ If you're having trouble and need to debug, you can add the following environmen
 
 ## Run tests
 
+*Note*: Currently 
+
 ```
 bundle exec rspec
 ```
