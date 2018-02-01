@@ -14,7 +14,7 @@ module FastlaneCI
       self.project = project
       self.sha = sha
 
-      self.build_service = FastlaneCI::FastlaneApp::BUILD_SERVICE
+      self.build_service = FastlaneCI::Services.build_service
 
       self.source = FastlaneCI::GitHubSource.source_from_provider_credential(
         provider_credential: provider_credential
@@ -82,7 +82,7 @@ module FastlaneCI
       )
 
       # Commit & Push the changes to git remote
-      FastlaneCI::FastlaneApp::PROJECT_DATA_SOURCE.git_repo.commit_changes!
+      FastlaneCI::Service.project_data_source.git_repo.commit_changes!
     rescue StandardError => ex
       logger.error("Error setting the build status as part of the config repo")
       logger.error(ex.to_s)

@@ -40,5 +40,10 @@ module FastlaneCI
     def local_repo_path
       File.join(self.containing_path, self.id)
     end
+
+    # Is the repo already cloned on the local machine?
+    def exists?
+      File.directory?(self.local_repo_path)
+    end
   end
 end
