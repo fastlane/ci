@@ -54,7 +54,7 @@ module FastlaneCI
       repo.git.fetch # is needed to see if there are new branches
 
       # TODO: ensure BuildService subclasses are thread-safe
-      build_service = FastlaneCI::FastlaneApp::BUILD_SERVICE
+      build_service = FastlaneCI::Services.build_service
 
       repo.git.branches.remote.each do |branch|
         next if branch.name.start_with?("HEAD ->") # not sure what this is for

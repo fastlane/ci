@@ -5,7 +5,7 @@ module FastlaneCI
   # in the background, every x seconds
   class RefreshConfigDataSourcesWorker < WorkerBase
     def work
-      FastlaneCI::FastlaneApp::PROJECT_DATA_SOURCE.refresh_repo
+      FastlaneCI::Services.project_data_source.refresh_repo
     end
 
     def timeout

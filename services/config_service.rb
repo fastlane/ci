@@ -12,7 +12,7 @@ module FastlaneCI
     attr_accessor :ci_user
     attr_accessor :active_code_hosts # dictionary of active_code_hosting_key to CodeHosting
 
-    def initialize(project_data_source: FastlaneCI::FastlaneApp::PROJECT_DATA_SOURCE, ci_user: nil)
+    def initialize(project_data_source: FastlaneCI::Services.project_data_source, ci_user: nil)
       self.project_data_source = project_data_source
       self.ci_user = ci_user
       self.active_code_hosts = {}

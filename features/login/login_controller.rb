@@ -54,7 +54,7 @@ module FastlaneCI
     post "/login" do
       email = params[:email]
       password = params[:password]
-      user = FastlaneApp::USER_SERVICE.login(email: email, password: password)
+      user = Services.user_service.login(email: email, password: password)
       if user.nil?
         redirect("#{HOME}/ci_login")
       else
@@ -75,7 +75,7 @@ module FastlaneCI
     post "#{HOME}/create_account" do
       email = params[:email]
       password = params[:password]
-      user = FastlaneApp::USER_SERVICE.create_user!(email: email, password: password)
+      user = Services.user_service.create_user!(email: email, password: password)
       if user.nil?
         locals = { title: "Create fastlane.ci account", create_failed: true }
         erb(:create_account, locals: locals, layout: FastlaneCI.default_layout)
@@ -116,7 +116,7 @@ module FastlaneCI
           updated_user = true
         end
 
-        FastlaneApp::USER_SERVICE.update_user!(user: user) if updated_user
+        Services.user_service.update_user!(user: user) if updated_user
 
         # update session user
         session[:user] = user

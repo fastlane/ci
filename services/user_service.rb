@@ -46,40 +46,7 @@ module FastlaneCI
 
       logger.debug("attempting to login user with email #{email}")
       user = self.user_data_source.login(email: email, password: password)
-      if user.nil?
-        user = trigger_initial_ci_setup(email: email, password: password, ci_config_repo: ci_config_repo)
-      end
       return user
-    end
-
-    def trigger_initial_ci_setup(email: nil, password: nil, ci_config_repo: nil)
-      logger.info("No config repo cloned yet, doing that now")
-
-      # This happens on the first launch of CI
-      # We don't have access to the config directory yet
-      # So we'll use ENV variables that are used for the initial clone only
-      #
-      # Long term, we'll have a nice onboarding flow, where you can enter those credentials
-      # as part of a web UI. But for containers (e.g. Google Cloud App Engine)
-      # we'll have to support ENV variables also, for the initial clone, so that's the code below
-      # Clone the repo, and login the user
-      provider_credential = GitHubProviderCredential.new(email: ENV["FASTLANE_CI_INITIAL_CLONE_EMAIL"],
-                                                       api_token: ENV["FASTLANE_CI_INITIAL_CLONE_API_TOKEN"])
-      FastlaneCI::JSONProjectDataSource.new(git_repo_config: ci_config_repo, provider_credential: provider_credential)
-
-      # Use the same class as the user_data_source, but with different credentials
-      self.user_data_source = self.user_data_source.class.new(json_folder_path: ci_config_repo.local_repo_path)
-
-      logger.debug("attempting to login user with email #{email}")
-      return self.user_data_source.login(email: email, password: password)
-    rescue StandardError => ex
-      logger.error("Something went wrong on the initial clone")
-
-      if ENV["FASTLANE_CI_INITIAL_CLONE_API_TOKEN"].to_s.length == 0 || ENV["FASTLANE_CI_INITIAL_CLONE_EMAIL"].to_s.length == 0
-        logger.error("Make sure to provide your `FASTLANE_CI_INITIAL_CLONE_EMAIL` and `FASTLANE_CI_INITIAL_CLONE_API_TOKEN` ENV variables")
-      end
-
-      raise ex
     end
   end
 end
