@@ -1,1 +1,1 @@
-Business logic is stored here. If you need to combine multiple data sources or massage data before it can be presented, this is where you should do that. You can think of it as a controller for your data sources.
+Business logic is stored here. If you need to combine multiple data sources or message data before it can be presented, this is where you should do that. You can think of it as a controller for your data sources.
