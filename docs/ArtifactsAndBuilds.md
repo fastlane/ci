@@ -51,16 +51,16 @@ The artifact system is built in a way to allow any developer to integrate `fastl
     }
   ],
   "context": {
-  	"fastlane-ci-plugin-test_coverage": {
-  	  "currentCoverage": 0.83,
-  	},
-  	"fastlane-ci-plugin-post_open_todos": {
-  	  "openTodosFound": [
-  	  	"FBFileHelper.m:93",
-  	  	"FBFileManager.m:181",
-  	  	"AppDelegate.m:13938"
-  	  ]
-  	},
+    "fastlane-ci-plugin-test_coverage": {
+      "currentCoverage": 0.83,
+    },
+    "fastlane-ci-plugin-post_open_todos": {
+      "openTodosFound": [
+        "FBFileHelper.m:93",
+        "FBFileManager.m:181",
+        "AppDelegate.m:13938"
+      ]
+  	}
   }
 }
 ```
