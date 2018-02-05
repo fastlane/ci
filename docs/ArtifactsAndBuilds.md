@@ -25,6 +25,8 @@ The artifact system is built in a way to allow any developer to integrate `fastl
 
 <img src="assets/build_list.png">
 
+A sample `[build_number].json` might look like this;
+
 ```json
 {
   "number": 5,
@@ -52,7 +54,7 @@ The artifact system is built in a way to allow any developer to integrate `fastl
   ],
   "context": {
     "fastlane-ci-plugin-test_coverage": {
-      "currentCoverage": 0.83,
+      "currentCoverage": 0.83
     },
     "fastlane-ci-plugin-post_open_todos": {
       "openTodosFound": [
@@ -71,4 +73,11 @@ The above JSON file is just an example of how one `[build_number].json` file mig
 - There can be any number of artifacts, that can be rendered as a link on the `fastlane.ci` web UI
 	 - Each artifact has a type, that might be a "parent" defined (e.g. `iOS`, `android`, `react-native`).
 	 - Each artifact either has a `url` or a `path` defined, whereas `url` is usually a remote URL, and `path` being a local file path for non-important metadata.
-- Additionally to the artifacts (which are basically attachments of larger files for builds), we want to offer a flexible way to attach extra information to builds, without having to modify the `fastlane.ci` core. We want to take an approach that offers a solid foundation for future features, like a plugin system. The `context` sample code shows how we can namespace data easily using the plugin's name (or internal `fastlane.ci` module if needed), allowing developers to build powerful tools on top of `fastlane.ci`, like tracking of historic code coverage.
+   - By storing the build artifacts externally, the user can easily switch artifact provided (e.g. from AWS S3 to Google Cloud storage), and still keeps their artifacts and with it all links, assuming the user keeps their account running.
+- Additionally to the artifacts (which are basically attachments of larger files for builds), we also thought about the concept of a **Build Context**
+
+## Build Context
+
+Similar to the [fastlane lane context](https://docs.fastlane.tools/advanced/#lane-context), we want to offer a flexible way to attach extra information to builds, without having to modify the `fastlane.ci` core. We want to take an approach that offers a solid foundation for future features, like a plugin system. The `context` sample code shows how we can namespace data easily using the plugin's name (or internal `fastlane.ci` module if needed), allowing developers to build powerful tools on top of `fastlane.ci`, like tracking of historic code coverage.
+
+Since we don't have a plugin system yet for `fastlane.ci`, we want to use the Build Context to store the number of open `# TODO` items for this project.
