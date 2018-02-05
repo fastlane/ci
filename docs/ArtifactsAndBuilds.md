@@ -19,7 +19,7 @@ With `fastlane.ci` we're going with a hybrid model, to offer best of both worlds
 - The `ci-config` repo includes a JSON file for each build, representing the basic metadata. It should be limited to short amounts of strings (not the full build output).
 - Each JSON file then links to additional artifacts. The artifacts are therefore stored separately, and will be downloaded on demand, making the storing and parsing of the JSON files fast and efficient. 
 
-By using this appraoch, all really important build metadata will always persist and won't get lost in case of a system failure. All artifacts are then either stored on the local machine where `fastlane.ci` runs (making it the responsibility of the developer to do backups), or uploaded a cloud hosting service like Google Cloud Storage.
+By using this approach, all really important build metadata will always persist and won't get lost in case of a system failure. All artifacts are then either stored on the local machine where `fastlane.ci` runs (making it the responsibility of the developer to do backups), or uploaded a cloud hosting service like Google Cloud Storage.
 
 The artifact system is built in a way to allow any developer to integrate `fastlane.ci` into whatever the team is already using. By default, `fastlane.ci` will provide a basic set of integration with a unified interface, allowing the community to extend it to support more and more storage options.
 
@@ -54,9 +54,11 @@ A sample `[build_number].json` might look like this;
   ],
   "context": {
     "fastlane-ci-plugin-test_coverage": {
+      "apiVersion": 1,
       "currentCoverage": 0.83
     },
     "fastlane-ci-plugin-post_open_todos": {
+      "apiVersion": 1,
       "openTodosFound": [
         "FBFileHelper.m:93",
         "FBFileManager.m:181",
@@ -73,7 +75,7 @@ The above JSON file is just an example of how one `[build_number].json` file mig
 - There can be any number of artifacts, that can be rendered as a link on the `fastlane.ci` web UI
 	 - Each artifact has a type, that might be a "parent" defined (e.g. `iOS`, `android`, `react-native`).
 	 - Each artifact either has a `url` or a `path` defined, whereas `url` is usually a remote URL, and `path` being a local file path for non-important metadata.
-   - By storing the build artifacts externally, the user can easily switch artifact provided (e.g. from AWS S3 to Google Cloud storage), and still keeps their artifacts and with it all links, assuming the user keeps their account running.
+   - By storing the build artifacts externally, the user can easily switch artifact providers (e.g. from AWS S3 to Google Cloud storage), and still keeps their artifacts and with it all links, assuming the user keeps their account running.
 - Additionally to the artifacts (which are basically attachments of larger files for builds), we also thought about the concept of a **Build Context**
 
 ## Build Context
