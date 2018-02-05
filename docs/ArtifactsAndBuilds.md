@@ -62,7 +62,7 @@ A sample `[build_number].json` might look like this;
         "FBFileManager.m:181",
         "AppDelegate.m:13938"
       ]
-  	}
+    }
   }
 }
 ```
