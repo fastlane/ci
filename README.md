@@ -50,7 +50,7 @@ With this project, we don't just want to make using CI easier, we want to bring 
 
 ## We're hiring!
 
-Are you passionate about [fastlane](https://fastlane.tools) already, and want to help us build `fastlane.ci`? We're looking for engineers to join our team, drop us a message with your CV to fastlane@google.com.
+Are you passionate about _fastlane_ already, and want to help us build `fastlane.ci`? We're looking for engineers to join our team, drop us a message with your CV to fastlane@google.com.
 
 ## System Requirements
 
@@ -91,3 +91,7 @@ bundle exec rspec
 ```
 bundle exec rubocop -a
 ```
+
+----
+
+[Interested? Be the first to hear about the official release](https://tinyletter.com/fastlane-tools)
