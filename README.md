@@ -46,7 +46,7 @@ With this project, we don't just want to make using CI easier, we want to bring 
 
 - [VISION.md](VISION.md): Describes the overall vision and idea of this project, with its core principials
 - [docs/SystemArchitecture.md](docs/SystemArchitecture.md): Describes the overall design architecture of `fastlane.ci`, including the controllers, services, data sources, and data objects
-- [How we store builds and their artifacts](https://github.com/fastlane/ci/issues/40#issuecomment-359507244)
+- [How we store builds and their artifacts](docs/ArtifactsAndBuilds.md)
 
 ## System Requirements
 
