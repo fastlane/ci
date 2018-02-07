@@ -48,10 +48,6 @@ With this project, we don't just want to make using CI easier, we want to bring 
 - [docs/SystemArchitecture.md](docs/SystemArchitecture.md): Describes the overall design architecture of `fastlane.ci`, including the controllers, services, data sources, and data objects
 - [docs/ArtifactsAndBuilds.md](docs/ArtifactsAndBuilds.md): Describes how we store builds and their artifacts
 
-## We're hiring!
-
-Are you passionate about _fastlane_ already, and want to help us build `fastlane.ci`? We're looking for engineers to join our team, drop us a message with your CV to fastlane@google.com.
-
 ## System Requirements
 
 Requires Ruby 2.3.0 or higher. macOS and Xcode are required when building iOS projects. Refer to the [fastlane documentation](https://docs.fastlane.tools/getting-started/ios/setup/#installing-fastlane) for more information.
@@ -95,3 +91,8 @@ bundle exec rubocop -a
 ----
 
 [Interested? Be the first to hear about the official release](https://tinyletter.com/fastlane-tools)
+
+## We're hiring!
+
+Are you passionate about _fastlane_ already, and want to help us build `fastlane.ci`? We're looking for engineers to join our team, drop us a message with your CV to fastlane@google.com.
+
