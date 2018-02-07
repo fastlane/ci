@@ -53,7 +53,8 @@ With this project, we don't just want to make using CI easier, we want to bring 
 Requires Ruby 2.3.0 or higher. macOS and Xcode are required when building iOS projects. Refer to the [fastlane documentation](https://docs.fastlane.tools/getting-started/ios/setup/#installing-fastlane) for more information.
 
 ## Development installation
-**Note:** We have a couple dependencies that aren't gems yet, so we've included them as git submodules
+
+**Note:** We have a couple dependencies that aren't standalone gems yet, so we included them as git submodules for now
 
 ```
 bundle install
