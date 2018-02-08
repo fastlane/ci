@@ -55,7 +55,7 @@ These objects are typically returned from [Data Sources](#data-sources). Each ob
 Some examples of Data Objects: `Project`, `User`, `GitRepoConfig` and `ProviderCredential`. None of these objects handle their own storage. You use [Services](#services) to query as well as any other [CRUD operation](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) needed.
 
 ## Anti-Patterns ##
-With this design, the biggest anti-pattern would be creating a tradition ruby "model" and having it manage its own persistence/querying/[CRUD operation](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete). An example of this would be if you created an object like this:
+With this design, the biggest anti-pattern would be creating a traditional ruby "model" and having it manage its own persistence/querying/[CRUD operation](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete). An example of this would be if you created an object like this:
 
 ### Use of MVC ###
 What you might be more used to
