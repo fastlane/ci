@@ -21,7 +21,7 @@
 - **Native fastlane integration**: Already use _fastlane_? `fastlane.ci` will work right out of the box for you
 - **Mobile first, mobile only**: For now, we're focusing exclusively on building the best CI system for mobile app devs
 - **Built in the open**: Together with all of you, MIT licensed
-- **Sensible defaults**: If a something can be automatically figured out by `fastlane.ci`, it should be
+- **Sensible defaults**: If something can be automatically figured out by `fastlane.ci`, it should be
 - **Easy permissions**: Instead of manually managing an extra layer of permission, `fastlane.ci` just uses GitHub
 - **Focus on the most established toolings**: git, GitHub and Xcode
 
