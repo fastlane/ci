@@ -231,6 +231,7 @@ module FastlaneCI
     # Discard any changes
     def reset_hard!
       self.git.reset_hard
+      self.git.clean(:force => true, :d => true)
     end
 
     def fetch
