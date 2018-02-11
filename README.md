@@ -62,6 +62,35 @@ git submodule init
 git submodule update
 ```
 
+## Environment variables
+
+We recommend create a local `.keys` file that you can load using `source .keys` before starting the server.
+
+`fastlane.ci` needs a CI-account that is used by `fastlane.ci` to commit and push changes that happen from the CI-side of things (e.g. a new build is triggered by a new commit).
+
+The setup below will be simplified as the project becomes more mature. As for now, we don't have a UI or automatic onboarding yet, so you'll have to set those variables up.
+
+```sh
+# Randomly generated key, that's used to encrypt the user passwords
+export FASTLANE_CI_ENCRYPTION_KEY="key"
+
+# The email address of your fastlane CI bot account
+export FASTLANE_CI_USER="email@bot.com"
+
+# The API token of your fastlane CI bot account
+export FASTLANE_CI_PASSWORD="password"
+
+# The git URL (https) for the configuration repo
+export FASTLANE_CI_REPO_URL="https://github.com/fastlane/ci-config"
+
+# Needed just for the first startup of fastlane.ci:
+# The email address used for the intial clone for the config repo
+export INITIAL_CLONE_EMAIL="email@user.com"
+
+# The API token used for the initial clone for the config repo
+export INITIAL_CLONE_API_TOKEN="token"
+```
+
 ## Local development
 
 ```
