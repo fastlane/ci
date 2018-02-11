@@ -4,4 +4,6 @@ rvm:
   - 2.3
   - 2.4
   - 2.5
+env:
+  - FASTLANE_CI_ENCRYPTION_KEY=""
 script: bundle exec rspec
