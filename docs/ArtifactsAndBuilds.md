@@ -73,7 +73,6 @@ The above JSON file is just an example of how one `[build_number].json` file mig
 
 - Outside the artifacts link, we store only the necessary information needed to identify a build, and show it on the user interface.
 - There can be any number of artifacts, that can be rendered as a link on the `fastlane.ci` web UI
-	 - Each artifact has a type, that might be a "parent" defined (e.g. `iOS`, `android`, `react-native`).
 	 - Each artifact either has a `url` or a `path` defined, whereas `url` is usually a remote URL, and `path` being a local file path for non-important metadata.
    - By storing the build artifacts externally, the user can easily switch artifact providers (e.g. from AWS S3 to Google Cloud storage), and still keep their artifacts and with it all links, assuming the user keeps their account running.
 - Additionally to the artifacts (which are basically attachments of larger files for builds), we also thought about the concept of a **Build Context**
