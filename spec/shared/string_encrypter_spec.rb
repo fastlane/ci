@@ -3,6 +3,11 @@ require "string_encrypter"
 
 module FastlaneCI
   describe StringEncrypter do
+    before do
+      encryption_key = "iUjsfjfiU"
+      allow(ENV).to receive(:[]).with("FASTLANE_CI_ENCRYPTION_KEY").and_return(encryption_key)
+    end
+
     describe "string encrypter example" do
       it "should encode, decode, and be the same as the start" do
         hi_string = StringEncrypter.encode("hi", key: "ThisIsAPassword")
