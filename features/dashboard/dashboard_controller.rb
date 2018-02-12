@@ -26,7 +26,7 @@ module FastlaneCI
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
       locals = {
         title: "Add new project",
-        repos: FastlaneCI::GitHubSource.source_from_provider_credential(provider_credential: provider_credential).repos
+        repos: FastlaneCI::GitHubService.new(provider_credential: provider_credential).repos
       }
       erb(:new_project, locals: locals, layout: FastlaneCI.default_layout)
     end

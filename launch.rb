@@ -6,6 +6,7 @@ module FastlaneCI
   class Launch
     def self.take_off
       verify_dependencies
+      verify_system_requirements
       load_dot_env
       verify_env_variables
       setup_threads
@@ -36,6 +37,15 @@ module FastlaneCI
     rescue LoadError
       warn("Error: no such file to load -- openssl. Make sure you have openssl installed")
       exit(1)
+    end
+
+    def self.verify_system_requirements
+      # Check the current ruby version
+      required_version = Gem::Version.new('2.3.0')
+      if Gem::Version.new(RUBY_VERSION) < required_version
+        warn("Error: ensure you have at least Ruby #{required_version}")
+        exit(1)
+      end
     end
 
     def self.verify_env_variables

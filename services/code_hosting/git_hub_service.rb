@@ -1,27 +1,20 @@
-require_relative "code_hosting"
+require_relative "code_hosting_service"
 require "octokit"
 
 module FastlaneCI
   # Data source that interacts with GitHub
   # TODO: should probably be renamed GitHubService
-  class GitHubSource < CodeHosting
-    class << self
-      # Generate a GitHub source based on the user's session
-      def source_from_provider_credential(provider_credential: nil)
-        return self.new(email: provider_credential.email,
-                        personal_access_token: provider_credential.api_token)
-      end
-    end
+  class GitHubService < CodeHostingService
 
     # The email is actually optional for API access
     # However we ask for the email on login, as we also plan on doing commits for the user
     # and this way we can make sure to configure things properly for git to use the email
-    attr_accessor :email
+    attr_accessor :provider_credential
 
-    def initialize(email: nil, personal_access_token: nil)
-      self.email = email
+    def initialize(provider_credential: nil)
+      self.provider_credential = provider_credential
       # TODO: Remove the ENV["INITIAL_CLONE_API_TOKEN"] from here, this was just for testing
-      @_client = Octokit::Client.new(access_token: ENV["INITIAL_CLONE_API_TOKEN"] || personal_access_token)
+      @_client = Octokit::Client.new(access_token: ENV["INITIAL_CLONE_API_TOKEN"] || provider_credential.api_token)
       Octokit.auto_paginate = true # TODO: just for now, we probably should do smart pagination in the future
     end
 

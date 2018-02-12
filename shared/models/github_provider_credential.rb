@@ -6,7 +6,6 @@ require_relative "../string_encrypter"
 module FastlaneCI
   # GitHub ProviderCredential class
   class GitHubProviderCredential < ProviderCredential
-    attr_accessor :email # email used on github
     attr_accessor :encrypted_api_token
 
     def initialize(email: nil, full_name: nil, api_token: nil)
@@ -30,6 +29,10 @@ module FastlaneCI
     def api_token
       return nil if @encrypted_api_token.nil?
       return StringEncrypter.decode(Base64.decode64(@encrypted_api_token))
+    end
+
+    def email
+      return @email
     end
 
     def type

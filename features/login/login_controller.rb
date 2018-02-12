@@ -122,7 +122,9 @@ module FastlaneCI
         session[:user] = user
       end
 
-      git_hub_service = FastlaneCI::GitHubSource.source_from_provider_credential(provider_credential: github_provider_credential)
+      # TODO: not a big deal right now, but we should have a way of automatically generating the correct 
+      # CodeHostingService subclass based on the provider_credential type.
+      git_hub_service = FastlaneCI::GitHubService.new(provider_credential: github_provider_credential)
 
       if git_hub_service.session_valid?
         redirect("/dashboard")
