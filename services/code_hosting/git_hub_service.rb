@@ -1,10 +1,13 @@
 require_relative "code_hosting_service"
+require_relative "../../taskqueue/task_queue"
+require_relative "../../shared/logging_module"
+
 require "octokit"
 
 module FastlaneCI
   # Data source that interacts with GitHub
-  # TODO: should probably be renamed GitHubService
   class GitHubService < CodeHostingService
+    include FastlaneCI::Logging
 
     # The email is actually optional for API access
     # However we ask for the email on login, as we also plan on doing commits for the user
@@ -13,9 +16,10 @@ module FastlaneCI
 
     def initialize(provider_credential: nil)
       self.provider_credential = provider_credential
-      # TODO: Remove the ENV["INITIAL_CLONE_API_TOKEN"] from here, this was just for testing
-      @_client = Octokit::Client.new(access_token: ENV["INITIAL_CLONE_API_TOKEN"] || provider_credential.api_token)
+
+      @_client = Octokit::Client.new(access_token: provider_credential.api_token)
       Octokit.auto_paginate = true # TODO: just for now, we probably should do smart pagination in the future
+      @task_queue = TaskQueue::TaskQueue.new(name: "#{provider_credential.type}-#{provider_credential.email}")
     end
 
     def client
@@ -67,11 +71,19 @@ module FastlaneCI
       #
       # Full docs for `create_status` over here
       # https://octokit.github.io/octokit.rb/Octokit/Client/Statuses.html
-      client.create_status(repo, sha, state, {
-        target_url: target_url,
-        description: description,
-        context: context || "fastlane.ci"
+
+      task = TaskQueue::Task.new(work_block: proc {
+        if ENV["FASTLANE_CI_SUPER_VERBOSE"]
+          logger.debug("Setting status #{state} on #{target_url}")
+        end
+        client.create_status(repo, sha, state, {
+          target_url: target_url,
+          description: description,
+          context: context || "fastlane.ci"
+        })
       })
+
+      @task_queue.add_task_async(task: task)
     rescue StandardError => ex
       # TODO: how do we handle GitHub errors
       # In this case `create_status` will cause an exception
