@@ -27,7 +27,7 @@ module FastlaneCI
         # TODO: we don't want to directly access `session` here, abstract out
         # We could use
         # ```
-        # FastlaneCI::GitHubService.source_from_provider_credential(provider).session_valid?
+        # FastlaneCI::GitHubService.new(provider_credential: provider).session_valid?
         # ```
         # however this would send a request every single time
         # Let's revisit later on

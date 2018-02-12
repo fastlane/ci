@@ -6,7 +6,7 @@ module FastlaneCI
 
     attr_accessor :project
     attr_accessor :build_service
-    attr_accessor :source
+    attr_accessor :code_hosting_service
     attr_accessor :current_build
     attr_accessor :sha
 
@@ -16,9 +16,8 @@ module FastlaneCI
 
       self.build_service = FastlaneCI::Services.build_service
 
-      self.source = FastlaneCI::GitHubService.source_from_provider_credential(
-        provider_credential: provider_credential
-      )
+      # TODO: provider credential should determine what exact CodeHostingService gets instantiated 
+      self.code_hosting_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
     end
 
     def run
@@ -98,7 +97,7 @@ module FastlaneCI
     # Using a `rescue` block here is important
     # As the build is still green, even though we couldn't set the GH status
     def update_build_status_source!
-      self.source.set_build_status!(
+      self.code_hosting_service.set_build_status!(
         repo: self.project.repo_config.git_url,
         sha: self.sha,
         state: self.current_build.status,

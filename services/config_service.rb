@@ -10,12 +10,12 @@ module FastlaneCI
 
     attr_accessor :project_data_source
     attr_accessor :ci_user
-    attr_accessor :active_code_hosts # dictionary of active_code_hosting_key to CodeHosting
+    attr_accessor :active_code_hosting_services # dictionary of active_code_hosting_service_key to CodeHosting
 
     def initialize(project_data_source: FastlaneCI::Services.project_data_source, ci_user: nil)
       self.project_data_source = project_data_source
       self.ci_user = ci_user
-      self.active_code_hosts = {}
+      self.active_code_hosting_services = {}
     end
 
     # if the provider_credential is for user B, but the service was initialized using user A,
@@ -24,26 +24,30 @@ module FastlaneCI
       return provider_credential.ci_user != self.ci_user
     end
 
-    def active_code_hosting_key(provider_credential: nil)
+    def active_code_hosting_service_key(provider_credential: nil)
       return "#{provider_credential.provider_name}_#{self.ci_user.id}"
     end
 
     # Find the active code host for the provider_credential/user combination
     # or instantiate one if none are available
-    def code_host(provider_credential: nil)
-      code_host_key = active_code_hosting_key(provider_credential: provider_credential)
-      code_host = self.active_code_hosts[code_host_key]
-      return code_host unless code_host.nil?
+    def code_hosting_service(provider_credential: nil)
+      code_hosting_service_key = active_code_hosting_service_key(provider_credential: provider_credential)
+      code_hosting_service = self.active_code_hosting_services[code_hosting_service_key]
+      return code_hosting_service unless code_hosting_service.nil?
 
+
+      # TODO: not a big deal right now, but we should have a way of automatically generating the correct 
+      # CodeHostingService subclass based on the provider_credential type and maybe not have it right here.
+      # A Java-style factory might be the right move here.
       case provider_credential.type
       when FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
-        code_host = GitHubService.new(email: provider_credential.email, personal_access_token: provider_credential.api_token)
-        active_code_hosts[code_host_key] = code_host
+        code_hosting_service = GitHubService.new(provider_credential: provider_credential)
+        active_code_hosting_services[code_hosting_service_key] = code_hosting_service
       else
         raise "Unrecognized provider_credential #{provider_credential.type}"
       end
 
-      return code_host
+      return code_hosting_service
     end
 
     def octokit_projects(provider_credential: nil)
@@ -51,10 +55,10 @@ module FastlaneCI
       if ENV["FASTLANE_CI_SUPER_VERBOSE"]
         logger.debug("Getting code host for #{provider_credential.ci_user.email}, #{provider_credential.type}")
       end
-      current_code_host = self.code_host(provider_credential: provider_credential)
+      current_code_hosting_service = self.code_hosting_service(provider_credential: provider_credential)
 
       # current set of `GitRepoConfig.name`s that `provider_credential` has access to
-      current_repo_git_url_set = current_code_host.repos.map(&:html_url).to_set
+      current_repo_git_url_set = current_code_hosting_service.repos.map(&:html_url).to_set
       # TODO: we have to improve repo handling, as it seems like we either have to implement
       # proper paging, or we ask for specific repos instead
       # Either way, my account has access to too many repos, so for now, let's just workaround using this

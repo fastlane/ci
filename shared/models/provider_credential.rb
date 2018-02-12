@@ -19,11 +19,16 @@ module FastlaneCI
 
     # must define in subclass
     attr_writer :type # must be defined in sub class
+    attr_writer :email # must be defined in sub class
     attr_writer :full_name # full name that the user intends to be in the commit author
     attr_writer :provider_name # MUST be unique, not a problem right now with just supporting GitHub
     attr_writer :remote_host # usually github.com
 
     def type
+      not_implemented(__method__)
+    end
+
+    def email
       not_implemented(__method__)
     end
 
