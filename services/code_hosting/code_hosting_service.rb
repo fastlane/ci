@@ -1,7 +1,7 @@
 require_relative "../../shared/models/provider_credential"
 module FastlaneCI
-  # Abstract base class for all code hosting data sources
-  class CodeHosting
+  # Abstract base class for all code hosting data services
+  class CodeHostingService
     def session_valid?
       not_implemented(__method__)
     end
