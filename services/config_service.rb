@@ -1,4 +1,4 @@
-require_relative "code_hosting_sources/git_hub_source"
+require_relative "code_hosting/git_hub_service"
 require_relative "config_data_sources/json_project_data_source"
 require_relative "../shared/models/github_provider_credential"
 require_relative "../shared/logging_module"
@@ -37,7 +37,7 @@ module FastlaneCI
 
       case provider_credential.type
       when FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
-        code_host = GitHubSource.new(email: provider_credential.email, personal_access_token: provider_credential.api_token)
+        code_host = GitHubService.new(email: provider_credential.email, personal_access_token: provider_credential.api_token)
         active_code_hosts[code_host_key] = code_host
       else
         raise "Unrecognized provider_credential #{provider_credential.type}"

@@ -1,6 +1,6 @@
 module FastlaneCI
   # Service that will interact with fastlane to run tests/lanes
-  # TODO: move github specific stuff out into GitHubService (GitHubSource right now)
+  # TODO: move github specific stuff out into GitHubService (GitHubService right now)
   class TestRunnerService
     include FastlaneCI::Logging
 
@@ -16,7 +16,7 @@ module FastlaneCI
 
       self.build_service = FastlaneCI::Services.build_service
 
-      self.source = FastlaneCI::GitHubSource.source_from_provider_credential(
+      self.source = FastlaneCI::GitHubService.source_from_provider_credential(
         provider_credential: provider_credential
       )
     end

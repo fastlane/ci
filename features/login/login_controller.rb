@@ -122,7 +122,7 @@ module FastlaneCI
         session[:user] = user
       end
 
-      git_hub_service = FastlaneCI::GitHubSource.source_from_provider_credential(provider_credential: github_provider_credential)
+      git_hub_service = FastlaneCI::GitHubService.source_from_provider_credential(provider_credential: github_provider_credential)
 
       if git_hub_service.session_valid?
         redirect("/dashboard")

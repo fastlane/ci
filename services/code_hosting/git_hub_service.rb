@@ -1,10 +1,10 @@
-require_relative "code_hosting"
+require_relative "code_hosting_service"
 require "octokit"
 
 module FastlaneCI
   # Data source that interacts with GitHub
   # TODO: should probably be renamed GitHubService
-  class GitHubSource < CodeHosting
+  class GitHubService < CodeHostingService
     class << self
       # Generate a GitHub source based on the user's session
       def source_from_provider_credential(provider_credential: nil)
