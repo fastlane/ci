@@ -81,7 +81,7 @@ export FASTLANE_CI_USER="email@bot.com"
 export FASTLANE_CI_PASSWORD="password"
 
 # The git URL (https) for the configuration repo
-export FASTLANE_CI_REPO_URL="https://github.com/fastlane/ci-config"
+export FASTLANE_CI_REPO_URL="https://github.com/your-name/your-ci-config"
 
 # Needed just for the first startup of fastlane.ci:
 # The email address used for the intial clone for the config repo
@@ -90,6 +90,73 @@ export INITIAL_CLONE_EMAIL="email@user.com"
 # The API token used for the initial clone for the config repo
 export INITIAL_CLONE_API_TOKEN="token"
 ```
+
+## Initial configuration
+
+In order to run fastlane.ci for the first time, the `https://github.com/your-name/your-ci-config` needs to be populated with at least two files.
+
+- `users.json`
+
+```json
+[
+    {
+      "id": "ee75eb27-9246-43c1-af5a-a8d33f8a963f",
+      "email": "your-name@gmail.com",
+      "password_hash": "some password hash that needs to be created",
+      "provider_credentials": [
+        {
+          "email": "minuscorp@gmail.com",
+          "encrypted_api_token": "some GitHub API token that has been encrypted using the FASTLANE_CI_ENCRYPTION_KEY",
+          "provider_name": "GitHub",
+          "type": "github",
+          "full_name": "Fastlane CI"
+        }
+      ]
+    }
+]
+```
+
+- `projects.json`
+
+```json
+{
+    "repo_config": {
+      "id": "ad0dadd1-ba5a-4634-949f-0ce62b77e48f",
+      "git_url": "https://github.com/your-name/fastlane-ci-demoapp",
+      "full_name": "your-name/fastlane-ci-demoapp",
+      "description": "Fastlane CI Demo App Repository",
+      "name": "Fastlane CI Demo App",
+      "provider_type_needed": "github",
+      "hidden": false
+    },
+    "id": "db799377-aaa3-4605-ba43-c91a13c8f83",
+    "project_name": "fastlane CI demo app test",
+    "lane": "test",
+    "enabled": true
+  }
+```
+
+In order to generate for the first time the `password_hash` and the `encrypted_api_token` there are some additional steps to follow:
+
+- In `string_encrypter_spec.rb`, right after `describe "string encrypter example" do` add:
+
+```ruby
+    require "pry"
+    binding.pry
+```
+
+- Then `DEBUG=1 bundle exec rspec spec/shared/string_encrypter_spec.rb`.
+
+- When the debug stops, you should be able to paste in:
+
+```ruby
+new_encrypted_api_token = StringEncrypter.encode("your_github_token")
+Base64.encode64(new_encrypted_api_token)
+```
+
+- The result of the code will be the encrypted `encrypted_api_token` in the `users.json` file.
+
+- For the `password_hash`, just execute `BCrypt::Password.create("your_password")` and use it in the `users.json` file.
 
 ## Local development
 
