@@ -138,9 +138,25 @@ In order to run fastlane.ci for the first time, the `https://github.com/your-nam
 
 In order to generate for the first time the `password_hash` and the `encrypted_api_token` there are some additional steps to follow:
 
-- Some first step.
+- In `string_encrypter_spec.rb`, right after `describe "string encrypter example" do` add:
 
-- Some second step.
+```ruby
+    require "pry"
+    binding.pry
+```
+
+- Then `DEBUG=1 bundle exec rspec spec/shared/string_encrypter_spec.rb`.
+
+- When the debug stops, you should be able to paste in:
+
+```ruby
+new_encrypted_api_token = StringEncrypter.encode("your_github_token")
+Base64.encode64(new_encrypted_api_token)
+```
+
+- The result of the code will be the encrypted `encrypted_api_token` in the `users.json` file.
+
+- For the `password_hash`, just execute `BCrypt::Password.create("your_password")` and use it in the `users.json` file.
 
 ## Local development
 
