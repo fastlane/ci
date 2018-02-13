@@ -55,6 +55,12 @@ module FastlaneCI
           else
             var_value = val
           end
+          if self.attribute_to_type_map.key?(var_name)
+            if self.attribute_to_type_map[var_name].include?(FastlaneCI::JSONConvertible)
+              # classes that include `JSONConvertible` take precedence over custom mapping.
+              var_value = self.attribute_to_type_map[var_name].from_json!(val)
+            end
+          end
           instance.instance_variable_set(var_name, var_value)
         end
         return instance
@@ -89,6 +95,7 @@ module FastlaneCI
       #         timestamp.strftime('%Q')
       #       }
       #       return { :@timestamp => timestamp_to_json_proc }
+      #     end
       #
       # @return [Hash] of properties and procs formatting to JSON
       def attribute_name_to_json_proc_map
@@ -105,12 +112,31 @@ module FastlaneCI
       #
       #     def self.json_to_attribute_name_proc_map
       #       json_to_timestamp_proc = proc { |json|
-      #         return Time.at(json.to_i)
+      #         Time.at(json.to_i)
       #       }
       #       return { :@timestamp => json_to_timestamp_proc }
+      #     end
       #
       # @return [Hash] of properties and procs formatting from JSON
       def json_to_attribute_name_proc_map
+        return {}
+      end
+
+      # class method
+      # This method is intended to be overridden by any
+      # class that implements `JSONConvertible` and need
+      # to provide the encoder information about which types
+      # are each attribute of the class.
+      #
+      #   @example
+      #
+      #
+      #     def attribute_to_type_map
+      #       return { :@string_attribute => String, :@custom_class_attribute => CustomClass }
+      #     end
+      #
+      # @return [Hash] of properties and their types
+      def attribute_to_type_map
         return {}
       end
     end
