@@ -14,6 +14,17 @@ class MockJSONConvertible
   end
 end
 
+class MockParentJSONConvertible
+  include FastlaneCI::JSONConvertible
+
+  # @return [MockJSONConvertible]
+  attr_accessor :mock_json_attribute
+
+  def initialize(mock_json_attribute: nil)
+    self.mock_json_attribute = mock_json_attribute
+  end
+end
+
 module FastlaneCI
   describe JSONConvertible do
     let (:mock_object) { MockJSONConvertible.new(one_attribute: "Hello", other_attribute: Time.at(0)) }
@@ -71,6 +82,25 @@ module FastlaneCI
       object = MockJSONConvertible.from_json!({ "json_one_attribute" => "Hello", "json_other_attribute" => Time.at(0) })
       expect(object.one_attribute).to eql("Hello")
       expect(object.other_attribute).to eql(Time.at(0))
+    end
+
+    it "Allows to decode from a dictionary object when it has custom attributes" do
+      allow(MockParentJSONConvertible).to receive(:attribute_to_type_map).and_return({ :@mock_json_attribute => MockJSONConvertible })
+      dictionary_object = { "mock_json_attribute" => { "one_attribute" => "Hello", "other_attribute" => Time.at(0) } }
+      object = MockParentJSONConvertible.from_json!(dictionary_object)
+      expect(object.mock_json_attribute.one_attribute).to eql("Hello")
+      expect(object.mock_json_attribute.other_attribute).to eql(Time.at(0))
+    end
+
+    it "The mapping of a class that includes `JSONConvertible` takes precedence from a custom map of a parent class" do
+      allow(MockParentJSONConvertible).to receive(:attribute_to_type_map).and_return({ :@mock_json_attribute => MockJSONConvertible })
+      allow(MockJSONConvertible).to receive(:json_to_attribute_name_proc_map).and_return({ :@mock_json_attribute => proc { |_|
+        MockJSONConvertible.new(one_attribute: "World", other_attribute: Time.at(10))
+      } })
+      dictionary_object = { "mock_json_attribute" => { "one_attribute" => "Hello", "other_attribute" => Time.at(0) } }
+      object = MockParentJSONConvertible.from_json!(dictionary_object)
+      expect(object.mock_json_attribute.one_attribute).to eql("Hello")
+      expect(object.mock_json_attribute.other_attribute).to eql(Time.at(0))
     end
   end
 end
