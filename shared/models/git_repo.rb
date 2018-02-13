@@ -87,10 +87,10 @@ module FastlaneCI
       while !setup_task.completed && now < sleep_timeout
         time_left = sleep_timeout - now
         logger.debug("Not setup yet, sleeping (time before timeout: #{time_left}) #{self.git_config.git_url}")
-        sleep 1
+        sleep(1)
         now = Time.now.utc
       end
-      
+
       raise "Unable to start git repo #{git_config.git_url} in #{sync_setup_timeout_seconds} seconds" if now > sleep_timeout
 
       logger.debug("Done starting up repo: #{self.git_config.git_url}")
@@ -113,16 +113,16 @@ module FastlaneCI
             self.pull
           else
             logger.debug("[#{self.git_config.id}] Repo URL seems to have changed... deleting the old directory and cloning again")
-            clear_directory
+            self.clear_directory
             self.clone
           end
         else
-          clear_directory
+          self.clear_directory
           logger.debug("Cloning #{self.git_config.git_url}")
           self.clone
         end
       else
-        logger.debug("Cloning #{self.git_config.git_url}")
+        logger.debug("Cloning #{self.git_config.git_url} into #{self.git_config.local_repo_path}")
         self.clone
 
         # now that we've cloned, we can setup the @_git variable
@@ -231,7 +231,7 @@ module FastlaneCI
         if ENV["FASTLANE_EXTRA_VERBOSE"] # because this repeats a ton
           logger.debug("[#{self.git_config.id}]: Pulling latest changes")
         end
-        self.temporary_storage_path = self.setup_auth(repo_auth: repo_auth)
+        self.setup_auth(repo_auth: repo_auth)
         git.pull
       end
     end
@@ -292,20 +292,31 @@ module FastlaneCI
       end
     end
 
-    def clone(repo_auth: self.repo_auth)
-      git_action_with_queue(ensure_block: proc { unset_auth }) do
-        # `self.git_config.containing_path` is where we store the local git repo
-        # fastlane.ci will also delete this directory if it breaks
-        # and just re-clones. So make sure it's fine if it gets deleted
-        raise "No containing path available" unless self.git_config.containing_path
-        logger.debug("Cloning git repo #{self.git_config.git_url}....")
-
-        self.temporary_storage_path = self.setup_auth(repo_auth: repo_auth)
-        logger.debug("[#{self.git_config.id}]: Cloning git repo #{self.git_config.git_url}")
-        Git.clone(self.git_config.git_url, self.git_config.id,
-                  path: self.git_config.containing_path,
-                  recursive: true)
+    def clone(repo_auth: self.repo_auth, async: false)
+      if async
+        # If we're async, just push it on the queue
+        git_action_with_queue(ensure_block: proc { unset_auth }) do
+          clone_synchronously(repo_auth: repo_auth)
+        end
+      else
+        clone_synchronously(repo_auth: repo_auth)
       end
+    end
+
+    private
+
+    def clone_synchronously(repo_auth: self.repo_auth)
+      # `self.git_config.containing_path` is where we store the local git repo
+      # fastlane.ci will also delete this directory if it breaks
+      # and just re-clones. So make sure it's fine if it gets deleted
+      raise "No containing path available" unless self.git_config.containing_path
+      logger.debug("Cloning git repo #{self.git_config.git_url}....")
+
+      self.temporary_storage_path = self.setup_auth(repo_auth: repo_auth)
+      logger.debug("[#{self.git_config.id}]: Cloning git repo #{self.git_config.git_url}")
+      Git.clone(self.git_config.git_url, self.git_config.id,
+                path: self.git_config.containing_path,
+                recursive: true)
     end
   end
 end
