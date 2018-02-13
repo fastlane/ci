@@ -1,0 +1,16 @@
+container:
+  image: ruby:2.5
+
+task:
+  bundle_cache:
+    folder: /usr/local/bundle
+    fingerprint_script: cat Gemfile.lock
+    populate_script: bundle install
+  git_script:
+    - git submodule init
+    - git submodule update
+  matrix:
+    - name: rspec
+      rspec_script: bundle exec rspec
+    - name: rubocop
+      rspec_script: bundle exec rubocop -a
