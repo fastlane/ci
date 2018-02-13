@@ -24,8 +24,16 @@ module FastlaneCI
         object_hash = {}
         self.instance_variables.each do |var|
           next if ignore_instance_variables.include?(var)
-          instance_variable_value = self.instance_variable_get(var)
-          var_name = var.to_s[1..-1]
+          if self.class.attribute_name_to_json_proc_map.key?(var)
+            instance_variable_value = self.class.attribute_name_to_json_proc_map[var].call(self.instance_variable_get(var))
+          else
+            instance_variable_value = self.instance_variable_get(var)
+          end
+          if self.class.attribute_key_name_map.key?(var)
+            var_name = self.class.attribute_key_name_map[var]
+          else
+            var_name = var.to_s[1..-1]
+          end
           object_hash[var_name] = instance_variable_value
         end
         return object_hash
@@ -37,9 +45,99 @@ module FastlaneCI
       def from_json!(json_object)
         instance = self.new
         json_object.each do |var, val|
-          instance.instance_variable_set("@#{var}".to_sym, val)
+          if self.attribute_key_name_map.key(var)
+            var_name = self.attribute_key_name_map.key(var).to_sym
+          else
+            var_name = "@#{var}".to_sym
+          end
+          if self.json_to_attribute_name_proc_map.key?(var)
+            var_value = self.json_to_attribute_name_proc_map[var].call(val)
+          else
+            var_value = val
+          end
+          if self.attribute_to_type_map.key?(var_name)
+            if self.attribute_to_type_map[var_name].include?(FastlaneCI::JSONConvertible)
+              # classes that include `JSONConvertible` take precedence over custom mapping.
+              var_value = self.attribute_to_type_map[var_name].from_json!(val)
+            end
+          end
+          instance.instance_variable_set(var_name, var_value)
         end
         return instance
+      end
+
+      # class method
+      # This method is intended to be overridden by any
+      # class that implements `JSONConvertible` and need
+      # to use a custom mapping of the attributes to JSON keys.
+      #
+      #   @example
+      #
+      #     def self.attribute_key_name_map
+      #       return { :@some_key => "some_key_in_json" }
+      #     end
+      #
+      # @return [Hash] of mapping properties to keys in the JSON
+      def attribute_key_name_map
+        return {}
+      end
+
+      # class method
+      # This method is intended to be overridden by any
+      # class that implements `JSONConvertible` and need
+      # to encode the result of the class attributes in a
+      # certain format into the JSON.
+      #
+      #   @example
+      #
+      #     def self.attribute_name_to_json_proc_map
+      #       timestamp_to_json_proc = proc { |timestamp|
+      #         timestamp.strftime('%Q')
+      #       }
+      #       return { :@timestamp => timestamp_to_json_proc }
+      #     end
+      #
+      # @return [Hash] of properties and procs formatting to JSON
+      def attribute_name_to_json_proc_map
+        return {}
+      end
+
+      # class method
+      # This method is intended to be overridden by any
+      # class that implements `JSONConvertible` and need
+      # to decode the JSON values back to the original types
+      # of the class attributes.
+      #
+      #   @example
+      #
+      #     def self.json_to_attribute_name_proc_map
+      #       json_to_timestamp_proc = proc { |json|
+      #         Time.at(json.to_i)
+      #       }
+      #       return { :@timestamp => json_to_timestamp_proc }
+      #     end
+      #
+      # @return [Hash] of properties and procs formatting from JSON
+      def json_to_attribute_name_proc_map
+        return {}
+      end
+
+      # class method
+      # This method is intended to be overridden by any
+      # class that implements `JSONConvertible` and need
+      # to provide the encoder information about which types
+      # are each attribute of the class.
+      #
+      #   @example
+      #
+      #
+      #     def attribute_to_type_map
+      #       return { :@string_attribute => String, :@custom_class_attribute => CustomClass }
+      #     end
+      #
+      # @return [Hash] of properties and their types
+      def attribute_to_type_map
+        return {}
       end
     end
   end
