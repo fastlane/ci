@@ -56,6 +56,7 @@ module FastlaneCI
       # TODO: ensure BuildService subclasses are thread-safe
       build_service = FastlaneCI::Services.build_service
 
+      # TODO: don't reach into this object's attributes like this
       repo.git.branches.remote.each do |branch|
         next if branch.name.start_with?("HEAD ->") # not sure what this is for
 
