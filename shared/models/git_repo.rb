@@ -4,6 +4,7 @@ require "git"
 require "tty-command"
 require "securerandom"
 require_relative "../logging_module"
+require_relative "../../taskqueue/task_queue"
 
 module FastlaneCI
   # Encapsulates all the data that is needed by GitRepo
@@ -41,7 +42,15 @@ module FastlaneCI
     # @return [GitRepoAuth]
     attr_accessor :repo_auth # whatever pieces of information that can change between git users
 
-    def initialize(git_config: nil, provider_credential: nil)
+    attr_accessor :temporary_storage_path
+
+    class << self
+      attr_accessor :git_action_queue
+    end
+
+    GitRepo.git_action_queue = TaskQueue::TaskQueue.new(name: "GitRepo task queue")
+
+    def initialize(git_config: nil, provider_credential: nil, async_start: false, sync_setup_timeout_seconds: 120)
       self.validate_initialization_params!(git_config: git_config, provider_credential: provider_credential)
       @git_config = git_config
 
@@ -60,15 +69,47 @@ module FastlaneCI
         raise "unsupported credential type: #{provider_credential.type}"
       end
 
+      logger.debug("Adding task to setup repo #{self.git_config.git_url} at: #{self.git_config.local_repo_path}")
+
+      setup_task = git_action_with_queue do
+        self.setup_repo
+      end
+
+      # if we're starting asynchronously, we can return now.
+      if async_start
+        logger.debug("Asynchronously starting up repo: #{self.git_config.git_url}")
+        return
+      end
+
+      logger.debug("Synchronously starting up repo: #{self.git_config.git_url}")
+      now = Time.now.utc
+      sleep_timeout = now + sync_setup_timeout_seconds # 10 second startup timeout
+      while !setup_task.completed && now < sleep_timeout
+        time_left = sleep_timeout - now
+        logger.debug("Not setup yet, sleeping (time before timeout: #{time_left}) #{self.git_config.git_url}")
+        sleep 1
+        now = Time.now.utc
+      end
+      
+      raise "Unable to start git repo #{git_config.git_url} in #{sync_setup_timeout_seconds} seconds" if now > sleep_timeout
+
+      logger.debug("Done starting up repo: #{self.git_config.git_url}")
+    end
+
+    def setup_repo
       if File.directory?(self.git_config.local_repo_path)
         # TODO: test if this crashes if it's not a git directory
-        repo = Git.open(self.git_config.local_repo_path)
+        @_git = Git.open(self.git_config.local_repo_path)
+        repo = self.git
         if repo.index.writable?
           # Things are looking legit so far
           # Now we have to check if the repo is actually from the
           # same repo URL
           if repo.remote("origin").url.casecmp(self.git_config.git_url.downcase).zero?
+            logger.debug("Resetting #{self.git_config.git_url}")
             self.git.reset_hard
+
+            logger.debug("Pulling #{self.git_config.git_url}")
             self.pull
           else
             logger.debug("[#{self.git_config.id}] Repo URL seems to have changed... deleting the old directory and cloning again")
@@ -77,19 +118,17 @@ module FastlaneCI
           end
         else
           clear_directory
+          logger.debug("Cloning #{self.git_config.git_url}")
           self.clone
         end
       else
+        logger.debug("Cloning #{self.git_config.git_url}")
         self.clone
-      end
-      logger.debug("Using #{self.git_config.local_repo_path} for config repo")
-    end
 
-    # This is where we store the local git repo
-    # fastlane.ci will also delete this directory if it breaks
-    # and just re-clones. So make sure it's fine if it gets deleted
-    def containing_path
-      self.git_config.containing_path
+        # now that we've cloned, we can setup the @_git variable
+        @_git = Git.open(self.git_config.local_repo_path)
+      end
+      logger.debug("Done, now using #{self.git_config.local_repo_path} for config repo")
     end
 
     def validate_initialization_params!(git_config: nil, provider_credential: nil)
@@ -104,6 +143,7 @@ module FastlaneCI
     end
 
     def clear_directory
+      logger.debug("Deleting #{self.git_config.local_repo_path}")
       FileUtils.rm_rf(self.git_config.local_repo_path)
     end
 
@@ -113,10 +153,6 @@ module FastlaneCI
     end
 
     def git
-      if @_git.nil?
-        @_git = Git.open(self.git_config.local_repo_path)
-      end
-
       return @_git
     end
 
@@ -136,9 +172,11 @@ module FastlaneCI
       # TODO: performance implications of settings this every time?
       # TODO: Set actual name + email here
       # TODO: see if we can set credentials here also
-      logger.debug("Using #{full_name} with #{username} as author information")
-      git.config("user.name", full_name)
-      git.config("user.email", username)
+      git_action_with_queue do
+        logger.debug("Using #{full_name} with #{username} as author information")
+        git.config("user.name", full_name)
+        git.config("user.email", username)
+      end
     end
 
     def temporary_git_storage
@@ -150,13 +188,12 @@ module FastlaneCI
     # Responsible for using the auth token to be able to push/pull changes
     # from git remote
     def setup_auth(repo_auth: self.repo_auth)
+      self.temporary_storage_path = File.join(self.temporary_git_storage, "git-auth-#{SecureRandom.uuid}")
       # More details: https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
-      storage_path = File.join(self.temporary_git_storage, "git-auth-#{SecureRandom.uuid}")
-
       local_repo_path = self.git_config.local_repo_path
       FileUtils.mkdir_p(local_repo_path) unless File.directory?(local_repo_path)
 
-      store_credentials_command = "git credential-store --file #{storage_path.shellescape} store"
+      store_credentials_command = "git credential-store --file #{self.temporary_storage_path.shellescape} store"
       content = [
         "protocol=https",
         "host=#{repo_auth.remote_host}",
@@ -172,89 +209,103 @@ module FastlaneCI
         # TODO: check if we find a better way for the initial clone to work without setting system global state
         scope = "global"
       end
-      use_credentials_command = "git config --#{scope} credential.helper 'store --file #{storage_path.shellescape}'"
+      use_credentials_command = "git config --#{scope} credential.helper 'store --file #{self.temporary_storage_path.shellescape}' #{local_repo_path}"
 
-      Dir.chdir(local_repo_path) do
-        cmd = TTY::Command.new(printer: :quiet)
-        cmd.run(store_credentials_command, input: content)
-        cmd.run(use_credentials_command)
+      if ENV["FASTLANE_EXTRA_VERBOSE"] # because this repeats a ton
+        logger.debug("Setting credentials with command: #{use_credentials_command}")
       end
 
-      return storage_path
+      cmd = TTY::Command.new(printer: :quiet)
+      cmd.run(store_credentials_command, input: content)
+      cmd.run(use_credentials_command)
     end
 
-    def unset_auth(storage_path: nil)
-      return unless storage_path.kind_of?(String)
+    def unset_auth
+      return unless self.temporary_storage_path.kind_of?(String)
       # TODO: Also auto-clean those files from time to time, on server re-launch maybe, or background worker
-      FileUtils.rm(storage_path) if File.exist?(storage_path)
+      FileUtils.rm(self.temporary_storage_path) if File.exist?(self.temporary_storage_path)
     end
 
     def pull(repo_auth: self.repo_auth)
-      if ENV["FASTLANE_EXTRA_VERBOSE"] # because this repeats a ton
-        logger.debug("[#{self.git_config.id}]: Pulling latest changes")
+      git_action_with_queue(ensure_block: proc { unset_auth }) do
+        if ENV["FASTLANE_EXTRA_VERBOSE"] # because this repeats a ton
+          logger.debug("[#{self.git_config.id}]: Pulling latest changes")
+        end
+        self.temporary_storage_path = self.setup_auth(repo_auth: repo_auth)
+        git.pull
       end
-      storage_path = self.setup_auth(repo_auth: repo_auth)
-      git.pull
-    ensure
-      unset_auth(storage_path: storage_path)
     end
 
     # This method commits and pushes all changes
     # if `file_to_commit` is `nil`, all files will be added
     # TODO: this method isn't actually tested yet
     def commit_changes!(commit_message: nil, file_to_commit: nil, repo_auth: self.repo_auth)
-      raise "file_to_commit not yet implemented" if file_to_commit
-      commit_message ||= "Automatic commit by fastlane.ci"
+      git_action_with_queue do
+        raise "file_to_commit not yet implemented" if file_to_commit
+        commit_message ||= "Automatic commit by fastlane.ci"
 
-      self.setup_author(full_name: repo_auth.full_name, username: repo_auth.username)
+        self.setup_author(full_name: repo_auth.full_name, username: repo_auth.username)
 
-      git.add(all: true) # TODO: for now we only add all files
-      git.commit(commit_message)
-      git.push
+        git.add(all: true) # TODO: for now we only add all files
+        git.commit(commit_message)
+        git.push
+      end
     end
 
     def push(repo_auth: self.repo_auth)
-      self.setup_author(full_name: repo_auth.full_name, username: repo_auth.username)
-      storage_path = self.setup_auth(repo_auth: repo_auth)
-      logger.debug("Pushing git repo....")
+      git_action_with_queue(ensure_block: proc { unset_auth }) do
+        self.setup_author(full_name: repo_auth.full_name, username: repo_auth.username)
+        self.temporary_storage_path = self.setup_auth(repo_auth: repo_auth)
+        logger.debug("Pushing git repo....")
 
-      # TODO: how do we handle branches
-      self.git.push
-    ensure
-      unset_auth(storage_path: storage_path)
+        # TODO: how do we handle branches
+        self.git.push
+      end
     end
 
     def status
       self.git.status
     end
 
+    # `ensure_block`: block that you want executed after the `&block` finishes executed, even on error
+    def git_action_with_queue(ensure_block: nil, &block)
+      git_task = TaskQueue::Task.new(work_block: block, ensure_block: ensure_block)
+      GitRepo.git_action_queue.add_task_async(task: git_task)
+      return git_task
+    end
+
     # Discard any changes
     def reset_hard!
-      self.git.reset_hard
-      self.git.clean(:force => true, :d => true)
+      git_action_with_queue do
+        self.git.reset_hard
+        self.git.clean(force: true, d: true)
+      end
     end
 
     def fetch
-      if ENV["FASTLANE_EXTRA_VERBOSE"] # because this repeats a ton
-        logger.debug("[#{self.git_config.id}]: Running git fetch")
+      git_action_with_queue(ensure_block: proc { unset_auth }) do
+        if ENV["FASTLANE_EXTRA_VERBOSE"] # because this repeats a ton
+          logger.debug("[#{self.git_config.id}]: Running git fetch")
+        end
+        self.temporary_storage_path = self.setup_auth(repo_auth: repo_auth)
+        self.git.fetch
       end
-      storage_path = self.setup_auth(repo_auth: repo_auth)
-      self.git.fetch
-    ensure
-      unset_auth(storage_path: storage_path)
     end
 
     def clone(repo_auth: self.repo_auth)
-      raise "No containing path available" unless self.containing_path
-      logger.debug("Cloning git repo #{self.git_config.git_url}....")
+      git_action_with_queue(ensure_block: proc { unset_auth }) do
+        # `self.git_config.containing_path` is where we store the local git repo
+        # fastlane.ci will also delete this directory if it breaks
+        # and just re-clones. So make sure it's fine if it gets deleted
+        raise "No containing path available" unless self.git_config.containing_path
+        logger.debug("Cloning git repo #{self.git_config.git_url}....")
 
-      storage_path = self.setup_auth(repo_auth: repo_auth)
-      logger.debug("[#{self.git_config.id}]: Cloning git repo #{self.git_config.git_url}")
-      Git.clone(self.git_config.git_url, self.git_config.id,
-                path: self.containing_path,
-                recursive: true)
-    ensure
-      unset_auth(storage_path: storage_path)
+        self.temporary_storage_path = self.setup_auth(repo_auth: repo_auth)
+        logger.debug("[#{self.git_config.id}]: Cloning git repo #{self.git_config.git_url}")
+        Git.clone(self.git_config.git_url, self.git_config.id,
+                  path: self.git_config.containing_path,
+                  recursive: true)
+      end
     end
   end
 end

@@ -16,7 +16,7 @@ module FastlaneCI
 
       self.build_service = FastlaneCI::Services.build_service
 
-      # TODO: provider credential should determine what exact CodeHostingService gets instantiated 
+      # TODO: provider credential should determine what exact CodeHostingService gets instantiated
       self.code_hosting_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
     end
 
@@ -41,13 +41,11 @@ module FastlaneCI
       update_build_status!
 
       # TODO: Replace with fastlane runner here
-      command = "rubocop"
-      puts("Running #{command}")
+      command = "rubocop #{project.repo_config.local_repo_path}"
+      logger.info("Running #{command}")
 
-      Dir.chdir(project.repo_config.local_repo_path) do
-        cmd = TTY::Command.new
-        cmd.run(command)
-      end
+      cmd = TTY::Command.new
+      cmd.run(command)
 
       duration = Time.now - start_time
 
