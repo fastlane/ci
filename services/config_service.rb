@@ -35,8 +35,7 @@ module FastlaneCI
       code_hosting_service = self.active_code_hosting_services[code_hosting_service_key]
       return code_hosting_service unless code_hosting_service.nil?
 
-
-      # TODO: not a big deal right now, but we should have a way of automatically generating the correct 
+      # TODO: not a big deal right now, but we should have a way of automatically generating the correct
       # CodeHostingService subclass based on the provider_credential type and maybe not have it right here.
       # A Java-style factory might be the right move here.
       case provider_credential.type

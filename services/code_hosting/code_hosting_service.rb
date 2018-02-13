@@ -2,7 +2,6 @@ require_relative "../../shared/models/provider_credential"
 module FastlaneCI
   # Abstract base class for all code hosting data services
   class CodeHostingService
-
     def initialize(provider_credential: nil)
       not_implemented(__method__)
     end

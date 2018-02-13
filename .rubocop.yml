@@ -220,6 +220,7 @@ AllCops:
   Exclude:
     - './vendor/**/*'
     - './fastfile-parser/**/*'
+    - './taskqueue/**/*'
 
 # They have not to be snake_case
 Naming/FileName:

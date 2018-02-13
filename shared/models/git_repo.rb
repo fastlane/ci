@@ -87,10 +87,10 @@ module FastlaneCI
       while !setup_task.completed && now < sleep_timeout
         time_left = sleep_timeout - now
         logger.debug("Not setup yet, sleeping (time before timeout: #{time_left}) #{self.git_config.git_url}")
-        sleep 1
+        sleep(1)
         now = Time.now.utc
       end
-      
+
       raise "Unable to start git repo #{git_config.git_url} in #{sync_setup_timeout_seconds} seconds" if now > sleep_timeout
 
       logger.debug("Done starting up repo: #{self.git_config.git_url}")
