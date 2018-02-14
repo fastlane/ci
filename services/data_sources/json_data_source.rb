@@ -8,6 +8,7 @@ module FastlaneCI
       def create(json_folder_path)
         instance = self.new
         instance.json_folder_path = json_folder_path
+        return instance
       end
     end
   end
