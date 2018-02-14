@@ -1,5 +1,6 @@
 require "bcrypt"
 require "securerandom"
+require_relative "json_data_source"
 require_relative "user_data_source"
 require_relative "../../shared/logging_module"
 require_relative "../../shared/json_convertible"
@@ -20,9 +21,8 @@ module FastlaneCI
 
   # Data source for users backed by JSON
   class JSONUserDataSource < UserDataSource
+    include FastlaneCI::JSONDataSource
     include FastlaneCI::Logging
-
-    attr_accessor :json_folder_path
 
     class << self
       attr_accessor :file_semaphore
@@ -32,11 +32,12 @@ module FastlaneCI
     JSONUserDataSource.file_semaphore = Mutex.new
 
     def initialize(json_folder_path: nil)
-      @json_folder_path = json_folder_path
+      instance = self.class.create(json_folder_path: json_folder_path)
       logger.debug("Using folder path for user data: #{json_folder_path}")
       # load up the json file here
       # parse all data into objects so we can fail fast on error
-      reload_users
+      instance.reload_users
+      return instance
     end
 
     def user_file_path(path: "users.json")

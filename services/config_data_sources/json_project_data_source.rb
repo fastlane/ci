@@ -1,4 +1,5 @@
 require_relative "project_data_source"
+require_relative "../data_sources/json_data_source"
 require_relative "../../shared/json_convertible"
 require_relative "../../shared/models/git_repo"
 require_relative "../../shared/models/git_repo_config"
@@ -19,6 +20,7 @@ module FastlaneCI
 
   # (default) Store configuration in git
   class JSONProjectDataSource < ProjectDataSource
+    include FastlaneCI::JSONDataSource
     include FastlaneCI::Logging
 
     # Reference to FastlaneCI::GitRepo
