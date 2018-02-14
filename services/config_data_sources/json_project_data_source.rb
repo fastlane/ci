@@ -32,6 +32,20 @@ module FastlaneCI
       attr_accessor :projects_file_semaphore
       attr_accessor :repos_file_semaphore
     end
+<<<<<<< refs/remotes/fastlane/master
+=======
+
+    JSONProjectDataSource.projects_file_semaphore = Mutex.new
+    JSONProjectDataSource.repos_file_semaphore = Mutex.new
+
+    # Reference to FastlaneCI::GitRepo
+    attr_accessor :git_repo
+
+    # You can provide either a `user` or `provider_credential`
+    # TODO: should it be just `provider_credential`?
+    def initialize(git_repo_config: nil, user: nil, provider_credential: nil)
+      raise "No git_repo_config provided" if git_repo_config.nil?
+>>>>>>> minuscorp-ProjectService~12
 
     JSONProjectDataSource.projects_file_semaphore = Mutex.new
     JSONProjectDataSource.repos_file_semaphore = Mutex.new
@@ -79,7 +93,11 @@ module FastlaneCI
         path = self.git_repo.file_path("repos.json")
         return [] unless File.exist?(path)
 
+<<<<<<< refs/remotes/fastlane/master
         saved_git_repos = JSON.parse(File.read(path)).map(&GitRepoConfig.method(:from_json!))
+=======
+        saved_git_repos = JSON.parse(File.read(path)).map { |repo_config_hash| GitRepoConfig.from_json!(repo_config_hash) }
+>>>>>>> minuscorp-ProjectService~12
         return saved_git_repos
       end
     end
@@ -89,6 +107,7 @@ module FastlaneCI
         path = self.git_repo.file_path("repos.json")
         File.write(path, JSON.pretty_generate(git_repo_configs.map(&:to_object_dictionary)))
       end
+<<<<<<< refs/remotes/fastlane/master
     end
 
     def create_project!(name: nil, repo_config: nil, enabled: nil, lane: nil)
@@ -135,6 +154,8 @@ module FastlaneCI
         logger.debug("Updating project #{existing_project.project_name}, writing out to projects.json to #{json_folder_path}")
         @projects[project_index] = project
       end
+=======
+>>>>>>> minuscorp-ProjectService~12
     end
   end
 end
