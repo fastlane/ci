@@ -11,6 +11,10 @@ module FastlaneCI
   # Mixin for Project to enable some basic JSON marshalling and unmarshalling
   class Project
     include FastlaneCI::JSONConvertible
+
+    def self.attribute_to_type_map
+      return { :@repo_config => GitRepoConfig }
+    end
   end
 
   # Mixin for GitRepoConfig to enable some basic JSON marshalling and unmarshalling
@@ -22,6 +26,14 @@ module FastlaneCI
   class JSONProjectDataSource < ProjectDataSource
     include FastlaneCI::JSONDataSource
     include FastlaneCI::Logging
+
+    class << self
+      attr_accessor :projects_file_semaphore
+      attr_accessor :repos_file_semaphore
+    end
+
+    JSONProjectDataSource.projects_file_semaphore = Mutex.new
+    JSONProjectDataSource.repos_file_semaphore = Mutex.new
 
     # Reference to FastlaneCI::GitRepo
     attr_accessor :git_repo
@@ -44,36 +56,37 @@ module FastlaneCI
 
     # Access configuration
     def projects
-      path = self.git_repo.file_path("projects.json")
-      return [] unless File.exist?(path)
+      JSONProjectDataSource.projects_file_semaphore.synchronize do
+        path = self.git_repo.file_path("projects.json")
+        return [] unless File.exist?(path)
 
-      saved_projects = JSON.parse(File.read(path)).map do |project_hash|
-        project = Project.from_json!(project_hash)
-
-        # need to grab the 'repo_config' because it doesn't convert automatically
-        repo_config_hash = project_hash["repo_config"]
-        project.repo_config = GitRepoConfig.from_json!(repo_config_hash)
-        project
+        saved_projects = JSON.parse(File.read(path)).map(&Project.method(:from_json!))
+        return saved_projects
       end
-      return saved_projects
     end
 
     def projects=(projects)
-      File.write(self.git_repo.file_path("projects.json"), JSON.pretty_generate(projects.map(&:to_object_dictionary)))
-      self.git_repo.commit_changes!
+      JSONProjectDataSource.projects_file_semaphore.synchronize do
+        File.write(self.git_repo.file_path("projects.json"), JSON.pretty_generate(projects.map(&:to_object_dictionary)))
+        self.git_repo.commit_changes!
+      end
     end
 
     def git_repos
-      path = self.git_repo.file_path("repos.json")
-      return [] unless File.exist?(path)
+      JSONProjectDataSource.repos_file_semaphore.synchronize do
+        path = self.git_repo.file_path("repos.json")
+        return [] unless File.exist?(path)
 
-      saved_git_repos = JSON.parse(File.read(path)).map { |repo_config_hash| GitRepoConfig.from_json!(repo_config_hash) }
-      return saved_git_repos
+        saved_git_repos = JSON.parse(File.read(path)).map { |repo_config_hash| GitRepoConfig.from_json!(repo_config_hash) }
+        return saved_git_repos
+      end
     end
 
     def save_git_repo_configs!(git_repo_configs: nil)
-      path = self.git_repo.file_path("repos.json")
-      File.write(path, JSON.pretty_generate(git_repo_configs.map(&:to_object_dictionary)))
+      JSONProjectDataSource.repos_file_semaphore.synchronize do
+        path = self.git_repo.file_path("repos.json")
+        File.write(path, JSON.pretty_generate(git_repo_configs.map(&:to_object_dictionary)))
+      end
     end
   end
 end
