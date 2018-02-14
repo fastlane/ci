@@ -88,5 +88,16 @@ module FastlaneCI
         File.write(path, JSON.pretty_generate(git_repo_configs.map(&:to_object_dictionary)))
       end
     end
+
+    def create_project!(name: nil, repo_config: nil, enabled: nil, lane: nil)
+      projects = self.projects
+      new_project = Project.new(repo_config: repo_config,
+                                enabled: enabled,
+                                project_name: name,
+                                lane: lane)
+      projects.push(new_project)
+      self.projects = projects
+      return new_project
+    end
   end
 end

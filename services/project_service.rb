@@ -1,4 +1,5 @@
 require_relative "config_data_sources/json_project_data_source"
+require_relative "../shared/../shared/models/repo_config"
 require_relative "../shared/logging_module"
 
 module FastlaneCI
@@ -11,13 +12,23 @@ module FastlaneCI
         raise "project_data_source must be descendant of #{ProjectDataSource.name}" unless project_data_source.class <= ProjectDataSource
       end
 
-      if project_data_source.nil?
-        # Default to JSONProjectDataSource
-        logger.debug("project_data_source is new, using `ENV[\"data_store_folder\"]` if available, or `sample_data` folder")
-        data_store_folder = ENV["data_store_folder"]
-        data_store_folder ||= File.join(FastlaneCI::FastlaneApp.settings.root, "sample_data")
-      end
+      self.project_data_source = project_data_source
+    end
 
+    def create_project!(name: nil, repo_config: nil, enabled: nil, lane: nil)
+      unless repo_config.nil?
+        raise "repo_config must be configured with an instance of #{RepoConfig.name}" unless repo_config.class <= RepoConfig
+      end
+      unless lane.nil?
+        raise "lane parameter must be configured"
+      end
+      # we can guess the other parameters if not provided
+      # the name parameter can be inferred from the url of the repo. (i.e., "https://gitub.com/fastlane/ci" -> "fastlane/ci")
+      name ||= repo_config.git_url.split("/").last(2).join("/")
+      # we infer that the new project will be enabled by default
+      enabled ||= true
+      project = self.project_data_source.create_project!(name: name, repo_config: repo_config, enabled: enabled, lane: lane)
+      return project
     end
   end
 end
