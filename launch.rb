@@ -41,7 +41,7 @@ module FastlaneCI
 
     def self.verify_system_requirements
       # Check the current ruby version
-      required_version = Gem::Version.new('2.3.0')
+      required_version = Gem::Version.new("2.3.0")
       if Gem::Version.new(RUBY_VERSION) < required_version
         warn("Error: ensure you have at least Ruby #{required_version}")
         exit(1)
