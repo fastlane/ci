@@ -31,13 +31,11 @@ module FastlaneCI
     # can't have us reading and writing to a file at the same time
     JSONUserDataSource.file_semaphore = Mutex.new
 
-    def initialize(json_folder_path: nil)
-      instance = self.class.create(json_folder_path: json_folder_path)
+    def after_creation(params)
       logger.debug("Using folder path for user data: #{json_folder_path}")
       # load up the json file here
       # parse all data into objects so we can fail fast on error
-      instance.reload_users
-      return instance
+      self.reload_users
     end
 
     def user_file_path(path: "users.json")

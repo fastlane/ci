@@ -63,7 +63,7 @@ module FastlaneCI
     # Start up a UserService from our JSONUserDataSource
     def self.user_service
       @_user_service ||= FastlaneCI::UserService.new(
-        user_data_source: JSONUserDataSource.new(json_folder_path: ci_config_git_repo_path)
+        user_data_source: JSONUserDataSource.create(json_folder_path: ci_config_git_repo_path)
       )
     end
 

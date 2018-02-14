@@ -18,7 +18,7 @@ module FastlaneCI
         logger.debug("user_data_source is new, using `ENV[\"data_store_folder\"]` if available, or `sample_data` folder")
         data_store_folder = ENV["data_store_folder"] # you can set it at runtime!
         data_store_folder ||= File.join(FastlaneCI::FastlaneApp.settings.root, "sample_data")
-        user_data_source = JSONUserDataSource.new(json_folder_path: data_store_folder)
+        user_data_source = JSONUserDataSource.create(json_folder_path: data_store_folder)
       end
 
       self.user_data_source = user_data_source
