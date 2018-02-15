@@ -52,6 +52,9 @@ module FastlaneCI
       end
     end
 
+    def after_creation(params)
+    end
+
     def refresh_repo
       self.git_repo.pull
     end
@@ -135,29 +138,6 @@ module FastlaneCI
         logger.debug("Updating project #{existing_project.project_name}, writing out to projects.json to #{json_folder_path}")
         @projects[project_index] = project
       end
-    end
-
-    def create_project!(name: nil, repo_config: nil, enabled: nil, lane: nil)
-      projects = self.projects
-      new_project = Project.new(repo_config: repo_config,
-                                enabled: enabled,
-                                project_name: name,
-                                lane: lane)
-      if self.project_exist?(new_project.project_name)
-        projects.push(new_project)
-        self.projects = projects
-        logger.debug("Added project #{new_project.project_name} to projets.json in #{self.json_folder_path}")
-        return new_project
-      else
-        logger.debug("Couldn't add project #{new_project.project_name} because it already exists")
-        return nil
-      end
-    end
-
-    # Define that the name of the project must be unique
-    def project_exist?(name: nil)
-      project = self.projects.select { |existing_project| existing_project.project_name.casecmp(name.downcase).zero? }.first
-      return !project.nil?
     end
   end
 end

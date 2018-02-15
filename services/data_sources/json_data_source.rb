@@ -1,7 +1,6 @@
 module FastlaneCI
   # define a simple initialization of instances which rely on a JSON file
   module JSONDataSource
-
     def self.included(base)
       base.send(:include, InstanceMethods)
       base.extend(ClassMethods)
