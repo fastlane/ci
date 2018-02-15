@@ -77,7 +77,7 @@ module FastlaneCI
         path = self.git_repo.file_path("repos.json")
         return [] unless File.exist?(path)
 
-        saved_git_repos = JSON.parse(File.read(path)).map { |repo_config_hash| GitRepoConfig.from_json!(repo_config_hash) }
+        saved_git_repos = JSON.parse(File.read(path)).map(&GitRepoConfig.method(:from_json!))
         return saved_git_repos
       end
     end
@@ -95,9 +95,21 @@ module FastlaneCI
                                 enabled: enabled,
                                 project_name: name,
                                 lane: lane)
-      projects.push(new_project)
-      self.projects = projects
-      return new_project
+      if self.project_exist?(new_project.project_name)
+        projects.push(new_project)
+        self.projects = projects
+        logger.debug("Added project #{new_project.project_name} to projets.json in #{self.json_folder_path}")
+        return new_project
+      else
+        logger.debug("Couldn't add project #{new_project.project_name} because it already exists")
+        return nil
+      end
+    end
+
+    # Define that the name of the project must be unique
+    def project_exist?(name: nil)
+      project = self.projects.select { |existing_project| existing_project.project_name.casecmp(name.downcase).zero? }.first
+      return !project.nil?
     end
   end
 end
