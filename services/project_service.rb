@@ -1,6 +1,7 @@
 require_relative "config_data_sources/json_project_data_source"
 require_relative "../shared/../shared/models/repo_config"
 require_relative "../shared/logging_module"
+require_relative "./user_service"
 
 module FastlaneCI
   # Provides access to projects
@@ -8,7 +9,7 @@ module FastlaneCI
     include FastlaneCI::Logging
     attr_accessor :project_data_source
 
-    def initialize(project_data_source: nil)
+    def initialize(project_data_source: nil, credential_provider: nil)
       unless project_data_source.nil?
         raise "project_data_source must be descendant of #{ProjectDataSource.name}" unless project_data_source.class <= ProjectDataSource
       end
@@ -30,6 +31,24 @@ module FastlaneCI
       enabled ||= true
       project = self.project_data_source.create_project!(name: name, repo_config: repo_config, enabled: enabled, lane: lane)
       return project
+    end
+
+    def project(name: nil)
+      if self.project_data_source.projects.project_exist?(name)
+        self.project_data_source.projects.select { |existing_project| existing_project.project_name.casecmp(name.downcase).zero? }.first
+      end
+    end
+
+    def git_repo
+      self.project_data_source.git_repo
+    end
+
+    def refresh_repo
+      self.git_repo.pull
+    end
+
+    def projects
+      self.project_data_source.projects
     end
   end
 end

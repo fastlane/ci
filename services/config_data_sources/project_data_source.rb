@@ -9,7 +9,7 @@ module FastlaneCI
       not_implemented(__method__)
     end
 
-    def refresh_repo
+    def refresh_repo(project: nil)
       not_implemented(__method__)
     end
 

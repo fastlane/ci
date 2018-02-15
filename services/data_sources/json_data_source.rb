@@ -11,7 +11,7 @@ module FastlaneCI
 
     # add these as class methods
     module ClassMethods
-      def create(json_folder_path: nil, params: nil)
+      def create(json_folder_path, **params)
         instance = self.new
         instance.json_folder_path = json_folder_path
         instance.after_creation(params)
@@ -21,7 +21,7 @@ module FastlaneCI
 
     # add this as instance methods
     module InstanceMethods
-      def after_creation(params)
+      def after_creation(**params)
       end
     end
   end

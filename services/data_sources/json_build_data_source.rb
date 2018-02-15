@@ -18,7 +18,7 @@ module FastlaneCI
 
     def self.json_to_attribute_name_proc_map
       seconds_to_datetime_proc = proc { |seconds|
-        DateTime.parse(Time.at(seconds).to_s)
+        Time.at(seconds.to_i)
       }
       return { :@timestamp => seconds_to_datetime_proc }
     end

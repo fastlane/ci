@@ -4,6 +4,7 @@ require_relative "../../shared/json_convertible"
 require_relative "../../shared/models/git_repo"
 require_relative "../../shared/models/git_repo_config"
 require_relative "../../shared/models/project"
+require_relative "../../shared/models/user"
 require_relative "../../shared/models/provider_credential"
 require_relative "../../shared/logging_module"
 
@@ -38,19 +39,13 @@ module FastlaneCI
     # Reference to FastlaneCI::GitRepo
     attr_accessor :git_repo
 
-    # You can provide either a `user` or `provider_credential`
-    # TODO: should it be just `provider_credential`?
-    def initialize(git_repo_config: nil, user: nil, provider_credential: nil)
-      raise "No git_repo_config provided" if git_repo_config.nil?
-
-      logger.debug("Using #{git_repo_config.local_repo_path} for project storage")
-
-      provider_credential ||= user.provider_credential(type: ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
-
-      @git_repo = FastlaneCI::GitRepo.new(git_config: git_repo_config, provider_credential: provider_credential)
-    end
-
-    def after_creation(params)
+    def after_creation(**params)
+      unless params.nil?
+        if params[:user] or params[:provider_credential]
+          params[:provider_credential] ||= params[:user].provider_credential(type: ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
+          @git_repo = FastlaneCI::GitRepo.new(git_config: self.json_folder_path, provider_credential: params[:provider_credential])
+        end
+      end
     end
 
     def refresh_repo

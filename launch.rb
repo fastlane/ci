@@ -149,9 +149,14 @@ module FastlaneCI
       provider_credential = GitHubProviderCredential.new(email: ENV["FASTLANE_CI_INITIAL_CLONE_EMAIL"],
                                                        api_token: ENV["FASTLANE_CI_INITIAL_CLONE_API_TOKEN"])
       # Trigger the initial clone
-      FastlaneCI::JSONProjectDataSource.new(
-        git_repo_config: ci_config_repo,
-        provider_credential: provider_credential
+      # FastlaneCI::JSONProjectDataSource.new(
+      #  git_repo_config: ci_config_repo,
+      #  provider_credential: provider_credential
+      # )
+      FastlaneCI::ProjectService.new(
+        project_data_source: FastlaneCI::JSONProjectDataSource.create(ci_config_repo,
+                                                                      git_repo_config: ci_config_repo,
+                                                                      provider_credential: provider_credential)
       )
       puts("Successfully did the initial clone on this machine")
     rescue StandardError => ex
