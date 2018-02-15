@@ -20,5 +20,9 @@ module FastlaneCI
     def create_project!(name: nil, repo_config: nil, enabled: nil, lane: nil)
       not_implemented(__method__)
     end
+
+    def update_project!(project: nil)
+      not_implemented(__method__)
+    end
   end
 end

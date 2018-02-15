@@ -3,6 +3,7 @@ require_relative "../shared/../shared/models/repo_config"
 require_relative "../shared/logging_module"
 
 module FastlaneCI
+  # Provides access to projects
   class ProjectService
     include FastlaneCI::Logging
     attr_accessor :project_data_source
