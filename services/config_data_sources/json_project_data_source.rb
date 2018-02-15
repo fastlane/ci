@@ -50,6 +50,9 @@ module FastlaneCI
       @git_repo = FastlaneCI::GitRepo.new(git_config: git_repo_config, provider_credential: provider_credential)
     end
 
+    def after_creation(params)
+    end
+
     def refresh_repo
       self.git_repo.pull
     end
@@ -90,14 +93,14 @@ module FastlaneCI
     end
 
     def create_project!(name: nil, repo_config: nil, enabled: nil, lane: nil)
-      projects = self.projects
+      projects = @projects
       new_project = Project.new(repo_config: repo_config,
                                 enabled: enabled,
                                 project_name: name,
                                 lane: lane)
       if self.project_exist?(new_project.project_name)
         projects.push(new_project)
-        self.projects = projects
+        @projects = projects
         logger.debug("Added project #{new_project.project_name} to projets.json in #{self.json_folder_path}")
         return new_project
       else
@@ -110,6 +113,29 @@ module FastlaneCI
     def project_exist?(name: nil)
       project = self.projects.select { |existing_project| existing_project.project_name.casecmp(name.downcase).zero? }.first
       return !project.nil?
+    end
+
+    def update_project!(project: nil)
+      unless project.nil?
+        raise "project must be configured with an instance of #{Project.name}" unless project.class <= Project
+      end
+      project_index = nil
+      existing_project = nil
+      @projects.each.with_index do |old_project, index|
+        if old_project.project_name.casecmp(project.project_name.downcase).zero?
+          project_index = index
+          existing_project = old_project
+          break
+        end
+      end
+
+      if existing_project.nil?
+        logger.debug("Couldn't update project #{project.project_name} because it doesn't exists")
+        raise "Couldn't update project #{project.project_name} because it doesn't exists"
+      else
+        logger.debug("Updating project #{existing_project.project_name}, writing out to projects.json to #{json_folder_path}")
+        @projects[project_index] = project
+      end
     end
   end
 end
