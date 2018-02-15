@@ -8,6 +8,20 @@ module FastlaneCI
   # Mixin the JSONConvertible class for Build
   class Build
     include FastlaneCI::JSONConvertible
+
+    def self.attribute_name_to_json_proc_map
+      timestamp_to_json_proc = proc { |timestamp|
+        timestamp.strftime("%s").to_i
+      }
+      return { :@timestamp => timestamp_to_json_proc }
+    end
+
+    def self.json_to_attribute_name_proc_map
+      seconds_to_datetime_proc = proc { |seconds|
+        DateTime.parse(Time.at(seconds).to_s)
+      }
+      return { :@timestamp => seconds_to_datetime_proc }
+    end
   end
 
   # Data source for all things related to builds on the file system in JSON
