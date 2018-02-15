@@ -1,3 +1,6 @@
 [submodule "fastfile-parser"]
 	path = fastfile-parser
 	url = https://github.com/fastlane/fastfile-parser
+[submodule "taskqueue"]
+	path = taskqueue
+	url = https://github.com/fastlane/taskqueue
