@@ -8,7 +8,7 @@ module FastlaneCI
       FastlaneCI::Services.project_data_source.refresh_repo
     end
 
-    def timeout
+    def sleep_interval
       15
     end
   end
