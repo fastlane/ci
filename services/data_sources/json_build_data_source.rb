@@ -52,7 +52,7 @@ module FastlaneCI
       containing_path = builds_path(project: project)
       full_path = File.join(containing_path, "#{build.number}.json")
 
-      puts("Writing to '#{full_path}'")
+      logger.debug("Writing to '#{full_path}'")
       hash_to_store = build.to_object_dictionary(ignore_instance_variables: [:@project])
       FileUtils.mkdir_p(containing_path)
       File.write(full_path, JSON.pretty_generate(hash_to_store))

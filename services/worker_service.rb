@@ -26,6 +26,7 @@ module FastlaneCI
       repo_config = project.repo_config
       raise "incompatible repo_config and provider_credential" if provider_credential.type != repo_config.provider_credential_type_needed
 
+      logger.debug("Starting worker for #{project.project_name}, on behalf of #{user_responsible.email}")
       new_worker = nil
       case provider_credential.type
       when FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
@@ -35,7 +36,6 @@ module FastlaneCI
       end
 
       self.resource_workers_dictionary[worker_key] = new_worker
-      logger.debug("Starting worker for #{project.project_name}, on behalf of #{user_responsible.email}")
     end
 
     def stop_worker(project: nil, user_responsible: nil)

@@ -25,7 +25,9 @@ module FastlaneCI
     def initialize(provider_credential: nil, project: nil)
       self.provider_credential = provider_credential
       self.project = project
-      super()
+
+      super() # This starts the work by calling `work`
+
       time_nano = Time.now.nsec
       project_full_name = project.repo_config.git_url
 
@@ -51,20 +53,21 @@ module FastlaneCI
         logger.debug("Checking for new commits on GitHub")
       end
       repo = self.git_repo
-      repo.fetch # is needed to see if there are new branches
+
+      # is needed to see if there are new branches
+      # called async
+      repo.fetch
 
       # TODO: ensure BuildService subclasses are thread-safe
       build_service = FastlaneCI::Services.build_service
 
-      # TODO: don't reach into this object's attributes like this
-      repo.git.branches.remote.each do |branch|
-        next if branch.name.start_with?("HEAD ->") # not sure what this is for
+      repo.git_and_remote_branches_each do |git, branch|
+        logger.debug("FOUND WEIRD BRANCH") if branch.name.start_with?("HEAD ->")
 
+        next if branch.name.start_with?("HEAD ->") # not sure what this is for
         # Check out the specific branch
         # this will detach our current head
-        # TODO: we probably have to add a lock system for repos
-        # as we access repos here, and also in the test runners
-        repo.git.reset_hard # as there might be un-committed changes in there
+        git.reset_hard # as there might be un-committed changes in there
         branch.checkout
         current_sha = repo.most_recent_commit.sha
 
@@ -94,7 +97,7 @@ module FastlaneCI
       end
     end
 
-    def timeout
+    def sleep_interval
       5
     end
   end

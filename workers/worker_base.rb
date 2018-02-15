@@ -2,7 +2,7 @@ require_relative "../shared/logging_module"
 
 module FastlaneCI
   # super class for all fastlane.ci workers
-  # Subclass this class, and implement `work` and `timeout`
+  # Subclass this class, and implement `work` and `sleep_interval`
   class WorkerBase
     include FastlaneCI::Logging
 
@@ -19,13 +19,10 @@ module FastlaneCI
 
     def initialize
       self.should_stop = false
-      # TODO: investigate what `abort_on_exception` does
-      #   and what to use it for
-      # Thread.abort_on_exception = true
 
       @thread = Thread.new do
         until self.should_stop
-          Kernel.sleep(self.timeout)
+          Kernel.sleep(self.sleep_interval)
 
           # We have the `work` inside a `begin rescue`
           # so that if something fails, the thread still is alive
@@ -54,8 +51,8 @@ module FastlaneCI
       @should_stop = true
     end
 
-    # Timeout in seconds
-    def timeout
+    # Sleep in seconds
+    def sleep_interval
       not_implemented(__method__)
     end
   end
