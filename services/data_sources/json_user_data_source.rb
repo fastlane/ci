@@ -31,7 +31,7 @@ module FastlaneCI
     # can't have us reading and writing to a file at the same time
     JSONUserDataSource.file_semaphore = Mutex.new
 
-    def after_creation(*params)
+    def after_creation(**params)
       logger.debug("Using folder path for user data: #{json_folder_path}")
       # load up the json file here
       # parse all data into objects so we can fail fast on error
