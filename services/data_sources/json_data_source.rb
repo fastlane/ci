@@ -11,6 +11,12 @@ module FastlaneCI
 
     # add these as class methods
     module ClassMethods
+      # Factory method, all JSON-based data sources rely on different
+      # JSON files stored in the `json_folder_path` directory.
+      #
+      # @param [String] json_folder_path
+      # @param [any] **params
+      # @return [JSONDataSource]
       def create(json_folder_path, **params)
         instance = self.new
         instance.json_folder_path = json_folder_path
@@ -21,6 +27,9 @@ module FastlaneCI
 
     # add this as instance methods
     module InstanceMethods
+      # Post-initialization method. This method is optionally
+      # overridden by `JSONDataSource`s in order to get injected
+      # different parameters that are mandatory for its initialization.
       def after_creation(**params)
       end
     end
