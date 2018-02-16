@@ -85,10 +85,10 @@ export FASTLANE_CI_REPO_URL="https://github.com/your-name/your-ci-config"
 
 # Needed just for the first startup of fastlane.ci:
 # The email address used for the intial clone for the config repo
-export INITIAL_CLONE_EMAIL="email@user.com"
+export FASTLANE_CI_INITIAL_CLONE_EMAIL="email@user.com"
 
 # The API token used for the initial clone for the config repo
-export INITIAL_CLONE_API_TOKEN="token"
+export FASTLANE_CI_INITIAL_CLONE_API_TOKEN="token"
 ```
 
 ## Initial configuration
