@@ -3,6 +3,7 @@ require_relative "../services/build_service"
 require_relative "../shared/models/provider_credential"
 require_relative "../shared/logging_module"
 require_relative "../services/test_runner_service"
+require_relative "../services/code_hosting/git_hub_service"
 
 module FastlaneCI
   # Responsible for checking if there have been new commits
@@ -14,7 +15,10 @@ module FastlaneCI
 
     attr_accessor :provider_credential
     attr_accessor :project
+
     attr_accessor :user_config_service
+    attr_accessor :github_service
+
     attr_accessor :serial_task_queue
     attr_accessor :current_tasks
 
@@ -26,6 +30,7 @@ module FastlaneCI
 
     def initialize(provider_credential: nil, project: nil)
       self.provider_credential = provider_credential
+      self.github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
       self.project = project
 
       project_full_name = project.repo_config.git_url
@@ -123,7 +128,7 @@ module FastlaneCI
           FastlaneCI::TestRunnerService.new(
             project: current_project,
             sha: current_sha,
-            provider_credential: credential
+            github_service: self.github_service
           ).run
         })
 
