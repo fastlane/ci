@@ -2,15 +2,24 @@ module FastlaneCI
   # Implementation for the FastlaneCore::Interface abstract class
   # this is set to the fastlane runner before executing the user's Fastfile
   class FastlaneCIOutput < FastlaneCore::Interface
-    # TODO: replace the implementation of all methods below
-    require "tty-screen"
+    # the file path to the log file for the output
+    attr_accessor :file_path
+
+    # The block that's being called for each new line
+    # that should be printed out to the user
+    attr_accessor :block
+
+    def initialize(file_path: nil, block: nil)
+      raise "No file path provided" if file_path.to_s.length == 0
+      raise "No block provided" if block.nil?
+      self.file_path = file_path
+      self.block = block
+    end
 
     def log
       return @log if @log
 
-      $stdout.sync = true
-
-      @log ||= Logger.new($stdout)
+      @log ||= Logger.new(self.file_path)
 
       @log.formatter = proc do |severity, datetime, progname, msg|
         "#{format_string(datetime, severity)}#{msg}\n"
@@ -20,7 +29,7 @@ module FastlaneCI
     end
 
     def format_string(datetime = Time.now, severity = "")
-      "[fastlane.ci] [#{datetime.strftime('%H:%M:%S')}]: "
+      "[#{datetime.strftime('%H:%M:%S')}]: "
     end
 
     #####################################################
@@ -29,6 +38,10 @@ module FastlaneCI
 
     def error(message)
       log.error(message.to_s.red)
+      self.block.call(
+        type: :error,
+        message: message
+      )
     end
 
     def important(message)
@@ -41,6 +54,11 @@ module FastlaneCI
 
     def message(message)
       log.info(message.to_s)
+      self.block.call(
+        type: :error,
+        message: message
+      )
+      # TODO: stopped here, migrate the other methods also
     end
 
     def deprecated(message)
@@ -60,17 +78,15 @@ module FastlaneCI
     end
 
     def verbose(message)
+      # TODO: are we gonna have a verbose mode?
+      # Proposal: we can log into 2 files, one the normal output
+      #     and one with the verbose output
       # log.debug(message.to_s) if FastlaneCore::Globals.verbose?
     end
 
     def header(message)
-      format = format_string
-      if message.length + 8 < TTY::Screen.width - format.length
-        message = "--- #{message} ---"
-        i = message.length
-      else
-        i = TTY::Screen.width - format.length
-      end
+      message = "--- #{message} ---"
+      i = message.length
       success("-" * i)
       success(message)
       success("-" * i)
@@ -81,41 +97,31 @@ module FastlaneCI
     #####################################################
 
     def interactive?
-      interactive = true
-      interactive = false if $stdout.isatty == false
-      # interactive = false if Helper.ci?
-      return interactive
+      # fastlane.ci is non-interactive
+      return false
     end
 
     def input(message)
-      verify_interactive!(message)
-      ask("#{format_string}#{message.to_s.yellow}").to_s.strip
+      non_interactive!(message)
     end
 
     def confirm(message)
-      verify_interactive!(message)
-      agree("#{format_string}#{message.to_s.yellow} (y/n)", true)
+      non_interactive!(message)
     end
 
     def select(message, options)
-      verify_interactive!(message)
-
-      important(message)
-      choose(*options)
+      non_interactive!(message)
     end
 
     def password(message)
-      verify_interactive!(message)
-
-      ask("#{format_string}#{message.to_s.yellow}") { |q| q.echo = "*" }
+      non_interactive!(message)
     end
 
     private
 
-    def verify_interactive!(message)
-      return if interactive?
+    def non_interactive!(message)
       important(message)
-      crash!("Could not retrieve response as fastlane runs in non-interactive mode")
+      crash!("Could not retrieve response as fastlane runs fastlane.ci and can't ask for additional inputs during its run")
     end
   end
 end

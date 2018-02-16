@@ -7,7 +7,12 @@ module FastlaneCI
     def run(platform: nil, lane: nil, parameters: nil)
       require "fastlane"
 
-      ci_output = FastlaneCI::FastlaneCIOutput.new
+      ci_output = FastlaneCI::FastlaneCIOutput.new(
+        file_path: "fastlane.log",
+        block: proc do |current_input|
+          puts "Current input: #{current_input}"
+        end
+      )
       FastlaneCore::UI.ui_object = ci_output
 
       # this only takes a few ms the first time being called

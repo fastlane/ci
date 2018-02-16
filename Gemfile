@@ -28,7 +28,8 @@ gem "unparser", ">= 0.2.6", "< 1.0.0"
 gem "rubocop"
 
 # fastlane dependencies
-gem "fastlane", ">= 2.81.0", "< 3.0.0"
+# gem "fastlane", ">= 2.81.0", "< 3.0.0"
+gem "fastlane", path: "../fastlane"
 
 group :test, :development do
   gem "pry"
