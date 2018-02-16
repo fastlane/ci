@@ -8,7 +8,7 @@ module FastlaneCI
       require "fastlane"
 
       ci_output = FastlaneCI::FastlaneCIOutput.new
-      FastlaneCore::UI.set_ui_object(ci_output)
+      FastlaneCore::UI.ui_object = ci_output
 
       # this only takes a few ms the first time being called
       Fastlane.load_actions
