@@ -1,6 +1,7 @@
 module FastlaneCI
   # Service that will interact with fastlane to run tests/lanes
   # TODO: move github specific stuff out into GitHubService (GitHubService right now)
+  # TODO: maybe rename this to GitHubTestRunnerService
   class TestRunnerService
     include FastlaneCI::Logging
 
@@ -10,14 +11,14 @@ module FastlaneCI
     attr_accessor :current_build
     attr_accessor :sha
 
-    def initialize(project: nil, sha: nil, provider_credential: nil)
+    def initialize(project: nil, sha: nil, github_service: nil)
       self.project = project
       self.sha = sha
 
       self.build_service = FastlaneCI::Services.build_service
 
       # TODO: provider credential should determine what exact CodeHostingService gets instantiated
-      self.code_hosting_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
+      self.code_hosting_service = github_service
     end
 
     def run

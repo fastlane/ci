@@ -22,12 +22,11 @@ module FastlaneCI
 
       @thread = Thread.new do
         until self.should_stop
-          Kernel.sleep(self.sleep_interval)
-
           # We have the `work` inside a `begin rescue`
           # so that if something fails, the thread still is alive
           begin
             self.work unless self.should_stop
+            Kernel.sleep(self.sleep_interval)
           rescue StandardError => ex
             puts("[#{self.class} Exception]: #{ex}: ")
             puts(ex.backtrace.join("\n"))
