@@ -119,7 +119,8 @@ In order to run fastlane.ci for the first time, the `https://github.com/your-nam
 - `projects.json`
 
 ```json
-{
+[
+  {
     "repo_config": {
       "id": "ad0dadd1-ba5a-4634-949f-0ce62b77e48f",
       "git_url": "https://github.com/your-name/fastlane-ci-demoapp",
@@ -134,6 +135,7 @@ In order to run fastlane.ci for the first time, the `https://github.com/your-nam
     "lane": "test",
     "enabled": true
   }
+]
 ```
 
 In order to generate for the first time the `password_hash` and the `encrypted_api_token` there are some additional steps to follow:
