@@ -67,6 +67,13 @@ module FastlaneCI
       )
     end
 
+    # Start up a UserService from our JSONUserDataSource
+    def self.notification_service
+      @_notification_service ||= FastlaneCI::NotificationService.new(
+        notification_data_source: JSONNotificationDataSource.new(json_folder_path: ci_config_git_repo_path)
+      )
+    end
+
     # Start up the BuildService
     def self.build_service
       @_build_service ||= FastlaneCI::BuildService.new(

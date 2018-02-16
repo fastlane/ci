@@ -102,11 +102,13 @@ module FastlaneCI
       # require all controllers
       require_relative "features/dashboard/dashboard_controller"
       require_relative "features/login/login_controller"
+      require_relative "features/notifications/notifications_controller"
       require_relative "features/project/project_controller"
 
       # Load up all the available controllers
       FastlaneCI::FastlaneApp.use(FastlaneCI::DashboardController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::LoginController)
+      FastlaneCI::FastlaneApp.use(FastlaneCI::NotificationsController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::ProjectController)
     end
 
