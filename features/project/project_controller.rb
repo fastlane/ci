@@ -76,14 +76,14 @@ module FastlaneCI
       # Wait for Josh' input
     end
 
-    get "#{HOME}/*" do |project_id|
-      project = self.user_project_with_id(project_id: project_id)
+    # get "#{HOME}/*" do |project_id|
+    #   project = self.user_project_with_id(project_id: project_id)
 
-      locals = {
-        project: project,
-        title: "Project #{project.project_name}"
-      }
-      erb(:project, locals: locals, layout: FastlaneCI.default_layout)
-    end
+    #   locals = {
+    #     project: project,
+    #     title: "Project #{project.project_name}"
+    #   }
+    #   erb(:project, locals: locals, layout: FastlaneCI.default_layout)
+    # end
   end
 end
