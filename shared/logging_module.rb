@@ -17,15 +17,15 @@ module FastlaneCI
   #
   # The default log level is WARN, so anything more severe than a warning will be logged out.
   #
-  # Setting the environment variable `DEBUG=1` will lower the log level to INFO.
   # `logger.info` should be used to print out generic (and useful) information about
   # system operation.
   #
-  # Setting the environment variable `FASTLANE_CI_SUPER_VERBOSE=1` further lowers the log to DEBUG.
-  # This includes extra logging which includes thread ids, and other
-  # non-essential information that could be useful during debugging.
+  # Setting the environment variable `DEBUG=1` will lower the log level to DEBUG.
+  # Use `logger.debug` to print out information useful to the developers
   #
-  # Use `logger.debug` for exposing this extra information
+  # Setting the environment variable `FASTLANE_CI_SUPER_VERBOSE=1` will also set the log level to DEBUG,
+  # but includes extra logging which includes thread ids, and other
+  # non-essential information that could be useful during debugging.
   module Logging
     def logger
       @logger ||= Logger.new(STDOUT).tap do |logger|
