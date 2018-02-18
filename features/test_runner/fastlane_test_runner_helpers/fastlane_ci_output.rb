@@ -50,10 +50,18 @@ module FastlaneCI
 
     def important(message)
       log.warn(message.to_s.yellow)
+      self.block.call(
+        type: :important,
+        message: message
+      )
     end
 
     def success(message)
       log.info(message.to_s.green)
+      self.block.call(
+        type: :success,
+        message: message
+      )
     end
 
     def message(message)
@@ -62,15 +70,22 @@ module FastlaneCI
         type: :error,
         message: message
       )
-      # TODO: stopped here, migrate the other methods also
     end
 
     def deprecated(message)
       log.error(message.to_s.deprecated)
+      self.block.call(
+        type: :error,
+        message: message
+      )
     end
 
     def command(message)
       log.info("$ #{message}".cyan)
+      self.block.call(
+        type: :command,
+        message: message
+      )
     end
 
     def command_output(message)
@@ -94,6 +109,61 @@ module FastlaneCI
       success("-" * i)
       success(message)
       success("-" * i)
+
+      self.block.call(
+        type: :header,
+        message: message
+      )
+    end
+
+    # TODO: Check if we can find a good way to not have to
+    #   overwrite all these methods
+    def crash!(exception)
+      self.block.call(
+        type: :crash,
+        message: message
+      )
+      raise FastlaneCrash.new, exception.to_s
+    end
+
+    def user_error!(error_message, options = {})
+      self.block.call(
+        type: :user_error,
+        message: message
+      )
+      super(error_message, options)
+    end
+
+    def shell_error!(error_message, options = {})
+      self.block.call(
+        type: :shell_error,
+        message: message
+      )
+      super(error_message, options)
+    end
+
+    def build_failure!(error_message, options = {})
+      self.block.call(
+        type: :build_failure,
+        message: message
+      )
+      super(error_message, options)
+    end
+
+    def test_failure!(error_message)
+      self.block.call(
+        type: :test_failure,
+        message: message
+      )
+      super(error_message)
+    end
+
+    def abort_with_message!(message)
+      self.block.call(
+        type: :abort,
+        message: message
+      )
+      super(error_message)
     end
 
     #####################################################
