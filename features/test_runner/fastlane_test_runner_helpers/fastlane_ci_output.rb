@@ -22,10 +22,6 @@ module FastlaneCI
       @log ||= Logger.new(self.file_path)
 
       @log.formatter = proc do |severity, datetime, progname, msg|
-        # This is the only way I found
-        # to run code for each line
-        self.block.call(msg)
-
         "#{format_string(datetime, severity)}#{msg}\n"
       end
 
