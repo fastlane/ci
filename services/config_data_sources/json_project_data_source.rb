@@ -52,9 +52,6 @@ module FastlaneCI
       end
     end
 
-    def after_creation(params)
-    end
-
     def refresh_repo
       self.git_repo.pull
     end
