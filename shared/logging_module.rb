@@ -41,7 +41,7 @@ module FastlaneCI
 
           thread_id = ""
 
-          if ENV['FASTLANE_CI_SUPER_VERBOSE']
+          if ENV["FASTLANE_CI_SUPER_VERBOSE"]
             # this gets noisey really quickly
             thread_id = " #{Thread.current[:thread_id]}" unless Thread.current[:thread_id].nil?
           end
@@ -50,8 +50,8 @@ module FastlaneCI
         end
 
         logger.level = :warn
-        logger.level = :debug if ENV['DEBUG']
-        logger.level = :debug if ENV['FASTLANE_CI_SUPER_VERBOSE']
+        logger.level = :debug if ENV["DEBUG"]
+        logger.level = :debug if ENV["FASTLANE_CI_SUPER_VERBOSE"]
       end
 
       return @logger
