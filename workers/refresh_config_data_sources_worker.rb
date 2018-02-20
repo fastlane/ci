@@ -5,7 +5,7 @@ module FastlaneCI
   # in the background, every x seconds
   class RefreshConfigDataSourcesWorker < WorkerBase
     def work
-      FastlaneCI::Services.project_data_source.refresh_repo
+      FastlaneCI::Services.project_service.refresh_repo
     end
 
     def sleep_interval

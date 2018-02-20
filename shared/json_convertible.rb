@@ -50,8 +50,8 @@ module FastlaneCI
           else
             var_name = "@#{var}".to_sym
           end
-          if self.json_to_attribute_name_proc_map.key?(var)
-            var_value = self.json_to_attribute_name_proc_map[var].call(val)
+          if self.json_to_attribute_name_proc_map.key?(var_name)
+            var_value = self.json_to_attribute_name_proc_map[var_name].call(val)
           else
             var_value = val
           end

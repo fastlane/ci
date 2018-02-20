@@ -2,6 +2,7 @@ require_relative "./config_data_sources/json_project_data_source"
 require_relative "./config_service"
 require_relative "./worker_service"
 require_relative "./user_service"
+require_relative "./project_service"
 require_relative "./data_sources/json_user_data_source"
 require_relative "./data_sources/json_build_data_source"
 require_relative "./code_hosting/git_hub_service"
@@ -20,7 +21,7 @@ module FastlaneCI
         # TODO: Verify that we actually need to do this
         @_user_service = nil
         @_build_service = nil
-        @_project_data_source = nil
+        @_project_service = nil
         @_ci_user = nil
         @_config_service = nil
         @_worker_service = nil
@@ -47,23 +48,22 @@ module FastlaneCI
       )
     end
 
-    # Start our project data source
-    # TODO: this should be accessed through a ProjectDataService
-    def self.project_data_source
-      @_project_data_source ||= FastlaneCI::JSONProjectDataSource.new(
-        git_repo_config: ci_config_repo,
-        user: ci_user
-      )
-    end
-
     ########################################################
     # Services that we provide
     ########################################################
 
+    # Start up a ProjectService from our JSONProjectDataSource
+    def self.project_service
+      @_project_service ||= FastlaneCI::ProjectService.new(
+        project_data_source: FastlaneCI::JSONProjectDataSource.create(ci_config_repo,
+                                                                      user: ci_user)
+      )
+    end
+
     # Start up a UserService from our JSONUserDataSource
     def self.user_service
       @_user_service ||= FastlaneCI::UserService.new(
-        user_data_source: JSONUserDataSource.new(json_folder_path: ci_config_git_repo_path)
+        user_data_source: FastlaneCI::JSONUserDataSource.create(ci_config_git_repo_path)
       )
     end
 
