@@ -31,5 +31,12 @@ module FastlaneCI
     def create_notification!(priority: nil, name: nil, message: nil)
       not_implemented(__method__)
     end
+
+    # Deletes a notification
+    #
+    # @abstract
+    def delete_notification!(name: nil)
+      not_implemented(__method__)
+    end
   end
 end

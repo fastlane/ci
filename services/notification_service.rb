@@ -53,5 +53,13 @@ module FastlaneCI
     def update_notification!(notification: nil)
       notification_data_source.update_notification!(notification: notification)
     end
+
+    # Deletes a notification if the 'primary key' exists
+    #
+    # @param  [String] name
+    # @return [nil]
+    def delete_notification!(name: nil)
+      notification_data_source.delete_notification!(name: name)
+    end
   end
 end

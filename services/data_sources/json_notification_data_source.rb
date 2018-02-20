@@ -107,6 +107,17 @@ module FastlaneCI
       end
     end
 
+    # Deletes a notification if it matches the primary key
+    #
+    # @param  [String] name
+    # @return [nil]
+    def delete_notification!(name: nil)
+      JSONNotificationDataSource.file_semaphore.synchronize do
+        primary_key = Notification.make_primary_key(name)
+        @notifications.delete_if { |notification| notification.primary_key == primary_key }
+      end
+    end
+
     private
 
     # @return [String]
