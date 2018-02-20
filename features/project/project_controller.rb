@@ -74,6 +74,8 @@ module FastlaneCI
 
       # TODO: what's the best way to store that project in the config?
       # Wait for Josh' input
+      FastlaneCI::Services.project_service.update_project!(project: project)
+      redirect("#{HOME}/#{project_id}")
     end
 
     get "#{HOME}/*" do |project_id|

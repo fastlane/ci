@@ -21,7 +21,7 @@ module FastlaneCI
       unless repo_config.nil?
         raise "repo_config must be configured with an instance of #{RepoConfig.name}" unless repo_config.class <= RepoConfig
       end
-      unless lane.nil?
+      if lane.nil?
         raise "lane parameter must be configured"
       end
       # we can guess the other parameters if not provided
@@ -30,13 +30,22 @@ module FastlaneCI
       # we infer that the new project will be enabled by default
       enabled ||= true
       project = self.project_data_source.create_project!(name: name, repo_config: repo_config, enabled: enabled, lane: lane)
+      # TODO: Commit ci-repo changes. How to do it?
       return project
     end
 
+    def update_project!(project: nil)
+      self.project_data_source.update_project!(project: project)
+    end
+
     def project(name: nil)
-      if self.project_data_source.projects.project_exist?(name)
-        self.project_data_source.projects.select { |existing_project| existing_project.project_name.casecmp(name.downcase).zero? }.first
+      if self.project_data_source.project_exist?(name)
+        self.project_data_source.projects.select { |existing_project| existing_project.project_name == name }.first
       end
+    end
+
+    def project_by_id(id)
+      self.project_data_source.projects.select { |project| project.id == id }.first
     end
 
     def git_repo

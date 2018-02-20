@@ -38,8 +38,7 @@ module FastlaneCI
     end
 
     def user_project_with_id(project_id: nil)
-      provider_credential = self.check_and_get_provider_credential
-      project = self.current_user_config_service.project(id: project_id, provider_credential: provider_credential)
+      project = FastlaneCI::Services.project_service.project_by_id(project_id)
       raise "user #{self.user.email} doesn't have access to a project with id `#{project_id}`" if project.nil?
       return project
     end

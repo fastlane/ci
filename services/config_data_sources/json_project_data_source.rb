@@ -92,14 +92,14 @@ module FastlaneCI
     end
 
     def create_project!(name: nil, repo_config: nil, enabled: nil, lane: nil)
-      projects = @projects
+      projects = self.projects
       new_project = Project.new(repo_config: repo_config,
                                 enabled: enabled,
                                 project_name: name,
                                 lane: lane)
-      if self.project_exist?(new_project.project_name)
+      if !self.project_exist?(new_project.project_name)
         projects.push(new_project)
-        @projects = projects
+        self.projects = projects
         logger.debug("Added project #{new_project.project_name} to projets.json in #{self.json_folder_path}")
         return new_project
       else
@@ -109,8 +109,8 @@ module FastlaneCI
     end
 
     # Define that the name of the project must be unique
-    def project_exist?(name: nil)
-      project = self.projects.select { |existing_project| existing_project.project_name.casecmp(name.downcase).zero? }.first
+    def project_exist?(name)
+      project = self.projects.select { |existing_project| existing_project.project_name == name }.first
       return !project.nil?
     end
 
@@ -120,8 +120,8 @@ module FastlaneCI
       end
       project_index = nil
       existing_project = nil
-      @projects.each.with_index do |old_project, index|
-        if old_project.project_name.casecmp(project.project_name.downcase).zero?
+      self.projects.each.with_index do |old_project, index|
+        if old_project.id.casecmp(project.id.downcase).zero?
           project_index = index
           existing_project = old_project
           break
@@ -133,7 +133,9 @@ module FastlaneCI
         raise "Couldn't update project #{project.project_name} because it doesn't exists"
       else
         logger.debug("Updating project #{existing_project.project_name}, writing out to projects.json to #{json_folder_path}")
-        @projects[project_index] = project
+        _projects = self.projects
+        _projects[project_index] = project
+        self.projects = _projects
       end
     end
   end
