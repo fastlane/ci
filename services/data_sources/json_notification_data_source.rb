@@ -45,7 +45,7 @@ module FastlaneCI
     # @return [Boolean]
     def notification_exist?(name: nil, message: nil)
       notification = @notifications.select do |n|
-        n.primary_key == Notification.make_primary_key(name, message)
+        n.primary_key == Notification.make_primary_key(name)
       end.first
 
       return notification.nil? ? false : true

@@ -54,7 +54,7 @@ module FastlaneCI
     #
     # @return [String]
     def primary_key
-      @primary_key ||= self.class.make_primary_key(name, message)
+      @primary_key ||= self.class.make_primary_key(name)
     end
 
     # Static method for converting notification data into primary key to
@@ -63,8 +63,8 @@ module FastlaneCI
     # @param  [String] name
     # @param  [String] message
     # @return [String]
-    def self.make_primary_key(name, message)
-      name.gsub(/\s+/, "").downcase + ":" + message.gsub(/\s+/, "").downcase
+    def self.make_primary_key(name)
+      name.gsub(/\s+/, "").downcase
     end
   end
 end

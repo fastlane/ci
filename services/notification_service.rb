@@ -15,9 +15,10 @@ module FastlaneCI
     # @raise  [Exception]
     # @return [nil]
     def initialize(notification_data_source: nil)
-      if !notification_data_source.nil? && !notification_data_source.class <= NotificationDataSource
-        raise "notification_data_source must be descendant of #{NotificationDataSource.name}"
+      unless notification_data_source.nil?
+        raise "notification_data_source must be descendant of #{NotificationDataSource.name}" unless notification_data_source.class <= NotificationDataSource
       end
+
 
       if notification_data_source.nil?
         logger.debug("notification_data_source is new, using `ENV[\"data_store_folder\"]` if available, or `sample_data` folder")

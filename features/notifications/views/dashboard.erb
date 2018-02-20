@@ -27,12 +27,14 @@
       </thead>
       <tbody>
         <% notifications.each do |notification| %>
-          <td><%= notification.id %></td>
-          <td><%= notification.priority %></td>
-          <td><%= notification.name %></td>
-          <td><%= notification.message %></td>
-          <td><%= notification.created_at %></td>
-          <td><%= notification.updated_at %></td>
+          <tr>
+            <td><%= notification.id %></td>
+            <td><%= notification.priority %></td>
+            <td><%= notification.name %></td>
+            <td><%= notification.message %></td>
+            <td><%= notification.created_at %></td>
+            <td><%= notification.updated_at %></td>
+          </tr>
         <% end %>
       </tbody>
     </table>

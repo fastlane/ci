@@ -18,26 +18,26 @@ module FastlaneCI
     end
 
     post "#{HOME}/create" do
-      Services.notification_service.create_notification!(notification_params)
+      payload = notification_params(request)
+      Services.notification_service.create_notification!(payload)
       redirect HOME
     end
 
     post "#{HOME}/update" do
-      Services.notification_service.update_notification!(notification_params)
+      notification = Notification.new(notification_params(request))
+      Services.notification_service.update_notification!(notification: notification)
       redirect HOME
     end
 
     private
 
-    # Parameters used for creating and updating notifications
+    # Parameters used for creating and updating notifications:
+    #   { :priority, :name, :message }
     #
+    # @param  [String]
     # @return [Hash]
-    def notification_params
-      {
-        priority: params[:priority],
-        name: params[:name],
-        message: params[:message]
-      }
+    def notification_params(request)
+      JSON.parse(request.body.read).symbolize_keys
     end
   end
 end
