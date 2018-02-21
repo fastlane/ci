@@ -70,7 +70,7 @@ module FastlaneCI
     # Start up the BuildService
     def self.build_service
       @_build_service ||= FastlaneCI::BuildService.new(
-        build_data_source: JSONBuildDataSource.new(json_folder_path: ci_config_git_repo_path)
+        build_data_source: JSONBuildDataSource.create(ci_config_git_repo_path)
       )
     end
 

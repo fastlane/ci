@@ -44,7 +44,7 @@ module FastlaneCI
     # Does the client with the associated credentials have access to the specified repo?
     # @repo [String] Repo URL as string
     def access_to_repo?(repo_url: nil)
-      client.repository?(repo_url.sub("https://github.com/",""))
+      client.repository?(repo_url.sub("https://github.com/", ""))
     end
 
     # The `target_url`, `description` and `context` parameters are optional
