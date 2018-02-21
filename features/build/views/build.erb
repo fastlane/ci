@@ -1,9 +1,13 @@
-<h1>Yolo</h1>
+<h1>Build Log <%= build.number %></h1>
 
-<script type="text/javascript">
-  var exampleSocket = new WebSocket("ws://127.0.0.1:9292/projects/db799377-aaa3-4605-ba43-c91a13c8f83/builds/b6dc2db05fb6e95ab4f744f08bd5de3202930d62/stream");
+<code>
+  <%= build_output %>
+</code>
+
+<!-- <script type="text/javascript">
+  var exampleSocket = new WebSocket("ws://127.0.0.1:9292/projects/db799377-aaa3-4605-ba43-c91a13c8f83/builds/e2619c93e7b686ae83b0cbcbbe99347628246440/stream");
 
   exampleSocket.onmessage = function (event) {
     console.log(event.data);
   }
-</script>
+</script> -->
