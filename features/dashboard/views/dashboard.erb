@@ -24,7 +24,7 @@
       </thead>
       <tbody>
         <% projects_with_access.each do |project| %>
-          <tr style="cursor: pointer;" onclick="location.href='/projects/<%= project.id %>'">
+          <tr style="cursor: pointer;" onclick="location.href='/projects/details/<%= project.id %>'">
             <td>💚</td>
             <td style="text-align: center;"><%= project.project_name %></td>
             <td><%= project.enabled ? "✅" : "🚫" %></td>
@@ -56,7 +56,7 @@
 
     <br />
 
-    <a href="/dashboard/add_project" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+    <a href="/projects/add" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
       Add new Project
     </a>
 

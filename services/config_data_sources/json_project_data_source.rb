@@ -138,5 +138,30 @@ module FastlaneCI
         self.projects = _projects
       end
     end
+
+    def delete_project!(project: nil)
+      unless project.nil?
+        raise "project must be configured with an instance of #{Project.name}" unless project.class <= Project
+      end
+      project_index = nil
+      existing_project = nil
+      self.projects.each.with_index do |old_project, index|
+        if old_project.id.casecmp(project.id.downcase).zero?
+          project_index = index
+          existing_project = old_project
+          break
+        end
+      end
+
+      if existing_project.nil?
+        logger.debug("Couldn't delete project #{project.project_name} because it doesn't exists")
+        raise "Couldn't update project #{project.project_name} because it doesn't exists"
+      else
+        logger.debug("Deleting project #{existing_project.project_name}, writing out to projects.json to #{json_folder_path}")
+        _projects = self.projects
+        _projects.delete_at(project_index)
+        self.projects = _projects
+      end
+    end
   end
 end
