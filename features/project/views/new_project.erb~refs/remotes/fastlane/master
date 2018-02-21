@@ -1,0 +1,32 @@
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
+  <header class="mdl-layout__header">
+    <div class="mdl-layout__header-row">
+      <span class="mdl-layout__title"><%= title %></span>
+    </div>
+  </header>
+  <div class="mdl-layout__drawer">
+    <span class="mdl-layout__title">fastlane.ci</span>
+    <nav class="mdl-navigation">
+      <a class="mdl-navigation__link" href="/">Dashboard</a>
+      <a class="mdl-navigation__link" href="#">Settings</a>
+    </nav>
+  </div>
+  <main class="mdl-layout__content" style="padding: 40px">
+    <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th style="width: 300px;">Project Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% repos.each do |repo| %>
+          <tr style="cursor: pointer;">
+            <td>💚</td>
+            <td onclick="document.location = '/projects/add/<%= repo[:name] %>';"><%= repo[:name] %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </main>
+</div>
