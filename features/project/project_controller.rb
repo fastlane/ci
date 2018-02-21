@@ -10,7 +10,9 @@ module FastlaneCI
     # above the other URL
     #
     # TODO: this should actually be a POST request
-    get "#{HOME}/*/trigger" do |project_id|
+    get "#{HOME}/:project_id/trigger" do
+      project_id = params[:project_id]
+
       project = self.user_project_with_id(project_id: project_id)
       current_github_provider_credential = self.check_and_get_provider_credential
 
@@ -30,8 +32,8 @@ module FastlaneCI
     end
 
     # Edit a project settings
-    get "#{HOME}/*/edit" do |project_id|
-      project = self.user_project_with_id(project_id: project_id)
+    get "#{HOME}/:project_id/edit" do
+      project = self.user_project_with_id(project_id: params[:project_id])
 
       # TODO: We now access a file directly from the submodule
       # That's of course far from ideal, and not something we want to do long term
@@ -67,8 +69,8 @@ module FastlaneCI
       erb(:edit_project, locals: locals, layout: FastlaneCI.default_layout)
     end
 
-    post "#{HOME}/*/save" do |project_id|
-      project = self.user_project_with_id(project_id: project_id)
+    post "#{HOME}/:project_id/save" do
+      project = self.user_project_with_id(project_id: params[:project_id])
       project.lane = params["selected_lane"]
       project.project_name = params["project_name"]
 
@@ -76,8 +78,8 @@ module FastlaneCI
       # Wait for Josh' input
     end
 
-    get "#{HOME}/*" do |project_id|
-      project = self.user_project_with_id(project_id: project_id)
+    get "#{HOME}/:project_id" do
+      project = self.user_project_with_id(project_id: params[:project_id])
 
       locals = {
         project: project,
