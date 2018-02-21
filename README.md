@@ -50,7 +50,7 @@ With this project, we don't just want to make using CI easier, we want to bring 
 
 ## System Requirements
 
-Requires Ruby 2.3.0 or higher. macOS and Xcode are required when building iOS projects. Refer to the [fastlane documentation](https://docs.fastlane.tools/getting-started/ios/setup/#installing-fastlane) for more information.
+Requires Ruby 2.3.3 or higher. macOS and Xcode are required when building iOS projects. Refer to the [fastlane documentation](https://docs.fastlane.tools/getting-started/ios/setup/#installing-fastlane) for more information.
 
 ## Development installation
 
@@ -191,4 +191,3 @@ bundle exec rubocop -a
 ## We're hiring!
 
 Are you passionate about _fastlane_ already, and want to help us build `fastlane.ci`? We're looking for engineers to join our team, drop us a message with your CV to fastlane@google.com.
-
