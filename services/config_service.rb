@@ -59,6 +59,7 @@ module FastlaneCI
       # TODO: we have to improve repo handling, as it seems like we either have to implement
       # proper paging, or we ask for specific repos instead
       # Either way, my account has access to too many repos, so for now, let's just workaround using this
+      current_repo_git_url_set << "https://github.com/nakhbari/Hello"
       current_repo_git_url_set << "https://github.com/taquitos/ci-sample-repo"
       current_repo_git_url_set << "https://github.com/fastlane/ci"
 
