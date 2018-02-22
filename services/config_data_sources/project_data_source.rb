@@ -16,5 +16,13 @@ module FastlaneCI
     def save_git_repo_configs!(git_repo_configs: nil)
       not_implemented(__method__)
     end
+
+    def create_project!(name: nil, repo_config: nil, enabled: nil, lane: nil)
+      not_implemented(__method__)
+    end
+
+    def update_project!(project: nil)
+      not_implemented(__method__)
+    end
   end
 end

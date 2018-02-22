@@ -8,12 +8,12 @@ module FastlaneCI
   class ConfigService
     include FastlaneCI::Logging
 
-    attr_accessor :project_data_source
+    attr_accessor :project_service
     attr_accessor :ci_user
     attr_accessor :active_code_hosting_services # dictionary of active_code_hosting_service_key to CodeHosting
 
-    def initialize(project_data_source: FastlaneCI::Services.project_data_source, ci_user: nil)
-      self.project_data_source = project_data_source
+    def initialize(project_service: FastlaneCI::Services.project_service, ci_user: nil)
+      self.project_service = project_service
       self.ci_user = ci_user
       self.active_code_hosting_services = {}
     end
@@ -63,7 +63,7 @@ module FastlaneCI
       current_repo_git_url_set << "https://github.com/fastlane/ci"
 
       logger.debug("Finding projects we have access to with #{provider_credential.ci_user.email}, #{provider_credential.type}")
-      projects = self.project_data_source.projects.select do |project|
+      projects = self.project_service.projects.select do |project|
         current_repo_git_url_set.include?(project.repo_config.git_url)
       end
 

@@ -70,7 +70,7 @@ module FastlaneCI
     end
 
     it "Allows to decode from a dictionary object using custom value mapping" do
-      allow(MockJSONConvertible).to receive(:json_to_attribute_name_proc_map).and_return({ :@other_attribute => proc { |timestamp| Time.parse(timestamp) } })
+      allow(MockJSONConvertible).to receive(:json_to_attribute_name_proc_map).and_return({ :@other_attribute => proc { |timestamp| Time.at(timestamp) } })
       object = MockJSONConvertible.from_json!({ "one_attribute" => "Hello", "other_attribute" => Time.at(0) })
       expect(object.one_attribute).to eql("Hello")
       expect(object.other_attribute).to eql(Time.at(0))
@@ -78,7 +78,7 @@ module FastlaneCI
 
     it "Allows to decode from a dictionary object using both custom value mapping and custom porperty mapping" do
       allow(MockJSONConvertible).to receive(:attribute_key_name_map).and_return({ :@one_attribute => "json_one_attribute", :@other_attribute => "json_other_attribute" })
-      allow(MockJSONConvertible).to receive(:json_to_attribute_name_proc_map).and_return({ :@other_attribute => proc { |timestamp| Time.parse(timestamp) } })
+      allow(MockJSONConvertible).to receive(:json_to_attribute_name_proc_map).and_return({ :@other_attribute => proc { |timestamp| Time.at(timestamp) } })
       object = MockJSONConvertible.from_json!({ "json_one_attribute" => "Hello", "json_other_attribute" => Time.at(0) })
       expect(object.one_attribute).to eql("Hello")
       expect(object.other_attribute).to eql(Time.at(0))
