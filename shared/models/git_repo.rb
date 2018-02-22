@@ -65,7 +65,7 @@ module FastlaneCI
     # @param sync_setup_timeout_seconds [Integer] When in sync setup mode, how many seconds to wait until raise an exception. (Defaults to 120)
     # @param callback [proc(GitRepo)] When in async setup mode, the proc to be called with the final GitRepo setup.
     def initialize(git_config: nil, provider_credential: nil, async_start: false, sync_setup_timeout_seconds: 120, callback: nil)
-      self.validate_initialization_params!(git_config: git_config, provider_credential: provider_credential)
+      self.validate_initialization_params!(git_config: git_config, provider_credential: provider_credential, async_start: async_start, callback: callback)
       @git_config = git_config
 
       @callback = callback
@@ -148,9 +148,10 @@ module FastlaneCI
       logger.debug("Done, now using #{self.git_config.local_repo_path} for config repo")
     end
 
-    def validate_initialization_params!(git_config: nil, provider_credential: nil)
+    def validate_initialization_params!(git_config: nil, provider_credential: nil, async_start: nil, callback: nil)
       raise "No git config provided" if git_config.nil?
       raise "No provider_credential provided" if provider_credential.nil?
+      raise "Callback provided but not initialized in async mode" if !callback.nil? && !async_start
 
       credential_type = provider_credential.type
       git_config_credential_type = git_config.provider_credential_type_needed
