@@ -164,8 +164,8 @@ module FastlaneCI
         logger.debug("iterating through all remote branches of #{self.git_config.git_url}")
         branch_count = 0
         self.git.branches.remote.each do |branch|
-          each_block.call(self.git, branch)
-          branch_count = branch_count + 1
+          yield(self.git, branch)
+          branch_count += 1
         end
         logger.debug("done iterating through all #{branch_count} remote branches of #{self.git_config.git_url}")
       end
