@@ -12,7 +12,7 @@
     </nav>
   </div>
   <main class="mdl-layout__content" style="padding: 40px">
-    <form method="POST" action="/dashboard/add_project/<%= repo.git_config.name %>">
+    <form method="POST" action="/projects/add/<%= repo.git_config.name %>">
       <h5>Adding <%= repo.git_config.full_name %></h5>
       <div class="mdl-textfield mdl-js-textfield">
         <input class="mdl-textfield__input" type="text" name="project_name">
