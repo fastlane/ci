@@ -73,9 +73,7 @@ module FastlaneCI
       # https://octokit.github.io/octokit.rb/Octokit/Client/Statuses.html
 
       task = TaskQueue::Task.new(work_block: proc {
-        if ENV["FASTLANE_CI_SUPER_VERBOSE"]
-          logger.debug("Setting status #{state} on #{target_url}")
-        end
+        logger.debug("Setting status #{state} on #{target_url}")
         client.create_status(repo, sha, state, {
           target_url: target_url,
           description: description,

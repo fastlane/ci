@@ -74,18 +74,16 @@ module FastlaneCI
     end
 
     def work
-      if ENV["FASTLANE_CI_SUPER_VERBOSE"]
-        logger.debug("Checking for new commits on GitHub")
-      end
+      logger.debug("Checking for new commits on GitHub")
 
-      logger.debug("Checking if we should wait for any previous previous tasks to complete")
+      logger.info("Checking if we should wait for any previous previous tasks to complete")
       should_wait = self.wait_for_previous_tasks?
       if should_wait
-        logger.debug("We still have test runner tasks to finish, not enqueuing any more")
+        logger.info("We still have test runner tasks to finish, not enqueuing any more")
         return
       end
 
-      logger.debug("No old test runner tasks, enqueuing new runner tasks")
+      logger.info("No old test runner tasks, enqueuing new runner tasks")
       repo = self.git_repo
 
       # is needed to see if there are new branches (called async)
@@ -96,10 +94,8 @@ module FastlaneCI
 
       self.current_tasks = []
       repo.git_and_remote_branches_each do |git, branch|
-        if ENV["FASTLANE_CI_SUPER_VERBOSE"]
-          # Not sure why this matters
-          logger.debug("FOUND WEIRD BRANCH") if branch.name.start_with?("HEAD ->")
-        end
+        # Not sure why this matters
+        logger.debug("FOUND WEIRD BRANCH") if branch.name.start_with?("HEAD ->")
 
         next if branch.name.start_with?("HEAD ->") # not sure what this is for
 
@@ -116,9 +112,7 @@ module FastlaneCI
           next
         end
 
-        if ENV["FASTLANE_CI_SUPER_VERBOSE"]
-          logger.debug("Detected branch #{branch.name} with sha #{current_sha}")
-        end
+        logger.debug("Detected branch #{branch.name} with sha #{current_sha}")
 
         credential = self.provider_credential
         current_project = self.project
