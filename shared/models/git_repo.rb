@@ -44,15 +44,31 @@ module FastlaneCI
 
     attr_accessor :temporary_storage_path
 
+    # This callback is used when the instance is initialized in async mode, so you can define a proc
+    # with the final GitRepo configured.
+    #   @example
+    #   GitRepo.new(..., async_start: true, callback: proc { |repo| puts "This is my final repo #{repo}"; })
+    #
+    # @return [proc(GitRepo)]
+    attr_accessor :callback
+
     class << self
       attr_accessor :git_action_queue
     end
 
     GitRepo.git_action_queue = TaskQueue::TaskQueue.new(name: "GitRepo task queue")
 
-    def initialize(git_config: nil, provider_credential: nil, async_start: false, sync_setup_timeout_seconds: 120)
-      self.validate_initialization_params!(git_config: git_config, provider_credential: provider_credential)
+    # Initializer for GitRepo class
+    # @param git_config [GitConfig]
+    # @param provider_credential [ProviderCredential]
+    # @param async_start [Bool] Whether the repo should be setup async or not. (Defaults to `true`)
+    # @param sync_setup_timeout_seconds [Integer] When in sync setup mode, how many seconds to wait until raise an exception. (Defaults to 120)
+    # @param callback [proc(GitRepo)] When in async setup mode, the proc to be called with the final GitRepo setup.
+    def initialize(git_config: nil, provider_credential: nil, async_start: false, sync_setup_timeout_seconds: 120, callback: nil)
+      self.validate_initialization_params!(git_config: git_config, provider_credential: provider_credential, async_start: async_start, callback: callback)
       @git_config = git_config
+
+      @callback = callback
 
       # Ok, so now we need to pull the bit of information from the credentials that we know we need for git repos
       case provider_credential.type
@@ -71,10 +87,10 @@ module FastlaneCI
 
       logger.debug("Adding task to setup repo #{self.git_config.git_url} at: #{self.git_config.local_repo_path}")
 
-      setup_task = git_action_with_queue do
-        logger.debug("starting setup_repo #{self.git_config.git_url}".freeze)
+      setup_task = git_action_with_queue(ensure_block: proc { callback_block(async_start) }) do
+        super_verbose("starting setup_repo #{self.git_config.git_url}".freeze)
         self.setup_repo
-        logger.debug("done setup_repo #{self.git_config.git_url}".freeze)
+        super_verbose("done setup_repo #{self.git_config.git_url}".freeze)
       end
 
       # if we're starting asynchronously, we can return now.
@@ -132,9 +148,10 @@ module FastlaneCI
       logger.debug("Done, now using #{self.git_config.local_repo_path} for config repo")
     end
 
-    def validate_initialization_params!(git_config: nil, provider_credential: nil)
+    def validate_initialization_params!(git_config: nil, provider_credential: nil, async_start: nil, callback: nil)
       raise "No git config provided" if git_config.nil?
       raise "No provider_credential provided" if provider_credential.nil?
+      raise "Callback provided but not initialized in async mode" if !callback.nil? && !async_start
 
       credential_type = provider_credential.type
       git_config_credential_type = git_config.provider_credential_type_needed
@@ -320,6 +337,14 @@ module FastlaneCI
       else
         clone_synchronously(repo_auth: repo_auth)
       end
+    end
+
+    def callback_block(async_start)
+      # How do we know that the task was successfully finished?
+      return if self.callback.nil?
+      return unless async_start
+
+      self.callback.call(self)
     end
 
     private
