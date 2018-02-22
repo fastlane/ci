@@ -43,7 +43,13 @@ module FastlaneCI
     attr_accessor :repo_auth # whatever pieces of information that can change between git users
 
     attr_accessor :temporary_storage_path
-    # return [proc]
+
+    # This callback is used when the instance is initialized in async mode, so you can define a proc
+    # with the final GitRepo configured.
+    #   @example
+    #   GitRepo.new(..., async_start: true, callback: proc { |repo| puts "This is my final repo #{repo}"; })
+    #
+    # @return [proc(GitRepo)]
     attr_accessor :callback
 
     class << self
@@ -52,6 +58,12 @@ module FastlaneCI
 
     GitRepo.git_action_queue = TaskQueue::TaskQueue.new(name: "GitRepo task queue")
 
+    # Initializer for GitRepo class
+    # @param git_config [GitConfig]
+    # @param provider_credential [ProviderCredential]
+    # @param async_start [Bool] Whether the repo should be setup async or not. (Defaults to `true`)
+    # @param sync_setup_timeout_seconds [Integer] When in sync setup mode, how many seconds to wait until raise an exception. (Defaults to 120)
+    # @param callback [proc(GitRepo)] When in async setup mode, the proc to be called with the final GitRepo setup.
     def initialize(git_config: nil, provider_credential: nil, async_start: false, sync_setup_timeout_seconds: 120, callback: nil)
       self.validate_initialization_params!(git_config: git_config, provider_credential: provider_credential)
       @git_config = git_config
@@ -328,9 +340,10 @@ module FastlaneCI
 
     def callback_block(async_start)
       # How do we know that the task was successfully finished?
-      if async_start
-        self.callback.call(self) unless self.callback.nil?
-      end
+      return if self.callback.nil?
+      return unless async_start
+
+      self.callback.call(self)
     end
 
     private
