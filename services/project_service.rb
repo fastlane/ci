@@ -30,13 +30,13 @@ module FastlaneCI
       # we infer that the new project will be enabled by default
       enabled ||= true
       project = self.project_data_source.create_project!(name: name, repo_config: repo_config, enabled: enabled, lane: lane)
-      self.commit_repo_changes(message: "Created project #{project.project_name}.")
+      self.commit_repo_changes!(message: "Created project #{project.project_name}.")
       return project
     end
 
     def update_project!(project: nil)
       self.project_data_source.update_project!(project: project)
-      self.commit_repo_changes(message: "Updated project #{project.project_name}.")
+      self.commit_repo_changes!(message: "Updated project #{project.project_name}.")
     end
 
     def project(name: nil)
@@ -63,13 +63,13 @@ module FastlaneCI
 
     def delete_project!(project: nil)
       self.project_data_source.delete_project!(project: project)
-      self.commit_repo_changes(message: "Deleted project #{project.project_name}.")
+      self.commit_repo_changes!(message: "Deleted project #{project.project_name}.")
     end
 
     private
 
     # Not sure if this must be here or not, but we can open a discussion on this.
-    def commit_repo_changes(message: nil, file_to_commit: nil)
+    def commit_repo_changes!(message: nil, file_to_commit: nil)
       self.project_data_source.git_repo.commit_changes!(commit_message: message,
                                                         file_to_commit: file_to_commit)
     end
