@@ -23,7 +23,7 @@ module FastlaneCI
   # Setting the environment variable `DEBUG=1` will lower the log level to DEBUG.
   # Use `logger.debug` to print out information useful to the developers
   #
-  # Setting the environment variable `FASTLANE_CI_SUPER_VERBOSE=1` will also set the log level to DEBUG,
+  # Setting the environment variable `FASTLANE_CI_VERBOSE=1` will also set the log level to DEBUG,
   # but includes extra logging which includes thread ids, and other
   # non-essential information that could be useful during debugging.
   module Logging
@@ -41,7 +41,7 @@ module FastlaneCI
 
           thread_id = ""
 
-          if ENV["FASTLANE_CI_SUPER_VERBOSE"]
+          if ENV["FASTLANE_CI_VERBOSE"]
             # this gets noisey really quickly
             thread_id = " #{Thread.current[:thread_id]}" unless Thread.current[:thread_id].nil?
           end
@@ -51,7 +51,7 @@ module FastlaneCI
 
         logger.level = :warn
         logger.level = :debug if ENV["DEBUG"]
-        logger.level = :debug if ENV["FASTLANE_CI_SUPER_VERBOSE"]
+        logger.level = :debug if ENV["FASTLANE_CI_VERBOSE"]
       end
 
       return @logger
