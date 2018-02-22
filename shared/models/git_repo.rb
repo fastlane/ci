@@ -75,13 +75,10 @@ module FastlaneCI
 
       logger.debug("Adding task to setup repo #{self.git_config.git_url} at: #{self.git_config.local_repo_path}")
 
-      setup_task = git_action_with_queue do
+      setup_task = git_action_with_queue(ensure_block: self.callback_block(async_start)) do
         super_verbose("starting setup_repo #{self.git_config.git_url}".freeze)
         self.setup_repo
         super_verbose("done setup_repo #{self.git_config.git_url}".freeze)
-        if async_start
-          self.callback.call(self) unless self.callback.nil?
-        end
       end
 
       # if we're starting asynchronously, we can return now.
@@ -326,6 +323,13 @@ module FastlaneCI
         end
       else
         clone_synchronously(repo_auth: repo_auth)
+      end
+    end
+
+    def callback_block(async_start)
+      # How do we know that the task was successfully finished?
+      if async_start
+        self.callback.call(self) unless self.callback.nil?
       end
     end
 
