@@ -18,5 +18,9 @@ module FastlaneCI
     def repos
       not_implemented(__method__)
     end
+
+    def access_to_repo?(repo_url: nil)
+      not_implemented(__method__)
+    end
   end
 end
