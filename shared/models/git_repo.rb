@@ -88,9 +88,9 @@ module FastlaneCI
       logger.debug("Adding task to setup repo #{self.git_config.git_url} at: #{self.git_config.local_repo_path}")
 
       setup_task = git_action_with_queue(ensure_block: proc { callback_block(async_start) }) do
-        super_verbose("starting setup_repo #{self.git_config.git_url}".freeze)
+        logger.debug("starting setup_repo #{self.git_config.git_url}".freeze)
         self.setup_repo
-        super_verbose("done setup_repo #{self.git_config.git_url}".freeze)
+        logger.debug("done setup_repo #{self.git_config.git_url}".freeze)
       end
 
       # if we're starting asynchronously, we can return now.
