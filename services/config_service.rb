@@ -56,7 +56,7 @@ module FastlaneCI
 
       logger.debug("Finding projects we have access to with #{provider_credential.ci_user.email}, #{provider_credential.type}")
       projects = self.project_service.projects.select do |project|
-        current_code_hosting_service.access_to_repo?({repo: project.repo_config.git_url})
+        current_code_hosting_service.access_to_repo?(repo_url: project.repo_config.git_url)
       end
 
       # return all projects that are the union of this current user's provider_credential, and the passed in provider_credential
