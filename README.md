@@ -71,7 +71,8 @@ We recommend create a local `.keys` file that you can load using `source .keys` 
 The setup below will be simplified as the project becomes more mature. As for now, we don't have a UI or automatic onboarding yet, so you'll have to set those variables up.
 
 ```sh
-# Randomly generated key, that's used to encrypt the user passwords
+# Arbitrary key you decide. This will be used for password encryption.
+# Do not change after selecting a key value, otherwise there will be decoding issues.
 export FASTLANE_CI_ENCRYPTION_KEY="key"
 
 # The email address of your fastlane CI bot account
@@ -102,11 +103,11 @@ In order to run fastlane.ci for the first time, the `https://github.com/your-nam
     {
       "id": "ee75eb27-9246-43c1-af5a-a8d33f8a963f",
       "email": "your-name@gmail.com",
-      "password_hash": "some password hash that needs to be created",
+      "password_hash": "some password hash that needs to be created. See instructions below.",
       "provider_credentials": [
         {
           "email": "minuscorp@gmail.com",
-          "encrypted_api_token": "some GitHub API token that has been encrypted using the FASTLANE_CI_ENCRYPTION_KEY",
+          "encrypted_api_token": "some GitHub API token that has been encrypted using the FASTLANE_CI_ENCRYPTION_KEY. See instructions below.",
           "provider_name": "GitHub",
           "type": "github",
           "full_name": "Fastlane CI"
