@@ -43,6 +43,8 @@ module FastlaneCI
     attr_accessor :repo_auth # whatever pieces of information that can change between git users
 
     attr_accessor :temporary_storage_path
+    # return [proc]
+    attr_accessor :callback
 
     class << self
       attr_accessor :git_action_queue
@@ -50,9 +52,11 @@ module FastlaneCI
 
     GitRepo.git_action_queue = TaskQueue::TaskQueue.new(name: "GitRepo task queue")
 
-    def initialize(git_config: nil, provider_credential: nil, async_start: false, sync_setup_timeout_seconds: 120)
+    def initialize(git_config: nil, provider_credential: nil, async_start: false, sync_setup_timeout_seconds: 120, callback: nil)
       self.validate_initialization_params!(git_config: git_config, provider_credential: provider_credential)
       @git_config = git_config
+
+      @callback = callback
 
       # Ok, so now we need to pull the bit of information from the credentials that we know we need for git repos
       case provider_credential.type
