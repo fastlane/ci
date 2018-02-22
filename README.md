@@ -77,7 +77,7 @@ export FASTLANE_CI_ENCRYPTION_KEY="key"
 # The email address of your fastlane CI bot account
 export FASTLANE_CI_USER="email@bot.com"
 
-# The API token of your fastlane CI bot account
+# The password of your fastlane CI bot account
 export FASTLANE_CI_PASSWORD="password"
 
 # The git URL (https) for the configuration repo
