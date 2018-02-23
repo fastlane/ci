@@ -1,6 +1,8 @@
 $LOAD_PATH << "shared"
 require "rack/test"
 require "rspec"
+require "stub_helpers"
+require "helper_functions"
 
 ENV["RACK_ENV"] = "test"
 require File.expand_path("../../fastlane_app.rb", __FILE__)
@@ -14,6 +16,8 @@ end
 
 RSpec.configure do |config|
   config.include(RSpecMixin)
+  config.include(StubHelpers)
+  config.include(HelperFunctions)
 
   config.formatter = :documentation
   config.tty = true
