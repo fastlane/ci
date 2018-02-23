@@ -3,12 +3,18 @@ require_relative "../data_sources/json_data_source"
 require_relative "../../shared/json_convertible"
 require_relative "../../shared/models/git_repo"
 require_relative "../../shared/models/git_repo_config"
+require_relative "../../shared/models/job_trigger"
 require_relative "../../shared/models/project"
 require_relative "../../shared/models/user"
 require_relative "../../shared/models/provider_credential"
 require_relative "../../shared/logging_module"
 
 module FastlaneCI
+  # Mixin for JobTrigger which is in an Array on Project
+  class JobTrigger
+    include FastlaneCI::JSONConvertible
+  end
+
   # Mixin for Project to enable some basic JSON marshalling and unmarshalling
   class Project
     include FastlaneCI::JSONConvertible
@@ -62,8 +68,31 @@ module FastlaneCI
         path = self.git_repo.file_path("projects.json")
         return [] unless File.exist?(path)
 
-        saved_projects = JSON.parse(File.read(path)).map(&Project.method(:from_json!))
+        saved_projects = JSON.parse(File.read(path)).map do |project_json|
+          project = Project.from_json!(project_json)
+          project.job_triggers = self.job_triggers_from_hash_array(job_trigger_array: project.job_triggers) unless project.job_triggers.nil?
+          project
+        end
         return saved_projects
+      end
+    end
+
+    def job_triggers_from_hash_array(job_trigger_array: nil)
+      return job_trigger_array.map do |job_trigger_hash|
+        type = job_trigger_hash["type"]
+
+        # currently only supports 3 triggers
+        job_trigger = nil
+        if type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit]
+          job_trigger = CommitJobTrigger.from_json!(job_trigger_hash)
+        elsif type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:nightly]
+          job_trigger = NightlyJobTrigger.from_json!(job_trigger_hash)
+        elsif type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual]
+          job_trigger = ManualJobTrigger.from_json!(job_trigger_hash)
+        else
+          raise "Unable to parse JobTrigger type: #{type} from #{job_trigger_hash}"
+        end
+        job_trigger
       end
     end
 
