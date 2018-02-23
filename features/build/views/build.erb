@@ -1,13 +1,19 @@
 <h1>Build Log <%= build.number %></h1>
 
-<code>
-  <%= build_output %>
+<code id="log">
+  <p>Line 1</p>
 </code>
 
-<!-- <script type="text/javascript">
-  var exampleSocket = new WebSocket("ws://127.0.0.1:9292/projects/db799377-aaa3-4605-ba43-c91a13c8f83/builds/e2619c93e7b686ae83b0cbcbbe99347628246440/stream");
-
-  exampleSocket.onmessage = function (event) {
-    console.log(event.data);
-  }
-</script> -->
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function(event) { 
+    var scheme   = "ws://"
+    var uri      = scheme + window.document.location.host + "/";
+    var ws       = new WebSocket(uri);
+    ws.onmessage = function(message) {
+      console.log(message)
+      var data = message.data
+      console.log(data)
+      document.getElementById("log").innerHTML << data // this piece doesn't work yet
+    }
+  });
+</script>

@@ -13,8 +13,7 @@ module FastlaneCI
         block: proc do |row|
           puts "Current output from fastlane: #{row}"
 
-          html_row = FastlaneOutputToHtml.convert_row(row)
-          puts html_row
+          yield(row)
         end
       )
       FastlaneCore::UI.ui_object = ci_output

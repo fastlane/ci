@@ -1,6 +1,8 @@
 # External
 require "sinatra/base"
 
+set :server, "thin"
+
 require_relative "./fastfile-parser/fastfile_parser"
 
 # Internal
@@ -36,9 +38,3 @@ module FastlaneCI
     end
   end
 end
-
-# TODO: remove this, only test code here:
-FastlaneCI::FastlaneTestRunner.new.run(
-  lane: "beta",
-  platform: "ios"
-)
