@@ -99,7 +99,6 @@ module FastlaneCI
     def projects=(projects)
       JSONProjectDataSource.projects_file_semaphore.synchronize do
         File.write(self.git_repo.file_path("projects.json"), JSON.pretty_generate(projects.map(&:to_object_dictionary)))
-        self.git_repo.commit_changes!
       end
     end
 
@@ -162,9 +161,9 @@ module FastlaneCI
         raise "Couldn't update project #{project.project_name} because it doesn't exists"
       else
         logger.debug("Updating project #{existing_project.project_name}, writing out to projects.json to #{json_folder_path}")
-        _projects = self.projects
-        _projects[project_index] = project
-        self.projects = _projects
+        projects = self.projects
+        projects[project_index] = project
+        self.projects = projects
       end
     end
 
