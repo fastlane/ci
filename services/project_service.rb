@@ -30,6 +30,7 @@ module FastlaneCI
       # we infer that the new project will be enabled by default
       enabled ||= true
       project = self.project_data_source.create_project!(name: name, repo_config: repo_config, enabled: enabled, lane: lane)
+      raise "Project couldn't be created" if project.nil?
       self.commit_repo_changes!(message: "Created project #{project.project_name}.")
       return project
     end
@@ -65,8 +66,6 @@ module FastlaneCI
       self.project_data_source.delete_project!(project: project)
       self.commit_repo_changes!(message: "Deleted project #{project.project_name}.")
     end
-
-    private
 
     # Not sure if this must be here or not, but we can open a discussion on this.
     def commit_repo_changes!(message: nil, file_to_commit: nil)
