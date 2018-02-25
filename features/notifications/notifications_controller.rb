@@ -55,7 +55,7 @@ module FastlaneCI
     #
     # @return [nil]
     post "#{HOME}/delete/:name" do
-      add_to_task_queue { Services.notification_service.delete_notification!(name: params[:name]) }
+      Services.notification_service.delete_notification!(name: params[:name])
       redirect HOME
     end
 

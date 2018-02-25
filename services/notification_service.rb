@@ -37,7 +37,7 @@ module FastlaneCI
     # @param  [String] message
     # @return [Notification]
     def create_notification!(priority: nil, name: nil, message: nil)
-      unless notification_data_source.notification_exist?(name: name, message: message)
+      unless notification_data_source.notification_exist?(name: name)
         logger.debug("creating notification #{name}")
         return notification_data_source.create_notification!(priority: priority, name: name, message: message)
       end

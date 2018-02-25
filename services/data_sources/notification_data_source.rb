@@ -14,7 +14,7 @@ module FastlaneCI
     # Checks if a notification exists with the same name and message
     #
     # @abstract
-    def notification_exist?(name: nil, message: nil)
+    def notification_exist?(name: nil)
       not_implemented(__method__)
     end
 
