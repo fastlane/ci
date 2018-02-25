@@ -3,12 +3,18 @@ require_relative "../data_sources/json_data_source"
 require_relative "../../shared/json_convertible"
 require_relative "../../shared/models/git_repo"
 require_relative "../../shared/models/git_repo_config"
+require_relative "../../shared/models/job_trigger"
 require_relative "../../shared/models/project"
 require_relative "../../shared/models/user"
 require_relative "../../shared/models/provider_credential"
 require_relative "../../shared/logging_module"
 
 module FastlaneCI
+  # Mixin for JobTrigger which is in an Array on Project
+  class JobTrigger
+    include FastlaneCI::JSONConvertible
+  end
+
   # Mixin for Project to enable some basic JSON marshalling and unmarshalling
   class Project
     include FastlaneCI::JSONConvertible
@@ -62,15 +68,37 @@ module FastlaneCI
         path = self.git_repo.file_path("projects.json")
         return [] unless File.exist?(path)
 
-        saved_projects = JSON.parse(File.read(path)).map(&Project.method(:from_json!))
+        saved_projects = JSON.parse(File.read(path)).map do |project_json|
+          project = Project.from_json!(project_json)
+          project.job_triggers = self.job_triggers_from_hash_array(job_trigger_array: project.job_triggers) unless project.job_triggers.nil?
+          project
+        end
         return saved_projects
+      end
+    end
+
+    def job_triggers_from_hash_array(job_trigger_array: nil)
+      return job_trigger_array.map do |job_trigger_hash|
+        type = job_trigger_hash["type"]
+
+        # currently only supports 3 triggers
+        job_trigger = nil
+        if type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit]
+          job_trigger = CommitJobTrigger.from_json!(job_trigger_hash)
+        elsif type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:nightly]
+          job_trigger = NightlyJobTrigger.from_json!(job_trigger_hash)
+        elsif type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual]
+          job_trigger = ManualJobTrigger.from_json!(job_trigger_hash)
+        else
+          raise "Unable to parse JobTrigger type: #{type} from #{job_trigger_hash}"
+        end
+        job_trigger
       end
     end
 
     def projects=(projects)
       JSONProjectDataSource.projects_file_semaphore.synchronize do
         File.write(self.git_repo.file_path("projects.json"), JSON.pretty_generate(projects.map(&:to_object_dictionary)))
-        self.git_repo.commit_changes!
       end
     end
 
@@ -92,14 +120,14 @@ module FastlaneCI
     end
 
     def create_project!(name: nil, repo_config: nil, enabled: nil, lane: nil)
-      projects = @projects
+      projects = self.projects
       new_project = Project.new(repo_config: repo_config,
                                 enabled: enabled,
                                 project_name: name,
                                 lane: lane)
-      if self.project_exist?(new_project.project_name)
+      if !self.project_exist?(new_project.project_name)
         projects.push(new_project)
-        @projects = projects
+        self.projects = projects
         logger.debug("Added project #{new_project.project_name} to projets.json in #{self.json_folder_path}")
         return new_project
       else
@@ -109,8 +137,8 @@ module FastlaneCI
     end
 
     # Define that the name of the project must be unique
-    def project_exist?(name: nil)
-      project = self.projects.select { |existing_project| existing_project.project_name.casecmp(name.downcase).zero? }.first
+    def project_exist?(name)
+      project = self.projects.select { |existing_project| existing_project.project_name == name }.first
       return !project.nil?
     end
 
@@ -120,8 +148,8 @@ module FastlaneCI
       end
       project_index = nil
       existing_project = nil
-      @projects.each.with_index do |old_project, index|
-        if old_project.project_name.casecmp(project.project_name.downcase).zero?
+      self.projects.each.with_index do |old_project, index|
+        if old_project.id.casecmp(project.id.downcase).zero?
           project_index = index
           existing_project = old_project
           break
@@ -133,7 +161,34 @@ module FastlaneCI
         raise "Couldn't update project #{project.project_name} because it doesn't exists"
       else
         logger.debug("Updating project #{existing_project.project_name}, writing out to projects.json to #{json_folder_path}")
-        @projects[project_index] = project
+        projects = self.projects
+        projects[project_index] = project
+        self.projects = projects
+      end
+    end
+
+    def delete_project!(project: nil)
+      unless project.nil?
+        raise "project must be configured with an instance of #{Project.name}" unless project.class <= Project
+      end
+      project_index = nil
+      existing_project = nil
+      self.projects.each.with_index do |old_project, index|
+        if old_project.id.casecmp(project.id.downcase).zero?
+          project_index = index
+          existing_project = old_project
+          break
+        end
+      end
+
+      if existing_project.nil?
+        logger.debug("Couldn't delete project #{project.project_name} because it doesn't exists")
+        raise "Couldn't update project #{project.project_name} because it doesn't exists"
+      else
+        logger.debug("Deleting project #{existing_project.project_name}, writing out to projects.json to #{json_folder_path}")
+        _projects = self.projects
+        _projects.delete_at(project_index)
+        self.projects = _projects
       end
     end
   end
