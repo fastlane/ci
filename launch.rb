@@ -1,9 +1,15 @@
+require_relative "./shared/logging_module"
+
 module FastlaneCI
   # Launch is responsible for spawning up the whole
   # fastlane.ci server, this includes all needed classes
   # workers, check for .env, env variables and dependencies
   # This is being called from `config.ru`
   class Launch
+    class << self
+      include FastlaneCI::Logging
+    end
+
     def self.take_off
       verify_dependencies
       verify_system_requirements
@@ -68,7 +74,7 @@ module FastlaneCI
 
     def self.setup_threads
       if ENV["RACK_ENV"] == "development"
-        puts("development mode, aborting on any thread exceptions")
+        logger.info("development mode, aborting on any thread exceptions")
         Thread.abort_on_exception = true
       end
     end
@@ -124,8 +130,7 @@ module FastlaneCI
         end
       end
 
-      # TODO: use logger if possible
-      puts("Seems like no workers were started to monitor your projects") if number_of_workers_started == 0
+      logger.info("Seems like no workers were started to monitor your projects") if number_of_workers_started == 0
 
       # Initialize the workers
       # For now, we're not using a fancy framework that adds multiple heavy dependencies
@@ -136,7 +141,7 @@ module FastlaneCI
     # Verify that fastlane.ci is already set up on this machine.
     # If that's not the case, we have to make sure to trigger the initial clone
     def self.trigger_initial_ci_setup
-      puts("No config repo cloned yet, doing that now") # TODO: use logger if possible
+      logger.info("No config repo cloned yet, doing that now")
 
       # This happens on the first launch of CI
       # We don't have access to the config directory yet
@@ -154,12 +159,12 @@ module FastlaneCI
                                                                       git_repo_config: ci_config_repo,
                                                                       provider_credential: provider_credential)
       )
-      puts("Successfully did the initial clone on this machine")
+      logger.info("Successfully did the initial clone on this machine")
     rescue StandardError => ex
-      puts("Something went wrong on the initial clone")
+      logger.error("Something went wrong on the initial clone")
 
       if ENV["FASTLANE_CI_INITIAL_CLONE_API_TOKEN"].to_s.length == 0 || ENV["FASTLANE_CI_INITIAL_CLONE_EMAIL"].to_s.length == 0
-        puts("Make sure to provide your `FASTLANE_CI_INITIAL_CLONE_EMAIL` and `FASTLANE_CI_INITIAL_CLONE_API_TOKEN` ENV variables")
+        logger.error("Make sure to provide your `FASTLANE_CI_INITIAL_CLONE_EMAIL` and `FASTLANE_CI_INITIAL_CLONE_API_TOKEN` ENV variables")
       end
 
       raise ex
