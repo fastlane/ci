@@ -19,6 +19,9 @@ module FastlaneCI
     # @return [String] Is a UDID so we're not open to ID guessing attacks
     attr_accessor :id
 
+    # @return [Array[JobTrigger]] The job triggers
+    attr_accessor :job_triggers
+
     def initialize(repo_config: nil, enabled: nil, project_name: nil, lane: nil, id: nil)
       self.repo_config = repo_config
       self.enabled = enabled

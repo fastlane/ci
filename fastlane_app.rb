@@ -31,7 +31,7 @@ module FastlaneCI
     end
 
     get "/favico.ico" do
-      "nope"
+      "nope" # TODO: Add favicon once we have it
     end
   end
 end

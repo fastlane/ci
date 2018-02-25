@@ -24,5 +24,9 @@ module FastlaneCI
     def update_project!(project: nil)
       not_implemented(__method__)
     end
+
+    def delete_project!(project: nil)
+      not_implemented(__method__)
+    end
   end
 end

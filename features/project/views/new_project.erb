@@ -19,7 +19,7 @@
         <% repos.each do |repo| %>
           <tr style="cursor: pointer;">
             <td>💚</td>
-            <td><%= repo[:name] %></td>
+            <td onclick="document.location = '/projects/add/<%= repo[:name] %>';"><%= repo[:name] %></td>
           </tr>
         <% end %>
       </tbody>

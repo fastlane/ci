@@ -50,7 +50,7 @@ With this project, we don't just want to make using CI easier, we want to bring 
 
 ## System Requirements
 
-Requires Ruby 2.3.0 or higher. macOS and Xcode are required when building iOS projects. Refer to the [fastlane documentation](https://docs.fastlane.tools/getting-started/ios/setup/#installing-fastlane) for more information.
+Requires Ruby 2.3.3 or higher. macOS and Xcode are required when building iOS projects. Refer to the [fastlane documentation](https://docs.fastlane.tools/getting-started/ios/setup/#installing-fastlane) for more information.
 
 ## Development installation
 
@@ -71,13 +71,14 @@ We recommend create a local `.keys` file that you can load using `source .keys` 
 The setup below will be simplified as the project becomes more mature. As for now, we don't have a UI or automatic onboarding yet, so you'll have to set those variables up.
 
 ```sh
-# Randomly generated key, that's used to encrypt the user passwords
+# Arbitrary key you decide. This will be used for password encryption.
+# Do not change after selecting a key value, otherwise there will be decoding issues.
 export FASTLANE_CI_ENCRYPTION_KEY="key"
 
 # The email address of your fastlane CI bot account
 export FASTLANE_CI_USER="email@bot.com"
 
-# The API token of your fastlane CI bot account
+# The password of your fastlane CI bot account
 export FASTLANE_CI_PASSWORD="password"
 
 # The git URL (https) for the configuration repo
@@ -102,11 +103,11 @@ In order to run fastlane.ci for the first time, the `https://github.com/your-nam
     {
       "id": "ee75eb27-9246-43c1-af5a-a8d33f8a963f",
       "email": "your-name@gmail.com",
-      "password_hash": "some password hash that needs to be created",
+      "password_hash": "some password hash that needs to be created. See instructions below.",
       "provider_credentials": [
         {
           "email": "minuscorp@gmail.com",
-          "encrypted_api_token": "some GitHub API token that has been encrypted using the FASTLANE_CI_ENCRYPTION_KEY",
+          "encrypted_api_token": "some GitHub API token that has been encrypted using the FASTLANE_CI_ENCRYPTION_KEY. See instructions below.",
           "provider_name": "GitHub",
           "type": "github",
           "full_name": "Fastlane CI"
@@ -169,9 +170,9 @@ bundle exec rackup -p 8080 --env development
 Visit [127.0.0.1:8080](http://127.0.0.1:8080/) to open the login
 
 If you're having trouble and need to debug, you can add the following environment variables:
-`FASTLANE_CI_SUPER_VERBOSE=1` and `DEBUG=1`
+`FASTLANE_CI_VERBOSE=1` and `DEBUG=1`
 
-`FASTLANE_CI_SUPER_VERBOSE` enables extra logging which includes thread ids, and other non-essential information that could be useful during debugging.
+`FASTLANE_CI_VERBOSE` enables extra logging which includes thread ids, and other non-essential information that could be useful during debugging.
 
 
 ## Run tests
@@ -193,4 +194,3 @@ bundle exec rubocop -a
 ## We're hiring!
 
 Are you passionate about _fastlane_ already, and want to help us build `fastlane.ci`? We're looking for engineers to join our team, drop us a message with your CV to fastlane@google.com.
-
