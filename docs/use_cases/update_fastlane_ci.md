@@ -15,7 +15,7 @@ Instead we want to offer an easy way to opt-in to auto-update, and make it the r
 
 ### Steps ###
 - User starts onboarding
-- As one of the last steps, the user is asked if they want to let `fastlane.ci` automatically itself
+- As one of the last steps, the user is asked if they want to let `fastlane.ci` automatically update itself
 - If user opts-in to automatic updates:
     - `fastlane.ci` periodically checks for new versions, by using similar code to the [update_fastlane](https://docs.fastlane.tools/actions/update_fastlane/) action
     - After a successful update, `fastlane.ci` might show an update message with a changelog somewhere in the notifications screen (to be determined if we really want to do this)
