@@ -186,9 +186,9 @@ module FastlaneCI
         raise "Couldn't update project #{project.project_name} because it doesn't exists"
       else
         logger.debug("Deleting project #{existing_project.project_name}, writing out to projects.json to #{json_folder_path}")
-        _projects = self.projects
-        _projects.delete_at(project_index)
-        self.projects = _projects
+        projects = self.projects
+        projects.delete_at(project_index)
+        self.projects = projects
       end
     end
   end
