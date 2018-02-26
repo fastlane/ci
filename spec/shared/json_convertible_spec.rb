@@ -36,6 +36,47 @@ class MockArrayJSONConvertible
   end
 end
 
+class MockAttributeArrayJSONConvertible
+  include FastlaneCI::JSONConvertible
+
+  attr_accessor :one_attribute
+
+  attr_accessor :other_attribute
+
+  attr_accessor :array_attribute
+
+  def initialize(one_attribute: nil, other_attribute: nil, array_attribute: nil)
+    self.one_attribute = one_attribute
+    self.other_attribute = other_attribute
+    self.array_attribute = array_attribute
+  end
+end
+
+class MockMultipleAttributeArrayJSONConvertible
+  include FastlaneCI::JSONConvertible
+
+  attr_accessor :one_array_attribute
+
+  attr_accessor :other_array_attribute
+
+  def initialize(one_array_attribute: nil, other_array_attribute: nil)
+    self.one_array_attribute = one_array_attribute
+    self.other_array_attribute = other_array_attribute
+  end
+
+  def self.map_enumerable_type(enumerable_property_name: nil, current_json_object: nil)
+    if enumerable_property_name == :@one_array_attribute
+      object = OpenStruct.new(current_json_object)
+      object.is_from_one_array_attribute = true
+      return object
+    elsif enumerable_property_name == :@other_array_attribute
+      object = OpenStruct.new(current_json_object)
+      object.is_from_other_array_attribute = true
+      return object
+    end
+  end
+end
+
 module FastlaneCI
   describe JSONConvertible do
     let (:mock_object) { MockJSONConvertible.new(one_attribute: "Hello", other_attribute: Time.at(0)) }
@@ -142,12 +183,41 @@ module FastlaneCI
       expect(object.mock_json_array_attribute[1]).to eql(mock_object)
     end
 
+    it "map_enumerable_type customizes the output object for a given variable name" do
+      object = OpenStruct.new
+      object.is_from_one_array_attribute = true
+      expect(
+        MockMultipleAttributeArrayJSONConvertible.map_enumerable_type(
+          enumerable_property_name: :@one_array_attribute,
+          current_json_object: { "is_from_one_array_attribute" => true }
+        )
+      ).to eql(object)
+      object = OpenStruct.new
+      object.is_from_other_array_attribute = true
+      expect(
+        MockMultipleAttributeArrayJSONConvertible.map_enumerable_type(
+          enumerable_property_name: :@other_array_attribute,
+          current_json_object: { "is_from_other_array_attribute" => true }
+        )
+      ).to eql(object)
+    end
+
     it "Allows to encode objects with array properties of a particular type" do
       array_object_dictionary = mock_array_object.to_object_dictionary
       expect(array_object_dictionary).to eql({ "mock_json_array_attribute" => [
                                                { "one_attribute" => "Hello", "other_attribute" => Time.at(0) },
                                                { "one_attribute" => "World", "other_attribute" => Time.at(10) }
                                              ] })
+    end
+
+    it "Allows to decode objects with nested array properties" do
+      mock_object = MockAttributeArrayJSONConvertible.new(one_attribute: "World", other_attribute: Time.at(10), array_attribute: [
+                                                            MockJSONConvertible.new(one_attribute: "Inner World", other_attribute: Time.at(100))
+                                                          ])
+      dictionary_object = mock_object.to_object_dictionary
+      expect(dictionary_object).to eql({ "one_attribute" => "World", "other_attribute" => Time.at(10), "array_attribute" => [
+                                         { "one_attribute" => "Inner World", "other_attribute" => Time.at(100) }
+                                       ] })
     end
   end
 end
