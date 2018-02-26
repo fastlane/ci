@@ -1,4 +1,4 @@
-# Add manual project use case #
+# Add manual project #
 
 Adding a project should be a very quick and easy process
 
