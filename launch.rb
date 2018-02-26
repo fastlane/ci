@@ -1,5 +1,6 @@
 require_relative "./shared/logging_module"
 require_relative "./taskqueue/task_queue"
+require_relative "./wizards/private_configuration_wizard"
 
 module FastlaneCI
   # Launch is responsible for spawning up the whole
@@ -12,12 +13,13 @@ module FastlaneCI
     end
 
     def self.take_off
+      require_fastlane_ci
+      PrivateConfigurationWizard.new.run!
       verify_dependencies
       verify_system_requirements
       load_dot_env
       verify_env_variables
       setup_threads
-      require_fastlane_ci
       check_for_existing_setup
       prepare_server
       launch_workers

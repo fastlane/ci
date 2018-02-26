@@ -55,8 +55,7 @@ module FastlaneCI
     # Start up a ProjectService from our JSONProjectDataSource
     def self.project_service
       @_project_service ||= FastlaneCI::ProjectService.new(
-        project_data_source: FastlaneCI::JSONProjectDataSource.create(ci_config_repo,
-                                                                      user: ci_user)
+        project_data_source: FastlaneCI::JSONProjectDataSource.create(ci_config_repo, user: ci_user)
       )
     end
 
