@@ -24,8 +24,6 @@ module FastlaneCI
     end
 
     def self.map_enumerable_type(enumerable_property_name: nil, current_json_object: nil)
-      require "pry"
-      binding.pry
       if enumerable_property_name == :@job_triggers
         type = job_trigger_hash["type"]
         # currently only supports 3 triggers
