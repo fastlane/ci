@@ -17,6 +17,10 @@ module FastlaneCI
       self.build_data_source.list_builds(project: project)
     end
 
+    def pending_builds(project: nil)
+      self.build_data_source.pending_builds(project: project)
+    end
+
     def add_build!(project: nil, build: nil)
       self.build_data_source.add_build!(project: project, build: build)
 

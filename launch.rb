@@ -1,4 +1,5 @@
 require_relative "./shared/logging_module"
+require_relative "./taskqueue/task_queue"
 
 module FastlaneCI
   # Launch is responsible for spawning up the whole
@@ -20,6 +21,7 @@ module FastlaneCI
       check_for_existing_setup
       prepare_server
       launch_workers
+      run_pending_builds
     end
 
     def self.require_fastlane_ci
@@ -138,26 +140,42 @@ module FastlaneCI
       FastlaneCI::RefreshConfigDataSourcesWorker.new
     end
 
+    # In the event of a server crash, we want to run pending builds on server
+    # initialization for all projects for the provider credentials
+    #
+    # @return [nil]
+    def self.run_pending_builds
+      task_queue = TaskQueue::TaskQueue.new(name: "run_pending_builds")
+      projects = Services.config_service.projects(provider_credential: self.provider_credential)
+      github_service = FastlaneCI::GitHubService.new(provider_credential: self.provider_credential)
+
+      # For each project, rerun all builds with the status of "pending"
+      projects.each do |project|
+        pending_builds = Services.build_service.pending_builds(project: project)
+        repo = FastlaneCI::GitRepo.new(git_config: project.repo_config, provider_credential: self.provider_credential)
+        current_sha = repo.most_recent_commit.sha
+        runner_service = FastlaneCI::TestRunnerService.new(project: project, sha: current_sha, github_service: github_service)
+
+        # Enqueue each pending build rerun in an asynchronous task queue
+        pending_builds.each do |build|
+          task = TaskQueue::Task.new(work_block: proc { runner_service.rerun(build) })
+          task_queue.add_task_async(task: task)
+        end
+      end
+    end
+
     # Verify that fastlane.ci is already set up on this machine.
     # If that's not the case, we have to make sure to trigger the initial clone
     def self.trigger_initial_ci_setup
       logger.info("No config repo cloned yet, doing that now")
 
-      # This happens on the first launch of CI
-      # We don't have access to the config directory yet
-      # So we'll use ENV variables that are used for the initial clone only
-      #
-      # Long term, we'll have a nice onboarding flow, where you can enter those credentials
-      # as part of a web UI. But for containers (e.g. Google Cloud App Engine)
-      # we'll have to support ENV variables also, for the initial clone, so that's the code below
-      # Clone the repo, and login the user
-      provider_credential = GitHubProviderCredential.new(email: ENV["FASTLANE_CI_INITIAL_CLONE_EMAIL"],
-                                                       api_token: ENV["FASTLANE_CI_INITIAL_CLONE_API_TOKEN"])
       # Trigger the initial clone
       FastlaneCI::ProjectService.new(
-        project_data_source: FastlaneCI::JSONProjectDataSource.create(ci_config_repo,
-                                                                      git_repo_config: ci_config_repo,
-                                                                      provider_credential: provider_credential)
+        project_data_source: FastlaneCI::JSONProjectDataSource.create(
+          ci_config_repo,
+          git_repo_config: ci_config_repo,
+          provider_credential: self.provider_credential
+        )
       )
       logger.info("Successfully did the initial clone on this machine")
     rescue StandardError => ex
@@ -168,6 +186,23 @@ module FastlaneCI
       end
 
       raise ex
+    end
+
+    # This happens on the first launch of CI
+    # We don't have access to the config directory yet
+    # So we'll use ENV variables that are used for the initial clone only
+    #
+    # Long term, we'll have a nice onboarding flow, where you can enter those credentials
+    # as part of a web UI. But for containers (e.g. Google Cloud App Engine)
+    # we'll have to support ENV variables also, for the initial clone, so that's the code below
+    # Clone the repo, and login the user
+    #
+    # @return [GitHubProviderCredential]
+    def self.provider_credential
+      @provider_credential ||= GitHubProviderCredential.new(
+        email: ENV["FASTLANE_CI_INITIAL_CLONE_EMAIL"],
+        api_token: ENV["FASTLANE_CI_INITIAL_CLONE_API_TOKEN"]
+      )
     end
   end
 end
