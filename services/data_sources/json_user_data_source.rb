@@ -94,6 +94,7 @@ module FastlaneCI
       end
 
       # nope, wrong password
+      logger.debug("user #{email} authentication failed")
       return nil
     end
 

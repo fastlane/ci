@@ -26,20 +26,13 @@ module FastlaneCI
 
   # Data source for all things related to builds on the file system in JSON
   class JSONBuildDataSource < BuildDataSource
+    include FastlaneCI::JSONDataSource
     include FastlaneCI::Logging
 
     attr_accessor :json_folder_path
 
-    def initialize(json_folder_path: nil)
-      raise "json_folder_path has to be provided" if json_folder_path.to_s.length == 0
+    def after_creation(**params)
       logger.debug("Using folder path for build data: #{json_folder_path}")
-      @json_folder_path = json_folder_path
-    end
-
-    def builds_path(project: nil)
-      raise "No project provided: #{project}" unless project.kind_of?(FastlaneCI::Project)
-
-      File.join(self.json_folder_path, "projects", project.id, "builds")
     end
 
     def list_builds(project: nil)
@@ -61,6 +54,10 @@ module FastlaneCI
       return most_recent_builds
     end
 
+    def pending_builds(project: nil)
+      list_builds(project: project).select { |build| build.status == "pending" }
+    end
+
     # Add or update a build
     def add_build!(project: nil, build: nil)
       containing_path = builds_path(project: project)
@@ -70,6 +67,14 @@ module FastlaneCI
       hash_to_store = build.to_object_dictionary(ignore_instance_variables: [:@project])
       FileUtils.mkdir_p(containing_path)
       File.write(full_path, JSON.pretty_generate(hash_to_store))
+    end
+
+    private
+
+    def builds_path(project: nil)
+      raise "No project provided: #{project}" unless project.kind_of?(FastlaneCI::Project)
+
+      File.join(json_folder_path, "projects", project.id, "builds")
     end
   end
 end
