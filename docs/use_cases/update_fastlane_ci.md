@@ -16,9 +16,12 @@ Instead we want to offer an easy way to opt-in to auto-update, and make it the r
 ### Steps ###
 - User starts onboarding
 - As one of the last steps, the user is asked if they want to let `fastlane.ci` automatically itself
-- `fastlane.ci` periodically checks for new versions, by using similar code to the [update_fastlane](https://docs.fastlane.tools/actions/update_fastlane/) action
-- After a successful update, `fastlane.ci` might show an updated message somewhere in the notifications screen (to be determined if we really want to do this)
-- If the updated fails, the user is notified through the CI notifications, with instructions on how to manually trigger the update
+- If user opts-in to automatic updates:
+    - `fastlane.ci` periodically checks for new versions, by using similar code to the [update_fastlane](https://docs.fastlane.tools/actions/update_fastlane/) action
+    - After a successful update, `fastlane.ci` might show an update message with a changelog somewhere in the notifications screen (to be determined if we really want to do this)
+    - If the updated fails, the user is notified through the CI notifications, with instructions on how to manually trigger the update
+- If user doesn't opt-in to automatic updates:
+    - `fastlane.ci` periodically checks for new versions, instead of automatically updating, a CI notification is sent to the users, with instructions on how to update, ideally showing the changelog as well
 
 ### Long term plans ###
 The long term plan is to offer a `fastlane.app` Mac app, that a developer can download and install on their Mac. 
