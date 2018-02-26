@@ -88,12 +88,13 @@ module FastlaneCI
       user_password = BCrypt::Password.new(user.password_hash)
 
       # sweet, it matches, return the user
-      if user_password.to_s == password
+      if user_password == password
         logger.debug("user #{email} authenticated")
         return user
       end
 
       # nope, wrong password
+      logger.debug("user #{email} authentication failed")
       return nil
     end
 
