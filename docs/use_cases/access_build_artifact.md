@@ -1,4 +1,4 @@
-# Artifacts #
+# Access build artifacts #
 
 Accessing build artifacts is an essential piece of CI systems. 
 `fastlane.ci` supports a flexible system to allow any kind of store options, so that developers can own their data.
