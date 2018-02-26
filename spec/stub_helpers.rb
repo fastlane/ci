@@ -4,6 +4,8 @@ module StubHelpers
   include HelperFunctions
 
   def stub_git_repos
+    # TODO: refactor GitRepo so that initialize is non-blocking if repo isn't valid
+    FastlaneCI::GitRepo.any_instance.stub(:initialize)
     FastlaneCI::GitRepo.any_instance.stub(:setup_repo)
     FastlaneCI::GitRepo.any_instance.stub(:clone)
   end
