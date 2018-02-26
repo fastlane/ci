@@ -23,6 +23,7 @@ Here's how you can contribute:
   - Don't worry if you can't find one, that means you get to be the first person to help build it!
 - You can then start a dialog on the issue with [@taquitos](https://github.com/taquitos) and [@KrauseFx](https://github.com/krausefx)
   - Ideally you'll talk about how you think it should be built, what information you think is missing, and anything else you need.
+- Take a look at the [use_cases we wrote](https://github.com/fastlane/ci/tree/master/docs/use_cases) and see if the thing you want to build is already covered by one of them
 - Build it!
   - Fork the repo, and make a branch!
   - Open a pull request and commit as often as you'd like, the more often, the quicker we can checkout what you're building and also give feedback
