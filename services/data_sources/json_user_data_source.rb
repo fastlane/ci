@@ -12,6 +12,18 @@ module FastlaneCI
   # Mixin the JSONConvertible class for User
   class User
     include FastlaneCI::JSONConvertible
+
+    def self.map_enumerable_type(enumerable_property_name: nil, current_json_object: nil)
+      if enumerable_property_name == :@provider_credentials
+        type = current_json_object["type"]
+        # currently only supports 1 type, but we could automate this part too
+        provider_credential = nil
+        if type == FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
+          provider_credential = GitHubProviderCredential.from_json!(current_json_object)
+        end
+        provider_credential
+      end
+    end
   end
 
   # Mixin the JSONConvertible class for all Providers
@@ -57,24 +69,12 @@ module FastlaneCI
 
         @users = JSON.parse(File.read(user_file_path)).map do |user_object_hash|
           user = User.from_json!(user_object_hash)
-          user.provider_credentials = provider_credentials_from_provider_hash_array(user: user, provider_credential_array: user.provider_credentials)
+          user.provider_credentials.each do |provider_credential|
+            # Provide the back-reference
+            provider_credential.ci_user = user
+          end
           user
         end
-      end
-    end
-
-    # TODO: this could be automatic
-    def provider_credentials_from_provider_hash_array(user: nil, provider_credential_array: nil)
-      return provider_credential_array.map do |provider_credential_hash|
-        type = provider_credential_hash["type"]
-
-        # currently only supports 1 type, but we could automate this part too
-        provider_credential = nil
-        if type == FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
-          provider_credential = GitHubProviderCredential.from_json!(provider_credential_hash)
-          provider_credential.ci_user = user # provide backreference
-        end
-        provider_credential
       end
     end
 

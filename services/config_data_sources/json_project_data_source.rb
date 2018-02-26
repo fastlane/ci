@@ -22,6 +22,24 @@ module FastlaneCI
     def self.attribute_to_type_map
       return { :@repo_config => GitRepoConfig }
     end
+
+    def self.map_enumerable_type(enumerable_property_name: nil, current_json_object: nil)
+      if enumerable_property_name == :@job_triggers
+        type = job_trigger_hash["type"]
+        # currently only supports 3 triggers
+        job_trigger = nil
+        if type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit]
+          job_trigger = CommitJobTrigger.from_json!(job_trigger_hash)
+        elsif type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:nightly]
+          job_trigger = NightlyJobTrigger.from_json!(job_trigger_hash)
+        elsif type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual]
+          job_trigger = ManualJobTrigger.from_json!(job_trigger_hash)
+        else
+          raise "Unable to parse JobTrigger type: #{type} from #{job_trigger_hash}"
+        end
+        job_trigger
+      end
+    end
   end
 
   # Mixin for GitRepoConfig to enable some basic JSON marshalling and unmarshalling
@@ -70,7 +88,6 @@ module FastlaneCI
 
         saved_projects = JSON.parse(File.read(path)).map do |project_json|
           project = Project.from_json!(project_json)
-          project.job_triggers = self.job_triggers_from_hash_array(job_trigger_array: project.job_triggers) unless project.job_triggers.nil?
           project
         end
         return saved_projects
@@ -186,9 +203,9 @@ module FastlaneCI
         raise "Couldn't update project #{project.project_name} because it doesn't exists"
       else
         logger.debug("Deleting project #{existing_project.project_name}, writing out to projects.json to #{json_folder_path}")
-        _projects = self.projects
-        _projects.delete_at(project_index)
-        self.projects = _projects
+        projects = self.projects
+        projects.delete_at(project_index)
+        self.projects = projects
       end
     end
   end
