@@ -79,7 +79,9 @@ module FastlaneCI
       self.created_at = created_at || Time.now.to_s
       self.updated_at = updated_at || Time.now.to_s
 
-      validate_initialization_params!
+      # The `from_json!` method does not allow validations, since it creates the
+      # instance with all values set to `nil`
+      validate_initialization_params! unless type.nil? && priority.nil?
     end
 
     private

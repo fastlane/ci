@@ -61,7 +61,7 @@ describe FastlaneCI::JSONNotificationDataSource do
             .and_return(json_notification_string)
       end
 
-      xit "writes to the `notifications.json` file" do
+      it "writes to the `notifications.json` file" do
         File.should_receive(:write)
         json_notification_data_source.update_notification!(notification: notification)
       end

@@ -41,7 +41,7 @@ module FastlaneCI
     # @return [Notification]
     def create_notification!(id: nil, priority: nil, type: nil, user_id: nil, name: nil, message: nil)
       add_to_task_queue do
-        return notification_data_source.create_notification!(
+        notification_data_source.create_notification!(
           id: id,
           priority: priority,
           type: type,

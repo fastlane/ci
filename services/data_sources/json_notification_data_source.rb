@@ -139,11 +139,15 @@ module FastlaneCI
     # Reloads the notifications from the data source
     def reload_notifications
       JSONNotificationDataSource.file_semaphore.synchronize do
-        return unless File.exist?(notifications_file_path)
-
-        @notifications = JSON.parse(File.read(notifications_file_path)).map do |notification_object_hash|
-          Notification.from_json!(notification_object_hash)
-        end
+        @notifications =
+          if !File.exist?(notifications_file_path)
+            File.write(notifications_file_path, "[]")
+            []
+          else
+            JSON.parse(File.read(notifications_file_path)).map do |notification_object_hash|
+              Notification.from_json!(notification_object_hash)
+            end
+          end
       end
     end
   end
