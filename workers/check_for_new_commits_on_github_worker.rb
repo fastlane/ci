@@ -16,12 +16,11 @@ module FastlaneCI
 
     attr_accessor :provider_credential
     attr_accessor :project
-
     attr_accessor :user_config_service
     attr_accessor :github_service
-
     attr_accessor :serial_task_queue
     attr_accessor :current_tasks
+    attr_accessor :scheduler
 
     attr_writer :git_repo
 
@@ -33,6 +32,7 @@ module FastlaneCI
       self.provider_credential = provider_credential
       self.github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
       self.project = project
+      self.scheduler = WorkerScheduler.new(sleep_interval: 10)
 
       project_full_name = project.repo_config.git_url
 
@@ -138,10 +138,6 @@ module FastlaneCI
         logger.debug("Adding task for #{project_full_name}: #{credential.ci_user.email}: #{current_sha[-6..-1]}")
         self.serial_task_queue.add_task_async(task: check_for_commit_task)
       end
-    end
-
-    def scheduler
-      WorkerScheduler.new(sleep_interval: 10)
     end
   end
 end

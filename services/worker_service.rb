@@ -1,4 +1,5 @@
 require_relative "../workers/check_for_new_commits_on_github_worker"
+require_relative "../workers/nightly_build_github_worker"
 require_relative "../shared/logging_module"
 require_relative "../shared/models/provider_credential"
 
@@ -27,15 +28,18 @@ module FastlaneCI
       raise "incompatible repo_config and provider_credential" if provider_credential.type != repo_config.provider_credential_type_needed
 
       logger.debug("Starting worker for #{project.project_name}, on behalf of #{user_responsible.email}")
-      new_worker = nil
+      new_workers = []
       case provider_credential.type
       when FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
-        new_worker = FastlaneCI::CheckForNewCommitsOnGithubWorker.new(provider_credential: provider_credential, project: project)
+        new_workers.push(FastlaneCI::CheckForNewCommitsOnGithubWorker.new(provider_credential: provider_credential, project: project))
+        new_workers.push(FastlaneCI::NightlyBuildGithubWorker.new(provider_credential: provider_credential, project: project))
       else
         raise "unrecognized provider_type: #{provider_credential.type}"
       end
 
-      self.resource_workers_dictionary[worker_key] = new_worker
+      new_workers.each do |new_worker|
+        self.resource_workers_dictionary[worker_key] = new_worker
+      end
     end
 
     def stop_worker(project: nil, user_responsible: nil)
