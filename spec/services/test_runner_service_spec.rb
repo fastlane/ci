@@ -9,7 +9,7 @@ describe FastlaneCI::TestRunnerService do
       repo_config: git_repo,
       enabled: true,
       project_name: "fake_project",
-      lane: "fake_lane",
+      lane: "fake_lane"
     )
   end
 
@@ -23,11 +23,12 @@ describe FastlaneCI::TestRunnerService do
     FastlaneCI::TestRunnerService.new(
       project: good_project,
       sha: SecureRandom.uuid,
-      github_service: double("GithubService", :set_build_status! => nil)
+      github_service: double("GithubService", set_build_status!: nil)
     )
   end
 
   before(:each) do
+    stub_file_io
     stub_git_repos
     stub_services
   end

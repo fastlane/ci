@@ -223,6 +223,9 @@ module FastlaneCI
       self.temporary_storage_path = File.join(self.temporary_git_storage, "git-auth-#{SecureRandom.uuid}")
       # More details: https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
       local_repo_path = self.git_config.local_repo_path
+
+      # Creates the `local_repo_path` directory and `notifications/` directory
+      # if they do not exist
       FileUtils.mkdir_p(local_repo_path) unless File.directory?(local_repo_path)
 
       store_credentials_command = "git credential-store --file #{self.temporary_storage_path.shellescape} store"

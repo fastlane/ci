@@ -1,0 +1,44 @@
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
+  <header class="mdl-layout__header">
+    <div class="mdl-layout__header-row">
+      <span class="mdl-layout__title"><%= title %></span>
+    </div>
+  </header>
+
+  <%= erb :"../../partials/navigation" %>
+
+  <main class="mdl-layout__content" style="padding: 40px">
+    <h3>Notifications</h3>
+    <div class="table-responsive-vertical">
+      <table class="table table-hover mdl-shadow--2dp">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Priority</th>
+            <th>Name</th>
+            <th>Message</th>
+            <th>Created At</th>
+            <th>Updated At</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% notifications.each do |notification| %>
+            <tr>
+              <td><%= notification.id %></td>
+              <td><%= notification.priority %></td>
+              <td><%= notification.name %></td>
+              <td><%= notification.message %></td>
+              <td><%= notification.created_at %></td>
+              <td><%= notification.updated_at %></td>
+              <td>
+                <form method="post" action="/notifications/delete/<%= notification.id %>">
+                  <input type="submit" value="Delete notification">
+                </form>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>

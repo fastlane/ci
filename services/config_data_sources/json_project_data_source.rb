@@ -155,8 +155,7 @@ module FastlaneCI
 
     # Define that the name of the project must be unique
     def project_exist?(name)
-      project = self.projects.select { |existing_project| existing_project.project_name == name }.first
-      return !project.nil?
+      return self.projects.any? { |existing_project| existing_project.project_name == name }
     end
 
     def update_project!(project: nil)

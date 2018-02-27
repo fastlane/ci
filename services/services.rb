@@ -3,6 +3,7 @@ require_relative "./config_service"
 require_relative "./worker_service"
 require_relative "./user_service"
 require_relative "./project_service"
+require_relative "./notification_service"
 require_relative "./data_sources/json_user_data_source"
 require_relative "./data_sources/json_build_data_source"
 require_relative "./code_hosting/git_hub_service"
@@ -55,8 +56,7 @@ module FastlaneCI
     # Start up a ProjectService from our JSONProjectDataSource
     def self.project_service
       @_project_service ||= FastlaneCI::ProjectService.new(
-        project_data_source: FastlaneCI::JSONProjectDataSource.create(ci_config_repo,
-                                                                      user: ci_user)
+        project_data_source: FastlaneCI::JSONProjectDataSource.create(ci_config_repo, user: ci_user)
       )
     end
 
@@ -64,6 +64,15 @@ module FastlaneCI
     def self.user_service
       @_user_service ||= FastlaneCI::UserService.new(
         user_data_source: FastlaneCI::JSONUserDataSource.create(ci_config_git_repo_path)
+      )
+    end
+
+    # Start up a UserService from our JSONUserDataSource
+    def self.notification_service
+      @_notification_service ||= FastlaneCI::NotificationService.new(
+        notification_data_source: JSONNotificationDataSource.create(
+          File.expand_path("..", ci_config_git_repo_path)
+        )
       )
     end
 
