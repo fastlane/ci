@@ -16,6 +16,7 @@ module FastlaneCI
       verify_system_requirements
       load_dot_env
       verify_env_variables
+      write_configuration_directories
       setup_threads
       require_fastlane_ci
       check_for_existing_setup
@@ -45,6 +46,12 @@ module FastlaneCI
     rescue LoadError
       warn("Error: no such file to load -- openssl. Make sure you have openssl installed")
       exit(1)
+    end
+
+    def self.write_configuration_directories
+      containing_path = File.expand_path("~/.fastlane/ci/")
+      notifications_path = File.join(containing_path, "notifications")
+      FileUtils.mkdir_p(notifications_path)
     end
 
     def self.verify_system_requirements
