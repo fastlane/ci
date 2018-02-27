@@ -1,4 +1,5 @@
 require_relative "worker_base"
+require_relative "worker_scheduler"
 require_relative "../services/build_service"
 require_relative "../shared/models/provider_credential"
 require_relative "../shared/logging_module"
@@ -139,8 +140,8 @@ module FastlaneCI
       end
     end
 
-    def sleep_interval
-      10
+    def scheduler
+      WorkerScheduler.new(sleep_interval: 10)
     end
   end
 end

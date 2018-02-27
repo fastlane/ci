@@ -27,6 +27,9 @@ gem "unparser", ">= 0.2.6", "< 1.0.0"
 # TODO: We should remove this before the public release
 gem "rubocop"
 
+# Job scheduler for Ruby (at, cron, in and every jobs).
+gem "rufus-scheduler"
+
 # fastlane dependencies
 # gem "fastlane" # disabled for now, until we need it
 
