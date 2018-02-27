@@ -7,20 +7,8 @@ gem "sinatra-contrib", ">= 2.0.0", "< 3.0" # TODO: document why we have this her
 # Best password hashing to-date
 gem "bcrypt", ">= 3.1.11", "< 4.0.0"
 
-# Colored terminal output
-gem "colored"
-
-# User inputs (e.g. passwords)
-gem "highline", ">= 1.7.2", "< 2.0.0"
-
 # Running shell commands
 gem "tty-command", ">= 0.7.0", "< 1.0.0"
-
-# Prompt user imput
-gem "tty-prompt"
-
-# Detect the terminal width
-gem "tty-screen", ">= 0.6.3", "< 1.0.0"
 
 # Communication with GitHub
 gem "octokit", ">= 4.8.0", "< 5.0.0"

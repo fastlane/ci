@@ -265,6 +265,3 @@ Style/MethodCallWithArgsParentheses:
     - 'context'
     - 'before'
     - 'after'
-
-Style/MethodMissing:
-  Enabled: false
