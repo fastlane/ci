@@ -28,7 +28,7 @@ module FastlaneCI
     # Creates and returns a notification
     #
     # @abstract
-    def create_notification!(id: nil, priority: nil, type: nil, name: nil, message: nil)
+    def create_notification!(id: nil, priority: nil, type: nil, user_id: nil, name: nil, message: nil)
       not_implemented(__method__)
     end
 

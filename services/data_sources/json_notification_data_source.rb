@@ -111,11 +111,12 @@ module FastlaneCI
     # @param  [String] id
     # @param  [String] priority
     # @param  [String] type
+    # @param  [String] user_id
     # @param  [String] name
     # @param  [String] message
     # @return [Notification]
-    def create_notification!(id: nil, priority: nil, type: nil, name: nil, message: nil)
-      new_notification = Notification.new(priority: priority, type: type, name: name, message: message)
+    def create_notification!(id: nil, priority: nil, type: nil, user_id: nil, name: nil, message: nil)
+      new_notification = Notification.new(priority: priority, type: type, user_id: user_id, name: name, message: message)
 
       if !notification_exist?(id: new_notification.id)
         self.notifications = @notifications.push(new_notification)
@@ -147,7 +148,6 @@ module FastlaneCI
     # Reloads the notifications from the data source
     def reload_notifications
       JSONNotificationDataSource.file_semaphore.synchronize do
-        @notifications = []
         return unless File.exist?(notifications_file_path)
 
         @notifications = JSON.parse(File.read(notifications_file_path)).map do |notification_object_hash|

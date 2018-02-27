@@ -96,6 +96,7 @@ describe FastlaneCI::NotificationService do
       priority: "LOW",
       type: "acknowledgement_required",
       name: "test_notif",
+      user_id: "some-user-id",
       message: "this is a test notification"
     }
   end
@@ -105,6 +106,7 @@ describe FastlaneCI::NotificationService do
       id: "test-id",
       priority: "HIGH",
       type: "acknowledgement_required",
+      user_id: "some-user-id",
       name: "test_notif",
       message: "this is a test notification"
     }

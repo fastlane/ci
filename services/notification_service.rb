@@ -33,11 +33,19 @@ module FastlaneCI
     # @param  [String] id
     # @param  [String] priority
     # @param  [String] type
+    # @param  [String] user_id
     # @param  [String] name
     # @param  [String] message
     # @return [Notification]
-    def create_notification!(id: nil, priority: nil, type: nil, name: nil, message: nil)
-      return notification_data_source.create_notification!(id: id, priority: priority, type: type, name: name, message: message)
+    def create_notification!(id: nil, priority: nil, type: nil, user_id: nil, name: nil, message: nil)
+      return notification_data_source.create_notification!(
+        id: id,
+        priority: priority,
+        type: type,
+        user_id: user_id,
+        name: name,
+        message: message
+      )
     end
 
     # Updates and persists an existing Notification

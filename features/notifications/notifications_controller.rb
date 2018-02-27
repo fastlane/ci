@@ -17,10 +17,12 @@ module FastlaneCI
       @task_queue = TaskQueue::TaskQueue.new(name: "notifications")
     end
 
-    # Renders the notifications dashboard, displaying a table of all notifications
+    # Renders the notifications dashboard, displaying a table of notifications
+    # scoped to the user
     get HOME do
       notifications = Services.notification_service.notification_data_source.notifications
-      locals = { notifications: notifications, title: "Notifications" }
+      user_notifications = notifications.select { |notification| notification.user_id == user.id }
+      locals = { notifications: user_notifications, title: "Notifications" }
       erb(:dashboard, locals: locals, layout: FastlaneCI.default_layout)
     end
 
@@ -69,13 +71,13 @@ module FastlaneCI
     end
 
     # Parameters used for creating and updating notifications:
-    #   { :priority, :type, :name, :message }
+    #   { :id, :priority, :type, :user_id, :name, :message }
     #
     # @param  [Sinatra::Request] request
     # @return [Hash]
     def notification_params(request)
       parse_request_body(request)
-        .select { |k, _v| %i(priority type name message).include?(k) }
+        .select { |k, _v| %i(id priority type user_id name message).include?(k) }
     end
   end
 end
