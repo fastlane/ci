@@ -25,8 +25,7 @@ module FastlaneCI
           # We have the `work` inside a `begin rescue`
           # so that if something fails, the thread still is alive
           begin
-            self.work unless self.should_stop
-            Kernel.sleep(self.sleep_interval)
+            self.scheduler.schedule { self.work } unless self.should_stop
           rescue StandardError => ex
             puts("[#{self.class} Exception]: #{ex}: ")
             puts(ex.backtrace.join("\n"))
@@ -50,8 +49,7 @@ module FastlaneCI
       @should_stop = true
     end
 
-    # Sleep in seconds
-    def sleep_interval
+    def scheduler
       not_implemented(__method__)
     end
   end
