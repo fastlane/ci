@@ -1,9 +1,14 @@
 require File.expand_path("../../../spec_helper.rb", __FILE__)
 require File.expand_path("../../../../shared/models/notification.rb", __FILE__)
-require File.expand_path("../../../../services/notification_service.rb", __FILE__)
 require File.expand_path("../../../../services/data_sources/json_notification_data_source.rb", __FILE__)
 
 describe FastlaneCI::JSONNotificationDataSource do
+  before(:each) do
+    stub_file_io
+    stub_git_repos
+    stub_services
+  end
+
   let(:file_path) do
     File.join(FastlaneCI::FastlaneApp.settings.root, "spec/fixtures/files/")
   end
@@ -12,14 +17,7 @@ describe FastlaneCI::JSONNotificationDataSource do
     File.join(file_path, "notifications/notifications.json")
   end
 
-  let(:notification_service) { described_class.create(file_path) }
-
-  before(:each) do
-    stub_git_repos
-    stub_services
-    stub_const("ENV", { "data_store_folder" => file_path })
-    File.stub(:write)
-  end
+  let(:json_notification_data_source) { described_class.create(file_path) }
 
   describe "#create_notification!" do
     before(:each) do
@@ -30,13 +28,13 @@ describe FastlaneCI::JSONNotificationDataSource do
 
     it "returns a new `Notification`" do
       expect(
-        notification_service.create_notification!(notification_params)
+        json_notification_data_source.create_notification!(notification_params)
       ).to be_an_instance_of(FastlaneCI::Notification)
     end
 
     it "writes to the `notifications.json` file" do
       File.should_receive(:write)
-      notification_service.create_notification!(notification_params)
+      json_notification_data_source.create_notification!(notification_params)
     end
   end
 
@@ -52,7 +50,7 @@ describe FastlaneCI::JSONNotificationDataSource do
 
       it "raises an error message and doesn't write to the `notifications.json` file" do
         File.should_not_receive(:write)
-        expect { notification_service.update_notification!(notification: notification) }.to raise_error
+        expect { json_notification_data_source.update_notification!(notification: notification) }.to raise_error
       end
     end
 
@@ -63,9 +61,9 @@ describe FastlaneCI::JSONNotificationDataSource do
             .and_return(json_notification_string)
       end
 
-      it "writes to the `notifications.json` file" do
+      xit "writes to the `notifications.json` file" do
         File.should_receive(:write)
-        notification_service.update_notification!(notification: notification)
+        json_notification_data_source.update_notification!(notification: notification)
       end
     end
   end
@@ -82,7 +80,7 @@ describe FastlaneCI::JSONNotificationDataSource do
   def notification_params
     {
       id: "test-id",
-      priority: "LOW",
+      priority: "urgent",
       type: "acknowledgement_required",
       name: "test_notif",
       user_id: "some-user-id",
@@ -93,7 +91,7 @@ describe FastlaneCI::JSONNotificationDataSource do
   def new_notification_params
     {
       id: "test-id",
-      priority: "HIGH",
+      priority: "success",
       type: "acknowledgement_required",
       user_id: "some-user-id",
       name: "test_notif",

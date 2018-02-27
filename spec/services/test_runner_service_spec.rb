@@ -28,6 +28,7 @@ describe FastlaneCI::TestRunnerService do
   end
 
   before(:each) do
+    stub_file_io
     stub_git_repos
     stub_services
   end

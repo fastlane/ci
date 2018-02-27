@@ -1,12 +1,2 @@
 [
-  {
-    "id": "fbe5fd43-57f6-4217-99ca-92a576c68dc2",
-    "priority": "LOW",
-    "type": "acknowledgement_required",
-    "name": "test_notif",
-    "user_id": "some-user-id",
-    "message": "this is a test notification",
-    "created_at": "2018-02-27 14:09:00 -0500",
-    "updated_at": "2018-02-27 14:09:00 -0500"
-  }
 ]

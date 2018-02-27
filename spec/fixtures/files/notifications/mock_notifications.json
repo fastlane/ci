@@ -1,7 +1,7 @@
 [
   {
     "id": "test-id",
-    "priority": "LOW",
+    "priority": "urgent",
     "type": "acknowledgement_required",
     "user_id": "some-user-id",
     "name": "test_notif",
