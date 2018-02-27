@@ -1,6 +1,7 @@
 require_relative "worker_base"
 require_relative "../services/build_service"
 require_relative "../shared/models/provider_credential"
+require_relative "../shared/models/job_trigger"
 require_relative "../shared/logging_module"
 require_relative "../services/test_runner_service"
 require_relative "../services/code_hosting/git_hub_service"
@@ -21,6 +22,7 @@ module FastlaneCI
 
     attr_accessor :serial_task_queue
     attr_accessor :current_tasks
+    attr_accessor :target_branches_set
 
     attr_writer :git_repo
 
@@ -32,6 +34,13 @@ module FastlaneCI
       self.provider_credential = provider_credential
       self.github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
       self.project = project
+
+      self.target_branches_set = Set.new
+      project.job_triggers.each do |trigger|
+        if trigger.kind_of?(FastlaneCI::CommitJobTrigger)
+          self.target_branches_set.add(trigger.branch)
+        end
+      end
 
       project_full_name = project.repo_config.git_url
 
@@ -94,10 +103,10 @@ module FastlaneCI
 
       self.current_tasks = []
       repo.git_and_remote_branches_each do |git, branch|
-        # Not sure why this matters
-        logger.debug("FOUND WEIRD BRANCH") if branch.name.start_with?("HEAD ->")
-
         next if branch.name.start_with?("HEAD ->") # not sure what this is for
+
+        # Only need to look at branches that are have triggers
+        next unless self.target_branches_set.include?(branch.name)
 
         # There might be un-committed changes in there, so ignore
         git.reset_hard
@@ -107,12 +116,13 @@ module FastlaneCI
 
         current_sha = repo.most_recent_commit.sha
 
+        # Skips branches that have previously been built
         builds = build_service.list_builds(project: self.project)
         if builds.map(&:sha).include?(current_sha)
           next
         end
 
-        logger.debug("Detected branch #{branch.name} with sha #{current_sha}")
+        logger.debug("Detected new commit on branch #{branch.name} with sha #{current_sha}")
 
         credential = self.provider_credential
         current_project = self.project
