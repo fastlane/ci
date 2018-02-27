@@ -31,7 +31,7 @@
               <td><%= notification.created_at %></td>
               <td><%= notification.updated_at %></td>
               <td>
-                <form method="post" action="/notifications/delete/<%= notification.name %>">
+                <form method="post" action="/notifications/delete/<%= notification.id %>">
                   <input type="submit" value="Delete notification">
                 </form>
               </td>

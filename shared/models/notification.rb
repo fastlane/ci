@@ -19,6 +19,16 @@ module FastlaneCI
     # @return [String]
     attr_accessor :name
 
+    # The type of a notification
+    #
+    # @return [String]
+    attr_accessor :type
+
+    # The user email the notification is associated with
+    #
+    # @return [String]
+    attr_accessor :email
+
     # Notification message to be displayed in the dashboard
     #
     # @return [String]
@@ -38,33 +48,19 @@ module FastlaneCI
     #
     # @param  [String] id
     # @param  [String] priority
+    # @param  [String] type
     # @param  [String] name
+    # @param  [String] email
     # @param  [String] message
-    # @return [nil]
-    def initialize(id: nil, priority: nil, name: nil, message: nil, created_at: nil, updated_at: nil)
+    def initialize(id: nil, priority: nil, type: nil, name: nil, email: nil, message: nil, created_at: nil, updated_at: nil)
       self.id = id || SecureRandom.uuid
       self.priority = %w[HIGH MEDIUM LOW].include?(priority) ? priority : "LOW"
+      self.type = %w[acknowledgement_required disappearing].include?(type) ? type : "acknowledgement_required"
       self.name = name
+      self.email = email
       self.message = message
       self.created_at = created_at || Time.now.to_s
       self.updated_at = updated_at || Time.now.to_s
-    end
-
-    # A way to uniquely specify a notification
-    #
-    # @return [String]
-    def primary_key
-      @primary_key ||= self.class.make_primary_key(name)
-    end
-
-    # Static method for converting notification data into primary key to
-    # uniquely specify the notification
-    #
-    # @param  [String] name
-    # @param  [String] message
-    # @return [String]
-    def self.make_primary_key(name)
-      name.gsub(/\s+/, "").downcase
     end
   end
 end

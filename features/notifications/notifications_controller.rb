@@ -12,15 +12,12 @@ module FastlaneCI
     # requests
     #
     # @param  [Sinatra::Base] app
-    # @return [nil]
     def initialize(app = nil)
-      @task_queue = TaskQueue::TaskQueue.new(name: "notifications")
       super(app)
+      @task_queue = TaskQueue::TaskQueue.new(name: "notifications")
     end
 
     # Renders the notifications dashboard, displaying a table of all notifications
-    #
-    # @return [nil]
     get HOME do
       notifications = Services.notification_service.notification_data_source.notifications
       locals = { notifications: notifications, title: "Notifications" }
@@ -28,8 +25,6 @@ module FastlaneCI
     end
 
     # Creates a new notification
-    #
-    # @return [nil]
     post "#{HOME}/create" do
       add_to_task_queue do
         payload = notification_params(request)
@@ -40,8 +35,6 @@ module FastlaneCI
     end
 
     # Updates a notification with a given `name`
-    #
-    # @return [nil]
     post "#{HOME}/update" do
       add_to_task_queue do
         notification = Notification.new(notification_params(request))
@@ -52,10 +45,8 @@ module FastlaneCI
     end
 
     # Deletes a notification with a given `name`
-    #
-    # @return [nil]
-    post "#{HOME}/delete/:name" do
-      Services.notification_service.delete_notification!(name: params[:name])
+    post "#{HOME}/delete/:id" do
+      Services.notification_service.delete_notification!(id: params[:id])
       redirect HOME
     end
 
@@ -64,7 +55,6 @@ module FastlaneCI
     # Adds a block of code to the notifications task queue
     #
     # @param  [Proc] block
-    # @return [nil]
     def add_to_task_queue(&block)
       task = TaskQueue::Task.new(work_block: proc { yield })
       @task_queue.add_task_async(task: task)
@@ -79,13 +69,13 @@ module FastlaneCI
     end
 
     # Parameters used for creating and updating notifications:
-    #   { :priority, :name, :message }
+    #   { :priority, :type, :name, :message }
     #
     # @param  [Sinatra::Request] request
     # @return [Hash]
     def notification_params(request)
       parse_request_body(request)
-        .select { |k, _v| %i(priority name message).include?(k) }
+        .select { |k, _v| %i(priority type name message).include?(k) }
     end
   end
 end

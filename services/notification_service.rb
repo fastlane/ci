@@ -13,12 +13,10 @@ module FastlaneCI
     #
     # @param  [NotificationDataSource] notification_data_source
     # @raise  [Exception]
-    # @return [nil]
     def initialize(notification_data_source: nil)
       unless notification_data_source.nil?
         raise "notification_data_source must be descendant of #{NotificationDataSource.name}" unless notification_data_source.class <= NotificationDataSource
       end
-
 
       if notification_data_source.nil?
         logger.debug("notification_data_source is new, using `ENV[\"data_store_folder\"]` if available, or `sample_data` folder")
@@ -32,34 +30,28 @@ module FastlaneCI
 
     # Creates and returns a new Notification
     #
+    # @param  [String] id
     # @param  [String] priority
+    # @param  [String] type
     # @param  [String] name
     # @param  [String] message
     # @return [Notification]
-    def create_notification!(priority: nil, name: nil, message: nil)
-      unless notification_data_source.notification_exist?(name: name)
-        logger.debug("creating notification #{name}")
-        return notification_data_source.create_notification!(priority: priority, name: name, message: message)
-      end
-
-      logger.debug("notification #{name} already exists!")
-      return nil
+    def create_notification!(id: nil, priority: nil, type: nil, name: nil, message: nil)
+      return notification_data_source.create_notification!(id: id, priority: priority, type: type, name: name, message: message)
     end
 
     # Updates and persists an existing Notification
     #
     # @param  [Notification] notification
-    # @return [nil]
     def update_notification!(notification: nil)
       notification_data_source.update_notification!(notification: notification)
     end
 
-    # Deletes a notification if the 'primary key' exists
+    # Deletes a notification if the `id` exists
     #
-    # @param  [String] name
-    # @return [nil]
-    def delete_notification!(name: nil)
-      notification_data_source.delete_notification!(name: name)
+    # @param  [String] id
+    def delete_notification!(id: nil)
+      notification_data_source.delete_notification!(id: id)
     end
   end
 end

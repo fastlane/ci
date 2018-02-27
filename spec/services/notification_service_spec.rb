@@ -33,42 +33,21 @@ describe FastlaneCI::NotificationService do
   end
 
   describe "#create_notification!" do
-    context "notification doesn't exist" do
-      before(:each) do
-        File.should_receive(:read)
-            .with(file_path)
-            .and_return("[]")
-      end
-
-      it "returns a new `Notification` if the notification does not exist" do
-        expect(
-          notification_service.create_notification!(notification_params)
-        ).to be_an_instance_of(FastlaneCI::Notification)
-      end
-
-      it "writes to the `notifications.json` file" do
-        File.should_receive(:write)
-        notification_service.create_notification!(notification_params)
-      end
+    before(:each) do
+      File.should_receive(:read)
+          .with(file_path)
+          .and_return("[]")
     end
 
-    context "notification exists" do
-      before(:each) do
-        File.should_receive(:read)
-            .with(file_path)
-            .and_return(json_notification_string)
-      end
-
-      it "returns `nil` if the notification already exists" do
-        expect(
-          notification_service.create_notification!(notification_params)
-        ).to be_nil
-      end
-
-      it "doesn't write to the `notifications.json` file" do
-        File.should_not_receive(:write)
+    it "returns a new `Notification`" do
+      expect(
         notification_service.create_notification!(notification_params)
-      end
+      ).to be_an_instance_of(FastlaneCI::Notification)
+    end
+
+    it "writes to the `notifications.json` file" do
+      File.should_receive(:write)
+      notification_service.create_notification!(notification_params)
     end
   end
 
@@ -103,23 +82,19 @@ describe FastlaneCI::NotificationService do
   end
 
   def json_notification_string
-    <<~JSON
-      [
-        {
-          "id": "66644e9e-17f4-4ba2-bdcb-4020c8b14479",
-          "priority": "LOW",
-          "name": "test_notif",
-          "message": "this is a test notification",
-          "created_at": "2018-02-16 13:44:08 -0500",
-          "updated_at": "2018-02-16 13:44:08 -0500"
-        }
-      ]
-    JSON
+    File.open(
+      File.join(
+        FastlaneCI::FastlaneApp.settings.root,
+        "spec/fixtures/files/mock_notifications.json"
+      )
+    ).read
   end
 
   def notification_params
     {
+      id: "test-id",
       priority: "LOW",
+      type: "acknowledgement_required",
       name: "test_notif",
       message: "this is a test notification"
     }
@@ -127,7 +102,9 @@ describe FastlaneCI::NotificationService do
 
   def new_notification_params
     {
+      id: "test-id",
       priority: "HIGH",
+      type: "acknowledgement_required",
       name: "test_notif",
       message: "this is a test notification"
     }

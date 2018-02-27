@@ -14,7 +14,7 @@ module FastlaneCI
     # Checks if a notification exists with the same name and message
     #
     # @abstract
-    def notification_exist?(name: nil)
+    def notification_exist?(id: nil)
       not_implemented(__method__)
     end
 
@@ -28,14 +28,14 @@ module FastlaneCI
     # Creates and returns a notification
     #
     # @abstract
-    def create_notification!(priority: nil, name: nil, message: nil)
+    def create_notification!(id: nil, priority: nil, type: nil, name: nil, message: nil)
       not_implemented(__method__)
     end
 
     # Deletes a notification
     #
     # @abstract
-    def delete_notification!(name: nil)
+    def delete_notification!(id: nil)
       not_implemented(__method__)
     end
   end

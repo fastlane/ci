@@ -19,13 +19,15 @@ module FastlaneCI
       attr_accessor :file_semaphore
     end
 
+    # @return [FastlaneCI::GitRepo]
+    attr_accessor :git_repo
+
     # Can't have us reading and writing to a file at the same time
     JSONNotificationDataSource.file_semaphore = Mutex.new
 
     # Reloads notifications from the notifications data source after instantiation
     #
     # @param  [Any] params
-    # @return [nil]
     def after_creation(**params)
       if params.nil?
         raise "Either user or a provider credential is mandatory."
@@ -58,7 +60,6 @@ module FastlaneCI
     # the CI user
     #
     # @param  [Array[Notification]] notifications
-    # @return [nil]
     def notifications=(notifications)
       JSONNotificationDataSource.file_semaphore.synchronize do
         File.write(notifications_file_path, JSON.pretty_generate(notifications.map(&:to_object_dictionary)))
@@ -68,25 +69,27 @@ module FastlaneCI
 
     # Returns `true` if the notification exists in the in-memory notifications object
     #
-    # @param  [String] name
+    # @param  [String] id
     # @return [Boolean]
-    def notification_exist?(name: nil)
-      notification = @notifications.select { |n| n.primary_key == Notification.make_primary_key(name) }.first
-      return notification.nil? ? false : true
+    def notification_exist?(id: nil)
+      JSONNotificationDataSource.file_semaphore.synchronize do
+        existing_notification = @notifications.select { |notification| notification.id == id }.first
+        return existing_notification.nil? ? false : true
+      end
     end
 
     # Swaps the old notification record with the updated notification record if
     # the notification exists
     #
     # @param  [Notification] notification
-    # @return [nil]
     def update_notification!(notification: nil)
       notification.updated_at = Time.now
+
       notification_index = nil
       existing_notification = nil
 
       @notifications.each.with_index do |old_notification, index|
-        if old_notification.primary_key == notification.primary_key
+        if old_notification.id == notification.id
           notification_index = index
           existing_notification = old_notification
           break
@@ -106,14 +109,16 @@ module FastlaneCI
 
     # Creates and returns a new notification object. Writes said object to `notifications.json`
     #
+    # @param  [String] id
     # @param  [String] priority
+    # @param  [String] type
     # @param  [String] name
     # @param  [String] message
     # @return [Notification]
-    def create_notification!(priority: nil, name: nil, message: nil)
-      new_notification = Notification.new(id: SecureRandom.uuid, priority: priority, name: name, message: message)
+    def create_notification!(id: nil, priority: nil, type: nil, name: nil, message: nil)
+      new_notification = Notification.new(priority: priority, type: type, name: name, message: message)
 
-      if !notification_exist?(name: new_notification.name)
+      if !notification_exist?(id: new_notification.id)
         self.notifications = @notifications.push(new_notification)
         logger.debug("Added notification #{new_notification.name}, writing out notifications.json to #{notifications_file_path}")
         return new_notification
@@ -123,19 +128,14 @@ module FastlaneCI
       end
     end
 
-    # Deletes a notification if it matches the primary key
+    # Deletes a notification if it matches the `id` passed in
     #
-    # @param  [String] name
-    # @return [nil]
-    def delete_notification!(name: nil)
-      primary_key = Notification.make_primary_key(name)
-      self.notifications = @notifications.delete_if { |notification| notification.primary_key == primary_key }
+    # @param  [String] id
+    def delete_notification!(id: nil)
+      self.notifications = @notifications.delete_if { |notification| notification.id == id }
     end
 
     private
-
-    # @return [FastlaneCI::GitRepo]
-    attr_accessor :git_repo
 
     # Returns the file path for the notifications to be read from / persisted to
     #
@@ -146,8 +146,6 @@ module FastlaneCI
     end
 
     # Reloads the notifications from the data source
-    #
-    # @return [nil]
     def reload_notifications
       JSONNotificationDataSource.file_semaphore.synchronize do
         @notifications = []
