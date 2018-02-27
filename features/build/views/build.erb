@@ -1,0 +1,19 @@
+<h1>Build Log <%= build.number %></h1>
+
+<code id="log">
+  <p>Line 1</p>
+</code>
+
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function(event) { 
+    var scheme   = "ws://"
+    var uri      = scheme + window.document.location.host + "/";
+    var ws       = new WebSocket(uri);
+    ws.onmessage = function(message) {
+      console.log(message)
+      var data = message.data
+      console.log(data)
+      document.getElementById("log").innerHTML << data // this piece doesn't work yet
+    }
+  });
+</script>

@@ -1,8 +1,12 @@
 source("https://rubygems.org")
 
 # Sinatra
-gem "sinatra", ">= 2.0.1", "< 3.0"
-gem "sinatra-contrib", ">= 2.0.0", "< 3.0" # TODO: document why we have this here @taquitos
+gem "sinatra", ">= 2.0.1", "< 3.0.0"
+gem "sinatra-contrib", ">= 2.0.0", "< 3.0.0" # TODO: document why we have this here @taquitos
+gem "faye-websocket", ">= 0.10.7", "< 1.0.0"
+
+# Web server
+gem "thin", ">= 1.7.2", "< 2.0.0"
 
 # Best password hashing to-date
 gem "bcrypt", ">= 3.1.11", "< 4.0.0"
@@ -28,7 +32,8 @@ gem "unparser", ">= 0.2.6", "< 1.0.0"
 gem "rubocop"
 
 # fastlane dependencies
-# gem "fastlane" # disabled for now, until we need it
+# gem "fastlane", ">= 2.81.0", "< 3.0.0"
+gem "fastlane", path: "../fastlane"
 
 group :test, :development do
   gem "pry"
