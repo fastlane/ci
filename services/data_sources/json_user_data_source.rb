@@ -100,12 +100,7 @@ module FastlaneCI
 
     # just check to see if we have a user with that email...
     def user_exist?(email: nil)
-      user = self.users.select { |existing_user| existing_user.email.casecmp(email.downcase).zero? }.first
-      if user.nil?
-        return false
-      else
-        return true
-      end
+      return self.users.any? { |existing_user| existing_user.email.casecmp(email.downcase).zero? }
     end
 
     def update_user!(user: nil)

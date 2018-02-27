@@ -73,8 +73,7 @@ module FastlaneCI
     # @return [Boolean]
     def notification_exist?(id: nil)
       JSONNotificationDataSource.file_semaphore.synchronize do
-        existing_notification = @notifications.select { |notification| notification.id == id }.first
-        return existing_notification.nil? ? false : true
+        return @notifications.any? { |notification| notification.id == id }
       end
     end
 
@@ -100,7 +99,7 @@ module FastlaneCI
 
       if existing_notification.nil?
         error_message = "Couldn't update notification #{notification.name} because it doesn't exist"
-        logger.debug(error_message)
+        logger.error(error_message)
         raise error_message
       else
         @notifications[notification_index] = notification
