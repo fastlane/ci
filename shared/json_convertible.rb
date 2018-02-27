@@ -24,19 +24,40 @@ module FastlaneCI
         object_hash = {}
         self.instance_variables.each do |var|
           next if ignore_instance_variables.include?(var)
-          if self.class.attribute_name_to_json_proc_map.key?(var)
-            instance_variable_value = self.class.attribute_name_to_json_proc_map[var].call(self.instance_variable_get(var))
+          # If we encounter with a `var` which value is an `Array`, we should iterate
+          # over its value and use its own `to_object_dictionary`.
+          if self.instance_variable_get(var).kind_of?(Array)
+            object_array = []
+            self.instance_variable_get(var).each do |obj|
+              object_array << obj.to_object_dictionary
+            end
+            # In this step we have all the objects, lastly we need the key of the array.
+            var_name, = self._to_object_dictionary(var)
+            object_hash[var_name] = object_array
           else
-            instance_variable_value = self.instance_variable_get(var)
+            var_name, instance_variable_value = self._to_object_dictionary(var)
+            object_hash[var_name] = instance_variable_value
           end
-          if self.class.attribute_key_name_map.key?(var)
-            var_name = self.class.attribute_key_name_map[var]
-          else
-            var_name = var.to_s[1..-1]
-          end
-          object_hash[var_name] = instance_variable_value
         end
         return object_hash
+      end
+
+      protected
+
+      def _to_object_dictionary(var)
+        # For a given object variable we check if it includes some custom value mapping to JSON.
+        if self.class.attribute_name_to_json_proc_map.key?(var)
+          instance_variable_value = self.class.attribute_name_to_json_proc_map[var].call(self.instance_variable_get(var))
+        else
+          instance_variable_value = self.instance_variable_get(var)
+        end
+        # For a given object variable we check if it includes some custom property mapping to JSON
+        if self.class.attribute_key_name_map.key?(var)
+          var_name = self.class.attribute_key_name_map[var]
+        else
+          var_name = var.to_s[1..-1]
+        end
+        return var_name, instance_variable_value
       end
     end
 
@@ -45,23 +66,20 @@ module FastlaneCI
       def from_json!(json_object)
         instance = self.new
         json_object.each do |var, val|
-          if self.attribute_key_name_map.key(var)
-            var_name = self.attribute_key_name_map.key(var).to_sym
-          else
-            var_name = "@#{var}".to_sym
-          end
-          if self.json_to_attribute_name_proc_map.key?(var)
-            var_value = self.json_to_attribute_name_proc_map[var].call(val)
-          else
-            var_value = val
-          end
-          if self.attribute_to_type_map.key?(var_name)
-            if self.attribute_to_type_map[var_name].include?(FastlaneCI::JSONConvertible)
-              # classes that include `JSONConvertible` take precedence over custom mapping.
-              var_value = self.attribute_to_type_map[var_name].from_json!(val)
+          # If we encounter with a value that is represented by an array, iterate over it.
+          if val.kind_of?(Array)
+            # For each of the objects in the array, we call the protected method to build the object array.
+            array_property = []
+            array_name = nil
+            val.each do |array_val|
+              array_name, this_instance = self._from_json!(var, array_val, is_iterable: true)
+              array_property << this_instance
             end
+            instance.instance_variable_set(array_name, array_property)
+          else
+            var_name, var_value = self._from_json!(var, val)
+            instance.instance_variable_set(var_name, var_value)
           end
-          instance.instance_variable_set(var_name, var_value)
         end
         return instance
       end
@@ -138,6 +156,54 @@ module FastlaneCI
       # @return [Hash] of properties and their types
       def attribute_to_type_map
         return {}
+      end
+
+      # class method
+      # This method is intended to be overridden by any
+      # class that implements `JSONConvertible` and need
+      # to provide a custom mapping for a enumerable property
+      # in the JSON.
+      #
+      # @param enumerable_property_name [Any] the property name of the object.
+      # @param current_json_object [Hash] the hash object of `enumerable_property_name` for a given iteration step.
+      #
+      #   @example
+      #
+      #     def map_enumerable_type(enumerable_property_name: nil, current_json_object: nil)
+      #       if enumerable_property_name == :@job_triggers
+      #         JobTrigger needs a factory method that reads `json[:type]` and instantiates the proper type
+      #         return  FastlaneCI::JobTrigger.create(json: current_json_object)
+      #       end
+      #     end
+      # @return [Any] object in the array by the given `property_name` and `json_object`.
+      def map_enumerable_type(enumerable_property_name: nil, current_json_object: nil)
+        return nil
+      end
+
+      protected
+
+      def _from_json!(var, val, is_iterable: false)
+        if self.attribute_key_name_map.key(var)
+          var_name = self.attribute_key_name_map.key(var).to_sym
+        else
+          var_name = "@#{var}".to_sym
+        end
+        if self.json_to_attribute_name_proc_map.key?(var_name)
+          var_value = self.json_to_attribute_name_proc_map[var_name].call(val)
+        else
+          var_value = val
+        end
+        if self.attribute_to_type_map.key?(var_name)
+          if self.attribute_to_type_map[var_name].include?(FastlaneCI::JSONConvertible)
+            # classes that include `JSONConvertible` take precedence over custom mapping.
+            var_value = self.attribute_to_type_map[var_name].from_json!(val)
+          end
+        elsif is_iterable
+          # This is only intended for array properties, it passes the final variable name and a single object of
+          # the variable array. Expects to return and object.
+          var_value = self.map_enumerable_type(enumerable_property_name: var_name, current_json_object: val)
+        end
+        return var_name, var_value
       end
     end
   end

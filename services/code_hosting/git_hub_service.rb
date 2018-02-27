@@ -41,6 +41,12 @@ module FastlaneCI
       client.repos({}, query: { sort: "asc" })
     end
 
+    # Does the client with the associated credentials have access to the specified repo?
+    # @repo [String] Repo URL as string
+    def access_to_repo?(repo_url: nil)
+      client.repository?(repo_url.sub("https://github.com/", ""))
+    end
+
     # The `target_url`, `description` and `context` parameters are optional
     # @repo [String] Repo URL as string
     def set_build_status!(repo: nil, sha: nil, state: nil, target_url: nil, description: nil, context: nil)
@@ -73,9 +79,7 @@ module FastlaneCI
       # https://octokit.github.io/octokit.rb/Octokit/Client/Statuses.html
 
       task = TaskQueue::Task.new(work_block: proc {
-        if ENV["FASTLANE_CI_SUPER_VERBOSE"]
-          logger.debug("Setting status #{state} on #{target_url}")
-        end
+        logger.debug("Setting status #{state} on #{target_url}")
         client.create_status(repo, sha, state, {
           target_url: target_url,
           description: description,

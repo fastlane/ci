@@ -21,5 +21,15 @@ module FastlaneCI
 
       self.full_name = full_name
     end
+
+    def self.from_octokit_repo!(repo: nil)
+      repo_config = GitRepoConfig.new(
+        git_url: repo[:html_url],
+        description: repo[:description],
+        name: repo[:name],
+        full_name: repo[:full_name]
+      )
+      return repo_config
+    end
   end
 end

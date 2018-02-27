@@ -1,7 +1,7 @@
 source("https://rubygems.org")
 
 # Sinatra
-gem "sinatra", ">= 2.0.0", "< 3.0.0"
+gem "sinatra", ">= 2.0.1", "< 3.0.0"
 gem "sinatra-contrib", ">= 2.0.0", "< 3.0.0" # TODO: document why we have this here @taquitos
 gem "faye-websocket", ">= 0.10.7", "< 1.0.0"
 

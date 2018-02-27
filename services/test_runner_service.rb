@@ -21,6 +21,10 @@ module FastlaneCI
       self.code_hosting_service = github_service
     end
 
+    # Runs a new build, incrementing the build number from the number of builds
+    # for a given project
+    #
+    # @return [nil]
     def run
       start_time = Time.now
       builds = build_service.list_builds(project: self.project)
@@ -63,6 +67,38 @@ module FastlaneCI
       self.update_build_status!
     end
 
+    # Re-runs a build passed in, does not modify the build number
+    #
+    # @param  [Build] build
+    # @return [nil]
+    def rerun(build = nil)
+      start_time = Time.now
+
+      self.current_build = build
+      update_build_status!
+
+      # TODO: Replace with fastlane runner here
+      command = "rubocop #{project.repo_config.local_repo_path}"
+      logger.info("Running #{command}")
+
+      cmd = TTY::Command.new
+      cmd.run(command)
+
+      duration = Time.now - start_time
+
+      current_build.duration = duration
+      current_build.status = :success
+
+      self.update_build_status!
+    rescue StandardError => ex
+      # TODO: better error handling, don't catch all Exception
+      puts(ex)
+      duration = Time.now - start_time
+      current_build.duration = duration
+      current_build.status = :failure # TODO: also handle failure
+      self.update_build_status!
+    end
+
     # Responsible for updating the build status in our local config
     # and on GitHub
     def update_build_status!
@@ -80,7 +116,7 @@ module FastlaneCI
       )
 
       # Commit & Push the changes to git remote
-      FastlaneCI::Services.project_data_source.git_repo.commit_changes!
+      FastlaneCI::Services.project_service.git_repo.commit_changes!
     rescue StandardError => ex
       logger.error("Error setting the build status as part of the config repo")
       logger.error(ex.to_s)

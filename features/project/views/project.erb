@@ -41,7 +41,8 @@
               <% end %>
             </td>
             <td style="text-align: center;"><%= build.number %></td>
-            <td><%= build.timestamp %></td>
+            <!-- TODO: Use whichever format for the timestamp desired. -->
+            <td><%= build.timestamp.strftime("%Y%m%dT%H%M%S%z") %></td>
           </tr>
         <% end %>
       </tbody>

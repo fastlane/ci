@@ -8,12 +8,12 @@ module FastlaneCI
   class ConfigService
     include FastlaneCI::Logging
 
-    attr_accessor :project_data_source
+    attr_accessor :project_service
     attr_accessor :ci_user
     attr_accessor :active_code_hosting_services # dictionary of active_code_hosting_service_key to CodeHosting
 
-    def initialize(project_data_source: FastlaneCI::Services.project_data_source, ci_user: nil)
-      self.project_data_source = project_data_source
+    def initialize(project_service: FastlaneCI::Services.project_service, ci_user: nil)
+      self.project_service = project_service
       self.ci_user = ci_user
       self.active_code_hosting_services = {}
     end
@@ -51,24 +51,12 @@ module FastlaneCI
 
     def octokit_projects(provider_credential: nil)
       # Get a list of all the repos `provider` has access to
-      if ENV["FASTLANE_CI_SUPER_VERBOSE"]
-        logger.debug("Getting code host for #{provider_credential.ci_user.email}, #{provider_credential.type}")
-      end
+      logger.debug("Getting code host for #{provider_credential.ci_user.email}, #{provider_credential.type}") if provider_credential.ci_user
       current_code_hosting_service = self.code_hosting_service(provider_credential: provider_credential)
 
-      # current set of `GitRepoConfig.name`s that `provider_credential` has access to
-      current_repo_git_url_set = current_code_hosting_service.repos.map(&:html_url).to_set
-      # TODO: we have to improve repo handling, as it seems like we either have to implement
-      # proper paging, or we ask for specific repos instead
-      # Either way, my account has access to too many repos, so for now, let's just workaround using this
-      current_repo_git_url_set << "https://github.com/taquitos/ci-sample-repo"
-      current_repo_git_url_set << "https://github.com/fastlane/ci"
-
-      if ENV["FASTLANE_CI_SUPER_VERBOSE"]
-        logger.debug("Finding projects we have access to with #{provider_credential.ci_user.email}, #{provider_credential.type}")
-      end
-      projects = self.project_data_source.projects.select do |project|
-        current_repo_git_url_set.include?(project.repo_config.git_url)
+      logger.debug("Finding projects we have access to with #{provider_credential.ci_user.email}, #{provider_credential.type}") if provider_credential.ci_user
+      projects = self.project_service.projects.select do |project|
+        current_code_hosting_service.access_to_repo?(repo_url: project.repo_config.git_url)
       end
 
       # return all projects that are the union of this current user's provider_credential, and the passed in provider_credential

@@ -22,15 +22,6 @@ module FastlaneCI
       erb(:dashboard, locals: locals, layout: FastlaneCI.default_layout)
     end
 
-    get "#{HOME}/add_project" do
-      provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
-      locals = {
-        title: "Add new project",
-        repos: FastlaneCI::GitHubService.new(provider_credential: provider_credential).repos
-      }
-      erb(:new_project, locals: locals, layout: FastlaneCI.default_layout)
-    end
-
     # Example of json endpoint if you want to use ajax to async load stuff
     get "#{HOME}/build_list" do
       Services::BUILD_SERVICE.builds do |builds, paging_token|
