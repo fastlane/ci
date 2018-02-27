@@ -19,51 +19,40 @@ module FastlaneCI
       attr_accessor :file_semaphore
     end
 
-    # @return [FastlaneCI::GitRepo]
-    attr_accessor :git_repo
-
     # Can't have us reading and writing to a file at the same time
     JSONNotificationDataSource.file_semaphore = Mutex.new
 
     # Reloads notifications from the notifications data source after instantiation
     #
-    # @param  [Any] params
+    # @param [Any] params
     def after_creation(**params)
-      if params.nil?
-        raise "Either user or a provider credential is mandatory."
-      else
-        if !params[:user] && !params[:provider_credential]
-          raise "Either user or a provider credential is mandatory."
-        else
-          params[:provider_credential] ||= params[:user].provider_credential(type: ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
-          @git_repo = FastlaneCI::GitRepo.new(git_config: self.json_folder_path, provider_credential: params[:provider_credential])
-        end
-      end
-
       reload_notifications
     end
 
     # Returns an array of notifications from the notifications JSON file stored
-    # in the configuration git repo
+    # in the notifications directory
     #
     # @return [Array[Notification]]
     def notifications
       JSONProjectDataSource.projects_file_semaphore.synchronize do
-        path = git_repo.file_path("notifications.json")
-        return [] unless File.exist?(path)
+        return unless File.exist?(notifications_file_path)
 
-        return JSON.parse(File.read(path)).map(&Notification.method(:from_json!))
+        return JSON.parse(File.read(notifications_file_path))
+                   .map(&Notification.method(:from_json!))
       end
     end
 
-    # Writes the notifications array to the git repo as JSON and commit them as
-    # the CI user
+    # Writes the notifications array to the notifications directory as JSON
     #
     # @param  [Array[Notification]] notifications
     def notifications=(notifications)
       JSONNotificationDataSource.file_semaphore.synchronize do
-        File.write(notifications_file_path, JSON.pretty_generate(notifications.map(&:to_object_dictionary)))
-        git_repo.commit_changes!
+        return unless File.exist?(notifications_file_path)
+
+        File.write(
+          notifications_file_path,
+          JSON.pretty_generate(notifications.map(&:to_object_dictionary))
+        )
       end
     end
 
@@ -139,10 +128,12 @@ module FastlaneCI
 
     # Returns the file path for the notifications to be read from / persisted to
     #
+    #   ~/.fastlane/ci/notifications/notifications.json
+    #
     # @param  [String] path
     # @return [String]
-    def notifications_file_path(path: "notifications.json")
-      git_repo.file_path("notifications.json")
+    def notifications_file_path(path: "notifications/notifications.json")
+      File.join(json_folder_path, path)
     end
 
     # Reloads the notifications from the data source

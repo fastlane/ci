@@ -1,5 +1,6 @@
 require_relative "data_sources/json_notification_data_source"
 require_relative "../shared/logging_module"
+require_relative "../taskqueue/task_queue"
 
 module FastlaneCI
   # Provides access to notification related logic
@@ -26,6 +27,7 @@ module FastlaneCI
       end
 
       @notification_data_source = notification_data_source
+      @task_queue = TaskQueue::TaskQueue.new(name: "notifications")
     end
 
     # Creates and returns a new Notification
@@ -38,28 +40,44 @@ module FastlaneCI
     # @param  [String] message
     # @return [Notification]
     def create_notification!(id: nil, priority: nil, type: nil, user_id: nil, name: nil, message: nil)
-      return notification_data_source.create_notification!(
-        id: id,
-        priority: priority,
-        type: type,
-        user_id: user_id,
-        name: name,
-        message: message
-      )
+      add_to_task_queue do
+        return notification_data_source.create_notification!(
+          id: id,
+          priority: priority,
+          type: type,
+          user_id: user_id,
+          name: name,
+          message: message
+        )
+      end
     end
 
     # Updates and persists an existing Notification
     #
     # @param  [Notification] notification
     def update_notification!(notification: nil)
-      notification_data_source.update_notification!(notification: notification)
+      add_to_task_queue do
+        notification_data_source.update_notification!(notification: notification)
+      end
     end
 
     # Deletes a notification if the `id` exists
     #
     # @param  [String] id
     def delete_notification!(id: nil)
-      notification_data_source.delete_notification!(id: id)
+      add_to_task_queue do
+        notification_data_source.delete_notification!(id: id)
+      end
+    end
+
+    private
+
+    # Adds a block of code to the notifications task queue
+    #
+    # @param  [Proc] block
+    def add_to_task_queue(&block)
+      task = TaskQueue::Task.new(work_block: proc { yield })
+      @task_queue.add_task_async(task: task)
     end
   end
 end

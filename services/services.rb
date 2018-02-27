@@ -56,8 +56,7 @@ module FastlaneCI
     # Start up a ProjectService from our JSONProjectDataSource
     def self.project_service
       @_project_service ||= FastlaneCI::ProjectService.new(
-        project_data_source: FastlaneCI::JSONProjectDataSource.create(ci_config_repo,
-                                                                      user: ci_user)
+        project_data_source: FastlaneCI::JSONProjectDataSource.create(ci_config_repo, user: ci_user)
       )
     end
 
@@ -72,8 +71,7 @@ module FastlaneCI
     def self.notification_service
       @_notification_service ||= FastlaneCI::NotificationService.new(
         notification_data_source: JSONNotificationDataSource.create(
-          ci_config_repo,
-          user: ci_user
+          File.expand_path("..", ci_config_git_repo_path)
         )
       )
     end

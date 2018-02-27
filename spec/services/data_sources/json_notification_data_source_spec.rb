@@ -1,31 +1,20 @@
-require File.expand_path("../../spec_helper.rb", __FILE__)
-require File.expand_path("../../../shared/models/notification.rb", __FILE__)
-require File.expand_path("../../../services/notification_service.rb", __FILE__)
-require File.expand_path("../../../services/data_sources/json_notification_data_source.rb", __FILE__)
+require File.expand_path("../../../spec_helper.rb", __FILE__)
+require File.expand_path("../../../../shared/models/notification.rb", __FILE__)
+require File.expand_path("../../../../services/notification_service.rb", __FILE__)
+require File.expand_path("../../../../services/data_sources/json_notification_data_source.rb", __FILE__)
 
-describe FastlaneCI::NotificationService do
+describe FastlaneCI::JSONNotificationDataSource do
   let(:file_path) do
-    File.join(FastlaneCI::FastlaneApp.settings.root, "spec/fixtures/files/notifications.json")
+    File.join(FastlaneCI::FastlaneApp.settings.root, "spec/fixtures/files/")
   end
 
-  let(:notification_service) do
-    described_class.new(
-      notification_data_source: FastlaneCI::JSONNotificationDataSource.create(
-        git_repo,
-        user: ci_user
-      )
-    )
+  let (:notifications_file_path) do
+    File.join(file_path, "notifications/notifications.json")
   end
+
+  let(:notification_service) { described_class.create(file_path) }
 
   before(:each) do
-    FastlaneCI::JSONNotificationDataSource.any_instance.stub(:git_repo).and_return(
-      double(
-        "git_repo",
-        local_repo_path: "fake_repo_path",
-        file_path: file_path,
-        commit_changes!: nil
-      )
-    )
     stub_git_repos
     stub_services
     stub_const("ENV", { "data_store_folder" => file_path })
@@ -35,7 +24,7 @@ describe FastlaneCI::NotificationService do
   describe "#create_notification!" do
     before(:each) do
       File.should_receive(:read)
-          .with(file_path)
+          .with(notifications_file_path)
           .and_return("[]")
     end
 
@@ -57,7 +46,7 @@ describe FastlaneCI::NotificationService do
     context "notification doesn't exist" do
       before(:each) do
         File.should_receive(:read)
-            .with(file_path)
+            .with(notifications_file_path)
             .and_return("[]")
       end
 
@@ -70,7 +59,7 @@ describe FastlaneCI::NotificationService do
     context "notification exists" do
       before(:each) do
         File.should_receive(:read)
-            .with(file_path)
+            .with(notifications_file_path)
             .and_return(json_notification_string)
       end
 
@@ -85,7 +74,7 @@ describe FastlaneCI::NotificationService do
     File.open(
       File.join(
         FastlaneCI::FastlaneApp.settings.root,
-        "spec/fixtures/files/mock_notifications.json"
+        "spec/fixtures/files/notifications/mock_notifications.json"
       )
     ).read
   end
