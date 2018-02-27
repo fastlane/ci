@@ -110,20 +110,3 @@ describe FastlaneCI::NotificationService do
     }
   end
 end
-
-require "ripper"
-
-# Monkey patch to fix issue with HEREDOC in rspec for Ruby 2.3
-#
-# https://github.com/rspec/rspec-core/issues/2163#issuecomment-193657248
-Ripper::Lexer.class_eval do
-  def on_heredoc_dedent(v, w)
-    @buf.last.each do |e|
-      next unless e.event == :on_tstring_content
-      if (n = dedent_string(e.tok, w)) > 0
-        e.pos[1] += n
-      end
-    end
-    v
-  end
-end
