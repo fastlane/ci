@@ -1,8 +1,6 @@
 # External
 require "sinatra/base"
 
-set :server, "thin"
-
 require_relative "./fastfile-parser/fastfile_parser"
 
 # Internal
