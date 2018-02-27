@@ -37,7 +37,7 @@ module FastlaneCI
 
       self.target_branches_set = Set.new
       project.job_triggers.each do |trigger|
-        if trigger.kind_of?(FastlaneCI::CommitJobTrigger)
+        if trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit]
           self.target_branches_set.add(trigger.branch)
         end
       end
