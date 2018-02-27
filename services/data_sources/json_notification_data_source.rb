@@ -87,13 +87,11 @@ module FastlaneCI
       notification_index = nil
       existing_notification = nil
 
-      JSONNotificationDataSource.file_semaphore.synchronize do
-        @notifications.each.with_index do |old_notification, index|
-          if old_notification.id == notification.id
-            notification_index = index
-            existing_notification = old_notification
-            break
-          end
+      @notifications.each.with_index do |old_notification, index|
+        if old_notification.id == notification.id
+          notification_index = index
+          existing_notification = old_notification
+          break
         end
       end
 
