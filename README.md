@@ -135,7 +135,17 @@ In order to run fastlane.ci for the first time, the `https://github.com/your-nam
     "id": "db799377-aaa3-4605-ba43-c91a13c8f83",
     "project_name": "fastlane CI demo app test",
     "lane": "test",
-    "enabled": true
+    "enabled": true,
+    "job_triggers": [
+      {
+        "type": "commit",
+        "branch": "master"
+      },
+      {
+        "type": "nightly",
+        "branch": "master"
+      }
+    ]
   }
 ]
 ```

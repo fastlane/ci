@@ -3,7 +3,12 @@ require "helper_functions"
 module StubHelpers
   include HelperFunctions
 
+  def stub_file_io
+    File.stub(:write)
+  end
+
   def stub_git_repos
+    FastlaneCI::GitRepo.any_instance.stub(:initialize)
     FastlaneCI::GitRepo.any_instance.stub(:setup_repo)
     FastlaneCI::GitRepo.any_instance.stub(:clone)
   end

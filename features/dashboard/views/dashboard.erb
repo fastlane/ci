@@ -4,13 +4,8 @@
       <span class="mdl-layout__title"><%= title %></span>
     </div>
   </header>
-  <div class="mdl-layout__drawer">
-    <span class="mdl-layout__title">fastlane.ci</span>
-    <nav class="mdl-navigation">
-      <a class="mdl-navigation__link" href="/">Dashboard</a>
-      <a class="mdl-navigation__link" href="#">Settings</a>
-    </nav>
-  </div>
+
+  <%= erb :"../../partials/navigation" %>
 
   <main class="mdl-layout__content" style="padding: 40px">
     <h3>Your projects</h3>
