@@ -8,6 +8,7 @@ require_relative "services/services"
 require_relative "workers/refresh_config_data_sources_worker"
 require_relative "shared/logging_module"
 require_relative "shared/fastlane_ci_error" # TODO: move somewhere else
+require_relative "features/test_runner/test_runner"
 
 # All things fastlane ci related go in this module
 module FastlaneCI

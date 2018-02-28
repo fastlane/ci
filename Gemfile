@@ -1,8 +1,8 @@
 source("https://rubygems.org")
 
 # Sinatra
-gem "sinatra", ">= 2.0.1", "< 3.0"
-gem "sinatra-contrib", ">= 2.0.0", "< 3.0" # TODO: document why we have this here @taquitos
+gem "sinatra", ">= 2.0.1", "< 3.0.0"
+gem "sinatra-contrib", ">= 2.0.0", "< 3.0.0" # TODO: document why we have this here @taquitos
 
 # Best password hashing to-date
 gem "bcrypt", ">= 3.1.11", "< 4.0.0"
@@ -31,7 +31,9 @@ gem "rubocop"
 gem "rufus-scheduler"
 
 # fastlane dependencies
-# gem "fastlane" # disabled for now, until we need it
+# TODO: point to minimum release instead of GitHub once
+# 	we shipped a new release
+gem "fastlane", git: "https://github.com/fastlane/fastlane"
 
 group :test, :development do
   gem "pry"
