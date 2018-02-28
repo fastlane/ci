@@ -140,6 +140,10 @@ In order to run fastlane.ci for the first time, the `https://github.com/your-nam
       {
         "type": "commit",
         "branch": "master"
+      },
+      {
+        "type": "nightly",
+        "branch": "master"
       }
     ]
   }
