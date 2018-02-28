@@ -7,13 +7,13 @@ module FastlaneCI
 
     # The block that's being called for each new line
     # that should be printed out to the user
-    attr_accessor :block
+    attr_accessor :each_line_block
 
-    def initialize(file_path: nil, block: nil)
+    def initialize(file_path: nil, each_line_block: nil)
       raise "No file path provided" if file_path.to_s.length == 0
-      raise "No block provided" if block.nil?
+      raise "No each_line_block provided" if each_line_block.nil?
       self.file_path = file_path
-      self.block = block
+      self.each_line_block = each_line_block
     end
 
     def log
@@ -38,7 +38,7 @@ module FastlaneCI
 
     def error(message)
       log.error(message.to_s.red)
-      self.block.call(
+      self.each_line_block.call(
         type: :error,
         message: message
       )
@@ -46,7 +46,7 @@ module FastlaneCI
 
     def important(message)
       log.warn(message.to_s.yellow)
-      self.block.call(
+      self.each_line_block.call(
         type: :important,
         message: message
       )
@@ -54,7 +54,7 @@ module FastlaneCI
 
     def success(message)
       log.info(message.to_s.green)
-      self.block.call(
+      self.each_line_block.call(
         type: :success,
         message: message
       )
@@ -62,7 +62,7 @@ module FastlaneCI
 
     def message(message)
       log.info(message.to_s)
-      self.block.call(
+      self.each_line_block.call(
         type: :error,
         message: message
       )
@@ -70,7 +70,7 @@ module FastlaneCI
 
     def deprecated(message)
       log.error(message.to_s.deprecated)
-      self.block.call(
+      self.each_line_block.call(
         type: :error,
         message: message
       )
@@ -78,7 +78,7 @@ module FastlaneCI
 
     def command(message)
       log.info("$ #{message}".cyan)
-      self.block.call(
+      self.each_line_block.call(
         type: :command,
         message: message
       )
@@ -106,7 +106,7 @@ module FastlaneCI
       success(message)
       success("-" * i)
 
-      self.block.call(
+      self.each_line_block.call(
         type: :header,
         message: message
       )
@@ -115,7 +115,7 @@ module FastlaneCI
     # TODO: Check if we can find a good way to not have to
     #   overwrite all these methods
     def crash!(exception)
-      self.block.call(
+      self.each_line_block.call(
         type: :crash,
         message: message
       )
@@ -123,7 +123,7 @@ module FastlaneCI
     end
 
     def user_error!(error_message, options = {})
-      self.block.call(
+      self.each_line_block.call(
         type: :user_error,
         message: message
       )
@@ -131,7 +131,7 @@ module FastlaneCI
     end
 
     def shell_error!(error_message, options = {})
-      self.block.call(
+      self.each_line_block.call(
         type: :shell_error,
         message: message
       )
@@ -139,7 +139,7 @@ module FastlaneCI
     end
 
     def build_failure!(error_message, options = {})
-      self.block.call(
+      self.each_line_block.call(
         type: :build_failure,
         message: message
       )
@@ -147,7 +147,7 @@ module FastlaneCI
     end
 
     def test_failure!(error_message)
-      self.block.call(
+      self.each_line_block.call(
         type: :test_failure,
         message: message
       )
@@ -155,7 +155,7 @@ module FastlaneCI
     end
 
     def abort_with_message!(message)
-      self.block.call(
+      self.each_line_block.call(
         type: :abort,
         message: message
       )
