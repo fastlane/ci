@@ -25,7 +25,11 @@ module FastlaneCI
           # We have the `work` inside a `begin rescue`
           # so that if something fails, the thread still is alive
           begin
-            self.scheduler.schedule { self.work } unless self.should_stop
+            if self.should_stop
+              self.scheduler.shutdown
+            else
+              self.scheduler.schedule { self.work }
+            end
           rescue StandardError => ex
             puts("[#{self.class} Exception]: #{ex}: ")
             puts(ex.backtrace.join("\n"))
