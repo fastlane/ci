@@ -33,7 +33,6 @@ module FastlaneCI
         # once we have the web socket streaming implemented
       rescue StandardError => ex
         # TODO: Exception handling here
-        require "pry"; binding.pry
         puts(ex)
       end
     end
