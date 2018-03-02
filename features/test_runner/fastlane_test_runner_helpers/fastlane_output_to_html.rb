@@ -11,6 +11,9 @@ module FastlaneCI
   # <p class="success">Step: default_platform</p>
   # 
   # It does so for each row
+  # 
+  # TODO: we decided to move this away long term, into the brower using JavaScript
+  #
   class FastlaneOutputToHtml
     class << self
       def convert_row(row)
