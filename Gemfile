@@ -6,7 +6,7 @@ gem "sinatra-contrib", ">= 2.0.0", "< 3.0.0" # TODO: document why we have this h
 gem "faye-websocket", ">= 0.10.7", "< 1.0.0" # web socket connection for Sinatra
 
 # web server that we need to support web socket connections with sinatra
-gem "thin"
+gem "thin", ">= 1.7.2", "< 2.0.0"
 
 # Best password hashing to-date
 gem "bcrypt", ">= 3.1.11", "< 4.0.0"

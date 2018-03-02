@@ -1,8 +1,8 @@
 GIT
   remote: https://github.com/fastlane/fastlane
-  revision: d0998ae7acd3e8ed165186d55547a9d7e69abefd
+  revision: 5c8081c5eda17a0e1ca6d953ee6492992553308c
   specs:
-    fastlane (2.83.0)
+    fastlane (2.84.0)
       CFPropertyList (>= 2.3, < 4.0.0)
       addressable (>= 2.3, < 3.0.0)
       babosa (>= 1.0.2, < 2.0.0)
@@ -271,7 +271,7 @@ DEPENDENCIES
   rufus-scheduler
   sinatra (>= 2.0.1, < 3.0.0)
   sinatra-contrib (>= 2.0.0, < 3.0.0)
-  thin
+  thin (>= 1.7.2, < 2.0.0)
   tty-command (>= 0.7.0, < 1.0.0)
   unparser (>= 0.2.6, < 1.0.0)
 
