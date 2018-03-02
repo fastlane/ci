@@ -9,6 +9,12 @@ module FastlaneCI
   class GitHubService < CodeHostingService
     include FastlaneCI::Logging
 
+    class << self
+      attr_accessor :status_context
+    end
+
+    GitHubService.status_context = "fastlane.ci"
+
     # The email is actually optional for API access
     # However we ask for the email on login, as we also plan on doing commits for the user
     # and this way we can make sure to configure things properly for git to use the email
@@ -48,8 +54,7 @@ module FastlaneCI
 
     # returns the status of a given commit sha for a given repo
     def status_for_commit_sha(repo_full_name: nil, sha: nil)
-      # TODO: only return when context is `fastlane.ci`
-      return client.statuses(repo_full_name, sha)
+      return client.statuses(repo_full_name, sha, context: GitHubService.status_context)
     end
 
     # updates the most current commit to "pending" on all open prs if they don't have a status.
@@ -80,7 +85,7 @@ module FastlaneCI
 
     # The `target_url`, `description` and `context` parameters are optional
     # @repo [String] Repo URL as string
-    def set_build_status!(repo: nil, sha: nil, state: nil, target_url: nil, description: nil, context: nil)
+    def set_build_status!(repo: nil, sha: nil, state: nil, target_url: nil, description: nil, context: GitHubService.status_context)
       state = state.to_s
 
       # Available states https://developer.github.com/v3/repos/statuses/
@@ -115,7 +120,7 @@ module FastlaneCI
         client.create_status(repo, sha, state, {
           target_url: target_url,
           description: description,
-          context: context || "fastlane.ci"
+          context: context || GitHubService.status_context
         })
       })
 
