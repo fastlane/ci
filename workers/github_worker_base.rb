@@ -6,7 +6,7 @@ require_relative "../services/code_hosting/git_hub_service"
 
 module FastlaneCI
   # Base class for GitHub workers
-  class GithubWorkerBase < WorkerBase
+  class GitHubWorkerBase < WorkerBase
     include FastlaneCI::Logging
 
     attr_accessor :provider_credential
@@ -50,7 +50,8 @@ module FastlaneCI
       end
 
       time_nano = Time.now.nsec
-      @thread_id = "GithubWorker:#{time_nano}: #{self.serial_task_queue.name}"
+      current_class_name = self.class.name.split("::").last
+      @thread_id = "#{current_class_name}:#{time_nano}: #{self.serial_task_queue.name}"
       return @thread_id
     end
 

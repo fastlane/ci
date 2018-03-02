@@ -9,7 +9,7 @@ module FastlaneCI
   # We have to poll, as there is no easy way to hear about
   # new commits from web events, as the CI system might be behind
   # firewalls
-  class CheckForNewCommitsOnGithubWorker < GithubWorkerBase
+  class CheckForNewCommitsOnGithubWorker < GitHubWorkerBase
     include FastlaneCI::Logging
 
     attr_accessor :trigger_type
@@ -22,7 +22,7 @@ module FastlaneCI
 
       self.current_tasks = []
 
-      super # This starts the work by calling `work`
+      super(provider_credential: provider_credential, project: project) # This starts the work by calling `work`
     end
 
     def wait_for_previous_tasks?
