@@ -48,10 +48,11 @@ module FastlaneCI
 
     # returns the status of a given commit sha for a given repo
     def status_for_commit_sha(repo_full_name: nil, sha: nil)
+      # TODO: only return when context is `fastlane.ci`
       return client.statuses(repo_full_name, sha)
     end
 
-    # updates the most current commit to "pending" on all open prs if they don't have a status.    
+    # updates the most current commit to "pending" on all open prs if they don't have a status.
     # returns a list of commits that have been updated to `pending` status
     def update_all_open_prs_without_status_to_pending_status!(repo_full_name: nil)
       open_pr_commits = self.last_commit_sha_for_all_open_pull_requests(repo_full_name: repo_full_name)

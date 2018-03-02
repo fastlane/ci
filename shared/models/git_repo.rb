@@ -282,9 +282,17 @@ module FastlaneCI
         self.setup_author(full_name: repo_auth.full_name, username: repo_auth.username)
 
         git.add(all: true) # TODO: for now we only add all files
-        git.commit(commit_message)
-        git.push
-        logger.debug("done commit_changes! #{self.git_config.git_url}")
+        changed = git.status.changed
+        added = git.status.added
+        deleted = git.status.deleted
+
+        if changed.count == 0 && added.count == 0 && deleted.count == 0
+          logger.debug("No changes in repo #{self.git_config.full_name}, skipping commit #{commit_message}")
+        else
+          git.commit(commit_message)
+          git.push
+          logger.debug("done commit_changes! #{self.git_config.full_name}")
+        end
       end
     end
 
