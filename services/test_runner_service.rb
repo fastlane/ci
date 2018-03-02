@@ -30,10 +30,10 @@ module FastlaneCI
     # All lines that were generated so far, this might not be a complete run
     # This is an array of hashes
     # TODO: have a class representing a Row (has to offer dynamic values though, as we might have non fastlane runners in the future)
-    attr_accessor :all_lines
+    attr_accessor :all_build_output_log_lines
 
     # All blocks listening to changes for this build
-    attr_accessor :all_blocks
+    attr_accessor :build_change_observer_blocks
 
     # The TestRunner object that is responsible for running the actual tests
     attr_accessor :test_runner
@@ -47,8 +47,8 @@ module FastlaneCI
       # TODO: provider credential should determine what exact CodeHostingService gets instantiated
       self.code_hosting_service = github_service
 
-      self.all_lines = []
-      self.all_blocks = []
+      self.all_build_output_log_lines = []
+      self.build_change_observer_blocks = []
 
       self.test_runner = FastlaneTestRunner.new(
         platform: "ios", # nil, # TODO: is the platform gonna be part of the `project.lane`? Probably yes
@@ -63,7 +63,7 @@ module FastlaneCI
     end
 
     def add_listener(block)
-      self.all_blocks << block
+      self.build_change_observer_blocks << block
     end
 
     # Handle a new incoming row, and alert every stakeholder who is interested
@@ -72,10 +72,10 @@ module FastlaneCI
 
       # Report back the row
       # 1) Store it in the history of logs (used to access half-built builds)
-      all_lines << row
+      all_build_output_log_lines << row
 
       # 2) Report back to all listeners, usually socket connections
-      self.all_blocks.each do |current_block|
+      self.build_change_observer_blocks.each do |current_block|
         current_block.call(row)
       end
     end

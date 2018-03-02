@@ -21,7 +21,7 @@ module FastlaneCI
         project: project,
         build: build,
         title: "Project #{project.project_name}, Build #{build.sha}",
-        existing_rows: current_runner_service.all_lines.collect { |a| a[:html] }
+        existing_rows: current_runner_service.all_build_output_log_lines.collect { |a| a[:html] }
       }
       erb(:build, locals: locals, layout: FastlaneCI.default_layout)
     end
