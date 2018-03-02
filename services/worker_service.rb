@@ -49,7 +49,7 @@ module FastlaneCI
       workers = self.project_to_workers_dictionary[workers_key]
 
       # worker will die, may take up to `timeout` seconds
-      workers.each { |worker| worker.die! }
+      workers.each(&:die!)
 
       self.project_to_workers_dictionary[workers_key] = nil
     end
@@ -60,7 +60,7 @@ module FastlaneCI
       end
     end
 
-    def project_has_trigger_type(project:nil, trigger_type: nil)
+    def project_has_trigger_type(project: nil, trigger_type: nil)
       raise "Need both project and trigger_type" unless project && trigger_type
 
       project.job_triggers.any? { |trigger| trigger.type == trigger_type }
