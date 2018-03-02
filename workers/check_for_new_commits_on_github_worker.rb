@@ -18,7 +18,7 @@ module FastlaneCI
 
     def initialize(provider_credential: nil, project: nil)
       self.trigger_type = FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit]
-      self.scheduler = WorkerScheduler.new(sleep_interval: 10)
+      self.scheduler = WorkerScheduler.new(interval_time: 10)
 
       self.current_tasks = []
 
