@@ -7,10 +7,14 @@ module FastlaneCI
   # Responsible for the real-time streaming of the build output
   # to the user's browser
   class BuildWebsocketBackend
+    class << self
+      attr_accessor :test_runner_services
+    end
+
     include FastlaneCI::Logging
 
     KEEPALIVE_TIME = 30 # in seconds
-    CHANNEL = "build-output"
+    CHANNEL = "build-output" # TODO: we probably need this to distinguish between multiple builds
 
     def initialize(app)
       logger.debug("Setting up new BuildWebsocketBackend")
@@ -31,28 +35,14 @@ module FastlaneCI
         logger.debug([:open, ws.object_id])
         @clients << ws
 
-        # TODO: Testing code only
-        # We don't want to actually trigger the runner here
-        FastlaneCI::FastlaneTestRunner.new.run(
-          lane: "beta",
-          platform: "ios"
-        ) do |row|
-          # Additionally to transfering the original metadata of this message
-          # that look like this:
-          # 
-          # {:type=>:success, :message=>"Everything worked"}
-          # 
-          # we append the HTML code that should be used in the `html` key
-          # the result looks like this
-          #
-          # {"type":"success","message":"Driving the lane 'ios beta' 🚀","html":"<p class=\"success\">Driving the lane 'ios beta' 🚀</p>"}
-          #
-          
-          row[:html] = FastlaneOutputToHtml.convert_row(row)
-          logger.debug("Streaming #{row} to #{@clients.count} client(s)")
-          @clients.each do
-            ws.send(row.to_json)
-          end
+        self.class.test_runner_services.each do |test_runner_service|
+          logger.debug("Appending to runner service :)")
+          test_runner_service.add_listener(proc do |row|
+            logger.debug("Streaming #{row} to #{@clients.count} client(s)")
+            @clients.each do
+              ws.send(row.to_json)
+            end
+          end)
         end
       end
 

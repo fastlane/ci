@@ -1,5 +1,11 @@
 module FastlaneCI
-  # Service that will interact with fastlane to run tests/lanes
+  # Responsible for the life cycle of running tests as part of fastlane.ci
+  # In particular this takes care of all the overhead, like measuring the time and storing & reporting
+  # the build status
+  # - TestRunnerService owns a TestRunner
+  # - TestRunnerService is alive until it's finished running
+  # - TestRunnerService is created on the fly, either when "resuming" a build, or when a new build is triggered by a project trigger
+  # - TestRunner only runs tests. Stays alive as long as the TestRunnerService
   # TODO: move github specific stuff out into GitHubService (GitHubService right now)
   # TODO: maybe rename this to GitHubTestRunnerService
   class TestRunnerService
@@ -11,7 +17,18 @@ module FastlaneCI
     attr_accessor :current_build
     attr_accessor :sha
 
-    def initialize(project: nil, sha: nil, github_service: nil)
+    # All lines that were generated so far, this might not be a complete run
+    # This is an array of hashes
+    # TODO: have a class representing a Row (has to offer dynamic values though, as we might have non fastlane runners in the future)
+    attr_accessor :all_lines
+
+    # All blocks listening to changes for this build
+    attr_accessor :all_blocks
+
+    # The TestRunner object that is responsible for running the actual tests
+    attr_accessor :test_runner
+
+    def initialize(project: nil, sha: nil, github_service: nil, test_runner: nil)
       self.project = project
       self.sha = sha
 
@@ -19,6 +36,33 @@ module FastlaneCI
 
       # TODO: provider credential should determine what exact CodeHostingService gets instantiated
       self.code_hosting_service = github_service
+
+      self.all_lines = []
+      self.all_blocks = []
+
+      self.test_runner = FastlaneTestRunner.new(
+        platform: "ios", #nil, # TODO: is the platform gonna be part of the `project.lane`? Probably yes
+        lane: "beta", #project.lane, 
+        parameters: nil
+      )
+    end
+
+    def add_listener(block)
+      self.all_blocks << block
+    end
+
+    # Handle a new incoming row, and alert every stakeholder who is interested
+    def new_row(row)
+      logger.debug(row["message"])
+
+      # Report back the row
+      # 1) Store it in the history of logs (used to access half-built builds)
+      all_lines << row
+
+      # 2) Report back to all listeners, usually socket connections
+      self.all_blocks.each do |current_block|
+        current_block.call(row)
+      end
     end
 
     # Runs a new build, incrementing the build number from the number of builds
@@ -45,12 +89,10 @@ module FastlaneCI
       )
       update_build_status!
 
-      # TODO: Replace with fastlane runner here
-      command = "rubocop #{project.repo_config.local_repo_path}"
-      logger.info("Running #{command}")
-
-      cmd = TTY::Command.new
-      cmd.run(command)
+      logger.debug("Running runner now")
+      test_runner.run do |current_row|
+        new_row(current_row)
+      end
 
       duration = Time.now - start_time
 
@@ -77,12 +119,10 @@ module FastlaneCI
       self.current_build = build
       update_build_status!
 
-      # TODO: Replace with fastlane runner here
-      command = "rubocop #{project.repo_config.local_repo_path}"
-      logger.info("Running #{command}")
-
-      cmd = TTY::Command.new
-      cmd.run(command)
+      logger.debug("Running runner now")
+      test_runner.run do |row|
+        new_row(row)
+      end
 
       duration = Time.now - start_time
 
