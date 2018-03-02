@@ -9,6 +9,18 @@ module FastlaneCI
   # TODO: move github specific stuff out into GitHubService (GitHubService right now)
   # TODO: maybe rename this to GitHubTestRunnerService
   class TestRunnerService
+    class << self
+      # TODO: move all the things below somewhere else
+      # we need to hold all test runner services, to not destroy them with the garbage collector
+      # and also to access them as part of our middle ware
+      # it probably makes sense to have a single TestRunnerService, that holds multiple TestRunners instead
+      attr_accessor :test_runner_services
+
+      def test_runner_services
+        @test_runner_services ||= []
+      end
+    end
+
     include FastlaneCI::Logging
 
     attr_accessor :project
@@ -45,6 +57,11 @@ module FastlaneCI
         lane: "beta", #project.lane, 
         parameters: nil
       )
+
+      # Add yourself to the list of active workers so we can stream the output to the user
+      # this might be nil, while the server still starts
+      puts "added myself to the backend list"
+      self.class.test_runner_services << self
     end
 
     def add_listener(block)

@@ -48,8 +48,9 @@ module FastlaneCI
 
       begin
         # Execute the Fastfile here
+        puts("starting fastlane run")
         fast_file.runner.execute(self.lane, self.platform, self.parameters)
-        puts("Big success")
+        puts("fastlane run complete")
         # TODO: success handling here
         # this all will be implemented using a separate PR
         # once we have the web socket streaming implemented

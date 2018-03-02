@@ -5,9 +5,9 @@ platform :ios do
   lane :beta do
     UI.message("It works, what kind of magic is this?")
     UI.message("Building now...")
-    sleep(3)
-    UI.error("One error in your project")
-    sleep(1)
+    sleep(5)
+    UI.error("One error in your project, trying to fix it for you...")
+    sleep(5)
     UI.success("Building complete")
   end
 end

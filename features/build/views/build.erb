@@ -1,7 +1,11 @@
 <h1>Build Log <%= build.number %></h1>
 
 <code id="log">
-  Loading...
+  <% if existing_rows.count > 0 %>
+    <%= existing_rows.join("\n") %>
+  <% else %>
+    Loading...
+  <% end %>
 </code>
 
 <script type="text/javascript">
@@ -10,7 +14,7 @@
     var uri      = scheme + window.document.location.host + "/";
     var ws       = new WebSocket(uri);
     console.log("Listening to web socket connection now for URL " + uri + "...")
-    var firstMessageReceived = false;
+    var firstMessageReceived = <%= existing_rows.count == 0 ? false : true %>;
     ws.onmessage = function(message) {
       if (firstMessageReceived == false) {
         document.getElementById("log").innerHTML = ""
