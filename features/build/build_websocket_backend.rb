@@ -21,6 +21,12 @@ module FastlaneCI
       self.websocket_clients = {}
     end
 
+    def fetch_build_id(event)
+      url = event.target.url
+      parameters = Rack::Utils.parse_query(url)
+      return parameters["build"]
+    end
+
     def call(env)
       unless Faye::WebSocket.websocket?(env)
         # This is a regular HTTP call (no socket connection)
@@ -30,17 +36,15 @@ module FastlaneCI
 
       ws = Faye::WebSocket.new(env, nil, {ping: KEEPALIVE_TIME })
       ws.on(:open) do |event|
-        url = event.target.url
-        parameters = Rack::Utils.parse_query(url)
-        project_id = parameters["project"]
-        build_id = parameters["build"]
-
         logger.debug([:open, ws.object_id])
+
+        build_id = fetch_build_id(event)
+
         self.websocket_clients[build_id] ||= []
         self.websocket_clients[build_id] << ws
 
         TestRunnerService.test_runner_services.each do |test_runner_service|
-          next if test_runner_service.sha != build_id # TODO: mismatch of sha - project_id
+          next if test_runner_service.sha != build_id # TODO: mismatch of sha, unify sha/build_id
 
           test_runner_service.add_listener(proc do |row|
             logger.debug("Streaming #{row} to #{self.websocket_clients.count} client(s)")
@@ -59,7 +63,10 @@ module FastlaneCI
 
       ws.on(:close) do |event|
         logger.debug([:close, ws.object_id, event.code, event.reason])
-        self.websocket_clients.delete(ws)
+
+        build_id = fetch_build_id(event)
+
+        self.websocket_clients[build_id].delete(ws)
         ws = nil
       end
 
