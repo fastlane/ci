@@ -11,7 +11,6 @@ module FastlaneCI
         file_path: "fastlane.log",
         block: proc do |row|
           puts "Current output from fastlane: #{row}"
-
           yield(row)
         end
       )
