@@ -3,6 +3,9 @@ require_relative "build_data_source"
 require_relative "../../shared/json_convertible"
 require_relative "../../shared/logging_module"
 require_relative "../../shared/models/build"
+require_relative "../../shared/models/artifact"
+require_relative "../../shared/models/artifact_provider.rb"
+require_relative "../../shared/models/local_artifact_provider.rb"
 
 module FastlaneCI
   # Mixin the JSONConvertible class for Build
@@ -22,6 +25,42 @@ module FastlaneCI
       }
       return { :@timestamp => seconds_to_datetime_proc }
     end
+
+    def self.attribute_to_type_map
+      return { :@artifacts => Artifact }
+    end
+  end
+
+  # Mixin the JSONConvertible class for Artifact
+  class Artifact
+    include FastlaneCI::JSONConvertible
+
+    def self.json_to_attribute_name_proc_map
+      provider_object_to_provider = proc { |object|
+        nil if object.nil?
+        provider_class = Object.const_get(object[:class_name])
+        if provider_class.include?(JSONConvertible)
+          provider = provider_class.from_json!(object)
+          provider
+        end
+      }
+      return { :@provider => provider_object_to_provider }
+    end
+
+    def self.attribute_name_to_json_proc_map
+      provider_to_provider_object = proc { |provider|
+        if provider.class.include?(JSONConvertible)
+          hash = provider.to_object_dictionary
+          hash
+        end
+      }
+      return { :@provider => provider_to_provider_object }
+    end
+  end
+
+  # Mixin the JSONConvertible class for LocalArtifactProvider
+  class LocalArtifactProvider
+    include FastlaneCI::JSONConvertible
   end
 
   # Data source for all things related to builds on the file system in JSON

@@ -4,6 +4,7 @@ require_relative "./fastlane_test_runner_helpers/fastlane_output_to_html"
 module FastlaneCI
   # Represents the test runner responsible for loading and running
   # fastlane Fastfile configurations
+  # TODO: run method *should* return an array of artifacts
   class FastlaneTestRunner < TestRunner
     # Parameters for running fastlane
     attr_reader :platform
@@ -41,6 +42,8 @@ module FastlaneCI
 
       # this only takes a few ms the first time being called
       Fastlane.load_actions
+
+      # TODO: How do I access fastlane actions (like lane_context) from here?
 
       # Load and parse the Fastfile
       fast_file = Fastlane::FastFile.new(FastlaneCore::FastlaneFolder.fastfile_path)

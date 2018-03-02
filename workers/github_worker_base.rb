@@ -27,6 +27,7 @@ module FastlaneCI
       self.project = project
 
       self.target_branches_set = Set.new
+      project.job_triggers = [] # WARN: DELETE
       project.job_triggers.each do |trigger|
         if trigger.type == self.trigger_type
           self.target_branches_set.add(trigger.branch)

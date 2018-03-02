@@ -1,3 +1,6 @@
+require_relative "../features/test_runner/fastlane_test_runner"
+require_relative "../shared/models/artifact"
+
 module FastlaneCI
   # Responsible for the life cycle of running tests as part of fastlane.ci
   # In particular this takes care of all the overhead, like measuring the time and storing & reporting

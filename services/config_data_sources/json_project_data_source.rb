@@ -40,6 +40,27 @@ module FastlaneCI
         job_trigger
       end
     end
+
+    def self.json_to_attribute_name_proc_map
+      provider_object_to_provider = proc { |object|
+        provider_class = Object.const_get(object["class_name"])
+        if provider_class.include?(JSONConvertible)
+          provider = provider_class.from_json!(object)
+          provider
+        end
+      }
+      return { :@artifact_provider => provider_object_to_provider }
+    end
+
+    def self.attribute_name_to_json_proc_map
+      provider_to_provider_object = proc { |provider|
+        if provider.class.include?(JSONConvertible)
+          hash = provider.to_object_dictionary
+          hash
+        end
+      }
+      return { :@artifact_provider => provider_to_provider_object }
+    end
   end
 
   # Mixin for GitRepoConfig to enable some basic JSON marshalling and unmarshalling
@@ -136,12 +157,13 @@ module FastlaneCI
       end
     end
 
-    def create_project!(name: nil, repo_config: nil, enabled: nil, lane: nil)
+    def create_project!(name: nil, repo_config: nil, enabled: nil, lane: nil, artifact_provider: nil)
       projects = self.projects
       new_project = Project.new(repo_config: repo_config,
                                 enabled: enabled,
                                 project_name: name,
-                                lane: lane)
+                                lane: lane,
+                                artifact_provider: artifact_provider)
       if !self.project_exist?(new_project.project_name)
         projects.push(new_project)
         self.projects = projects

@@ -1,5 +1,6 @@
 require_relative "config_data_sources/json_project_data_source"
-require_relative "../shared/../shared/models/repo_config"
+require_relative "../shared/models/repo_config"
+require_relative "../shared/models/local_artifact_provider"
 require_relative "../shared/logging_module"
 require_relative "./user_service"
 
@@ -17,7 +18,7 @@ module FastlaneCI
       self.project_data_source = project_data_source
     end
 
-    def create_project!(name: nil, repo_config: nil, enabled: nil, lane: nil)
+    def create_project!(name: nil, repo_config: nil, enabled: nil, lane: nil, artifact_provider: nil)
       unless repo_config.nil?
         raise "repo_config must be configured with an instance of #{RepoConfig.name}" unless repo_config.class <= RepoConfig
       end
@@ -29,7 +30,9 @@ module FastlaneCI
       name ||= repo_config.git_url.split("/").last(2).join("/")
       # we infer that the new project will be enabled by default
       enabled ||= true
-      project = self.project_data_source.create_project!(name: name, repo_config: repo_config, enabled: enabled, lane: lane)
+      # we use LocalArtifactProvider by default
+      artifact_provider ||= LocalArtifactProvider.new()
+      project = self.project_data_source.create_project!(name: name, repo_config: repo_config, enabled: enabled, lane: lane, artifact_provider: artifact_provider)
       raise "Project couldn't be created" if project.nil?
       self.commit_repo_changes!(message: "Created project #{project.project_name}.")
       return project
