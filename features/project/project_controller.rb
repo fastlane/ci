@@ -155,6 +155,7 @@ module FastlaneCI
       project_name = params["project_name"]
 
       # We now have enough information to create the new project.
+      # TODO: add job_triggers here
       project = Services.project_service.create_project!(
         name: project_name,
         repo_config: repo_config,

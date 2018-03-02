@@ -1,3 +1,5 @@
+require "fastlane"
+
 module FastlaneCI
   # Implementation for the FastlaneCore::Interface abstract class
   # this is set to the fastlane runner before executing the user's Fastfile

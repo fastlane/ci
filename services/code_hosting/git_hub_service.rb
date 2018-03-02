@@ -36,6 +36,36 @@ module FastlaneCI
       client.login
     end
 
+    # returns all open pull requests on given repo
+    def open_pull_requests(repo_full_name: nil)
+      return client.pull_requests(repo_full_name, state: "open")
+    end
+
+    # returns only the most recent commit_sha for every open pr
+    def last_commit_sha_for_all_open_pull_requests(repo_full_name: nil)
+      return self.open_pull_requests(repo_full_name: repo_full_name).map { |pull_request| pull_request.head.sha }
+    end
+
+    # returns the status of a given commit sha for a given repo
+    def status_for_commit_sha(repo_full_name: nil, sha: nil)
+      return client.statuses(repo_full_name, sha)
+    end
+
+    # updates the most current commit to "pending" on all open prs if they don't have a status.    
+    # returns a list of commits that have been updated to `pending` status
+    def update_all_open_prs_without_status_to_pending_status!(repo_full_name: nil)
+      open_pr_commits = self.last_commit_sha_for_all_open_pull_requests(repo_full_name: repo_full_name)
+      updated_commits = []
+      open_pr_commits.each do |sha|
+        statuses = self.status_for_commit_sha(repo_full_name: repo_full_name, sha: sha)
+        if statuses.count == 0
+          self.set_build_status!(repo: repo_full_name, sha: sha, state: "pending")
+          updated_commits << sha
+        end
+      end
+      return updated_commits
+    end
+
     # TODO: parse those here or in service layer?
     def repos
       client.repos({}, query: { sort: "asc" })
@@ -79,7 +109,8 @@ module FastlaneCI
       # https://octokit.github.io/octokit.rb/Octokit/Client/Statuses.html
 
       task = TaskQueue::Task.new(work_block: proc {
-        logger.debug("Setting status #{state} on #{target_url}")
+        state_details = target_url.nil? ? "#{repo}, sha #{sha}" : target_url
+        logger.debug("Setting status #{state} on #{state_details}")
         client.create_status(repo, sha, state, {
           target_url: target_url,
           description: description,

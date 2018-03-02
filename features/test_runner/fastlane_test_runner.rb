@@ -1,5 +1,4 @@
 require_relative "./fastlane_test_runner_helpers/fastlane_ci_output"
-require_relative "./fastlane_test_runner_helpers/fastlane_output_to_html"
 
 module FastlaneCI
   # Represents the test runner responsible for loading and running
@@ -56,7 +55,6 @@ module FastlaneCI
         # once we have the web socket streaming implemented
       rescue StandardError => ex
         # TODO: Exception handling here
-        require "pry"; binding.pry
         puts(ex)
       end
     end
