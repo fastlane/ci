@@ -11,13 +11,14 @@ module FastlaneCI
 
     KEEPALIVE_TIME = 30 # in seconds
 
+    # A hash of connected web sockets, the key being the build ID # TODO: right now we still use the sha
     attr_accessor :websocket_clients
 
     def initialize(app)
       logger.debug("Setting up new BuildWebsocketBackend")
       @app = app
 
-      self.websocket_clients = []
+      self.websocket_clients = {}
     end
 
     def call(env)
@@ -29,16 +30,23 @@ module FastlaneCI
 
       ws = Faye::WebSocket.new(env, nil, {ping: KEEPALIVE_TIME })
       ws.on(:open) do |event|
+        url = event.target.url
+        parameters = Rack::Utils.parse_query(url)
+        project_id = parameters["project"]
+        build_id = parameters["build"]
+
         logger.debug([:open, ws.object_id])
-        self.websocket_clients << ws
+        self.websocket_clients[build_id] ||= []
+        self.websocket_clients[build_id] << ws
 
         TestRunnerService.test_runner_services.each do |test_runner_service|
-          logger.debug("Appending to runner service :)")
+          next if test_runner_service.sha != build_id # TODO: mismatch of sha - project_id
+
           test_runner_service.add_listener(proc do |row|
             logger.debug("Streaming #{row} to #{self.websocket_clients.count} client(s)")
 
-            self.websocket_clients.each do
-              ws.send(row.to_json)
+            self.websocket_clients[build_id].each do |current_socket|
+              current_socket.send(row.to_json)
             end
           end)
         end
