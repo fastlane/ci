@@ -3,6 +3,10 @@ source("https://rubygems.org")
 # Sinatra
 gem "sinatra", ">= 2.0.1", "< 3.0.0"
 gem "sinatra-contrib", ">= 2.0.0", "< 3.0.0" # TODO: document why we have this here @taquitos
+gem "faye-websocket", ">= 0.10.7", "< 1.0.0" # web socket connection for Sinatra
+
+# web server that we need to support web socket connections with sinatra
+gem "thin"
 
 # Best password hashing to-date
 gem "bcrypt", ">= 3.1.11", "< 4.0.0"

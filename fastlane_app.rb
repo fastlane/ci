@@ -1,6 +1,11 @@
 # External
 require "sinatra/base"
 
+# Switch from the default Sinatra web server to `thin`
+# which is required to support web socket streams for the
+# display of real-time output
+# set :server, "thin"
+
 require_relative "./fastfile-parser/fastfile_parser"
 
 # Internal
