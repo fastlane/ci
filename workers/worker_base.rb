@@ -6,7 +6,6 @@ module FastlaneCI
   class WorkerBase
     include FastlaneCI::Logging
 
-    attr_accessor :should_stop
     attr_accessor :worker_id
 
     def thread_id=(new_value)
@@ -18,24 +17,16 @@ module FastlaneCI
     end
 
     def initialize
-      self.should_stop = false
-
       @thread = Thread.new do
-        until self.should_stop
+        begin
           # We have the `work` inside a `begin rescue`
           # so that if something fails, the thread still is alive
-          begin
-            if self.should_stop
-              self.scheduler.shutdown
-            else
-              self.scheduler.schedule { self.work }
-            end
-          rescue StandardError => ex
-            puts("[#{self.class} Exception]: #{ex}: ")
-            puts(ex.backtrace.join("\n"))
-            puts("[#{self.class}] Killing thread #{self.thread_id} due to exception\n")
-            self.should_stop = true
-          end
+          self.scheduler.schedule { self.work }
+        rescue StandardError => ex
+          puts("[#{self.class} Exception]: #{ex}: ")
+          puts(ex.backtrace.join("\n"))
+          puts("[#{self.class}] Killing thread #{self.thread_id} due to exception\n")
+          self.die!
         end
       end
     end
@@ -50,7 +41,7 @@ module FastlaneCI
 
     def die!
       logger.debug("Stopping worker")
-      @should_stop = true
+      self.scheduler.shutdown
     end
 
     def scheduler
