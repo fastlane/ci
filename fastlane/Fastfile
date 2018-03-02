@@ -1,5 +1,17 @@
 default_platform(:ios)
 
+lane :rspec_me do
+  desc "Run all the rspec tests"
+  sh("bundle update")
+  sh("bundle execute rspec")
+end
+
+lane :rubocop do
+  desc "Rubocop the whole project to ensure no style violations"
+  sh("bundle update")
+  sh("bundle execute rubocop")
+end
+
 platform :ios do
   desc "Description of what the lane does"
   lane :beta do
