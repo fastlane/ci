@@ -2,7 +2,7 @@ require_relative "../shared/logging_module"
 
 module FastlaneCI
   # super class for all fastlane.ci workers
-  # Subclass this class, and implement `work` and `sleep_interval`
+  # Subclass this class, and implement `work` and `interval_time`
   class WorkerBase
     include FastlaneCI::Logging
 

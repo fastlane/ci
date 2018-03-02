@@ -8,7 +8,7 @@ module FastlaneCI
     attr_accessor :scheduler
 
     def initialize
-      self.scheduler = WorkerScheduler.new(sleep_interval: 15)
+      self.scheduler = WorkerScheduler.new(interval_time: 15)
     end
 
     def work
