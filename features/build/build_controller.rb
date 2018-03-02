@@ -13,7 +13,7 @@ module FastlaneCI
       project = self.user_project_with_id(project_id: project_id)
       build = project.builds.find { |b| b.sha == build_id } # TODO: We need a build ID, sha isn't enough
 
-      current_runner_service = TestRunnerService.test_runner_services.find do |t| 
+      current_runner_service = TestRunnerService.test_runner_services.find do |t|
         t.project.id == project_id && t.sha == build_id # TODO: just as above, use actual identification
       end
 

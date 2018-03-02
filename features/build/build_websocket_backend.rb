@@ -1,11 +1,14 @@
 require "faye/websocket"
 require_relative "../../shared/logging_module"
 
-Faye::WebSocket.load_adapter('thin')
+Faye::WebSocket.load_adapter("thin")
 
 module FastlaneCI
   # Responsible for the real-time streaming of the build output
   # to the user's browser
+  # This is a Rack middleware, that is called before any of the Sinatra code is called
+  # it allows us to have the real time web socket connection. Inside the `.call` method
+  # we check if the current request is a socket connection or traditional HTTPs
   class BuildWebsocketBackend
     include FastlaneCI::Logging
 
@@ -34,7 +37,7 @@ module FastlaneCI
         return @app.call(env)
       end
 
-      ws = Faye::WebSocket.new(env, nil, {ping: KEEPALIVE_TIME })
+      ws = Faye::WebSocket.new(env, nil, { ping: KEEPALIVE_TIME })
       ws.on(:open) do |event|
         logger.debug([:open, ws.object_id])
 

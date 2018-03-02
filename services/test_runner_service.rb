@@ -14,8 +14,6 @@ module FastlaneCI
       # we need to hold all test runner services, to not destroy them with the garbage collector
       # and also to access them as part of our middle ware
       # it probably makes sense to have a single TestRunnerService, that holds multiple TestRunners instead
-      attr_accessor :test_runner_services
-
       def test_runner_services
         @test_runner_services ||= []
       end
@@ -53,14 +51,14 @@ module FastlaneCI
       self.all_blocks = []
 
       self.test_runner = FastlaneTestRunner.new(
-        platform: "ios", #nil, # TODO: is the platform gonna be part of the `project.lane`? Probably yes
-        lane: "beta", #project.lane, 
+        platform: "ios", # nil, # TODO: is the platform gonna be part of the `project.lane`? Probably yes
+        lane: "beta", # project.lane,
         parameters: nil
       )
 
       # Add yourself to the list of active workers so we can stream the output to the user
       # this might be nil, while the server still starts
-      puts "added myself to the backend list"
+      puts("added myself to the backend list")
       self.class.test_runner_services << self
     end
 

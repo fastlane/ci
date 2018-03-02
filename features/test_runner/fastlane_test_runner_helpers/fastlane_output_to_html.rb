@@ -1,17 +1,17 @@
 module FastlaneCI
   # Responsible for converting JSON based message information, e.g.
-  # 
+  #
   # {
   #   type: success,
   #   message: "Step: default_platform"
   # }
-  # 
+  #
   # to HTML code, e.g.
-  # 
+  #
   # <p class="success">Step: default_platform</p>
-  # 
+  #
   # It does so for each row
-  # 
+  #
   # TODO: we decided to move this away long term, into the brower using JavaScript
   #
   class FastlaneOutputToHtml

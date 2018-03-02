@@ -24,16 +24,15 @@ module FastlaneCI
         each_line_block: proc do |row|
           # Additionally to transfering the original metadata of this message
           # that look like this:
-          # 
+          #
           # {:type=>:success, :message=>"Everything worked"}
-          # 
+          #
           # we append the HTML code that should be used in the `html` key
           # the result looks like this
           #
-          # {"type":"success","message":"Driving the lane 'ios beta' 🚀","html":"<p class=\"success\">Driving the lane 'ios beta' 🚀</p>"}
+          # {"type":"success","message":"Driving the lane 'ios beta'","html":"<p class=\"success\">Driving the lane 'ios beta'</p>"}
           #
           row[:html] = FastlaneOutputToHtml.convert_row(row)
-
           yield(row)
         end
       )
