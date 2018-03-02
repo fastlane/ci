@@ -49,9 +49,7 @@ module FastlaneCI
 
     # Shuts down the scheduler, ceases any scheduler/triggering activity.
     def shutdown
-      if self.scheduler
-        self.scheduler.shutdown
-      end
+      self.scheduler.shutdown if self.scheduler
     end
   end
 end
