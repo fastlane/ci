@@ -63,7 +63,7 @@ module FastlaneCI
     def message(message)
       log.info(message.to_s)
       self.each_line_block.call(
-        type: :error,
+        type: :message,
         message: message
       )
     end

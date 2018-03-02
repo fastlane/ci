@@ -10,7 +10,7 @@ module FastlaneCI
 
       ci_output = FastlaneCI::FastlaneCIOutput.new(
         file_path: "fastlane.log",
-        block: proc do |row|
+        each_line_block: proc do |row|
           puts "Current output from fastlane: #{row}"
 
           yield(row)

@@ -4,5 +4,10 @@ platform :ios do
   desc "Description of what the lane does"
   lane :beta do
     UI.message("It works, what kind of magic is this?")
+    UI.message("Building now...")
+    sleep(3)
+    UI.error("One error in your project")
+    sleep(1)
+    UI.success("Building complete")
   end
 end

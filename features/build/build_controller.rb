@@ -9,7 +9,7 @@ module FastlaneCI
 
     use(FastlaneCI::BuildWebsocketBackend)
 
-    get "/projects/*/builds/*" do |project_id, build_id|
+    get "#{HOME}/*" do |project_id, build_id|
       project = self.user_project_with_id(project_id: project_id)
       build = project.builds.find { |b| b.sha == build_id } # TODO: We need a build ID, sha isn't enough
 

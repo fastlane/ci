@@ -1,7 +1,7 @@
 <h1>Build Log <%= build.number %></h1>
 
 <code id="log">
-  <p>Line 1</p>
+  Loading...
 </code>
 
 <script type="text/javascript">
@@ -9,11 +9,39 @@
     var scheme   = "ws://"
     var uri      = scheme + window.document.location.host + "/";
     var ws       = new WebSocket(uri);
+    console.log("Listening to web socket connection now for URL " + uri + "...")
+    var firstMessageReceived = false;
     ws.onmessage = function(message) {
+      if (firstMessageReceived == false) {
+        document.getElementById("log").innerHTML = ""
+        firstMessageReceived = true
+      }
       console.log(message)
-      var data = message.data
+      var data = JSON.parse(message.data)
       console.log(data)
-      document.getElementById("log").innerHTML << data // this piece doesn't work yet
+      document.getElementById("log").innerHTML += data["html"]
+    }
+    ws.onopen = function(something) {
+      console.log("Open")
+      console.log(something)
+    }
+    ws.onerror = function(error) {
+      console.log("error")
+      console.log(error)
+    }
+    ws.onclose = function(something) {
+      console.log("close")
+      console.log(something)
+      document.getElementById("log").innerHTML += "<p class='error'>Server disconnected</p>"
     }
   });
 </script>
+
+<style type="text/css">
+  .success {
+    color: green;
+  }
+  .error {
+    color: red;
+  }
+</style>
