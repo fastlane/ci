@@ -4,7 +4,7 @@ require_relative "../shared/logging_module"
 
 module FastlaneCI
   # Responsible for starting off builds nightly
-  class NightlyBuildGithubWorker < GithubWorkerBase
+  class NightlyBuildGithubWorker < GitHubWorkerBase
     include FastlaneCI::Logging
     NIGHTLY_CRON_TIME = "0 0 * * *"
 
