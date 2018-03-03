@@ -27,7 +27,7 @@ module FastlaneCI
         ).run
       end
 
-      redirect("#{HOME}/details/#{project_id}")
+      redirect("#{HOME}/#{project_id}/builds/#{current_sha}")
     end
 
     # Edit a project settings
