@@ -1,5 +1,6 @@
 require "set"
 require_relative "./shared/logging_module"
+require_relative "./shared/models/job_trigger"
 require_relative "./taskqueue/task_queue"
 
 module FastlaneCI
@@ -184,18 +185,23 @@ module FastlaneCI
     # We might be in a situation where we have an open pr, but no status yet
     # if that's the case, we should enqueue a build for it
     def self.enqueue_builds_for_open_github_prs_with_no_status(projects: nil, github_service: nil)
-      # we can have multiple projects with the same repo, so we only want to enqueue work for that repo once
-      repo_full_name_enqueued = Set.new
       projects.each do |project|
+        # TODO: generalize this sort of thing
+        credential_type = project.repo_config.provider_credential_type_needed
+
+        # we don't support anything other than GitHub right now
+        next unless credential_type == FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
+
+        # Collect all the branches from the triggers on this project that are commit-based
+        branches_to_check = project.job_triggers
+                                   .select { |trigger| trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit] }
+                                   .map(&:branch)
+                                   .uniq
+
         repo_full_name = project.repo_config.full_name
-
-        # if we've already added all the commits for this repo, skip it
-        next if repo_full_name_enqueued.include?(repo_full_name)
-
-        repo_full_name_enqueued.add(repo_full_name)
-
         # let's get all commit shas that need a build (no status yet)
-        commit_shas = github_service.last_commit_sha_for_all_open_pull_requests(repo_full_name: repo_full_name)
+        commit_shas = github_service.last_commit_sha_for_all_open_pull_requests(repo_full_name: repo_full_name, branches: branches_to_check)
+
         # no commit shas need to be switched to `pending` state
         next unless commit_shas.count > 0
 
