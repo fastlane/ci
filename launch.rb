@@ -207,7 +207,7 @@ module FastlaneCI
 
         commit_shas.each do |current_sha|
           logger.debug("Checking #{repo_full_name} sha: #{current_sha} for missing status")
-          statuses = github_service.status_for_commit_sha(repo_full_name: repo_full_name, sha: current_sha)
+          statuses = github_service.statuses_for_commit_sha(repo_full_name: repo_full_name, sha: current_sha)
 
           # if we have a status, skip it!
           next if statuses.count > 0

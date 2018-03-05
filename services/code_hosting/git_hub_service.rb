@@ -65,9 +65,11 @@ module FastlaneCI
       return self.open_pull_requests(repo_full_name: repo_full_name, branches: branches).map { |pull_request| pull_request.head.sha }
     end
 
-    # returns the status of a given commit sha for a given repo
-    def status_for_commit_sha(repo_full_name: nil, sha: nil)
-      return client.statuses(repo_full_name, sha, context: GitHubService.status_context)
+    # returns the statused of a given commit sha for a given repo specifically for fastlane.ci
+    def statused_for_commit_sha(repo_full_name: nil, sha: nil)
+      all_statuses = client.statuses(repo_full_name, sha)
+      only_ci_statuses = all_statuses.select { |status| status.context.start_with?(GitHubService.status_context_prefix) }
+      return only_ci_statuses
     end
 
     # updates the most current commit to "pending" on all open prs if they don't have a status.
@@ -76,7 +78,7 @@ module FastlaneCI
       open_pr_commits = self.last_commit_sha_for_all_open_pull_requests(repo_full_name: repo_full_name)
       updated_commits = []
       open_pr_commits.each do |sha|
-        statuses = self.status_for_commit_sha(repo_full_name: repo_full_name, sha: sha)
+        statuses = self.statuses_for_commit_sha(repo_full_name: repo_full_name, sha: sha)
         if statuses.count == 0
           self.set_build_status!(repo: repo_full_name, sha: sha, state: "pending", status_context: status_context)
           updated_commits << sha
