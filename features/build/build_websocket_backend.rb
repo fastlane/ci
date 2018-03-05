@@ -45,8 +45,9 @@ module FastlaneCI
       ws.on(:open) do |event|
         logger.debug([:open, ws.object_id])
 
-        build_number = fetch_build_details(event)[:build_number]
-        project_id = fetch_build_details(event)[:project_id]
+        url_details = fetch_build_details(event)
+        build_number = url_details[:build_number]
+        project_id = url_details[:project_id]
 
         self.websocket_clients[project_id] ||= {}
         self.websocket_clients[project_id][build_number] ||= []
@@ -78,9 +79,11 @@ module FastlaneCI
       ws.on(:close) do |event|
         logger.debug([:close, ws.object_id, event.code, event.reason])
 
-        build_id = fetch_build_id(event)
+        url_details = fetch_build_details(event)
+        build_number = url_details[:build_number]
+        project_id = url_details[:project_id]
 
-        self.websocket_clients[build_id].delete(ws)
+        self.websocket_clients[project_id][build_number].delete(ws)
         ws = nil
       end
 
