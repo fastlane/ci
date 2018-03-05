@@ -25,7 +25,7 @@ module FastlaneCI
         )
       end
 
-      redirect back
+      redirect HOME
     end
 
     # Updates a user existing in the configuration repository `users.json`
@@ -40,7 +40,7 @@ module FastlaneCI
         Services.user_service.update_user!(new_user)
       end
 
-      redirect back
+      redirect HOME
     end
 
     private

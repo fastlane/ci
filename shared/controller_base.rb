@@ -83,6 +83,17 @@ module FastlaneCI
 
     protected
 
+    # Converts keys from strings to symbols and selects only the expected keys
+    #
+    # @param  [Hash]       actuals
+    # @param  [Set[Symbol] expected_keys
+    # @return [Hash]
+    def format_params(actuals, expected_keys)
+      actuals
+        .select { |k, _v| expected_keys.include?(k) }
+        .each_with_object({}) { |(k, v), hash| hash[k.to_sym] = v }
+    end
+
     # Validates all the required keys are present, and that no values are nil
     #
     # @param  [Hash]       actuals

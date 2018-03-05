@@ -93,7 +93,7 @@ module FastlaneCI
       @_worker_service ||= FastlaneCI::WorkerService.new
     end
 
-    def provider_credential_service
+    def self.provider_credential_service
       @_provider_credential_service ||= FastlaneCI::ProviderCredentialService.new
     end
   end

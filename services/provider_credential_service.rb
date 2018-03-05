@@ -10,11 +10,11 @@ module FastlaneCI
     # credentials array
     def create_provider_credential!(
       user_id: nil, id: nil, email: nil, api_token: nil, provider_name: nil,
-      full_name: nil
+      full_name: nil, type: nil
     )
       provider_credential = GitHubProviderCredential.new(
         id: id, email: email, api_token: api_token, provider_name: provider_name,
-        full_name: full_name
+        full_name: full_name, type: type
       )
       user = Services.user_service.find_user(id: user_id)
 
@@ -33,11 +33,11 @@ module FastlaneCI
 
     def update_provider_credential!(
       user_id: nil, id: nil, email: nil, api_token: nil, provider_name: nil,
-      full_name: nil
+      full_name: nil, type: nil
     )
       provider_credential = GitHubProviderCredential.new(
         email: email, api_token: api_token, provider_name: provider_name,
-        full_name: full_name
+        full_name: full_name, type: type
       )
       user = Services.user_service.find_user(id: user_id)
 

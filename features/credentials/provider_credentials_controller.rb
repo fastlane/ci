@@ -10,18 +10,22 @@ module FastlaneCI
 
     post "#{HOME}/create" do
       if valid_params?(params, provider_credential_params)
-        Services.provider_credential_service.create_provider_credential!(params)
+        Services.provider_credential_service.create_provider_credential!(
+          format_params(params, provider_credential_params)
+        )
       end
 
-      redirect back
+      redirect("/users")
     end
 
     post "#{HOME}/update" do
       if valid_params?(params, provider_credential_params)
-        Services.provider_credential_service.update_provider_credential!(params)
+        Services.provider_credential_service.update_provider_credential!(
+          format_params(params, provider_credential_params)
+        )
       end
 
-      redirect back
+      redirect("/users")
     end
 
     private
