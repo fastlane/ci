@@ -38,7 +38,7 @@ module FastlaneCI
     def self.json_to_attribute_name_proc_map
       provider_object_to_provider = proc { |object|
         nil if object.nil?
-        provider_class = Object.const_get(object[:class_name])
+        provider_class = Object.const_get(object["class_name"])
         if provider_class.include?(JSONConvertible)
           provider = provider_class.from_json!(object)
           provider

@@ -1,5 +1,6 @@
 require_relative "./fastlane_test_runner_helpers/fastlane_ci_output"
 require_relative "./fastlane_test_runner_helpers/fastlane_output_to_html"
+require_relative "./test_runner"
 
 module FastlaneCI
   # Represents the test runner responsible for loading and running
@@ -10,11 +11,14 @@ module FastlaneCI
     attr_reader :platform
     attr_reader :lane
     attr_reader :parameters
+    attr_reader :fastfile_path
 
-    def initialize(platform: nil, lane: nil, parameters: nil)
+    # TODO: That fastfile_path is far from ideal, just a safe fallback when developing.
+    def initialize(platform: nil, lane: nil, parameters: nil, fastfile_path: FastlaneCore::FastlaneFolder.fastfile_path)
       @platform = platform
       @lane = lane
       @parameters = parameters
+      @fastfile_path = fastfile_path
     end
 
     def run
@@ -46,7 +50,7 @@ module FastlaneCI
       # TODO: How do I access fastlane actions (like lane_context) from here?
 
       # Load and parse the Fastfile
-      fast_file = Fastlane::FastFile.new(FastlaneCore::FastlaneFolder.fastfile_path)
+      fast_file = Fastlane::FastFile.new(self.fastfile_path)
 
       begin
         # Execute the Fastfile here
@@ -59,6 +63,16 @@ module FastlaneCI
       rescue StandardError => ex
         # TODO: Exception handling here
         puts(ex)
+        puts(ex.backtrace)
+      ensure
+        # Either the build was successfull or not, we have to ensure the artifacts for the execution.
+        artifact_paths = []
+        artifact_paths << { type: "log", path: "fastlane.log" }
+        constants_with_path = Fastlane::Actions::SharedValues.constants
+          .select { |value| value.to_s.include?("PATH") } # Far from ideal, but meanwhile...
+          .select { |value| !Fastlane::Actions.lane_context[value].nil? && !Fastlane::Actions.lane_context[value].empty? }
+          .map { |value| { type: value.to_s, path: Fastlane::Actions.lane_context[value]} }
+        return artifact_paths.concat(constants_with_path)
       end
     end
   end

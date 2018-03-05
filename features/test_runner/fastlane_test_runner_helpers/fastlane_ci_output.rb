@@ -62,7 +62,10 @@ module FastlaneCI
       )
     end
 
-    def message(message)
+    # TODO: Getting recurrent fails on this method due to wrong argument number
+    # but couldn't track the origin of the issue, meanwhile I provide a default
+    # argument in order to prevent failures.
+    def message(message = "")
       log.info(message.to_s)
       self.each_line_block.call(
         type: :message,

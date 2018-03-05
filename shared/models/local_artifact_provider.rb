@@ -33,7 +33,12 @@ module FastlaneCI
       raise "Build was not provided or wrong type provided" if build.nil? || build&.class&.is_a?(Build)
       raise "Project was not provided or wrong type provided" if project.nil? || project&.class&.is_a?(Project)
 
-      artifact_path = root_path.join(project.id, build.number)
+      require "pry"
+      binding.pry
+
+      self.root_path = Pathname.new(self.root_path) unless self.root_path.kind_of?(Pathname)
+
+      artifact_path = self.root_path.join(project.id, build.number.to_s)
 
       FileUtils.mkdir_p(artifact_path) unless File.directory?(artifact_path)
 
@@ -50,7 +55,7 @@ module FastlaneCI
       FileUtils.mv(original_artifact_reference, new_artifact_reference.join(file_name))
 
       artifact.reference = new_artifact_reference.join(file_name)
-      artifact.artifact_provider = self
+      artifact.provider = self
       artifact # This is the Artifact that we will store in the build.
     end
 
