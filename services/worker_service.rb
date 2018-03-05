@@ -31,10 +31,10 @@ module FastlaneCI
       new_workers = []
       case provider_credential.type
       when FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
-        if self.project_has_trigger_type(project: project, trigger_type: FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit])
+        if self.project_has_trigger_type?(project: project, trigger_type: FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit])
           new_workers << FastlaneCI::CheckForNewCommitsOnGithubWorker.new(provider_credential: provider_credential, project: project)
         end
-        if self.project_has_trigger_type(project: project, trigger_type: FastlaneCI::JobTrigger::TRIGGER_TYPE[:nightly])
+        if self.project_has_trigger_type?(project: project, trigger_type: FastlaneCI::JobTrigger::TRIGGER_TYPE[:nightly])
           new_workers << FastlaneCI::NightlyBuildGithubWorker.new(provider_credential: provider_credential, project: project)
         end
       else
@@ -60,7 +60,7 @@ module FastlaneCI
       end
     end
 
-    def project_has_trigger_type(project: nil, trigger_type: nil)
+    def project_has_trigger_type?(project: nil, trigger_type: nil)
       raise "Need both project and trigger_type" unless project && trigger_type
 
       project.job_triggers.any? { |trigger| trigger.type == trigger_type }
