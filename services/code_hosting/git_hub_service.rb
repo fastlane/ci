@@ -66,7 +66,7 @@ module FastlaneCI
     end
 
     # returns the statused of a given commit sha for a given repo specifically for fastlane.ci
-    def statused_for_commit_sha(repo_full_name: nil, sha: nil)
+    def statuses_for_commit_sha(repo_full_name: nil, sha: nil)
       all_statuses = client.statuses(repo_full_name, sha)
       only_ci_statuses = all_statuses.select { |status| status.context.start_with?(GitHubService.status_context_prefix) }
       return only_ci_statuses
