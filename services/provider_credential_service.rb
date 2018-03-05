@@ -18,13 +18,17 @@ module FastlaneCI
       )
       user = Services.user_service.find_user(id: user_id)
 
-      new_user = User.new(
-        id: user.id,
-        email: user.id,
-        password: user.password_hash,
-        provider_credentials: user.provider_credentials.push(provider_credential)
-      )
-      Services.user_service.update_user!(new_user)
+      if user.nil?
+        logger.error("Can't create provider credential for user, since user does not exist.")
+      else
+        new_user = User.new(
+          id: user.id,
+          email: user.email,
+          password_hash: user.password_hash,
+          provider_credentials: user.provider_credentials.push(provider_credential)
+        )
+        Services.user_service.update_user!(user: new_user)
+      end
     end
 
     def update_provider_credential!(
@@ -37,15 +41,19 @@ module FastlaneCI
       )
       user = Services.user_service.find_user(id: user_id)
 
-      new_user = User.new(
-        id: user.id,
-        email: user.id,
-        password: user.password_hash,
-        provider_credentials: user.provider_credentials
-          .delete_if { |credential| credential.id == id }
-          .push(provider_credential)
-      )
-      Services.user_service.update_user!(new_user)
+      if user.nil?
+        logger.error("Can't update provider credential for user, since user does not exist.")
+      else
+        new_user = User.new(
+          id: user.id,
+          email: user.email,
+          password_hash: user.password_hash,
+          provider_credentials: user.provider_credentials
+            .delete_if { |credential| credential.id == id }
+            .push(provider_credential)
+        )
+        Services.user_service.update_user!(user: new_user)
+      end
     end
   end
 end

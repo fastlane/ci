@@ -3,17 +3,17 @@
 
   <p>
     <code>email=</code>
-    <input type="text" name="email" value=<% user.email %>>
+    <input type="text" name="email" value=<%= user.email %>>
   </p>
 
   <p>
     <code>password_hash=</code>
-    <input type="text" name="password_hash" value=<% user.password_hash %>>
+    <input type="text" name="password_hash" value=<%= user.password_hash %>>
   </p>
 
   <!-- List all existing provider credentials for a user -->
 
-  <h4>Provider Credentials</h4>
+  <b>Provider Credentials</b>
   <% user.provider_credentials.each do |credential| %>
     <%=
       erb :"../../credentials/views/forms/_provider_credentials",
