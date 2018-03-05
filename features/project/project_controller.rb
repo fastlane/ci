@@ -19,7 +19,7 @@ module FastlaneCI
       repo = FastlaneCI::GitRepo.new(git_config: project.repo_config, provider_credential: current_github_provider_credential)
       current_sha = repo.most_recent_commit.sha
 
-      test_runner = FastlaneCI::TestRunnerService.new(
+      test_runner_service = FastlaneCI::TestRunnerService.new(
         project: project,
         sha: current_sha
       )
@@ -27,10 +27,10 @@ module FastlaneCI
       # TODO: not the best approach to spawn a thread
       # Use TaskQueue instead
       Thread.new do
-        test_runner.run
+        test_runner_service.run
       end
 
-      redirect("#{HOME}/#{project_id}/builds/#{test_runner.current_build.id}")
+      redirect("#{HOME}/#{project_id}/builds/#{test_runner_service.current_build.number}")
     end
 
     # Edit a project settings
