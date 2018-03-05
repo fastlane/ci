@@ -191,7 +191,7 @@ module FastlaneCI
         repo: self.project.repo_config.git_url,
         sha: self.sha,
         state: self.current_build.status,
-        target_url: nil
+        status_context: self.project.project_name
       )
     rescue StandardError => ex
       logger.error("Error setting the build status on remote service")

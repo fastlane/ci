@@ -2,12 +2,19 @@ require_relative "code_hosting_service"
 require_relative "../../taskqueue/task_queue"
 require_relative "../../shared/logging_module"
 
+require "set"
 require "octokit"
 
 module FastlaneCI
   # Data source that interacts with GitHub
   class GitHubService < CodeHostingService
     include FastlaneCI::Logging
+
+    class << self
+      attr_accessor :status_context_prefix
+    end
+
+    GitHubService.status_context_prefix = "fastlane.ci: "
 
     # The email is actually optional for API access
     # However we ask for the email on login, as we also plan on doing commits for the user
@@ -37,30 +44,43 @@ module FastlaneCI
     end
 
     # returns all open pull requests on given repo
-    def open_pull_requests(repo_full_name: nil)
-      return client.pull_requests(repo_full_name, state: "open")
+    # branches should be nil if you want all branches to be considered
+    def open_pull_requests(repo_full_name: nil, branches: nil)
+      all_open_pull_requests = client.pull_requests(repo_full_name, state: "open")
+
+      # if no specific branch, return all open prs
+      return all_open_pull_requests if branches.nil? || branches.count == 0
+
+      # we want only the PRs whose latest commit was to one of the branches passed in
+      logger.debug("returning all open prs from: #{repo_full_name}, branches: #{branches}")
+
+      branch_set = branches.to_set
+      all_open_pull_requests_on_branch = all_open_pull_requests.select { |pull_request| branch_set.include?(pull_request.head.ref) }
+      return all_open_pull_requests_on_branch
     end
 
     # returns only the most recent commit_sha for every open pr
-    def last_commit_sha_for_all_open_pull_requests(repo_full_name: nil)
-      return self.open_pull_requests(repo_full_name: repo_full_name).map { |pull_request| pull_request.head.sha }
+    # branches should be nil if you want all branches to be considered
+    def last_commit_sha_for_all_open_pull_requests(repo_full_name: nil, branches: nil)
+      return self.open_pull_requests(repo_full_name: repo_full_name, branches: branches).map { |pull_request| pull_request.head.sha }
     end
 
-    # returns the status of a given commit sha for a given repo
-    def status_for_commit_sha(repo_full_name: nil, sha: nil)
-      # TODO: only return when context is `fastlane.ci`
-      return client.statuses(repo_full_name, sha)
+    # returns the statused of a given commit sha for a given repo specifically for fastlane.ci
+    def statuses_for_commit_sha(repo_full_name: nil, sha: nil)
+      all_statuses = client.statuses(repo_full_name, sha)
+      only_ci_statuses = all_statuses.select { |status| status.context.start_with?(GitHubService.status_context_prefix) }
+      return only_ci_statuses
     end
 
     # updates the most current commit to "pending" on all open prs if they don't have a status.
     # returns a list of commits that have been updated to `pending` status
-    def update_all_open_prs_without_status_to_pending_status!(repo_full_name: nil)
+    def update_all_open_prs_without_status_to_pending_status!(repo_full_name: nil, status_context: nil)
       open_pr_commits = self.last_commit_sha_for_all_open_pull_requests(repo_full_name: repo_full_name)
       updated_commits = []
       open_pr_commits.each do |sha|
-        statuses = self.status_for_commit_sha(repo_full_name: repo_full_name, sha: sha)
+        statuses = self.statuses_for_commit_sha(repo_full_name: repo_full_name, sha: sha)
         if statuses.count == 0
-          self.set_build_status!(repo: repo_full_name, sha: sha, state: "pending")
+          self.set_build_status!(repo: repo_full_name, sha: sha, state: "pending", status_context: status_context)
           updated_commits << sha
         end
       end
@@ -80,7 +100,8 @@ module FastlaneCI
 
     # The `target_url`, `description` and `context` parameters are optional
     # @repo [String] Repo URL as string
-    def set_build_status!(repo: nil, sha: nil, state: nil, target_url: nil, description: nil, context: nil)
+    def set_build_status!(repo: nil, sha: nil, state: nil, target_url: nil, description: nil, status_context:)
+      status_context = GitHubService.status_context_prefix + status_context
       state = state.to_s
 
       # Available states https://developer.github.com/v3/repos/statuses/
@@ -89,11 +110,6 @@ module FastlaneCI
 
       # We auto receive the SLUG, so that the user of this class can pass a full URL also
       repo = repo.split("/")[-2..-1].join("/")
-
-      # TODO: this will use the user's session, so their face probably appears there
-      # As Josh already predicted, we're gonna need a fastlane.ci account also
-      # that we use for all non-user actions.
-      # This includes scheduled things, commit status reporting and probably more in the future
 
       if description.nil?
         description = "All green" if state == "success"
@@ -104,18 +120,13 @@ module FastlaneCI
         description = "Something went wrong" if state == "error"
       end
 
-      # TODO: Enable once the GitHub token is fixed
-      #
-      # Full docs for `create_status` over here
-      # https://octokit.github.io/octokit.rb/Octokit/Client/Statuses.html
-
       task = TaskQueue::Task.new(work_block: proc {
         state_details = target_url.nil? ? "#{repo}, sha #{sha}" : target_url
         logger.debug("Setting status #{state} on #{state_details}")
         client.create_status(repo, sha, state, {
           target_url: target_url,
           description: description,
-          context: context || "fastlane.ci"
+          context: status_context
         })
       })
 
