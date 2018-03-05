@@ -62,8 +62,16 @@ module FastlaneCI
 
     def users=(users)
       JSONUserDataSource.file_semaphore.synchronize do
+        users.each do |user|
+          user.provider_credentials.map! do |credential|
+            credential.to_object_dictionary(ignore_instance_variables: [:@ci_user])
+          end
+        end
+
         File.write(user_file_path, JSON.pretty_generate(users.map(&:to_object_dictionary)))
       end
+
+      reload_users
     end
 
     def reload_users

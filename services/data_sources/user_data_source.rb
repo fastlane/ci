@@ -25,5 +25,10 @@ module FastlaneCI
     def create_user!(email: nil, password: nil, provider_credential: nil)
       not_implemented(__method__)
     end
+
+    # @return [User]
+    def find_user(id: nil)
+      not_implemented(__method__)
+    end
   end
 end
