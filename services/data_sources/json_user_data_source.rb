@@ -13,6 +13,10 @@ module FastlaneCI
   class User
     include FastlaneCI::JSONConvertible
 
+    def self.attribute_to_type_map
+      return { :@provider_credentials => GitHubProviderCredential }
+    end
+
     def self.map_enumerable_type(enumerable_property_name: nil, current_json_object: nil)
       if enumerable_property_name == :@provider_credentials
         type = current_json_object["type"]
