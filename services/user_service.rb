@@ -41,6 +41,11 @@ module FastlaneCI
       self.user_data_source.update_user!(user: user)
     end
 
+    # @return [User]
+    def find_user(id: nil)
+      self.user_data_source.find_user(id: id)
+    end
+
     def login(email: nil, password: nil, ci_config_repo: nil)
       email = email.strip
 

@@ -3,6 +3,7 @@ require_relative "./config_service"
 require_relative "./worker_service"
 require_relative "./user_service"
 require_relative "./project_service"
+require_relative "./provider_credential_service"
 require_relative "./notification_service"
 require_relative "./data_sources/json_user_data_source"
 require_relative "./data_sources/json_build_data_source"
@@ -90,6 +91,10 @@ module FastlaneCI
 
     def self.worker_service
       @_worker_service ||= FastlaneCI::WorkerService.new
+    end
+
+    def provider_credential_service
+      @_provider_credential_service ||= FastlaneCI::ProviderCredentialService.new
     end
   end
 end

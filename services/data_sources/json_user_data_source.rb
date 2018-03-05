@@ -126,9 +126,9 @@ module FastlaneCI
       end
     end
 
-    def create_user!(email: nil, password: nil, provider_credential: nil)
+    def create_user!(id: nil, email: nil, password: nil, provider_credential: nil)
       new_user = User.new(
-        id: SecureRandom.uuid,
+        id: id,
         email: email,
         password_hash: BCrypt::Password.create(password),
         provider_credentials: [provider_credential]
@@ -145,6 +145,15 @@ module FastlaneCI
           logger.debug("Couldn't add user #{new_user.email} because they already exist")
           return nil
         end
+      end
+    end
+
+    # Finds a user with a given id
+    #
+    # @return [User]
+    def find_user(id: nil)
+      JSONUserDataSource.file_semaphore.synchronize do
+        return @users.select { |user| user.id == id }.first
       end
     end
   end

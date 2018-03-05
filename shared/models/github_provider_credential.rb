@@ -8,12 +8,12 @@ module FastlaneCI
   class GitHubProviderCredential < ProviderCredential
     attr_accessor :encrypted_api_token
 
-    def initialize(email: nil, full_name: nil, api_token: nil)
+    def initialize(email: nil, full_name: nil, api_token: nil, name: nil, type: nil)
       self.email = email
       self.full_name = full_name
       self.api_token = api_token
-      self.provider_name = "GitHub"
-      self.type = PROVIDER_CREDENTIAL_TYPES[:github]
+      self.provider_name = name || "GitHub"
+      self.type = type || PROVIDER_CREDENTIAL_TYPES[:github]
       self.remote_host = "github.com"
     end
 

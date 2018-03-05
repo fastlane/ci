@@ -2,7 +2,10 @@
   <span class="mdl-layout__title">fastlane.ci</span>
   <nav class="mdl-navigation">
     <a class="mdl-navigation__link" href="/">Dashboard</a>
-    <a class="mdl-navigation__link" href="/notifications">Notifications</a>
+    <% if user %>
+      <a class="mdl-navigation__link" href="/notifications">Notifications</a>
+      <a class="mdl-navigation__link" href="/users">Users</a>
+    <% end %>
     <a class="mdl-navigation__link" href="/#">Settings</a>
   </nav>
 </div>

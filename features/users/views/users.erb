@@ -1,0 +1,27 @@
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
+  <header class="mdl-layout__header">
+    <div class="mdl-layout__header-row">
+      <span class="mdl-layout__title"><%= title %></span>
+    </div>
+  </header>
+
+  <%= erb :"../../partials/navigation" %>
+
+  <main class="mdl-layout__content" style="padding: 40px">
+    <% if users.nil? %>
+      <%= erb :"./warnings/_users_json" %>
+    <% else %>
+      <!-- Users found in users.json -->
+
+      <h3>Existing users found in <code>users.json</code></h3>
+      <% users.each do |user| %>
+        <%= erb :"./forms/_users", locals: { user: user, action: "update" } %>
+      <% end %>
+    <% end %>
+
+    <!-- Form to create another user to add to the `users.json` -->
+
+    <h3>Add new user</h3>
+    <%= erb :"./forms/_users", locals: { user: new_user, action: "create" } %>
+  </main>
+</div>
