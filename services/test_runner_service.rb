@@ -56,9 +56,10 @@ module FastlaneCI
         parameters: nil
       )
 
+      self.prepare_build_object
+
       # Add yourself to the list of active workers so we can stream the output to the user
       # this might be nil, while the server still starts
-      puts("added myself to the backend list")
       self.class.test_runner_services << self
     end
 
@@ -80,12 +81,7 @@ module FastlaneCI
       end
     end
 
-    # Runs a new build, incrementing the build number from the number of builds
-    # for a given project
-    #
-    # @return [nil]
-    def run
-      start_time = Time.now
+    def prepare_build_object
       builds = build_service.list_builds(project: self.project)
 
       if builds.count > 0
@@ -103,8 +99,17 @@ module FastlaneCI
         sha: self.sha
       )
       update_build_status!
+    end
+
+    # Runs a new build, incrementing the build number from the number of builds
+    # for a given project
+    #
+    # @return [nil]
+    def run
+      start_time = Time.now
 
       logger.debug("Running runner now")
+
       test_runner.run do |current_row|
         new_row(current_row)
       end

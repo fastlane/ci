@@ -10,6 +10,9 @@ module FastlaneCI
     # A reference to the project this build is associated with
     attr_accessor :project
 
+    # @return [String] UDID to identify the build
+    attr_accessor :id
+
     # @return [Integer]
     attr_accessor :number
 
@@ -25,13 +28,14 @@ module FastlaneCI
     # @return [String] The git sha of the commit this build was run for
     attr_accessor :sha
 
-    def initialize(project: nil, number: nil, status: nil, timestamp: nil, duration: nil, sha: nil)
+    def initialize(project: nil, number: nil, status: nil, timestamp: nil, duration: nil, sha: nil, id: nil)
       self.project = project
       self.number = number
       self.status = status
       self.timestamp = timestamp
       self.duration = duration
       self.sha = sha
+      self.id = id || SecureRandom.uuid
     end
 
     def status=(new_value)
