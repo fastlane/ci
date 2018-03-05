@@ -178,7 +178,7 @@ Base64.encode64(new_encrypted_api_token)
 bundle exec rackup -p 8080 --env development
 ```
 
-Visit [127.0.0.1:8080](http://127.0.0.1:8080/) to open the login
+Visit [localhost:8080](http://localhost:8080/) to open the login
 
 If you're having trouble and need to debug, you can add the following environment variables:
 `FASTLANE_CI_VERBOSE=1` and `DEBUG=1`

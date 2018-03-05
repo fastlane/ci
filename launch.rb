@@ -1,4 +1,6 @@
+require "set"
 require_relative "./shared/logging_module"
+require_relative "./shared/models/job_trigger"
 require_relative "./taskqueue/task_queue"
 
 module FastlaneCI
@@ -9,7 +11,11 @@ module FastlaneCI
   class Launch
     class << self
       include FastlaneCI::Logging
+
+      attr_accessor :build_queue
     end
+
+    Launch.build_queue = TaskQueue::TaskQueue.new(name: "ci startup build queue")
 
     def self.take_off
       verify_dependencies
@@ -22,7 +28,12 @@ module FastlaneCI
       check_for_existing_setup
       prepare_server
       launch_workers
-      run_pending_builds
+
+      github_projects = Services.config_service.projects(provider_credential: self.provider_credential)
+      github_service = FastlaneCI::GitHubService.new(provider_credential: self.provider_credential)
+
+      run_pending_github_builds(projects: github_projects, github_service: github_service)
+      enqueue_builds_for_open_github_prs_with_no_status(projects: github_projects, github_service: github_service)
     end
 
     def self.require_fastlane_ci
@@ -121,6 +132,7 @@ module FastlaneCI
       require_relative "features/project/project_controller"
       require_relative "features/credentials/provider_credentials_controller"
       require_relative "features/users/users_controller"
+      require_relative "features/build/build_controller"
 
       # Load up all the available controllers
       FastlaneCI::FastlaneApp.use(FastlaneCI::DashboardController)
@@ -129,6 +141,7 @@ module FastlaneCI
       FastlaneCI::FastlaneApp.use(FastlaneCI::ProjectController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::ProviderCredentialsController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::UsersController)
+      FastlaneCI::FastlaneApp.use(FastlaneCI::BuildController)
     end
 
     def self.launch_workers
@@ -157,14 +170,12 @@ module FastlaneCI
     # initialization for all projects for the provider credentials
     #
     # @return [nil]
-    def self.run_pending_builds
-      task_queue = TaskQueue::TaskQueue.new(name: "run_pending_builds")
-      projects = Services.config_service.projects(provider_credential: self.provider_credential)
-      github_service = FastlaneCI::GitHubService.new(provider_credential: self.provider_credential)
-
+    def self.run_pending_github_builds(projects: nil, github_service: nil)
       # For each project, rerun all builds with the status of "pending"
       projects.each do |project|
         pending_builds = Services.build_service.pending_builds(project: project)
+
+        # TODO: I think we can change this to pull the most recent sha from github
         repo = FastlaneCI::GitRepo.new(git_config: project.repo_config, provider_credential: self.provider_credential)
         current_sha = repo.most_recent_commit.sha
         runner_service = FastlaneCI::TestRunnerService.new(project: project, sha: current_sha, github_service: github_service)
@@ -172,7 +183,45 @@ module FastlaneCI
         # Enqueue each pending build rerun in an asynchronous task queue
         pending_builds.each do |build|
           task = TaskQueue::Task.new(work_block: proc { runner_service.rerun(build) })
-          task_queue.add_task_async(task: task)
+          Launch.build_queue.add_task_async(task: task)
+        end
+      end
+    end
+
+    # We might be in a situation where we have an open pr, but no status yet
+    # if that's the case, we should enqueue a build for it
+    def self.enqueue_builds_for_open_github_prs_with_no_status(projects: nil, github_service: nil)
+      projects.each do |project|
+        # TODO: generalize this sort of thing
+        credential_type = project.repo_config.provider_credential_type_needed
+
+        # we don't support anything other than GitHub right now
+        next unless credential_type == FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
+
+        # Collect all the branches from the triggers on this project that are commit-based
+        branches_to_check = project.job_triggers
+                                   .select { |trigger| trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit] }
+                                   .map(&:branch)
+                                   .uniq
+
+        repo_full_name = project.repo_config.full_name
+        # let's get all commit shas that need a build (no status yet)
+        commit_shas = github_service.last_commit_sha_for_all_open_pull_requests(repo_full_name: repo_full_name, branches: branches_to_check)
+
+        # no commit shas need to be switched to `pending` state
+        next unless commit_shas.count > 0
+
+        commit_shas.each do |current_sha|
+          logger.debug("Checking #{repo_full_name} sha: #{current_sha} for missing status")
+          statuses = github_service.statuses_for_commit_sha(repo_full_name: repo_full_name, sha: current_sha)
+
+          # if we have a status, skip it!
+          next if statuses.count > 0
+
+          logger.debug("Found sha: #{current_sha} in #{repo_full_name} missing status, adding build.")
+          runner_service = FastlaneCI::TestRunnerService.new(project: project, sha: current_sha, github_service: github_service)
+          task = TaskQueue::Task.new(work_block: proc { runner_service.run })
+          Launch.build_queue.add_task_async(task: task)
         end
       end
     end

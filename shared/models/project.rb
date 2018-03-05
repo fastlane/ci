@@ -7,7 +7,7 @@ module FastlaneCI
     # @return [GitRepoConfig] URL to the Git repo
     attr_accessor :repo_config
 
-    # @return [String] Name of the project
+    # @return [String] Name of the project, also shows up in status as "fastlane.ci: #{project_name}"
     attr_accessor :project_name
 
     # @return [String] lane name to run
