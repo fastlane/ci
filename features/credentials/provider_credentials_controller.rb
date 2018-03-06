@@ -4,7 +4,10 @@ require_relative "../../shared/authenticated_controller_base"
 require_relative "../../services/services"
 
 module FastlaneCI
-  # A CRUD controller to manage provider credentials associated with a user
+  # A CRUD controller to manage provider credentials associated with a user. A
+  # `ProviderCredential` is a credential a user may use to access some third-party
+  # provider. For instance, the `GitHubProviderCredential` allows FastlaneCI users
+  # to interact with the GitHub API
   class ProviderCredentialsController < AuthenticatedControllerBase
     HOME = "/provider_credentials"
 
