@@ -1,27 +1,44 @@
 <form method="POST" action="users/<%= action %>">
-  <p>
+  <td>
     <code>id=<%= user.id %></code>
     <input type="hidden" name="id" value=<%= user.id %>>
-  </p>
+  </td>
 
-  <p>
+  <td>
     <code>email=</code>
     <input type="text" name="email" value=<%= user.email %>>
-  </p>
+  </td>
 
-  <p>
+  <td>
     <code>password_hash=</code>
     <input type="text" name="password_hash" value=<%= user.password_hash %>>
-  </p>
+  </td>
 
-  <b>Associated Provider Credentials</b>
-  <% user.provider_credentials.each do |credential| %>
-    <p><%= credential.id %></p>
-    <p><%= credential.full_name %></p>
-    <p>
-      <a href="/provider_credentials">Edit or add provider credentials</a>
-    </p>
-  <% end %>
+  <td>
+    <table>
+      <thead>
+        <tr>
+          <th>id</th>
+          <th>full_name</th>
+          <th></th>
+        </tr>
+      </thead>
 
-  <input type="submit" value="<%= action.capitalize %> user">
+      <tbody>
+        <% user.provider_credentials.each do |credential| %>
+          <tr>
+            <td><%= credential.id %></td>
+            <td><%= credential.full_name %></td>
+            <td>
+              <a href="/provider_credentials">Edit or add provider credentials</a>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </td>
+
+  <td>
+    <input type="submit" value="<%= action.capitalize %> user">
+  </td>
 </form>
