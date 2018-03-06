@@ -25,7 +25,7 @@ module FastlaneCI
         )
       end
 
-      redirect HOME
+      redirect(HOME)
     end
 
     # Updates a user existing in the configuration repository `users.json`
@@ -40,7 +40,7 @@ module FastlaneCI
         Services.user_service.update_user!(new_user)
       end
 
-      redirect HOME
+      redirect(HOME)
     end
 
     private
@@ -59,13 +59,6 @@ module FastlaneCI
     # @return [User]
     def new_user
       @new_user ||= User.new(provider_credentials: [GitHubProviderCredential.new])
-    end
-
-    # Empty provider credential
-    #
-    # @return [GitHubProviderCredential]
-    def new_credential
-      @new_credential ||= GitHubProviderCredential.new
     end
 
     #####################################################

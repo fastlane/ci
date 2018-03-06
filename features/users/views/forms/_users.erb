@@ -1,5 +1,8 @@
 <form method="POST" action="users/<%= action %>">
-  <input type="hidden" name="id" value=<%= user.id %>>
+  <p>
+    <code>id=<%= user.id %></code>
+    <input type="hidden" name="id" value=<%= user.id %>>
+  </p>
 
   <p>
     <code>email=</code>
@@ -11,23 +14,14 @@
     <input type="text" name="password_hash" value=<%= user.password_hash %>>
   </p>
 
-  <!-- List all existing provider credentials for a user -->
-
-  <b>Provider Credentials</b>
+  <b>Associated Provider Credentials</b>
   <% user.provider_credentials.each do |credential| %>
-    <%=
-      erb :"../../credentials/views/forms/_provider_credentials",
-      locals: { user_id: user.id, credential: credential, action: "update" }
-    %>
+    <p><%= credential.id %></p>
+    <p><%= credential.full_name %></p>
+    <p>
+      <a href="/provider_credentials">Edit or add provider credentials</a>
+    </p>
   <% end %>
-
-  <!-- Form to create another provider credential -->
-
-  <b>New Provider Credential</b>
-  <%=
-    erb :"../../credentials/views/forms/_provider_credentials",
-    locals: { user_id: user.id, credential: new_credential, action: "create" }
-  %>
 
   <input type="submit" value="<%= action.capitalize %> user">
 </form>
