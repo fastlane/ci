@@ -60,9 +60,7 @@ module FastlaneCI
       end
     end
 
-    def project_has_trigger_type?(project: nil, trigger_type: nil)
-      raise "Need both project and trigger_type" unless project && trigger_type
-
+    def project_has_trigger_type?(project:, trigger_type:)
       project.job_triggers.any? { |trigger| trigger.type == trigger_type }
     end
   end
