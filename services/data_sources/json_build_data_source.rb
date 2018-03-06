@@ -37,6 +37,10 @@ module FastlaneCI
 
     def self.json_to_attribute_name_proc_map
       provider_object_to_provider = proc { |object|
+        # So, there might be some chances (but it shouldn't ever happen)
+        # that the Artifact's ArtifactProvider is null in the JSON, so it must be nil in the object.
+        # But that means that the Artifact is unrecoverable.
+        # TODO: What kind of error handling should we provide? An Artifact with nil provider is unrecoverable.
         nil if object.nil?
         provider_class = Object.const_get(object["class_name"])
         if provider_class.include?(JSONConvertible)

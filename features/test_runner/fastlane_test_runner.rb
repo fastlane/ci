@@ -11,14 +11,11 @@ module FastlaneCI
     attr_reader :platform
     attr_reader :lane
     attr_reader :parameters
-    attr_reader :fastfile_path
 
-    # TODO: That fastfile_path is far from ideal, just a safe fallback when developing.
-    def initialize(platform: nil, lane: nil, parameters: nil, fastfile_path: FastlaneCore::FastlaneFolder.fastfile_path)
+    def initialize(platform: nil, lane: nil, parameters: nil)
       @platform = platform
       @lane = lane
       @parameters = parameters
-      @fastfile_path = fastfile_path
     end
 
     def run
@@ -47,10 +44,9 @@ module FastlaneCI
       # this only takes a few ms the first time being called
       Fastlane.load_actions
 
-      # TODO: How do I access fastlane actions (like lane_context) from here?
-
       # Load and parse the Fastfile
-      fast_file = Fastlane::FastFile.new(self.fastfile_path)
+      # TODO: This won't work for now, as it is evaluating to the local CI fastlane.
+      fast_file = Fastlane::FastFile.new(FastlaneCore::FastlaneFolder.fastfile_path)
 
       begin
         # Execute the Fastfile here

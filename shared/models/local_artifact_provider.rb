@@ -3,7 +3,6 @@ require_relative "artifact"
 require_relative "build"
 require_relative "project"
 
-require "tmpdir"
 require "pathname"
 
 module FastlaneCI
@@ -12,7 +11,7 @@ module FastlaneCI
     class << self
       # Provide a simple default root_path for users that don't want much configuration.
       def default_root_path
-        Pathname.new(Dir.tmpdir).join("fastlane-artifacts")
+        Pathname.new(File.expand_path("~/.fastlane/ci/")).join("artifacts")
       end
     end
 

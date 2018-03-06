@@ -56,8 +56,7 @@ module FastlaneCI
       self.test_runner = FastlaneTestRunner.new(
         platform: self.project.lane.split(" ").first, # nil, # TODO: is the platform gonna be part of the `project.lane`? Probably yes
         lane: self.project.lane.split(" ").last, # project.lane,
-        parameters: nil,
-        fastfile_path: fastfile_path_from_project!(project: self.project)
+        parameters: nil
       )
 
       self.prepare_build_object
@@ -156,9 +155,22 @@ module FastlaneCI
       update_build_status!
 
       logger.debug("Running runner now")
-      test_runner.run do |row|
-        new_row(row)
+      artifact_paths = test_runner.run do |current_row|
+        new_row(current_row)
       end
+
+      artifacts = artifact_paths.map { |artifact|
+        Artifact.new(
+          type: artifact[:type],
+          reference: artifact[:path],
+          provider: self.project.artifact_provider
+        )
+      }
+      .map { |artifact|
+        self.project.artifact_provider.store!(artifact: artifact, build: self.current_build, project: self.project)
+      }
+
+      self.current_build.artifacts = artifacts
 
       duration = Time.now - start_time
 
@@ -218,25 +230,6 @@ module FastlaneCI
       logger.error("Error setting the build status on remote service")
       logger.error(ex.to_s)
       logger.error(ex.backtrace.join("\n"))
-    end
-
-    def fastfile_path_from_project!(project: nil)
-      return if project.nil?
-
-      project_path = project.repo_config.local_repo_path
-
-      # First assume the fastlane directory and its file is in the root of the project
-      fastfiles = Dir[File.join(project_path, "fastlane/Fastfile")]
-      # If not, it might be in a subfolder
-      fastfiles = Dir[File.join(project_path, "**/fastlane/Fastfile")] if fastfiles.count == 0
-
-      if fastfiles.count > 1
-        logger.error("Ugh, multiple Fastfiles found, we're gonna have to build a selection in the future")
-        # for now, just take the first one
-      end
-
-      fastfile_path = fastfiles.first
-      fastfile_path
     end
   end
 end
