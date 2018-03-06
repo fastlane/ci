@@ -1,9 +1,11 @@
 require_relative "./fastlane_test_runner_helpers/fastlane_ci_output"
 require_relative "./fastlane_test_runner_helpers/fastlane_output_to_html"
+require_relative "./test_runner"
 
 module FastlaneCI
   # Represents the test runner responsible for loading and running
   # fastlane Fastfile configurations
+  # TODO: run method *should* return an array of artifacts
   class FastlaneTestRunner < TestRunner
     # Parameters for running fastlane
     attr_reader :platform
@@ -43,6 +45,7 @@ module FastlaneCI
       Fastlane.load_actions
 
       # Load and parse the Fastfile
+      # TODO: This won't work for now, as it is evaluating to the local CI fastlane.
       fast_file = Fastlane::FastFile.new(FastlaneCore::FastlaneFolder.fastfile_path)
 
       begin
@@ -56,6 +59,16 @@ module FastlaneCI
       rescue StandardError => ex
         # TODO: Exception handling here
         puts(ex)
+        puts(ex.backtrace)
+      ensure
+        # Either the build was successfull or not, we have to ensure the artifacts for the execution.
+        artifact_paths = []
+        artifact_paths << { type: "log", path: "fastlane.log" }
+        constants_with_path = Fastlane::Actions::SharedValues.constants
+          .select { |value| value.to_s.include?("PATH") } # Far from ideal, but meanwhile...
+          .select { |value| !Fastlane::Actions.lane_context[value].nil? && !Fastlane::Actions.lane_context[value].empty? }
+          .map { |value| { type: value.to_s, path: Fastlane::Actions.lane_context[value]} }
+        return artifact_paths.concat(constants_with_path)
       end
     end
   end

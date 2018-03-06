@@ -75,6 +75,13 @@ module FastlaneCI
               array_name, this_instance = self._from_json!(var, array_val, is_iterable: true)
               array_property << this_instance
             end
+            if array_name.nil?
+              if self.attribute_key_name_map.key(var)
+                array_name = self.attribute_key_name_map.key(var).to_sym
+              else
+                array_name = "@#{var}".to_sym
+              end
+            end
             instance.instance_variable_set(array_name, array_property)
           else
             var_name, var_value = self._from_json!(var, val)

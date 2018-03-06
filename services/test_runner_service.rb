@@ -1,3 +1,6 @@
+require_relative "../features/test_runner/fastlane_test_runner"
+require_relative "../shared/models/artifact"
+
 module FastlaneCI
   # Responsible for the life cycle of running tests as part of fastlane.ci
   # In particular this takes care of all the overhead, like measuring the time and storing & reporting
@@ -51,8 +54,8 @@ module FastlaneCI
       self.build_change_observer_blocks = []
 
       self.test_runner = FastlaneTestRunner.new(
-        platform: "ios", # nil, # TODO: is the platform gonna be part of the `project.lane`? Probably yes
-        lane: "beta", # project.lane,
+        platform: self.project.lane.split(" ").first, # nil, # TODO: is the platform gonna be part of the `project.lane`? Probably yes
+        lane: self.project.lane.split(" ").last, # project.lane,
         parameters: nil
       )
 
@@ -109,10 +112,22 @@ module FastlaneCI
       start_time = Time.now
 
       logger.debug("Running runner now")
-
-      test_runner.run do |current_row|
+      artifact_paths = test_runner.run do |current_row|
         new_row(current_row)
       end
+
+      artifacts = artifact_paths.map { |artifact|
+        Artifact.new(
+          type: artifact[:type],
+          reference: artifact[:path],
+          provider: self.project.artifact_provider
+        )
+      }
+      .map { |artifact|
+        self.project.artifact_provider.store!(artifact: artifact, build: self.current_build, project: self.project)
+      }
+
+      self.current_build.artifacts = artifacts
 
       duration = Time.now - start_time
 
@@ -140,9 +155,22 @@ module FastlaneCI
       update_build_status!
 
       logger.debug("Running runner now")
-      test_runner.run do |row|
-        new_row(row)
+      artifact_paths = test_runner.run do |current_row|
+        new_row(current_row)
       end
+
+      artifacts = artifact_paths.map { |artifact|
+        Artifact.new(
+          type: artifact[:type],
+          reference: artifact[:path],
+          provider: self.project.artifact_provider
+        )
+      }
+      .map { |artifact|
+        self.project.artifact_provider.store!(artifact: artifact, build: self.current_build, project: self.project)
+      }
+
+      self.current_build.artifacts = artifacts
 
       duration = Time.now - start_time
 
