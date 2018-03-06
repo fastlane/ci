@@ -13,12 +13,6 @@ describe FastlaneCI::TestRunnerService do
     )
   end
 
-  # Will cause an exception to be raised in `subject.run` because the project
-  # constructor it wasn't given a 'repo_config' attribute
-  let (:bad_project) do
-    FastlaneCI::Project.new
-  end
-
   subject do
     FastlaneCI::TestRunnerService.new(
       project: good_project,
@@ -69,16 +63,6 @@ describe FastlaneCI::TestRunnerService do
         expect(subject.current_build.number).to eq(4)
       end
     end
-
-    context "failure" do
-      before(:each) { allow(subject).to receive(:project).and_return(bad_project) }
-
-      it "Updates the current build and sets the status to 'failure' when a build fails" do
-        expect { subject.run }.to change { subject.current_build }.from(nil)
-      end
-
-      after(:each) { expect(subject.current_build.status).to eq(:failure) }
-    end
   end
 
   describe "#rerun" do
@@ -113,16 +97,6 @@ describe FastlaneCI::TestRunnerService do
         # Build should not be incremented by 1
         expect(subject.current_build.number).to eq(build.number)
       end
-    end
-
-    context "failure" do
-      before(:each) { allow(subject).to receive(:project).and_return(bad_project) }
-
-      it "Updates the current build and sets the status to 'failure' when a build fails" do
-        expect { subject.run }.to change { subject.current_build }.from(nil)
-      end
-
-      after(:each) { expect(subject.current_build.status).to eq(:failure) }
     end
   end
 end

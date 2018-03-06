@@ -1,5 +1,6 @@
 # Added by fastlane.ci team
 .keys
+fastlane.log
 
 # from https://github.com/github/gitignore/blob/master/Ruby.gitignore
 
