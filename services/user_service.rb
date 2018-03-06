@@ -30,7 +30,7 @@ module FastlaneCI
       unless self.user_data_source.user_exist?(email: email)
         logger.debug("creating account #{email}")
         provider_credential = GitHubProviderCredential.new(email: email)
-        return self.user_data_source.create_user!(id: nil, email: email, password: password, provider_credential: provider_credential)
+        return self.user_data_source.create_user!(id: id, email: email, password: password, provider_credential: provider_credential)
       end
 
       logger.debug("account #{email} already exists!")
