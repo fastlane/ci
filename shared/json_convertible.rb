@@ -29,6 +29,8 @@ module FastlaneCI
           if self.instance_variable_get(var).kind_of?(Array)
             object_array = []
             self.instance_variable_get(var).each do |obj|
+              # If the `Array` is an array of `Hash`, don't call `to_object_dictionary`
+              # on the elements, since the method does not exist for `Hash` types
               object_array << (obj.kind_of?(Hash) ? obj : obj.to_object_dictionary)
             end
             # In this step we have all the objects, lastly we need the key of the array.

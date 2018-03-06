@@ -67,6 +67,10 @@ module FastlaneCI
     def users=(users)
       JSONUserDataSource.file_semaphore.synchronize do
         users.each do |user|
+          # Fist need to serialize the provider credentials and ignore the `ci_user`
+          # instance variable. The reasoning is since if you serialize the `user`
+          # first, you will call `to_object_map` on the `ci_user`, which holds
+          # reference to a user. This will go on indefinitely
           user.provider_credentials.map! do |credential|
             credential.to_object_dictionary(ignore_instance_variables: [:@ci_user])
           end
@@ -75,6 +79,7 @@ module FastlaneCI
         File.write(user_file_path, JSON.pretty_generate(users.map(&:to_object_dictionary)))
       end
 
+      # Reload the users to sync them up with the persisted file store
       reload_users
     end
 
