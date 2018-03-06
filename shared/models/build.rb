@@ -1,5 +1,6 @@
 module FastlaneCI
   # Represents a build, part of a project, usually many builds per project
+  # One build is identified using the `build.project.id` + `build.number`
   class Build
     BUILD_STATUSES = [
       :success,
