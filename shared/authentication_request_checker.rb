@@ -40,6 +40,9 @@ module FastlaneCI
         if user.provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]).nil?
           logger.debug("No provider credentials found, redirecting to GitHub provider page")
           redirect("/login")
+        elsif Launch.first_time_user?
+          logger.debug("First-time user, directing them to /configuration")
+          redirect("/configuration")
         else
           logger.debug("User is authenticated, accessing #{route}")
         end

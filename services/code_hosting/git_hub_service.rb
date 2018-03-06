@@ -137,5 +137,18 @@ module FastlaneCI
       # if the user doesn't have write permission for the repo
       raise ex
     end
+
+    # Creates a remote repository
+    def create_private_remote_configuration_repo
+      repo_name = ENV["FASTLANE_CI_REPO_URL"].split("/").last
+      client.create_repository(repo_name, private: true)
+      commit_and_push_changes!
+    end
+
+    # Commits the most recent changes and pushes them to the new repo
+    def commit_and_push_changes!
+      Services.configuration_git_repo.commit_changes!
+      Services.configuration_git_repo.push
+    end
   end
 end

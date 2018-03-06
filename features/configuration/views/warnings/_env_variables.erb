@@ -1,0 +1,28 @@
+<!-- No `~/.fastlane/ci/.keys` file found -->
+
+<p>FastlaneCI requires certain environment variables to be configured.</p>
+<p>These environment variables include:</p>
+
+<b><code>~/.fastlane/ci/.keys</code></b>
+<pre>
+  <code>
+    # Randomly generated key, that's used to encrypt the user passwords
+    FASTLANE_CI_ENCRYPTION_KEY='key'
+
+    # The email address of your fastlane CI bot account
+    FASTLANE_CI_USER='email-for-your-bot-account@gmail.com'
+
+    # The API token of your fastlane CI bot account
+    FASTLANE_CI_PASSWORD='encrypted_api_password'
+
+    # The git URL (https) for the configuration repo
+    FASTLANE_CI_REPO_URL='https://github.com/username/reponame'
+
+    # Needed just for the first startup of fastlane.ci:
+    # The email address used for the intial clone for the config repo
+    FASTLANE_CI_INITIAL_CLONE_EMAIL='email-for-your-clone-account@gmail.com'
+
+    # The API token used for the initial clone for the config repo
+    FASTLANE_CI_INITIAL_CLONE_API_TOKEN='api_token_for_initial_clone'
+  </code>
+</pre>
