@@ -46,6 +46,9 @@ module FastlaneCI
             thread_id = " #{Thread.current[:thread_id]}" unless Thread.current[:thread_id].nil?
           end
 
+          if msg.class == Array
+            msg = msg.join("\n")
+          end
           "[#{datetime.strftime('%Y-%m-%d %H:%M:%S')}#{thread_id}] #{severity} #{progname}:  #{msg}\n"
         end
 
