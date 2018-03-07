@@ -21,11 +21,18 @@ module FastlaneCI
         begin
           # We have the `work` inside a `begin rescue`
           # so that if something fails, the thread still is alive
-          self.scheduler.schedule { self.work }
+          self.scheduler.schedule do
+            self.work
+            # If we're running in debug mode, don't run these things continuously
+            unless ENV["FASTLANE_CI_THREAD_DEBUG_MODE"].nil?
+              logger.debug("stopping worker after this work unit")
+              self.die!
+            end
+          end
         rescue StandardError => ex
-          puts("[#{self.class} Exception]: #{ex}: ")
-          puts(ex.backtrace.join("\n"))
-          puts("[#{self.class}] Killing thread #{self.thread_id} due to exception\n")
+          logger.error("[#{self.class} Exception]: #{ex}: ")
+          logger.error(ex.backtrace.join("\n"))
+          logger.error("[#{self.class}] Killing thread #{self.thread_id} due to exception\n")
           self.die!
         end
       end

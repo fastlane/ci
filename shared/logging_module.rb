@@ -52,6 +52,7 @@ module FastlaneCI
         logger.level = :warn
         logger.level = :debug if ENV["DEBUG"]
         logger.level = :debug if ENV["FASTLANE_CI_VERBOSE"]
+        logger.level = :debug if ENV["FASTLANE_CI_THREAD_DEBUG_MODE"]
       end
 
       return @logger
