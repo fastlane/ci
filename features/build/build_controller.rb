@@ -16,15 +16,18 @@ module FastlaneCI
       build = project.builds.find { |b| b.number == build_number }
 
       # Fetch all the active runners, and see if there is one WIP
-      current_runner_service = BuildRunnerService.build_runner_services.find do |t|
-        t.project.id == project_id && t.current_build.number == build_number
-      end
+      current_build_runner = Services.build_runner_service.find_build_runner(
+        project_id: project_id,
+        build_number: build_number
+      )
+
+      raise "Couldn't find build runner for project #{project_id} with build_number #{build_number}" if current_build_runner.nil?
 
       locals = {
         project: project,
         build: build,
         title: "Project #{project.project_name}, Build #{build.number}",
-        existing_rows: current_runner_service.all_build_output_log_lines.collect { |a| a[:html] }
+        existing_rows: current_build_runner.all_build_output_log_lines.collect { |a| a[:html] }
       }
       erb(:build, locals: locals, layout: FastlaneCI.default_layout)
     end

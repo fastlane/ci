@@ -7,12 +7,14 @@ module FastlaneCI
   # fastlane Fastfile configurations
   # TODO: run method *should* return an array of artifacts
   class FastlaneBuildRunner < BuildRunner
+    include FastlaneCI::Logging
+
     # Parameters for running fastlane
     attr_reader :platform
     attr_reader :lane
     attr_reader :parameters
 
-    def initialize(platform: nil, lane: nil, parameters: nil)
+    def setup(platform: nil, lane: nil, parameters: nil)
       @platform = platform
       @lane = lane
       @parameters = parameters
@@ -28,12 +30,12 @@ module FastlaneCI
           # Additionally to transfering the original metadata of this message
           # that look like this:
           #
-          # {:type=>:success, :message=>"Everything worked"}
+          #   {:type=>:success, :message=>"Everything worked"}
           #
           # we append the HTML code that should be used in the `html` key
           # the result looks like this
           #
-          # {"type":"success","message":"Driving the lane 'ios beta'","html":"<p class=\"success\">Driving the lane 'ios beta'</p>"}
+          #   {"type":"success","message":"Driving the lane 'ios beta'","html":"<p class=\"success\">Driving the lane 'ios beta'</p>"}
           #
           row[:html] = FastlaneOutputToHtml.convert_row(row)
           yield(row)
