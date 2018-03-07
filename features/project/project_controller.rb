@@ -18,6 +18,13 @@ module FastlaneCI
 
       repo = FastlaneCI::GitRepo.new(git_config: project.repo_config, provider_credential: current_github_provider_credential)
       current_sha = repo.most_recent_commit.sha
+      manual_triggers_allowed = project.job_triggers.any? { |trigger| trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual] }
+
+      unless manual_triggers_allowed
+        status(403) # Forbidden
+        body("Cannot build. There is no manual build trigger, for this branch, associated with this project.")
+        return
+      end
 
       test_runner_service = FastlaneCI::TestRunnerService.new(
         project: project,
