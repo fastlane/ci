@@ -8,8 +8,24 @@ module StubHelpers
   end
 
   def stub_git_repos
+    fake_git_config = FastlaneCI::GitRepoConfig.new(
+      id: "Fake id", 
+      git_url: "Not a real url", 
+      description: "Fake git repo config", 
+      name: "Fake repo", 
+      full_name: "Fake repo"
+    )
+
+    fake_repo_auth = FastlaneCI::GitRepoAuth.new(
+      remote_host: "fake.host.google.com", 
+      username: "fake_taquitos", 
+      full_name: "taquitos fake name", 
+      auth_token: "fake auth token"
+    )
     FastlaneCI::GitRepo.any_instance.stub(:initialize)
     FastlaneCI::GitRepo.any_instance.stub(:setup_repo)
+    FastlaneCI::GitRepo.any_instance.stub(:git_config).and_return(fake_git_config)
+    FastlaneCI::GitRepo.any_instance.stub(:repo_auth).and_return(fake_repo_auth)
     FastlaneCI::GitRepo.any_instance.stub(:clone)
   end
 
