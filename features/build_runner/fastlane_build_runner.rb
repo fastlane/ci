@@ -64,12 +64,12 @@ module FastlaneCI
         # this all will be implemented using a separate PR
         # once we have the web socket streaming implemented
 
-        return [] # TODO :return artifacts here
+        return [] # TODO: return artifacts here
       rescue StandardError => ex
         # TODO: Exception handling here
         logger.error(ex)
         logger.error(ex.backtrace)
-        return [] # TODO :return artifacts here (if any)
+        return [] # TODO: return artifacts here (if any)
       ensure
         # Either the build was successfull or not, we have to ensure the artifacts for the execution.
         # artifact_paths = []

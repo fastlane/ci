@@ -19,8 +19,6 @@ module FastlaneCI
     attr_accessor :project
 
     # The code hosting service we want to report the status back to
-    # TODO: this probably shouldn't be stored here, think about using
-    # 	callbacks or similar
     attr_accessor :code_hosting_service
 
     # A reference to FastlaneCI::Build
@@ -37,7 +35,7 @@ module FastlaneCI
     # All blocks listening to changes for this build
     attr_accessor :build_change_observer_blocks
 
-    def initialize(project: nil, sha: nil, github_service: nil)
+    def initialize(project:, sha:, github_service:)
       self.project = project
       self.sha = sha
 
@@ -177,7 +175,6 @@ module FastlaneCI
     # Using a `rescue` block here is important
     # As the build is still green, even though we couldn't set the GH status
     def update_build_status_source!
-      return # TODO: enable again
       self.code_hosting_service.set_build_status!(
         repo: self.project.repo_config.git_url,
         sha: self.sha,

@@ -26,8 +26,11 @@ module FastlaneCI
         return
       end
 
-      # TODO: pass GitHub service?
-      build_runner = FastlaneBuildRunner.new(project: project, sha: current_sha, github_service: nil)
+      build_runner = FastlaneBuildRunner.new(
+        project: project,
+        sha: current_sha, 
+        github_service: current_github_provider_credential
+      )
       build_runner.setup(platform: "ios", lane: "beta", parameters: nil) # specific to fastlane
       Services.build_runner_service.add_build_runner(build_runner: build_runner)
 
