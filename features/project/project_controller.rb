@@ -26,18 +26,15 @@ module FastlaneCI
         return
       end
 
-      build_runner_service = FastlaneCI::BuildRunnerService.new(
+      build_runner = FastlaneBuildRunner.new(
         project: project,
-        sha: current_sha
+        sha: current_sha,
+        github_service: current_github_provider_credential
       )
+      build_runner.setup(platform: "ios", lane: "beta", parameters: nil) # specific to fastlane
+      Services.build_runner_service.add_build_runner(build_runner: build_runner)
 
-      # TODO: not the best approach to spawn a thread
-      # Use TaskQueue instead
-      Thread.new do
-        build_runner_service.run
-      end
-
-      redirect("#{HOME}/#{project_id}/builds/#{build_runner_service.current_build.number}")
+      redirect("#{HOME}/#{project_id}/builds/#{build_runner.current_build_number}")
     end
 
     # Edit a project settings

@@ -2,6 +2,7 @@ require_relative "data_sources/build_data_source"
 
 module FastlaneCI
   # Provides service-level access to build information
+  # This class is NOT responsible for running builds
   class BuildService
     attr_accessor :build_data_source
 

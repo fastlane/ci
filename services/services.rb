@@ -83,6 +83,11 @@ module FastlaneCI
       )
     end
 
+    # Start up the BuildRunnerService
+    def self.build_runner_service
+      @_build_runner_service ||= FastlaneCI::BuildRunnerService.new
+    end
+
     # Grab a config service that is configured for the CI user
     def self.config_service
       @_config_service ||= FastlaneCI::ConfigService.new(ci_user: ci_user)
