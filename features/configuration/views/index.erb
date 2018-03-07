@@ -8,6 +8,12 @@
   <%= erb :"../../partials/navigation" %>
 
   <main class="mdl-layout__content" style="padding: 40px">
+    <% if variables[:status] == :error %>
+      <%= erb :"./errors/_keys" %>
+    <% end %>
+
+    <p><%= variables[:message] %></p>
+
     <% if first_time_user? %>
       <h1>Welcome to FastlaneCI 👋!</h1>
       <b>
@@ -21,14 +27,6 @@
       <!-- Form to create private remote github repository -->
 
       <%= erb :"./forms/_git_repo" %>
-    <% end %>
-
-    <% if variables[:status] == :error %>
-      <%= erb :"./errors/_keys" %>
-    <% elsif variables[:status] == :success %>
-      <p>
-        <code>.keys</code> was successfully written to <code>~/.fastlane/ci</code>!
-      </p>
     <% end %>
 
     <% if keys.any?(&:nil?) %>
