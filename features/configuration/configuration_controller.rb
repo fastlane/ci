@@ -29,7 +29,7 @@ module FastlaneCI
     # 3) If the data is not valid, display an error message
     post "#{HOME}/keys" do
       status =
-        if valid_params?(params, keys_params)
+        if valid_params?(params, post_parameter_list_for_validation)
           Services.environment_variable_service.write_keys_file!(locals: params)
           Services.environment_variable_service.reload_dot_env!
           STATUS[:success]
@@ -45,15 +45,19 @@ module FastlaneCI
     #
     # 1) Creates and clones a private configuration repository:
     #
-    #    i.  create the private configuration git repo remotely
-    #    ii. clone the configuration repo
+    #    i.   create the private configuration git repo remotely
+    #    ii.  reset the services that rely on environment variables
+    #    iii. clone the configuration repo
+    #    iv.  run github workers
     #
     # 2) Redirect back to `/configuration`
     post "#{HOME}/git_repo" do
       status =
         if keys.none?(&:nil?)
-          Services.github_service.create_private_remote_configuration_repo
-          Services.config_service.trigger_initial_ci_setup
+          Services.configuration_repository_service.create_private_remote_configuration_repo
+          Services.reset_services!
+          Launch.trigger_initial_ci_setup
+          Launch.run_github_workers
           STATUS[:success]
         else
           STATUS[:error]
@@ -86,7 +90,7 @@ module FastlaneCI
     #####################################################
 
     # @return [Set[String]]
-    def keys_params
+    def post_parameter_list_for_validation
       Set.new(
         %w(encryption_key ci_user_email ci_user_api_token repo_url
            clone_user_email clone_user_api_token)
@@ -99,7 +103,7 @@ module FastlaneCI
 
     # @return [Boolean]
     def first_time_user?
-      Launch.first_time_user?
+      !Services.configuration_repository_service.configuration_repository_exists?
     end
   end
 end

@@ -1,6 +1,7 @@
 require_relative "./code_hosting/git_hub_service"
 require_relative "./config_data_sources/json_project_data_source"
 require_relative "./config_service"
+require_relative "./configuration_repository_service"
 require_relative "./data_sources/json_build_data_source"
 require_relative "./data_sources/json_user_data_source"
 require_relative "./environment_variable_service"
@@ -36,6 +37,7 @@ module FastlaneCI
       @_github_service = nil
       @_config_service = nil
       @_worker_service = nil
+      @_configuration_repository_service = nil
     end
 
     ########################################################
@@ -149,6 +151,13 @@ module FastlaneCI
 
     def self.worker_service
       @_worker_service ||= FastlaneCI::WorkerService.new
+    end
+
+    # @return [ConfigurationRepositoryService]
+    def self.configuration_repository_service
+      @_configuration_repository_service ||= FastlaneCI::ConfigurationRepositoryService.new(
+        provider_credential: provider_credential
+      )
     end
 
     def self.environment_variable_service

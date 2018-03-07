@@ -27,13 +27,7 @@ module FastlaneCI
       setup_threads
       check_for_existing_setup
       prepare_server
-      launch_workers
-
-      github_projects = Services.config_service.projects(provider_credential: self.provider_credential)
-      github_service = FastlaneCI::GitHubService.new(provider_credential: self.provider_credential)
-
-      run_pending_github_builds(projects: github_projects, github_service: github_service)
-      enqueue_builds_for_open_github_prs_with_no_status(projects: github_projects, github_service: github_service)
+      run_github_workers
     end
 
     def self.require_fastlane_ci
@@ -79,12 +73,8 @@ module FastlaneCI
     # If not, this is where we do the initial clone
     def self.check_for_existing_setup
       # TODO: should we also trigger a blocking `git pull` here?
-      self.trigger_initial_ci_setup if first_time_user?
+      self.trigger_initial_ci_setup unless first_time_user?
       Services.reset_services!
-    end
-
-    def self.first_time_user?
-      !self.ci_config_repo.exists?
     end
 
     def self.ci_config_repo
@@ -122,7 +112,21 @@ module FastlaneCI
       FastlaneCI::FastlaneApp.use(FastlaneCI::BuildController)
     end
 
+    def self.run_github_workers
+      return if first_time_user?
+
+      launch_workers
+
+      github_projects = Services.config_service.projects(provider_credential: self.provider_credential)
+      github_service = FastlaneCI::GitHubService.new(provider_credential: self.provider_credential)
+
+      run_pending_github_builds(projects: github_projects, github_service: github_service)
+      enqueue_builds_for_open_github_prs_with_no_status(projects: github_projects, github_service: github_service)
+    end
+
     def self.launch_workers
+      return if first_time_user?
+
       # Iterate through all provider credentials and their projects and start a worker for each project
       Services.ci_user.provider_credentials.each do |provider_credential|
         projects = Services.config_service.projects(provider_credential: provider_credential)
@@ -147,6 +151,8 @@ module FastlaneCI
     #
     # @return [nil]
     def self.run_pending_github_builds(projects: nil, github_service: nil)
+      return if first_time_user?
+
       # For each project, rerun all builds with the status of "pending"
       projects.each do |project|
         pending_builds = Services.build_service.pending_builds(project: project)
@@ -167,6 +173,8 @@ module FastlaneCI
     # We might be in a situation where we have an open pr, but no status yet
     # if that's the case, we should enqueue a build for it
     def self.enqueue_builds_for_open_github_prs_with_no_status(projects: nil, github_service: nil)
+      return if first_time_user?
+
       projects.each do |project|
         # TODO: generalize this sort of thing
         credential_type = project.repo_config.provider_credential_type_needed
@@ -241,6 +249,11 @@ module FastlaneCI
         email: ENV["FASTLANE_CI_INITIAL_CLONE_EMAIL"],
         api_token: ENV["FASTLANE_CI_INITIAL_CLONE_API_TOKEN"]
       )
+    end
+
+    def self.first_time_user?
+      !self.ci_config_repo.exists? ||
+        !Services.configuration_repository_service.configuration_repository_valid?
     end
   end
 end

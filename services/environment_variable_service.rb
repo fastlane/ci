@@ -5,6 +5,8 @@ module FastlaneCI
   # Logic pertaining to environment variable configuration
   class EnvironmentVariableService
     # Write .keys configuration file with proper environment variables
+    #
+    # @param  [Hash] locals
     def write_keys_file!(
       locals: {
         encryption_key: nil,
@@ -29,6 +31,8 @@ module FastlaneCI
       Services.reset_services!
     end
 
+    # Verifies the proper environment variables needed to run the server are
+    # present
     def verify_env_variables
       if ENV["FASTLANE_CI_ENCRYPTION_KEY"].nil?
         warn("Error: unable to decrypt sensitive data without environment variable `FASTLANE_CI_ENCRYPTION_KEY` set")
