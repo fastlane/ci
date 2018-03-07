@@ -146,19 +146,17 @@ module FastlaneCI
 
     def self.launch_workers
       # Iterate through all provider credentials and their projects and start a worker for each project
-      number_of_workers_started = 0
       Services.ci_user.provider_credentials.each do |provider_credential|
         projects = Services.config_service.projects(provider_credential: provider_credential)
         projects.each do |project|
-          Services.worker_service.start_worker_for_provider_credential_and_config(
+          Services.worker_service.start_workers_for_project_and_credential(
             project: project,
             provider_credential: provider_credential
           )
-          number_of_workers_started += 1
         end
       end
 
-      logger.info("Seems like no workers were started to monitor your projects") if number_of_workers_started == 0
+      logger.info("Seems like no workers were started to monitor your projects") if Services.worker_service.num_workers == 0
 
       # Initialize the workers
       # For now, we're not using a fancy framework that adds multiple heavy dependencies
