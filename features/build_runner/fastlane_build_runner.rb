@@ -63,19 +63,22 @@ module FastlaneCI
         # TODO: success handling here
         # this all will be implemented using a separate PR
         # once we have the web socket streaming implemented
+
+        return [] # TODO :return artifacts here
       rescue StandardError => ex
         # TODO: Exception handling here
         logger.error(ex)
         logger.error(ex.backtrace)
+        return [] # TODO :return artifacts here (if any)
       ensure
         # Either the build was successfull or not, we have to ensure the artifacts for the execution.
-        artifact_paths = []
-        artifact_paths << { type: "log", path: "fastlane.log" }
-        constants_with_path = Fastlane::Actions::SharedValues.constants
-                                                             .select { |value| value.to_s.include?("PATH") } # Far from ideal, but meanwhile...
-                                                             .select { |value| !Fastlane::Actions.lane_context[value].nil? && !Fastlane::Actions.lane_context[value].empty? }
-                                                             .map { |value| { type: value.to_s, path: Fastlane::Actions.lane_context[value] } }
-        artifact_paths.concat(constants_with_path)
+        # artifact_paths = []
+        # artifact_paths << { type: "log", path: "fastlane.log" }
+        # constants_with_path = Fastlane::Actions::SharedValues.constants
+        #                                                      .select { |value| value.to_s.include?("PATH") } # Far from ideal, but meanwhile...
+        #                                                      .select { |value| !Fastlane::Actions.lane_context[value].nil? && !Fastlane::Actions.lane_context[value].empty? }
+        #                                                      .map { |value| { type: value.to_s, path: Fastlane::Actions.lane_context[value] } }
+        # artifact_paths.concat(constants_with_path)
       end
     end
   end
