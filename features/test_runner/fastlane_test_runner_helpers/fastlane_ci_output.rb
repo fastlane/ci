@@ -62,6 +62,8 @@ module FastlaneCI
       )
     end
 
+    # If you're here because you saw the exception: `wrong number of arguments (given 0, expected 1)`
+    # that means you're accidentally calling this method instead of a local variable on the stack frame before this
     def message(message)
       log.info(message.to_s)
       self.each_line_block.call(
@@ -119,7 +121,7 @@ module FastlaneCI
     def crash!(exception)
       self.each_line_block.call(
         type: :crash,
-        message: message
+        message: exception.to_s
       )
       raise FastlaneCrash.new, exception.to_s
     end
@@ -127,7 +129,7 @@ module FastlaneCI
     def user_error!(error_message, options = {})
       self.each_line_block.call(
         type: :user_error,
-        message: message
+        message: error_message
       )
       super(error_message, options)
     end
@@ -135,7 +137,7 @@ module FastlaneCI
     def shell_error!(error_message, options = {})
       self.each_line_block.call(
         type: :shell_error,
-        message: message
+        message: error_message
       )
       super(error_message, options)
     end
@@ -143,7 +145,7 @@ module FastlaneCI
     def build_failure!(error_message, options = {})
       self.each_line_block.call(
         type: :build_failure,
-        message: message
+        message: error_message
       )
       super(error_message, options)
     end
@@ -151,15 +153,15 @@ module FastlaneCI
     def test_failure!(error_message)
       self.each_line_block.call(
         type: :test_failure,
-        message: message
+        message: error_message
       )
       super(error_message)
     end
 
-    def abort_with_message!(message)
+    def abort_with_message!(error_message)
       self.each_line_block.call(
         type: :abort,
-        message: message
+        message: error_message
       )
       super(error_message)
     end
