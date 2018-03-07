@@ -51,7 +51,7 @@ module FastlaneCI
       begin
         # Execute the Fastfile here
         puts("starting fastlane run")
-        fast_file.runner.execute("beta", "ios", self.parameters)
+        fast_file.runner.execute(self.lane, self.platform, self.parameters)
         puts("fastlane run complete")
         # TODO: success handling here
         # this all will be implemented using a separate PR
