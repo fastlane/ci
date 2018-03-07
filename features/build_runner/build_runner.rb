@@ -1,12 +1,17 @@
+require_relative "../shared/models/artifact"
+
 module FastlaneCI
-  # Class that represents a build runner, used
+  # Class that represents a BuildRunner, used
   # to run tests for a given commit sha
   #
   # Responsible for
-  # - Loading up _fastlane_ and running a lane with it, checking the return status
+  # - Run the build (e.g. fastlane via FastlaneBuildRunner) and check its return status
   # - Raise an exception if build fails, with information that can be handled by `TestRunnerService`
   # - Reporting back a list of artifacts  to `TestRunnerService`
-
+  # - Measures the time of a `TestRunner`'s execution
+  # - Stores the `Build` information in version control and triggers the report of the build status on GitHub
+  # - Offer a way to subscribe to new lines being added to the output (e.g. to stream them to the user's browser)
+  #
   class BuildRunner
     include FastlaneCI::Logging
 

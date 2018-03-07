@@ -1,11 +1,9 @@
 require_relative "../features/build_runner/fastlane_build_runner"
-require_relative "../shared/models/artifact"
 
 module FastlaneCI
   # Responsible for
   # - Manage all `TestRunner` objects that are active (either in queue or actually running)
-  # - Measures the time of a `TestRunner`'s execution
-  # - Stores the `Build` information in version control and triggers the report of the build status on GitHub
+  # - Provide helper methods to make it easy to find currently running/queued BuildRunners
   #
   # TODO: move github specific stuff out into GitHubService (GitHubService right now)
   # TODO: maybe rename this to GitHubBuildRunnerService
