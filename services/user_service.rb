@@ -24,6 +24,14 @@ module FastlaneCI
       self.user_data_source = user_data_source
     end
 
+    #####################################################
+    # @!group Users Logic
+    #####################################################
+
+    def users
+      user_data_source.users
+    end
+
     def create_user!(id: nil, email: nil, password: nil)
       email = email.strip
 
@@ -52,6 +60,61 @@ module FastlaneCI
       logger.debug("attempting to login user with email #{email}")
       user = self.user_data_source.login(email: email, password: password)
       return user
+    end
+
+    #####################################################
+    # @!group Provider Credential Logic
+    #####################################################
+
+    # Creates a new provider credential, and adds it to the User's provider
+    # credentials array
+    def create_provider_credential!(
+      user_id: nil, id: nil, email: nil, api_token: nil, full_name: nil
+    )
+      provider_credential = GitHubProviderCredential.new(
+        id: id, email: email, api_token: api_token, full_name: full_name
+      )
+      user = Services.user_service.find_user(id: user_id)
+
+      if user.nil?
+        logger.error("Can't create provider credential for user, since user does not exist.")
+      else
+        new_user = User.new(
+          id: user.id,
+          email: user.email,
+          password_hash: user.password_hash,
+          provider_credentials: user.provider_credentials.push(provider_credential)
+        )
+        Services.user_service.update_user!(user: new_user)
+      end
+    end
+
+    # Look-up the user by `user_id` and updates the provider credential
+    # associated with the provider credential `id`
+    def update_provider_credential!(
+      user_id: nil, id: nil, email: nil, api_token: nil, full_name: nil
+    )
+      provider_credential = GitHubProviderCredential.new(
+        email: email, api_token: api_token, full_name: full_name
+      )
+      user = Services.user_service.find_user(id: user_id)
+
+      if user.nil?
+        logger.error("Can't update provider credential for user, since user does not exist.")
+      else
+        # Delete the old credential, and push on the new one
+        new_provider_credentials = user.provider_credentials
+                                       .delete_if { |credential| credential.id == id }
+                                       .push(provider_credential)
+
+        new_user = User.new(
+          id: user.id,
+          email: user.email,
+          password_hash: user.password_hash,
+          provider_credentials: new_provider_credentials
+        )
+        Services.user_service.update_user!(user: new_user)
+      end
     end
   end
 end

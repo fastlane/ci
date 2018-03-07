@@ -1,7 +1,7 @@
 require File.expand_path("../../spec_helper.rb", __FILE__)
-require File.expand_path("../../../services/provider_credential_service.rb", __FILE__)
+require File.expand_path("../../../services/user_service.rb", __FILE__)
 
-describe FastlaneCI::ProviderCredentialService do
+describe FastlaneCI::UserService do
   let(:user_id) { "user_id" }
 
   let(:credentials) do
@@ -22,7 +22,9 @@ describe FastlaneCI::ProviderCredentialService do
   end
 
   subject do
-    FastlaneCI::ProviderCredentialService.new
+    FastlaneCI::UserService.new(
+      user_data_source: FastlaneCI::JSONUserDataSource.create(git_repo_path)
+    )
   end
 
   before(:each) do
@@ -118,7 +120,6 @@ describe FastlaneCI::ProviderCredentialService do
     {
       email: "fake_email@gmail.com",
       api_token: "fake_api_token",
-      provider_name: "github",
       full_name: "full_name"
     }
   end

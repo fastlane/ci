@@ -83,13 +83,6 @@ module FastlaneCI
 
     protected
 
-    # View helper
-    #
-    # @return [String]
-    def new_uuid
-      SecureRandom.uuid
-    end
-
     # Converts keys from strings to symbols and selects only the expected keys
     #
     # @param  [Hash]       actuals

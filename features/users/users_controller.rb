@@ -17,7 +17,7 @@ module FastlaneCI
     #
     # - creates a user if the locals are valid
     post "#{HOME}/create" do
-      if valid_params?(params, users_params)
+      if valid_params?(params, post_parameter_list_for_validation)
         Services.user_service.create_user!(
           id: params[:id],
           email: params[:email],
@@ -30,7 +30,7 @@ module FastlaneCI
 
     # Updates a user existing in the configuration repository `users.json`
     post "#{HOME}/update" do
-      if valid_params?(params, users_params)
+      if valid_params?(params, post_parameter_list_for_validation)
         new_user = User.new(
           id: params[:id],
           email: params[:email],
@@ -51,14 +51,17 @@ module FastlaneCI
 
     # @return [Array[User]]
     def users
-      Services.user_service.user_data_source.users
+      Services.user_service.users
     end
 
-    # Empty user object for new user form
+    # Empty user object for `/create` action form. The forms/_users.erb
+    # form requires that a `User` object is passed into the form
     #
     # @return [User]
-    def new_user
-      @new_user ||= User.new(provider_credentials: [GitHubProviderCredential.new])
+    def blank_user_for_create_action_form
+      @blank_user ||= User.new(
+        provider_credentials: [GitHubProviderCredential.new]
+      )
     end
 
     #####################################################
@@ -66,7 +69,7 @@ module FastlaneCI
     #####################################################
 
     # @return [Set[Symbol]]
-    def users_params
+    def post_parameter_list_for_validation
       Set.new(%w(id email password_hash))
     end
   end

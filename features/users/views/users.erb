@@ -18,9 +18,9 @@
         <thead>
           <tr>
             <th>id</th>
-            <th>email</th>
-            <th>password_hash</th>
-            <th>provider_credentials</th>
+            <th>Email</th>
+            <th>Password Hash</th>
+            <th>Provider Credentials</th>
             <th></th>
           </tr>
         </thead>
@@ -42,16 +42,19 @@
       <thead>
         <tr>
           <th>id</th>
-          <th>email</th>
-          <th>password_hash</th>
-          <th>provider_credentials</th>
+          <th>Email</th>
+          <th>Password Hash</th>
+          <th>Provider Credentials</th>
           <th></th>
         </tr>
       </thead>
 
       <tbody>
         <tr>
-          <%= erb :"./forms/_users", locals: { user: new_user, action: "create" } %>
+          <%=
+            erb :"./forms/_users",
+            locals: { user: blank_user_for_create_action_form, action: "create" }
+          %>
         </tr>
       </tbody>
   </main>
