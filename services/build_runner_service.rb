@@ -21,11 +21,14 @@ module FastlaneCI
 
       self.build_runners << build_runner
 
-      # TODO: not the best approach to spawn a thread
-      # Use TaskQueue instead
-      Thread.new do
+      task = TaskQueue::Task.new(work_block: proc do
         build_runner.start
-      end
+      end)
+      self.build_runner_task_queue.add_task_async(task: task)
+    end
+
+    def build_runner_task_queue
+      @_build_runner_task_queue ||= TaskQueue::TaskQueue.new(name: "build runner service")
     end
 
     # Fetch all the active runners, and see if there is one WIP

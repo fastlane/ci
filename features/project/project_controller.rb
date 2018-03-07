@@ -28,7 +28,7 @@ module FastlaneCI
 
       build_runner = FastlaneBuildRunner.new(
         project: project,
-        sha: current_sha, 
+        sha: current_sha,
         github_service: current_github_provider_credential
       )
       build_runner.setup(platform: "ios", lane: "beta", parameters: nil) # specific to fastlane
