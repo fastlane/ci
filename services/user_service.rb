@@ -74,7 +74,7 @@ module FastlaneCI
       provider_credential = GitHubProviderCredential.new(
         id: id, email: email, api_token: api_token, full_name: full_name
       )
-      user = Services.user_service.find_user(id: user_id)
+      user = find_user(id: user_id)
 
       if user.nil?
         logger.error("Can't create provider credential for user, since user does not exist.")
@@ -85,7 +85,7 @@ module FastlaneCI
           password_hash: user.password_hash,
           provider_credentials: user.provider_credentials.push(provider_credential)
         )
-        Services.user_service.update_user!(user: new_user)
+        update_user!(user: new_user)
       end
     end
 
@@ -97,7 +97,7 @@ module FastlaneCI
       provider_credential = GitHubProviderCredential.new(
         email: email, api_token: api_token, full_name: full_name
       )
-      user = Services.user_service.find_user(id: user_id)
+      user = find_user(id: user_id)
 
       if user.nil?
         logger.error("Can't update provider credential for user, since user does not exist.")
@@ -113,7 +113,7 @@ module FastlaneCI
           password_hash: user.password_hash,
           provider_credentials: new_provider_credentials
         )
-        Services.user_service.update_user!(user: new_user)
+        update_user!(user: new_user)
       end
     end
   end
