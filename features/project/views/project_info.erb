@@ -1,0 +1,27 @@
+<table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+  <thead>
+    <tr>
+      <th>Status</th>
+      <th>Build Number</th>
+      <th>Triggered</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% project.builds.each do |build| %>
+      <% url = "/projects/#{project.id}/builds/#{build.number}" %>
+      <tr style="cursor: pointer;" onclick="location.href='<%= url %>'">
+        <td>
+          <% if build.status == "success" %>
+            <%= "✅" %>
+          <% elsif build.status == "pending" %>
+            <%= "🌕" %>
+          <% else %>
+            <%= "🚫" %>
+          <% end %>
+        </td>
+        <td style="text-align: center;"><%= build.number %></td>
+        <td><%= build.timestamp.strftime("%Y%m%dT%H%M%S%z") %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
