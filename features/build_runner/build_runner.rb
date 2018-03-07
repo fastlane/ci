@@ -161,7 +161,6 @@ module FastlaneCI
     rescue StandardError => ex
       logger.error("Error setting the build status as part of the config repo")
       logger.error(ex)
-      logger.error(ex.backtrace.join("\n"))
       # If setting the build status inside the git repo fails
       # this is actually a big deal, and we can't proceed.
       # For setting the build status, if that fails, it's fine
@@ -183,7 +182,6 @@ module FastlaneCI
     rescue StandardError => ex
       logger.error("Error setting the build status on remote service")
       logger.error(ex)
-      logger.error(ex.backtrace.join("\n"))
     end
   end
 end
