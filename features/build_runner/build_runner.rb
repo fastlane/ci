@@ -50,6 +50,11 @@ module FastlaneCI
       self.prepare_build_object
     end
 
+    # Access the build number of that specific BuildRunner
+    def current_build_number
+      return self.current_build.number
+    end
+
     # Use this method for additional setup for subclasses
     def setup
       not_implemented(__method__)

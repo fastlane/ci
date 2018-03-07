@@ -31,7 +31,7 @@ module FastlaneCI
       build_runner.setup(platform: "ios", lane: "beta", parameters: nil) # specific to fastlane
       Services.build_runner_service.add_build_runner(build_runner: build_runner)
 
-      redirect("#{HOME}/#{project_id}/builds/#{build_runner.current_build.number}")
+      redirect("#{HOME}/#{project_id}/builds/#{build_runner.current_build_number}")
     end
 
     # Edit a project settings
