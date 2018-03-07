@@ -53,8 +53,8 @@ describe FastlaneCI::UserService do
 
     context "user exists" do
       before(:each) do
-        FastlaneCI::UserService.any_instance.stub(:find_user).with(id: user_id) { user }
-        FastlaneCI::UserService.any_instance.stub(:update_user!).with(user: updated_user)
+        subject.stub(:find_user).with(id: user_id) { user }
+        subject.stub(:update_user!).with(user: updated_user)
       end
 
       it "creates a new provider credential for the user" do
@@ -95,8 +95,8 @@ describe FastlaneCI::UserService do
 
     context "user exists" do
       before(:each) do
-        FastlaneCI::UserService.any_instance.stub(:find_user).with(id: user_id) { user }
-        FastlaneCI::UserService.any_instance.stub(:update_user!).with(user: updated_user)
+        subject.stub(:find_user).with(id: user_id) { user }
+        subject.stub(:update_user!).with(user: updated_user)
       end
 
       it "replaces provider credential for the user" do
