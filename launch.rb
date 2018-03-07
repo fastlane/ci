@@ -90,6 +90,11 @@ module FastlaneCI
         warn("Error: ensure you have your `FASTLANE_CI_REPO_URL` environment variable set")
         exit(1)
       end
+
+      # force verbose mode if we're debugging threads
+      if ENV["FASTLANE_CI_THREAD_DEBUG_MODE"]
+        ENV["FASTLANE_CI_VERBOSE"] = "1"
+      end
     end
 
     def self.setup_threads
