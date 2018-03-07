@@ -1,4 +1,4 @@
-require_relative "../shared/models/artifact"
+require_relative "../../shared/models/artifact"
 
 module FastlaneCI
   # Class that represents a BuildRunner, used
@@ -62,7 +62,7 @@ module FastlaneCI
     def start
       start_time = Time.now
 
-      logger.debug("Running runner now")
+      logger.debug("Starting runner #{self.class} now...")
 
       artifact_paths = self.run do |current_row|
         new_row(current_row)
@@ -88,7 +88,7 @@ module FastlaneCI
       self.update_build_status!
     rescue StandardError => ex
       # TODO: better error handling, don't catch all Exception
-      puts(ex)
+      logger.error(ex)
       duration = Time.now - start_time
       current_build.duration = duration
       current_build.status = :failure # TODO: also handle failure
