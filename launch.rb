@@ -130,6 +130,8 @@ module FastlaneCI
       require_relative "features/login/login_controller"
       require_relative "features/notifications/notifications_controller"
       require_relative "features/project/project_controller"
+      require_relative "features/credentials/provider_credentials_controller"
+      require_relative "features/users/users_controller"
       require_relative "features/build/build_controller"
 
       # Load up all the available controllers
@@ -137,6 +139,8 @@ module FastlaneCI
       FastlaneCI::FastlaneApp.use(FastlaneCI::LoginController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::NotificationsController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::ProjectController)
+      FastlaneCI::FastlaneApp.use(FastlaneCI::ProviderCredentialsController)
+      FastlaneCI::FastlaneApp.use(FastlaneCI::UsersController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::BuildController)
     end
 

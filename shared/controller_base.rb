@@ -1,6 +1,7 @@
 require "sinatra/base"
 require "sinatra/reloader"
 require "sinatra/custom_logger"
+require "set"
 require "logger"
 
 require_relative "logging_module"
@@ -78,6 +79,28 @@ module FastlaneCI
       #     setup_common_controller_configuration(is_called_during_reload: true)
       #   }
       # end
+    end
+
+    protected
+
+    # Converts keys from strings to symbols and selects only the expected keys
+    #
+    # @param  [Hash]       actuals
+    # @param  [Set[Symbol] expected_keys
+    # @return [Hash]
+    def format_params(actuals, expected_keys)
+      actuals
+        .select { |k, _v| expected_keys.include?(k) }
+        .each_with_object({}) { |(k, v), hash| hash[k.to_sym] = v }
+    end
+
+    # Validates all the required keys are present, and that no values are nil
+    #
+    # @param  [Hash]       actuals
+    # @param  [Set[Symbol] expected_keys
+    # @return [Boolean]
+    def valid_params?(actuals, expected_keys)
+      expected_keys.subset?(actuals.keys.to_set) && actuals.values.none?(&:nil?)
     end
   end
 end

@@ -8,7 +8,8 @@ module FastlaneCI
   class GitHubProviderCredential < ProviderCredential
     attr_accessor :encrypted_api_token
 
-    def initialize(email: nil, full_name: nil, api_token: nil)
+    def initialize(id: nil, email: nil, full_name: nil, api_token: nil)
+      self.id = id || SecureRandom.uuid
       self.email = email
       self.full_name = full_name
       self.api_token = api_token

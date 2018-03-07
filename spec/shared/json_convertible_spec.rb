@@ -87,6 +87,13 @@ module FastlaneCI
                                    ])
     end
 
+    let (:mock_array_of_hash_object) do
+      MockArrayJSONConvertible.new(mock_json_array_attribute: [
+                                     { one_attribute: "Hello", other_attribute: "Test" },
+                                     { one_attribute: "World", other_attribute: "This" }
+                                   ])
+    end
+
     it "Works out of the box with serialization to object dictionary" do
       json_from_mock_object = mock_object.to_object_dictionary
 
@@ -207,6 +214,14 @@ module FastlaneCI
       expect(array_object_dictionary).to eql({ "mock_json_array_attribute" => [
                                                { "one_attribute" => "Hello", "other_attribute" => Time.at(0) },
                                                { "one_attribute" => "World", "other_attribute" => Time.at(10) }
+                                             ] })
+    end
+
+    it "Allows to encode objects with array properties of a type that does not include the JSONConvertible mixin" do
+      array_object_dictionary = mock_array_of_hash_object.to_object_dictionary
+      expect(array_object_dictionary).to eql({ "mock_json_array_attribute" => [
+                                               { one_attribute: "Hello", other_attribute: "Test" },
+                                               { one_attribute: "World", other_attribute: "This" }
                                              ] })
     end
 

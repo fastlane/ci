@@ -22,7 +22,12 @@ module FastlaneCI
     end
 
     # Creates and returns a user if one doesn't already exist, otherwise fails and returns nil
-    def create_user!(email: nil, password: nil, provider_credential: nil)
+    def create_user!(id: nil, email: nil, password: nil, provider_credential: nil)
+      not_implemented(__method__)
+    end
+
+    # @return [User]
+    def find_user(id: nil)
       not_implemented(__method__)
     end
   end

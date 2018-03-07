@@ -13,6 +13,10 @@ module FastlaneCI
   class User
     include FastlaneCI::JSONConvertible
 
+    def self.attribute_to_type_map
+      return { :@provider_credentials => GitHubProviderCredential }
+    end
+
     def self.map_enumerable_type(enumerable_property_name: nil, current_json_object: nil)
       if enumerable_property_name == :@provider_credentials
         type = current_json_object["type"]
@@ -60,6 +64,25 @@ module FastlaneCI
       end
     end
 
+    def users=(users)
+      JSONUserDataSource.file_semaphore.synchronize do
+        users.each do |user|
+          # Fist need to serialize the provider credentials and ignore the `ci_user`
+          # instance variable. The reasoning is since if you serialize the `user`
+          # first, you will call `to_object_map` on the `ci_user`, which holds
+          # reference to a user. This will go on indefinitely
+          user.provider_credentials.map! do |credential|
+            credential.to_object_dictionary(ignore_instance_variables: [:@ci_user])
+          end
+        end
+
+        File.write(user_file_path, JSON.pretty_generate(users.map(&:to_object_dictionary)))
+      end
+
+      # Reload the users to sync them up with the persisted file store
+      reload_users
+    end
+
     def reload_users
       JSONUserDataSource.file_semaphore.synchronize do
         unless File.exist?(user_file_path)
@@ -104,48 +127,53 @@ module FastlaneCI
     end
 
     def update_user!(user: nil)
-      JSONUserDataSource.file_semaphore.synchronize do
-        user_index = nil
-        existing_user = nil
-        @users.each.with_index do |old_user, index|
-          if old_user.email.casecmp(user.email.downcase).zero?
-            user_index = index
-            existing_user = old_user
-            break
-          end
-        end
+      user_index = nil
+      existing_user = nil
 
-        if existing_user.nil?
-          logger.debug("Couldn't update user #{user.email} because they don't exist")
-          raise "Couldn't update user #{user.email} because they don't exist"
-        else
-          @users[user_index] = user # swap the old user record with the user
-          logger.debug("Updating user #{existing_user.email}, writing out users.json to #{user_file_path}")
-          File.write(user_file_path, JSON.pretty_generate(@users.map(&:to_object_dictionary)))
+      self.users.each.with_index do |old_user, index|
+        if old_user.email.casecmp(user.email.downcase).zero?
+          user_index = index
+          existing_user = old_user
+          break
         end
+      end
+
+      if existing_user.nil?
+        logger.debug("Couldn't update user #{user.email} because they don't exist")
+        raise "Couldn't update user #{user.email} because they don't exist"
+      else
+        users = self.users
+        users[user_index] = user
+        self.users = users
+        logger.debug("Updating user #{existing_user.email}, writing out users.json to #{user_file_path}")
       end
     end
 
-    def create_user!(email: nil, password: nil, provider_credential: nil)
+    def create_user!(id: nil, email: nil, password: nil, provider_credential: nil)
+      users = self.users
       new_user = User.new(
-        id: SecureRandom.uuid,
+        id: id,
         email: email,
         password_hash: BCrypt::Password.create(password),
         provider_credentials: [provider_credential]
       )
-      JSONUserDataSource.file_semaphore.synchronize do
-        existing_user = @users.select { |user| user.email.casecmp(email.downcase).zero? }.first
-        if existing_user.nil?
-          @users << new_user
 
-          logger.debug("Added user #{new_user.email}, writing out users.json to #{user_file_path}")
-          File.write(user_file_path, JSON.pretty_generate(@users.map(&:to_object_dictionary)))
-          return new_user
-        else
-          logger.debug("Couldn't add user #{new_user.email} because they already exist")
-          return nil
-        end
+      if !self.user_exist?(email: email)
+        users.push(new_user)
+        self.users = users
+        logger.debug("Added user #{new_user.email}, writing out users.json to #{user_file_path}")
+        return new_user
+      else
+        logger.debug("Couldn't add user #{new_user.email} because they already exist")
+        return nil
       end
+    end
+
+    # Finds a user with a given id
+    #
+    # @return [User]
+    def find_user(id: nil)
+      return self.users.select { |user| user.id == id }.first
     end
   end
 end

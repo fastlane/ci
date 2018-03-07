@@ -1,0 +1,42 @@
+<form method="POST" action="users/<%= action %>">
+  <td>
+    <code>id=<%= user.id %></code>
+    <input type="hidden" name="id" value=<%= user.id %>>
+  </td>
+
+  <td>
+    <input type="text" name="email" value=<%= user.email %>>
+  </td>
+
+  <td>
+    <input type="text" name="password_hash" value=<%= user.password_hash %>>
+  </td>
+
+  <td>
+    <table>
+      <thead>
+        <tr>
+          <th><i>id</i></th>
+          <th><i>Full Name</i></th>
+          <th></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% user.provider_credentials.each do |credential| %>
+          <tr>
+            <td><%= credential.id %></td>
+            <td><%= credential.full_name %></td>
+            <td>
+              <a href="/provider_credentials"><%= action.capitalize %></a>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </td>
+
+  <td>
+    <input type="submit" value="<%= action.capitalize %> user">
+  </td>
+</form>

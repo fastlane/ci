@@ -15,9 +15,9 @@ module FastlaneCI
 
     PROVIDER_CREDENTIAL_TYPES = doubled_types.freeze
 
+    attr_accessor :id
     attr_accessor :ci_user # user associated with this provider
 
-    # must define in subclass
     attr_writer :type # must be defined in sub class
     attr_writer :email # must be defined in sub class
     attr_writer :full_name # full name that the user intends to be in the commit author
@@ -45,6 +45,7 @@ module FastlaneCI
     end
 
     def initialize
+      self.id = SecureRandom.uuid
     end
   end
 end

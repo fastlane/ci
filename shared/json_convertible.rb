@@ -29,7 +29,13 @@ module FastlaneCI
           if self.instance_variable_get(var).kind_of?(Array)
             object_array = []
             self.instance_variable_get(var).each do |obj|
-              object_array << obj.to_object_dictionary
+              # If the `Array` type does not include the JSONConvertible mixin, don't
+              # call `to_object_dictionary` on the elements, since the method does not exist
+              if obj.class.include?(JSONConvertible)
+                object_array << obj.to_object_dictionary
+              else
+                object_array << obj
+              end
             end
             # In this step we have all the objects, lastly we need the key of the array.
             var_name, = self._to_object_dictionary(var)
