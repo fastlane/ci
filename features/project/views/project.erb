@@ -2,54 +2,25 @@
   <header class="mdl-layout__header">
     <div class="mdl-layout__header-row">
       <span class="mdl-layout__title"><%= title %></span>
+      <div class="mdl-layout-spacer"></div>
+      <a href="/projects/<%= project.id %>/trigger" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+        Trigger Job Now
+      </a>
+    </div>
+    <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
+      <a href="#scroll-tab-info" class="mdl-layout__tab is-active">Info</a>
+      <a href="#scroll-tab-settings" class="mdl-layout__tab">Settings</a>
     </div>
   </header>
 
   <%= erb :"../../partials/navigation" %>
 
   <main class="mdl-layout__content" style="padding: 40px">
-    <h1><%= title %></h1>
-    <a href="/projects/<%= project.id %>/trigger" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-      Trigger Job Now
-    </a>
-
-    <br /><br />
-
-    <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
-      <thead>
-        <tr>
-          <th>Status</th>
-          <th>Build Number</th>
-          <th>Triggered</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% project.builds.each do |build| %>
-          <% url = "/projects/#{project.id}/builds/#{build.number}" %>
-          <tr style="cursor: pointer;" onclick="location.href='<%= url %>'">
-            <td>
-              <% if build.status == "success" %>
-                <%= "✅" %>
-              <% elsif build.status == "pending" %>
-                <%= "🌕" %>
-              <% else %>
-                <%= "🚫" %>
-              <% end %>
-            </td>
-            <td style="text-align: center;"><%= build.number %></td>
-            <!-- TODO: Use whichever format for the timestamp desired. -->
-            <td><%= build.timestamp.strftime("%Y%m%dT%H%M%S%z") %></td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-    <br />
-
-
-
-    <a href="/projects/<%= project.id %>/edit" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-      Edit Project
-    </a>
-
+    <section class="mdl-layout__tab-panel is-active" id="scroll-tab-info">
+      <%= erb(:project_info, locals: { project: project }) %>
+    </section>
+    <section class="mdl-layout__tab-panel" id="scroll-tab-settings">
+      <%= erb(:project_settings, locals: { project: project , available_lanes: available_lanes, fastfile_path: fastfile_path }) %>
+    </section>
   </main>
 </div>

@@ -33,8 +33,8 @@ module FastlaneCI
       redirect("#{HOME}/#{project_id}/builds/#{test_runner_service.current_build.number}")
     end
 
-    # Edit a project settings
-    get "#{HOME}/:project_id/edit" do
+    # Details of a project settings
+    get "#{HOME}/:project_id" do
       project = self.user_project_with_id(project_id: params[:project_id])
 
       # TODO: We now access a file directly from the submodule
@@ -68,7 +68,7 @@ module FastlaneCI
         fastfile_path: relative_fastfile_path
       }
 
-      erb(:edit_project, locals: locals, layout: FastlaneCI.default_layout)
+      erb(:project, locals: locals, layout: FastlaneCI.default_layout)
     end
 
     post "#{HOME}/:project_id/save" do
@@ -80,17 +80,7 @@ module FastlaneCI
       # TODO: what's the best way to store that project in the config?
       # Wait for Josh' input
       FastlaneCI::Services.project_service.update_project!(project: project)
-      redirect("#{HOME}/details/#{project_id}")
-    end
-
-    get "#{HOME}/details/:project_id" do
-      project = self.user_project_with_id(project_id: params[:project_id])
-
-      locals = {
-        project: project,
-        title: "Project #{project.project_name}"
-      }
-      erb(:project, locals: locals, layout: FastlaneCI.default_layout)
+      redirect("#{HOME}/#{project_id}")
     end
 
     get "#{HOME}/add" do
@@ -167,7 +157,7 @@ module FastlaneCI
       )
 
       if !project.nil?
-        redirect("#{HOME}/details/#{project.id}")
+        redirect("#{HOME}/#{project.id}")
       else
         raise "Project couldn't be created"
       end

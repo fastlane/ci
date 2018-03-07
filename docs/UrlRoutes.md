@@ -23,7 +23,7 @@ This comes with its own up- and downsides.
 
 #### Accessing a resource
 
-- `/projects/[project_id]`: Show project details
+- `/projects/[project_id]`: Show project details and allow settings to be configured
 - `/projects/[project_id]/builds/[build_id]`: Show build details - even though `[build_id]` might be unique, we want to have its parent in the URL also
 
 **More depth**
@@ -36,7 +36,6 @@ Sometimes a resource has a view with more details, so we can append `/details` t
 
 Basically the same URL as accessing a resource, but with an appended `/edit`
 
-- `/projects/[project_id]/edit`
 - `/projects/[project_id]/builds/[build_id]/edit`
 
 #### POST URLs
