@@ -1,5 +1,6 @@
 require_relative "../features/build_runner/fastlane_build_runner"
 require_relative "../shared/models/artifact"
+require_relative "../shared/logging_module"
 
 module FastlaneCI
   # Responsible for the life cycle of running tests as part of fastlane.ci
@@ -12,6 +13,7 @@ module FastlaneCI
   # TODO: move github specific stuff out into GitHubService (GitHubService right now)
   # TODO: maybe rename this to GitHubBuildRunnerService
   class BuildRunnerService
+    include FastlaneCI::Logging
     class << self
       # TODO: move all the things below somewhere else
       # we need to hold all test runner services, to not destroy them with the garbage collector
@@ -21,8 +23,6 @@ module FastlaneCI
         @build_runner_services ||= []
       end
     end
-
-    include FastlaneCI::Logging
 
     attr_accessor :project
     attr_accessor :build_service
@@ -72,7 +72,7 @@ module FastlaneCI
 
     # Handle a new incoming row, and alert every stakeholder who is interested
     def new_row(row)
-      logger.debug(row["message"])
+      logger.debug(row["message"]) if row["message"]
 
       # Report back the row
       # 1) Store it in the history of logs (used to access half-built builds)
@@ -137,7 +137,7 @@ module FastlaneCI
       self.update_build_status!
     rescue StandardError => ex
       # TODO: better error handling, don't catch all Exception
-      puts(ex)
+      logger.error(ex)
       duration = Time.now - start_time
       current_build.duration = duration
       current_build.status = :failure # TODO: also handle failure
@@ -180,7 +180,7 @@ module FastlaneCI
       self.update_build_status!
     rescue StandardError => ex
       # TODO: better error handling, don't catch all Exception
-      puts(ex)
+      logger.error(ex)
       duration = Time.now - start_time
       current_build.duration = duration
       current_build.status = :failure # TODO: also handle failure

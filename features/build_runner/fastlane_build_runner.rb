@@ -7,6 +7,7 @@ module FastlaneCI
   # fastlane Fastfile configurations
   # TODO: run method *should* return an array of artifacts
   class FastlaneBuildRunner < BuildRunner
+    include FastlaneCI::Logging
     # Parameters for running fastlane
     attr_reader :platform
     attr_reader :lane
@@ -46,20 +47,21 @@ module FastlaneCI
 
       # Load and parse the Fastfile
       # TODO: This won't work for now, as it is evaluating to the local CI fastlane.
-      fast_file = Fastlane::FastFile.new(FastlaneCore::FastlaneFolder.fastfile_path)
+      fast_file_path = FastlaneCore::FastlaneFolder.fastfile_path
+      fast_file = Fastlane::FastFile.new(fast_file_path)
 
       begin
         # Execute the Fastfile here
-        puts("starting fastlane run")
+        logger.info("starting fastlane run lane: #{self.lane} platform: #{self.platform}, params: #{self.parameters} from #{fast_file_path}")
         fast_file.runner.execute(self.lane, self.platform, self.parameters)
-        puts("fastlane run complete")
+        logger.info("fastlane run complete")
         # TODO: success handling here
         # this all will be implemented using a separate PR
         # once we have the web socket streaming implemented
       rescue StandardError => ex
         # TODO: Exception handling here
-        puts(ex)
-        puts(ex.backtrace)
+        logger.error(ex)
+        logger.error(ex.backtrace)
       ensure
         # Either the build was successfull or not, we have to ensure the artifacts for the execution.
         artifact_paths = []
@@ -68,7 +70,7 @@ module FastlaneCI
                                                              .select { |value| value.to_s.include?("PATH") } # Far from ideal, but meanwhile...
                                                              .select { |value| !Fastlane::Actions.lane_context[value].nil? && !Fastlane::Actions.lane_context[value].empty? }
                                                              .map { |value| { type: value.to_s, path: Fastlane::Actions.lane_context[value] } }
-        return artifact_paths.concat(constants_with_path)
+        artifact_paths.concat(constants_with_path)
       end
     end
   end
