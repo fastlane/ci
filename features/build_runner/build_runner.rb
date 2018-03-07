@@ -109,7 +109,7 @@ module FastlaneCI
 
     # Handle a new incoming row, and alert every stakeholder who is interested
     def new_row(row)
-      logger.debug(row["message"])
+      logger.debug(row["message"]) if row["message"].to_s.length > 0
 
       # Report back the row
       # 1) Store it in the history of logs (used to access half-built builds)
@@ -160,7 +160,7 @@ module FastlaneCI
       FastlaneCI::Services.project_service.git_repo.commit_changes!
     rescue StandardError => ex
       logger.error("Error setting the build status as part of the config repo")
-      logger.error(ex.to_s)
+      logger.error(ex)
       logger.error(ex.backtrace.join("\n"))
       # If setting the build status inside the git repo fails
       # this is actually a big deal, and we can't proceed.
@@ -182,7 +182,7 @@ module FastlaneCI
       )
     rescue StandardError => ex
       logger.error("Error setting the build status on remote service")
-      logger.error(ex.to_s)
+      logger.error(ex)
       logger.error(ex.backtrace.join("\n"))
     end
   end
