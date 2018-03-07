@@ -28,10 +28,8 @@ module FastlaneCI
       end
     end
 
-    def find_build_runner(project_id: nil, build_number: nil)
-      raise "You have to provide both a project and a build number" if project_id.nil? || build_number.nil?
-
-      # Fetch all the active runners, and see if there is one WIP
+    # Fetch all the active runners, and see if there is one WIP
+    def find_build_runner(project_id:, build_number:)
       return self.build_runners.find do |build_runner|
         build_runner.project.id == project_id && build_runner.current_build.number == build_number
       end
