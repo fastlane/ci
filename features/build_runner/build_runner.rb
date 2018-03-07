@@ -133,7 +133,7 @@ module FastlaneCI
       if builds.count > 0
         new_build_number = builds.sort_by(&:number).last.number + 1
       else
-        new_build_number = 1 # do we start with 1?
+        new_build_number = 1 # We start with build number 1
       end
 
       self.current_build = FastlaneCI::Build.new(
