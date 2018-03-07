@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/fastlane/fastlane
-  revision: 5c8081c5eda17a0e1ca6d953ee6492992553308c
+  revision: 098fb3f351b73c97cbc077625ca606b6b2fc7da2
   specs:
     fastlane (2.84.0)
       CFPropertyList (>= 2.3, < 4.0.0)
@@ -86,7 +86,7 @@ GEM
     faye-websocket (0.10.7)
       eventmachine (>= 0.12.0)
       websocket-driver (>= 0.5.1)
-    gh_inspector (1.1.2)
+    gh_inspector (1.1.3)
     git (1.3.0)
     google-api-client (0.13.6)
       addressable (~> 2.5, >= 2.5.1)

@@ -26,7 +26,7 @@ module FastlaneCI
         return
       end
 
-      test_runner_service = FastlaneCI::TestRunnerService.new(
+      build_runner_service = FastlaneCI::BuildRunnerService.new(
         project: project,
         sha: current_sha
       )
@@ -34,10 +34,10 @@ module FastlaneCI
       # TODO: not the best approach to spawn a thread
       # Use TaskQueue instead
       Thread.new do
-        test_runner_service.run
+        build_runner_service.run
       end
 
-      redirect("#{HOME}/#{project_id}/builds/#{test_runner_service.current_build.number}")
+      redirect("#{HOME}/#{project_id}/builds/#{build_runner_service.current_build.number}")
     end
 
     # Edit a project settings

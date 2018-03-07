@@ -1,7 +1,7 @@
 require File.expand_path("../../spec_helper.rb", __FILE__)
-require File.expand_path("../../../services/test_runner_service.rb", __FILE__)
+require File.expand_path("../../../services/build_runner_service.rb", __FILE__)
 
-describe FastlaneCI::TestRunnerService do
+describe FastlaneCI::BuildRunnerService do
   # Will not cause an exception to be raised in `subject.run` because the project
   # constructor is given a 'repo_config' attribute
   let (:good_project) do
@@ -14,7 +14,7 @@ describe FastlaneCI::TestRunnerService do
   end
 
   subject do
-    FastlaneCI::TestRunnerService.new(
+    FastlaneCI::BuildRunnerService.new(
       project: good_project,
       sha: SecureRandom.uuid,
       github_service: double("GithubService", set_build_status!: nil)

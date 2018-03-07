@@ -16,7 +16,7 @@ module FastlaneCI
       build = project.builds.find { |b| b.number == build_number }
 
       # Fetch all the active runners, and see if there is one WIP
-      current_runner_service = TestRunnerService.test_runner_services.find do |t|
+      current_runner_service = BuildRunnerService.build_runner_services.find do |t|
         t.project.id == project_id && t.current_build.number == build_number
       end
 
