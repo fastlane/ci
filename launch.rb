@@ -176,7 +176,7 @@ module FastlaneCI
         # TODO: I think we can change this to pull the most recent sha from github
         repo = FastlaneCI::GitRepo.new(git_config: project.repo_config, provider_credential: self.provider_credential)
         current_sha = repo.most_recent_commit.sha
-        runner_service = FastlaneCI::TestRunnerService.new(project: project, sha: current_sha, github_service: github_service)
+        runner_service = FastlaneCI::BuildRunnerService.new(project: project, sha: current_sha, github_service: github_service)
 
         # Enqueue each pending build rerun in an asynchronous task queue
         pending_builds.each do |build|
@@ -217,7 +217,7 @@ module FastlaneCI
           next if statuses.count > 0
 
           logger.debug("Found sha: #{current_sha} in #{repo_full_name} missing status, adding build.")
-          runner_service = FastlaneCI::TestRunnerService.new(project: project, sha: current_sha, github_service: github_service)
+          runner_service = FastlaneCI::BuildRunnerService.new(project: project, sha: current_sha, github_service: github_service)
           task = TaskQueue::Task.new(work_block: proc { runner_service.run })
           Launch.build_queue.add_task_async(task: task)
         end

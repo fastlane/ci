@@ -1,24 +1,24 @@
-require_relative "../features/test_runner/fastlane_test_runner"
+require_relative "../features/build_runner/fastlane_build_runner"
 require_relative "../shared/models/artifact"
 
 module FastlaneCI
   # Responsible for the life cycle of running tests as part of fastlane.ci
   # In particular this takes care of all the overhead, like measuring the time and storing & reporting
   # the build status
-  # - TestRunnerService owns a TestRunner
-  # - TestRunnerService is alive until it's finished running
-  # - TestRunnerService is created on the fly, either when "resuming" a build, or when a new build is triggered by a project trigger
-  # - TestRunner only runs tests. Stays alive as long as the TestRunnerService
+  # - BuildRunnerService owns a BuildRunner
+  # - BuildRunnerService is alive until it's finished running
+  # - BuildRunnerService is created on the fly, either when "resuming" a build, or when a new build is triggered by a project trigger
+  # - BuildRunner only runs tests. Stays alive as long as the BuildRunnerService
   # TODO: move github specific stuff out into GitHubService (GitHubService right now)
-  # TODO: maybe rename this to GitHubTestRunnerService
-  class TestRunnerService
+  # TODO: maybe rename this to GitHubBuildRunnerService
+  class BuildRunnerService
     class << self
       # TODO: move all the things below somewhere else
       # we need to hold all test runner services, to not destroy them with the garbage collector
       # and also to access them as part of our middle ware
-      # it probably makes sense to have a single TestRunnerService, that holds multiple TestRunners instead
-      def test_runner_services
-        @test_runner_services ||= []
+      # it probably makes sense to have a single BuildRunnerService, that holds multiple BuildRunners instead
+      def build_runner_services
+        @build_runner_services ||= []
       end
     end
 
@@ -38,10 +38,10 @@ module FastlaneCI
     # All blocks listening to changes for this build
     attr_accessor :build_change_observer_blocks
 
-    # The TestRunner object that is responsible for running the actual tests
-    attr_accessor :test_runner
+    # The BuildRunner object that is responsible for running the actual tests
+    attr_accessor :build_runner
 
-    def initialize(project: nil, sha: nil, github_service: nil, test_runner: nil)
+    def initialize(project: nil, sha: nil, github_service: nil)
       self.project = project
       self.sha = sha
 
@@ -53,7 +53,7 @@ module FastlaneCI
       self.all_build_output_log_lines = []
       self.build_change_observer_blocks = []
 
-      self.test_runner = FastlaneTestRunner.new(
+      self.build_runner = FastlaneBuildRunner.new(
         platform: self.project.lane.split(" ").first, # nil, # TODO: is the platform gonna be part of the `project.lane`? Probably yes
         lane: self.project.lane.split(" ").last, # project.lane,
         parameters: nil
@@ -63,7 +63,7 @@ module FastlaneCI
 
       # Add yourself to the list of active workers so we can stream the output to the user
       # this might be nil, while the server still starts
-      self.class.test_runner_services << self
+      self.class.build_runner_services << self
     end
 
     def add_listener(block)
@@ -112,20 +112,20 @@ module FastlaneCI
       start_time = Time.now
 
       logger.debug("Running runner now")
-      artifact_paths = test_runner.run do |current_row|
+      artifact_paths = build_runner.run do |current_row|
         new_row(current_row)
       end
 
-      artifacts = artifact_paths.map { |artifact|
+      artifacts = artifact_paths.map do |artifact|
         Artifact.new(
           type: artifact[:type],
           reference: artifact[:path],
           provider: self.project.artifact_provider
         )
-      }
-      .map { |artifact|
+      end
+                                .map do |artifact|
         self.project.artifact_provider.store!(artifact: artifact, build: self.current_build, project: self.project)
-      }
+      end
 
       self.current_build.artifacts = artifacts
 
@@ -155,20 +155,20 @@ module FastlaneCI
       update_build_status!
 
       logger.debug("Running runner now")
-      artifact_paths = test_runner.run do |current_row|
+      artifact_paths = build_runner.run do |current_row|
         new_row(current_row)
       end
 
-      artifacts = artifact_paths.map { |artifact|
+      artifacts = artifact_paths.map do |artifact|
         Artifact.new(
           type: artifact[:type],
           reference: artifact[:path],
           provider: self.project.artifact_provider
         )
-      }
-      .map { |artifact|
+      end
+                                .map do |artifact|
         self.project.artifact_provider.store!(artifact: artifact, build: self.current_build, project: self.project)
-      }
+      end
 
       self.current_build.artifacts = artifacts
 

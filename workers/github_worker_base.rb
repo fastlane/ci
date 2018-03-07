@@ -1,7 +1,7 @@
 require_relative "worker_base"
 require_relative "../shared/models/provider_credential"
 require_relative "../shared/logging_module"
-require_relative "../services/test_runner_service"
+require_relative "../services/build_runner_service"
 require_relative "../services/code_hosting/git_hub_service"
 
 module FastlaneCI
@@ -93,7 +93,7 @@ module FastlaneCI
       current_sha = repo.most_recent_commit.sha
 
       build_task = TaskQueue::Task.new(work_block: proc {
-        FastlaneCI::TestRunnerService.new(
+        FastlaneCI::BuildRunnerService.new(
           project: current_project,
           sha: current_sha,
           github_service: self.github_service

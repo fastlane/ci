@@ -1,12 +1,12 @@
-require_relative "./fastlane_test_runner_helpers/fastlane_ci_output"
-require_relative "./fastlane_test_runner_helpers/fastlane_output_to_html"
-require_relative "./test_runner"
+require_relative "./fastlane_build_runner_helpers/fastlane_ci_output"
+require_relative "./fastlane_build_runner_helpers/fastlane_output_to_html"
+require_relative "./build_runner"
 
 module FastlaneCI
-  # Represents the test runner responsible for loading and running
+  # Represents the build runner responsible for loading and running
   # fastlane Fastfile configurations
   # TODO: run method *should* return an array of artifacts
-  class FastlaneTestRunner < TestRunner
+  class FastlaneBuildRunner < BuildRunner
     # Parameters for running fastlane
     attr_reader :platform
     attr_reader :lane
@@ -65,9 +65,9 @@ module FastlaneCI
         artifact_paths = []
         artifact_paths << { type: "log", path: "fastlane.log" }
         constants_with_path = Fastlane::Actions::SharedValues.constants
-          .select { |value| value.to_s.include?("PATH") } # Far from ideal, but meanwhile...
-          .select { |value| !Fastlane::Actions.lane_context[value].nil? && !Fastlane::Actions.lane_context[value].empty? }
-          .map { |value| { type: value.to_s, path: Fastlane::Actions.lane_context[value]} }
+                                                             .select { |value| value.to_s.include?("PATH") } # Far from ideal, but meanwhile...
+                                                             .select { |value| !Fastlane::Actions.lane_context[value].nil? && !Fastlane::Actions.lane_context[value].empty? }
+                                                             .map { |value| { type: value.to_s, path: Fastlane::Actions.lane_context[value] } }
         return artifact_paths.concat(constants_with_path)
       end
     end

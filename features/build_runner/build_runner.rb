@@ -1,7 +1,7 @@
 module FastlaneCI
-  # Abstract class that represents a test runner, used
+  # Abstract class that represents a build runner, used
   # to run tests for a given commit sha
-  class TestRunner
+  class BuildRunner
     # @return [Array[String]] of references for the different artifacts created by the runner.
     def run(*args)
       not_implemented(__method__)
@@ -9,4 +9,4 @@ module FastlaneCI
   end
 end
 
-require_relative "./fastlane_test_runner"
+require_relative "./fastlane_build_runner"

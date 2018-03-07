@@ -53,13 +53,13 @@ module FastlaneCI
         self.websocket_clients[project_id][build_number] ||= []
         self.websocket_clients[project_id][build_number] << ws
 
-        TestRunnerService.test_runner_services.each do |test_runner_service|
-          next if test_runner_service.current_build.number != build_number
-          next if test_runner_service.project.id != project_id
+        BuildRunnerService.build_runner_services.each do |build_runner_service|
+          next if build_runner_service.current_build.number != build_number
+          next if build_runner_service.project.id != project_id
 
           # TODO: Think this through, do we properly add new listener, and notify them of line changes, etc.
           #       Also how does the "offboarding" of runners work once the tests are finished
-          test_runner_service.add_listener(proc do |row|
+          build_runner_service.add_listener(proc do |row|
             web_sockets = self.websocket_clients[project_id][build_number]
             logger.debug("Streaming #{row} to #{web_sockets.count} client(s)")
 

@@ -6,7 +6,7 @@ module FastlaneCI
     # @return [String] The class of the provider
     attr_accessor :class_name
 
-    # The store! method must implement the utility in order to store some 
+    # The store! method must implement the utility in order to store some
     # temporary Artifact into a resource storage, such as disk, Cloud Storage, etc.
     #
     # @param [Artifact] artifact, the artifact we want to store.
