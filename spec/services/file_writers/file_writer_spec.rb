@@ -28,16 +28,10 @@ describe FastlaneCI::FileWriter do
   describe "#write!" do
     it "opens and writes the `file_template` to the `path`" do
       subject.stub(:file_template) { template_string }
-      file = double("file")
 
       File
-        .should_receive(:open)
-        .with(template_path, "w")
-        .and_yield(file)
-
-      file
         .should_receive(:write)
-        .with(template_string)
+        .with(template_path, template_string)
 
       subject.write!
     end

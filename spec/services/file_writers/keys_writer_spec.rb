@@ -37,16 +37,9 @@ describe FastlaneCI::KeysWriter do
 
   describe "#write!" do
     it "opens and writes the `file_template` to the `path`, with the correct `locals`" do
-      file = double("file")
-
       File
-        .should_receive(:open)
-        .with(template_path, "w")
-        .and_yield(file)
-
-      file
         .should_receive(:write)
-        .with(template_string)
+        .with(template_path, template_string)
 
       subject.write!
     end
