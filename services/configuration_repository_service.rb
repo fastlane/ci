@@ -58,17 +58,17 @@ module FastlaneCI
     def serialized_users
       users = [
         User.new(
-          email: ENV["FASTLANE_CI_USER"],
-          password_hash: BCrypt::Password.create(ENV["FASTLANE_CI_PASSWORD"]),
+          email: FastlaneCI.env.ci_user_email,
+          password_hash: BCrypt::Password.create(FastlaneCI.env.ci_user_password),
           provider_credentials: [
             FastlaneCI::GitHubProviderCredential.new(
-              email: ENV["FASTLANE_CI_USER"],
-              api_token: ENV["FASTLANE_CI_PASSWORD"],
+              email: FastlaneCI.env.ci_user_email,
+              api_token: FastlaneCI.env.ci_user_password,
               full_name: "CI User credentials"
             ),
             FastlaneCI::GitHubProviderCredential.new(
-              email: ENV["FASTLANE_CI_INITIAL_CLONE_EMAIL"],
-              api_token: ENV["FASTLANE_CI_INITIAL_CLONE_API_TOKEN"],
+              email: FastlaneCI.env.initial_clone_email,
+              api_token: FastlaneCI.env.initial_clone_api_token,
               full_name: "Clone User credentials"
             )
           ]
@@ -128,14 +128,14 @@ module FastlaneCI
     #
     # @return [String]
     def repo_name
-      ENV["FASTLANE_CI_REPO_URL"].split("/").last
+      FastlaneCI.env.repo_url.split("/").last
     end
 
     # The short-form of the configuration repository URL `ueser/repo`
     #
     # @return [String]
     def repo_shortform
-      ENV["FASTLANE_CI_REPO_URL"].split("/").last(2).join("/")
+      FastlaneCI.env.repo_url.split("/").last(2).join("/")
     end
   end
 end
