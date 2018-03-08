@@ -66,6 +66,9 @@ module FastlaneCI
     end
 
     # returns the statused of a given commit sha for a given repo specifically for fastlane.ci
+    # TODO: add support for filtering status types, to allow listing of just fastlane.ci status reports
+    #       This has to wait for now, until we decide how we separate them for each project, as multiple projects
+    #       can run builds for one repo
     def statuses_for_commit_sha(repo_full_name: nil, sha: nil)
       all_statuses = client.statuses(repo_full_name, sha)
       only_ci_statuses = all_statuses.select { |status| status.context.start_with?(GitHubService.status_context_prefix) }
