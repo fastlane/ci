@@ -81,7 +81,7 @@ module FastlaneCI
       # Setup the fastlane.ci GitRepoConfig
       @_ci_config_repo ||= GitRepoConfig.new(
         id: "fastlane-ci-config",
-        git_url: ENV["FASTLANE_CI_REPO_URL"],
+        git_url: FastlaneCI.env.repo_url,
         description: "Contains the fastlane.ci configuration",
         name: "fastlane ci",
         hidden: true
@@ -221,8 +221,8 @@ module FastlaneCI
     rescue StandardError => ex
       logger.error("Something went wrong on the initial clone")
 
-      if ENV["FASTLANE_CI_INITIAL_CLONE_API_TOKEN"].to_s.length == 0 || ENV["FASTLANE_CI_INITIAL_CLONE_EMAIL"].to_s.length == 0
-        logger.error("Make sure to provide your `FASTLANE_CI_INITIAL_CLONE_EMAIL` and `FASTLANE_CI_INITIAL_CLONE_API_TOKEN` ENV variables")
+      if FastlaneCI.env.initial_clone_api_token.to_s.empty?
+        logger.error("Make sure to provide your `FASTLANE_CI_INITIAL_CLONE_API_TOKEN` ENV variable")
       end
 
       raise ex
@@ -240,8 +240,8 @@ module FastlaneCI
     # @return [GitHubProviderCredential]
     def self.provider_credential
       @provider_credential ||= GitHubProviderCredential.new(
-        email: ENV["FASTLANE_CI_INITIAL_CLONE_EMAIL"],
-        api_token: ENV["FASTLANE_CI_INITIAL_CLONE_API_TOKEN"]
+        email: FastlaneCI.env.initial_clone_email,
+        api_token: FastlaneCI.env.initial_clone_api_token
       )
     end
 

@@ -55,7 +55,7 @@ module FastlaneCI
     def self.ci_config_repo
       @_ci_config_repo ||= GitRepoConfig.new(
         id: "fastlane-ci-config",
-        git_url: ENV["FASTLANE_CI_REPO_URL"],
+        git_url: FastlaneCI.env.repo_url,
         description: "Contains the fastlane.ci configuration",
         name: "fastlane ci",
         hidden: true
@@ -75,8 +75,8 @@ module FastlaneCI
     def self.ci_user
       # Find our fastlane.ci system user
       @_ci_user ||= Services.user_service.login(
-        email: ENV["FASTLANE_CI_USER"],
-        password: ENV["FASTLANE_CI_PASSWORD"],
+        email: FastlaneCI.env.ci_user_email,
+        password: FastlaneCI.env.ci_user_password,
         ci_config_repo: self.ci_config_repo
       )
     end
@@ -93,8 +93,8 @@ module FastlaneCI
     # @return [GitHubProviderCredential]
     def self.provider_credential
       @_provider_credential ||= GitHubProviderCredential.new(
-        email: ENV["FASTLANE_CI_INITIAL_CLONE_EMAIL"],
-        api_token: ENV["FASTLANE_CI_INITIAL_CLONE_API_TOKEN"]
+        email: FastlaneCI.env.initial_clone_email,
+        api_token: FastlaneCI.env.initial_clone_api_token
       )
     end
 

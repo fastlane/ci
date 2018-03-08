@@ -34,17 +34,17 @@ module FastlaneCI
     # Verifies the proper environment variables needed to run the server are
     # present
     def verify_env_variables
-      if ENV["FASTLANE_CI_ENCRYPTION_KEY"].nil?
+      if FastlaneCI.env.encryption_key.nil?
         warn("Error: unable to decrypt sensitive data without environment variable `FASTLANE_CI_ENCRYPTION_KEY` set")
         exit(1)
       end
 
-      if ENV["FASTLANE_CI_USER"].nil? || ENV["FASTLANE_CI_PASSWORD"].nil?
+      if FastlaneCI.env.ci_user_email.nil? || FastlaneCI.env.ci_user_password.nil?
         warn("Error: ensure you have your `FASTLANE_CI_USER` and `FASTLANE_CI_PASSWORD`environment variables set")
         exit(1)
       end
 
-      if ENV["FASTLANE_CI_REPO_URL"].nil?
+      if FastlaneCI.env.repo_url.nil?
         warn("Error: ensure you have your `FASTLANE_CI_REPO_URL` environment variable set")
         exit(1)
       end

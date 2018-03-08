@@ -73,14 +73,7 @@ module FastlaneCI
 
     # @return [Hash]
     def keys
-      {
-        encryption_key: ENV["FASTLANE_CI_ENCRYPTION_KEY"],
-        ci_user_email: ENV["FASTLANE_CI_USER"],
-        ci_user_api_token: ENV["FASTLANE_CI_PASSWORD"],
-        repo_url: ENV["FASTLANE_CI_REPO_URL"],
-        clone_user_email: ENV["FASTLANE_CI_INITIAL_CLONE_EMAIL"],
-        clone_user_api_token: ENV["FASTLANE_CI_INITIAL_CLONE_API_TOKEN"]
-      }
+      FastlaneCI.env.all
     end
 
     #####################################################
