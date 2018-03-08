@@ -98,12 +98,11 @@ module FastlaneCI
         github_service: self.github_service
       )
       build_runner.setup(parameters: nil)
-      Services.build_runner_service.add_build_runner(build_runner: build_runner)
+      build_task = Services.build_runner_service.add_build_runner(build_runner: build_runner)
 
       logger.debug("Adding task for #{self.project_full_name}: #{credential.ci_user.email}: #{current_sha[-6..-1]}")
-      self.serial_task_queue.add_task_async(task: build_task)
 
-      build_task
+      return build_task
     end
 
     def trigger_type
