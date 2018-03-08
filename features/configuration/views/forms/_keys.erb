@@ -1,0 +1,33 @@
+<form method="POST" action="/configuration/keys">
+  <p>
+    <code>FASTLANE_CI_ENCRYPTION_KEY=</code>
+    <input type="text" name="encryption_key", value=<%= keys[:encryption_key] %>>
+  </p>
+
+  <p>
+    <code>FASTLANE_CI_USER=</code>
+    <input type="text" name="ci_user_email", value=<%= keys[:ci_user_email] %>>
+  </p>
+
+  <p>
+    <code>FASTLANE_CI_PASSWORD=</code>
+    <input type="text" name="ci_user_api_token", value=<%= keys[:ci_user_api_token] %>>
+  </p>
+
+  <p>
+    <code>FASTLANE_CI_REPO_URL=</code>
+    <input type="text" name="repo_url" value=<%= keys[:repo_url] %>>
+  </p>
+
+  <p>
+    <code>FASTLANE_CI_INITIAL_CLONE_EMAIL=</code>
+    <input type="text" name="clone_user_email", value=<%= keys[:clone_user_email] %>>
+  </p>
+
+  <p>
+    <code>FASTLANE_CI_INITIAL_CLONE_API_TOKEN=</code>
+    <input type="text" name="clone_user_api_token", value=<%= keys[:clone_user_api_token] %>>
+  </p>
+
+  <input type="submit" value="Update configuration variables.">
+</form>
