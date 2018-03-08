@@ -23,11 +23,14 @@ module FastlaneCI
       verify_system_requirements
       Services.environment_variable_service.reload_dot_env!
       Services.environment_variable_service.verify_env_variables
+
+      # done making sure our env is sane, let's move on to the next step 
       write_configuration_directories
-      setup_threads
+      configure_thread_abort
       check_for_existing_setup
-      prepare_server
-      run_github_workers
+      register_available_controllers
+      start_github_workers
+      restart_any_pending_work
     end
 
     def self.require_fastlane_ci
@@ -61,7 +64,7 @@ module FastlaneCI
       end
     end
 
-    def self.setup_threads
+    def self.configure_thread_abort
       if ENV["RACK_ENV"] == "development"
         logger.info("development mode, aborting on any thread exceptions")
         Thread.abort_on_exception = true
@@ -90,7 +93,7 @@ module FastlaneCI
 
     # We can't actually launch the server here
     # as it seems like it has to happen in `config.ru`
-    def self.prepare_server
+    def self.register_available_controllers
       # require all controllers
       require_relative "features/configuration/configuration_controller"
       require_relative "features/dashboard/dashboard_controller"
@@ -112,10 +115,18 @@ module FastlaneCI
       FastlaneCI::FastlaneApp.use(FastlaneCI::BuildController)
     end
 
-    def self.run_github_workers
+    def self.start_github_workers
       return if first_time_user?
 
-      launch_workers
+      launch_workers unless ENV["FASTLANE_CI_SKIP_WORKER_LAUNCH"]
+    end
+
+    def self.restart_any_pending_work
+      return if first_time_user?
+
+      # this helps during debugging
+      # in the future we should allow this to be configurable behavior
+      return if ENV["FASTLANE_CI_SKIP_RESTARTING_PENDING_WORK"]
 
       github_projects = Services.config_service.projects(provider_credential: self.provider_credential)
       github_service = FastlaneCI::GitHubService.new(provider_credential: self.provider_credential)
