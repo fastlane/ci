@@ -28,14 +28,13 @@ module FastlaneCI
     #
     # 3) If the data is not valid, display an error message
     post "#{HOME}/keys" do
-      variables =
-        if valid_params?(params, post_parameter_list_for_validation)
-          Services.environment_variable_service.write_keys_file!(locals: params)
-          Services.environment_variable_service.reload_dot_env!
-          { status: STATUS[:success], message: "~/.fastlane/ci/keys file written." }
-        else
-          { status: STATUS[:error], message: "~/.fastlane/ci/keys file NOT written." }
-        end
+      if valid_params?(params, post_parameter_list_for_validation)
+        Services.environment_variable_service.write_keys_file!(locals: params)
+        Services.environment_variable_service.reload_dot_env!
+        variables = { status: STATUS[:success], message: "~/.fastlane/ci/keys file written." }
+      else
+        variables = { status: STATUS[:error], message: "~/.fastlane/ci/keys file NOT written." }
+      end
 
       locals = { title: "Configuration", variables: variables }
       erb(:index, locals: locals, layout: FastlaneCI.default_layout)
@@ -52,16 +51,15 @@ module FastlaneCI
     #
     # 2) Redirect back to `/configuration`
     post "#{HOME}/git_repo" do
-      variables =
-        if keys.none?(&:nil?)
-          Services.configuration_repository_service.create_private_remote_configuration_repo
-          Services.reset_services!
-          Launch.trigger_initial_ci_setup
-          Launch.run_github_workers
-          { status: STATUS[:success], message: "Remote repo successfully created" }
-        else
-          { status: STATUS[:error], message: "Remote repo NOT successfully created" }
-        end
+      if keys.none?(&:nil?)
+        Services.configuration_repository_service.create_private_remote_configuration_repo
+        Services.reset_services!
+        Launch.trigger_initial_ci_setup
+        Launch.run_github_workers
+        variables = { status: STATUS[:success], message: "Remote repo successfully created" }
+      else
+        variables = { status: STATUS[:error], message: "Remote repo NOT successfully created" }
+      end
 
       locals = { title: "Configuration", variables: variables }
       erb(:index, locals: locals, layout: FastlaneCI.default_layout)

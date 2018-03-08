@@ -125,8 +125,6 @@ module FastlaneCI
     end
 
     def self.launch_workers
-      return if first_time_user?
-
       # Iterate through all provider credentials and their projects and start a worker for each project
       Services.ci_user.provider_credentials.each do |provider_credential|
         projects = Services.config_service.projects(provider_credential: provider_credential)
@@ -151,8 +149,6 @@ module FastlaneCI
     #
     # @return [nil]
     def self.run_pending_github_builds(projects: nil, github_service: nil)
-      return if first_time_user?
-
       # For each project, rerun all builds with the status of "pending"
       projects.each do |project|
         pending_builds = Services.build_service.pending_builds(project: project)
@@ -173,8 +169,6 @@ module FastlaneCI
     # We might be in a situation where we have an open pr, but no status yet
     # if that's the case, we should enqueue a build for it
     def self.enqueue_builds_for_open_github_prs_with_no_status(projects: nil, github_service: nil)
-      return if first_time_user?
-
       projects.each do |project|
         # TODO: generalize this sort of thing
         credential_type = project.repo_config.provider_credential_type_needed

@@ -6,6 +6,8 @@ module FastlaneCI
     # @return [String]
     attr_reader :path
 
+    # `locals` are template variables used in `file_template` method
+    #
     # @return [Hash]
     attr_reader :locals
 
@@ -21,7 +23,7 @@ module FastlaneCI
     # Writes the concrete class' template method (`file_template`) out to the
     # specified file `path`
     def write!
-      File.open(path, "w") { |file| file.write(file_template) }
+      File.write(path, file_template)
     end
 
     # Template method to be overridden by concretions
