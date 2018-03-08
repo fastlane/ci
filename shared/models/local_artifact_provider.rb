@@ -57,12 +57,9 @@ module FastlaneCI
 
     def retrieve!(artifact: nil)
       raise "Artifact to store was not provided or wrong type provided" if artifact.nil? || artifact&.class&.is_a?(Artifact)
-      raise "Build was not provided or wrong type provided" if build.nil? || build&.class&.is_a?(Build)
-      raise "Project was not provided or wrong type provided" if project.nil? || project&.class&.is_a?(Project)
-
       raise "Artifact reference not found" unless File.exist?(artifact.reference)
 
-      return artifact.reference
+      artifact.reference
     end
   end
 end
