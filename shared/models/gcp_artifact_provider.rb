@@ -42,9 +42,10 @@ module FastlaneCI
     end
 
     def init_storage!
+      # TODO: This will break when google-cloud-storage is updated.
       self.storage = Google::Cloud::Storage.new(
-        project_id: self.cloud_project,
-        credentials: self.json_keyfile_path
+        project: self.cloud_project,
+        keyfile: File.expand_path(self.json_keyfile_path)
       )
       self.bucket = self.storage.bucket(self.bucket_name)
       permissions = self.bucket.test_permissions("storage.buckets.get", "storage.buckets.write")
