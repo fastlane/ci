@@ -102,6 +102,26 @@ module FastlaneCI
     end
 
     def login(email: nil, password: nil)
+      # TODO: Andrew will remove this nasty hack in the onboarding refactor
+      #
+      # I made a bad assumption because of a cached browser which made me ignore a simple
+      # usecase
+      if email == ENV["FASTLANE_CI_USER"] && password == ENV["FASTLANE_CI_PASSWORD"]
+        ci_user = User.new(
+          email: ENV["FASTLANE_CI_USER"],
+          password_hash: BCrypt::Password.create(ENV["FASTLANE_CI_PASSWORD"]),
+          provider_credentials: [
+            FastlaneCI::GitHubProviderCredential.new(
+              email: FastlaneCI.env.ci_user_email,
+              api_token: FastlaneCI.env.ci_user_password,
+              full_name: "CI User credentials"
+            )
+          ]
+        )
+        return ci_user
+      end
+      # END: nasty hack :puke:
+
       user = self.users.select { |existing_user| existing_user.email.casecmp(email.downcase).zero? }.first
 
       # user doesn't exist
