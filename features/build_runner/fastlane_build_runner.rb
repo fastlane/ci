@@ -78,7 +78,7 @@ module FastlaneCI
         logger.error(ex)
         logger.error(ex.backtrace)
         return [] # TODO: return artifacts here (if any)
-      ensure
+        # ensure
         # Either the build was successfull or not, we have to ensure the artifacts for the execution.
         # artifact_paths = []
         # artifact_paths << { type: "log", path: "fastlane.log" }
