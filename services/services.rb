@@ -21,7 +21,8 @@ module FastlaneCI
     # Resets all the memoized services which rely on configurable environment
     # variables
     def self.reset_services!
-      logger.info("Reseting memoized services to `nil`")
+      # TODO: we might need to trigger service shutdowns if they have any scheduled tasks
+      logger.info("Reseting all services")
 
       # Reset service helpers
       @_ci_config_repo = nil
