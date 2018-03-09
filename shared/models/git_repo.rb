@@ -208,7 +208,6 @@ module FastlaneCI
       logger.debug("Using #{full_name} with #{username} as author information on #{self.git_config.git_url}")
       git.config("user.name", full_name)
       git.config("user.email", username)
-      logger.debug("done setup_author")
     end
 
     def temporary_git_storage
@@ -275,7 +274,7 @@ module FastlaneCI
     # TODO: this method isn't actually tested yet
     def commit_changes!(commit_message: nil, file_to_commit: nil, repo_auth: self.repo_auth)
       git_action_with_queue do
-        logger.debug("Starting commit_changes! #{self.git_config.git_url}")
+        logger.debug("Starting commit_changes! #{self.git_config.git_url} for #{repo_auth.username}")
         raise "file_to_commit not yet implemented" if file_to_commit
         commit_message ||= "Automatic commit by fastlane.ci"
 
@@ -291,7 +290,7 @@ module FastlaneCI
         else
           git.commit(commit_message)
           git.push
-          logger.debug("Done commit_changes! #{self.git_config.full_name}")
+          logger.debug("Done commit_changes! #{self.git_config.full_name} for #{repo_auth.username}")
         end
       end
     end

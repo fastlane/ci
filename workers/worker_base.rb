@@ -47,7 +47,7 @@ module FastlaneCI
     end
 
     def die!
-      logger.debug("Stopping worker")
+      logger.debug("Shutting down worker's scheduler")
       self.scheduler.shutdown
     end
 

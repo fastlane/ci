@@ -58,19 +58,37 @@ module FastlaneCI
       # this only takes a few ms the first time being called
       Fastlane.load_actions
 
-      # Load and parse the Fastfile
-      # TODO: This won't work for now, as it is evaluating to the local CI fastlane.
       fast_file_path = self.project.local_fastfile_path
       fast_file = Fastlane::FastFile.new(fast_file_path)
 
       begin
+        # TODO: I think we need to clear out the singleton values, such as lane context, and all that jazz
         # Execute the Fastfile here
         logger.info("starting fastlane run lane: #{self.lane} platform: #{self.platform}, params: #{self.parameters} from #{fast_file_path}")
+
+        build_success = true
+        # Attach a listener to the output to see if we have a failure. If so, this build failed
+        self.add_listener(proc do |row|
+          build_success = false if row[:type] == :error
+        end)
+
+        build_output = ["#{fast_file_path}, #{self.lane} platform: #{self.platform}, params: #{self.parameters} from output"]
+        # Attach a listener so we can collect the build output and display it all at once
+        self.add_listener(proc do |row|
+          build_output << "#{row[:time]}: #{row[:message]}"
+        end)
+        
+
         fast_file.runner.execute(self.lane, self.platform, self.parameters)
+
+        if build_success
+          self.current_build.status = :success
+        else
+          self.current_build.status = :failure
+        end
+
         logger.info("fastlane run complete")
-        # TODO: success handling here
-        # this all will be implemented using a separate PR
-        # once we have the web socket streaming implemented
+        logger.debug(build_output.join("\n").to_s)
 
         return [] # TODO: return artifacts here
       rescue StandardError => ex

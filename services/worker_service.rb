@@ -16,7 +16,7 @@ module FastlaneCI
     end
 
     def project_to_workers_dictionary_key(project: nil, user_responsible: nil)
-      logger.debug("Generating a key for project: `#{project.project_name}` (#{project.id}), user: #{user_responsible}")
+      logger.debug("Generating a key for project: `#{project.project_name}` (#{project.id}), user: #{user_responsible.email}")
       return "#{project.id}_#{user_responsible.id}"
     end
 
