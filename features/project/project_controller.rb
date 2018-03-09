@@ -33,9 +33,7 @@ module FastlaneCI
         sha: current_sha,
         github_service: FastlaneCI::GitHubService.new(provider_credential: current_github_provider_credential)
       )
-
-      lane ||= project.lane
-      build_runner.setup(platform: platform, lane: lane, parameters: nil) # specific to fastlane
+      build_runner.setup(parameters: nil)
       Services.build_runner_service.add_build_runner(build_runner: build_runner)
 
       redirect("#{HOME}/#{project_id}/builds/#{build_runner.current_build_number}")
