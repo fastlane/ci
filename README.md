@@ -44,7 +44,7 @@ With this project, we don't just want to make using CI easier, we want to bring 
 
 ## Docs
 
-- [VISION.md](VISION.md): Describes the overall vision and idea of this project, with its core principials
+- [VISION.md](VISION.md): Describes the overall vision and idea of this project, with its core principals
 - [docs/SystemArchitecture.md](docs/SystemArchitecture.md): Describes the overall design architecture of `fastlane.ci`, including the controllers, services, data sources, and data objects
 - [docs/ArtifactsAndBuilds.md](docs/ArtifactsAndBuilds.md): Describes how we store builds and their artifacts
 - [docs/use_cases](docs/use_cases): Describe the ideal use cases and the user flow
@@ -86,7 +86,7 @@ export FASTLANE_CI_PASSWORD="password"
 export FASTLANE_CI_REPO_URL="https://github.com/your-name/your-ci-config"
 
 # Needed just for the first startup of fastlane.ci:
-# The email address used for the intial clone for the config repo
+# The email address used for the initial clone for the config repo
 export FASTLANE_CI_INITIAL_CLONE_EMAIL="email@user.com"
 
 # The API token used for the initial clone for the config repo
