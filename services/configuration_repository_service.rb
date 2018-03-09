@@ -17,10 +17,11 @@ module FastlaneCI
     # Creates a remote repository if it does not already exist, complete with
     # the expected remote files `user.json` and `projects.json`
     def create_private_remote_configuration_repo
-      return if configuration_repository_exists?
-      client.create_repository(repo_name, private: true)
-      create_remote_json_file("users.json", json_string: serialized_users)
-      create_remote_json_file("projects.json")
+      unless configuration_repository_exists?
+        client.create_repository(repo_name, private: true)
+      end
+      create_remote_json_file("users.json", json_string: serialized_users) unless remote_file_a_json_array?("users.json")
+      create_remote_json_file("projects.json") unless remote_file_a_json_array?("projects.json")
     end
 
     # Returns `true` if the configuration repository is in proper format:
@@ -87,9 +88,11 @@ module FastlaneCI
     #
     # @param  [String] file_path
     def create_remote_json_file(file_path, json_string: "[]")
-      client.create_contents(
-        repo_shortform, file_path, "Adding #{file_path}", json_string
-      )
+      unless client.contents(repo_shortform, path: file_path)
+        client.create_contents(
+          repo_shortform, file_path, "Adding #{file_path}", json_string
+        )
+      end
     end
 
     #####################################################

@@ -3,6 +3,7 @@ require_relative "../shared/models/repo_config"
 require_relative "../shared/models/local_artifact_provider"
 require_relative "../shared/logging_module"
 require_relative "./user_service"
+require_relative "./services"
 
 module FastlaneCI
   # Provides access to projects
@@ -72,7 +73,7 @@ module FastlaneCI
 
     # Not sure if this must be here or not, but we can open a discussion on this.
     def commit_repo_changes!(message: nil, file_to_commit: nil)
-      self.project_data_source.git_repo.commit_changes!(commit_message: message,
+      Services.configuration_git_repo.commit_changes!(commit_message: message,
                                                         file_to_commit: file_to_commit)
     end
   end

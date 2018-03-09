@@ -103,6 +103,9 @@ module FastlaneCI
           fastfile_path: fastfile_path
       }
 
+      # Delete the project
+      FileUtils.rm_rf(repo_path)
+
       erb(:new_project_form, locals: locals, layout: FastlaneCI.default_layout)
     end
 
@@ -116,6 +119,13 @@ module FastlaneCI
 
       lane = params["selected_lane"]
       project_name = params["project_name"]
+
+      # TODO: Trigger the clone
+      _repo = GitRepo.new(
+        git_config: repo_config,
+        provider_credential: provider_credential,
+        async_start: false
+      )
 
       # We now have enough information to create the new project.
       # TODO: add job_triggers here

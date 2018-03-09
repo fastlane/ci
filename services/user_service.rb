@@ -1,6 +1,7 @@
 require_relative "data_sources/json_user_data_source"
 require_relative "../shared/models/github_provider_credential"
 require_relative "../shared/logging_module"
+require_relative "./services"
 
 module FastlaneCI
   # Provides access to user stuff
@@ -38,7 +39,7 @@ module FastlaneCI
       unless self.user_data_source.user_exist?(email: email)
         logger.debug("creating account #{email}")
         provider_credential = GitHubProviderCredential.new(email: email)
-        return self.user_data_source.create_user!(id: id, email: email, password: password, provider_credential: provider_credential)
+        self.user_data_source.create_user!(id: id, email: email, password: password, provider_credential: provider_credential)
       end
 
       logger.debug("account #{email} already exists!")
@@ -115,6 +116,14 @@ module FastlaneCI
         )
         update_user!(user: new_user)
       end
+    end
+
+    protected
+
+    # Not sure if this must be here or not, but we can open a discussion on this.
+    def commit_repo_changes!(message: nil, file_to_commit: nil)
+      Services.configuration_git_repo.commit_changes!(commit_message: message,
+                                                        file_to_commit: file_to_commit)
     end
   end
 end

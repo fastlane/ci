@@ -19,6 +19,8 @@ module FastlaneCI
 
     def self.map_enumerable_type(enumerable_property_name: nil, current_json_object: nil)
       if enumerable_property_name == :@provider_credentials
+        require "pry"
+        binding.pry
         type = current_json_object["type"]
         # currently only supports 1 type, but we could automate this part too
         provider_credential = nil
@@ -107,9 +109,10 @@ module FastlaneCI
       # I made a bad assumption because of a cached browser which made me ignore a simple
       # usecase
       if email == ENV["FASTLANE_CI_USER"] && password == ENV["FASTLANE_CI_PASSWORD"]
-        ci_user = User.new(
+        # We do not create users outside of create_user! method because they're not stored!
+        ci_user = create_user!(
           email: ENV["FASTLANE_CI_USER"],
-          password_hash: BCrypt::Password.create(ENV["FASTLANE_CI_PASSWORD"]),
+          password: BCrypt::Password.create(ENV["FASTLANE_CI_PASSWORD"]),
           provider_credentials: [
             FastlaneCI::GitHubProviderCredential.new(
               email: FastlaneCI.env.initial_clone_email,
@@ -169,24 +172,23 @@ module FastlaneCI
       end
     end
 
-    def create_user!(id: nil, email: nil, password: nil, provider_credential: nil)
+    def create_user!(id: nil, email: nil, password: nil, provider_credentials: nil)
       users = self.users
       new_user = User.new(
         id: id,
         email: email,
         password_hash: BCrypt::Password.create(password),
-        provider_credentials: [provider_credential]
+        provider_credentials: provider_credentials
       )
 
       if !self.user_exist?(email: email)
         users.push(new_user)
         self.users = users
         logger.debug("Added user #{new_user.email}, writing out users.json to #{user_file_path}")
-        return new_user
       else
         logger.debug("Couldn't add user #{new_user.email} because they already exist")
-        return nil
       end
+      return new_user
     end
 
     # Finds a user with a given id

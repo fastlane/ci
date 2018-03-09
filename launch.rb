@@ -76,7 +76,7 @@ module FastlaneCI
     # If not, this is where we do the initial clone
     def self.check_for_existing_setup
       # TODO: should we also trigger a blocking `git pull` here?
-      self.trigger_initial_ci_setup unless first_time_user?
+      self.trigger_initial_ci_setup if first_time_user?
       Services.reset_services!
     end
 
@@ -229,6 +229,11 @@ module FastlaneCI
         )
       )
       logger.info("Successfully did the initial clone on this machine")
+      # The ci-config repo is clean and has no the minimum files required
+      unless Services.configuration_repository_service.configuration_repository_valid?
+        logger.info("Creating minimum ci-config repo structure")
+        Services.configuration_repository_service.create_private_remote_configuration_repo
+      end
     rescue StandardError => ex
       logger.error("Something went wrong on the initial clone")
 
