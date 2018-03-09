@@ -24,7 +24,7 @@ module FastlaneCI
       Services.environment_variable_service.reload_dot_env!
       Services.environment_variable_service.verify_env_variables
 
-      # done making sure our env is sane, let's move on to the next step 
+      # done making sure our env is sane, let's move on to the next step
       write_configuration_directories
       configure_thread_abort
       check_for_existing_setup

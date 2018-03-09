@@ -52,7 +52,7 @@ module FastlaneCI
 
       # Load and parse the Fastfile
       # TODO: This won't work for now, as it is evaluating to the local CI fastlane.
-      fast_file_path = FastlaneCore::FastlaneFolder.fastfile_path
+      fast_file_path = self.project.local_fastfile_path
       fast_file = Fastlane::FastFile.new(fast_file_path)
 
       begin
@@ -70,7 +70,7 @@ module FastlaneCI
         logger.error(ex)
         logger.error(ex.backtrace)
         return [] # TODO: return artifacts here (if any)
-      ensure
+        # ensure
         # Either the build was successfull or not, we have to ensure the artifacts for the execution.
         # artifact_paths = []
         # artifact_paths << { type: "log", path: "fastlane.log" }
