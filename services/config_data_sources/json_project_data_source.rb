@@ -135,8 +135,6 @@ module FastlaneCI
     end
 
     def projects=(projects)
-      require "pry"
-      binding.pry
       JSONProjectDataSource.projects_file_semaphore.synchronize do
         File.write(self.git_repo.file_path("projects.json"), JSON.pretty_generate(projects.map(&:to_object_dictionary)))
       end
