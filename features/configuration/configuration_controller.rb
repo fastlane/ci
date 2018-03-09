@@ -83,7 +83,7 @@ module FastlaneCI
     # @return [Set[String]]
     def post_parameter_list_for_validation
       Set.new(
-        %w(encryption_key ci_user_email ci_user_api_token repo_url
+        %w(encryption_key ci_user_email ci_user_password repo_url
            clone_user_email clone_user_api_token)
       )
     end

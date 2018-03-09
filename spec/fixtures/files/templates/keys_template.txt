@@ -5,7 +5,7 @@ FASTLANE_CI_ENCRYPTION_KEY='key'
 FASTLANE_CI_USER='ci_user_email'
 
 # The encrypted API token of your fastlane CI bot account
-FASTLANE_CI_PASSWORD='ci_user_api_token'
+FASTLANE_CI_PASSWORD='ci_user_password'
 
 # The git URL (https) for the configuration repo
 FASTLANE_CI_REPO_URL='https://github.com/user/repo'

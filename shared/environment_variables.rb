@@ -8,7 +8,7 @@ module FastlaneCI
       {
         encryption_key: encryption_key,
         ci_user_email: ci_user_email,
-        ci_user_api_token: ci_user_password,
+        ci_user_password: ci_user_password,
         repo_url: repo_url,
         clone_user_email: initial_clone_email,
         clone_user_api_token: initial_clone_api_token
@@ -42,7 +42,7 @@ module FastlaneCI
     end
 
     # The API token used for the initial clone for the config repo
-    def initial_clone_api_token
+    def clone_user_api_token
       ENV["FASTLANE_CI_INITIAL_CLONE_API_TOKEN"]
     end
   end

@@ -27,7 +27,7 @@ describe FastlaneCI::KeysWriter do
       locals: {
         encryption_key: "key",
         ci_user_email: "ci_user_email",
-        ci_user_api_token: "ci_user_api_token",
+        ci_user_password: "ci_user_password",
         repo_url: "https://github.com/user/repo",
         clone_user_email: "clone_user_email",
         clone_user_api_token: "clone_user_api_token"

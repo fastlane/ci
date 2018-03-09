@@ -1,5 +1,6 @@
 require "securerandom"
 
+require_relative "../../shared/logging_module"
 require_relative "artifact_provider"
 require_relative "local_artifact_provider"
 
@@ -7,6 +8,8 @@ module FastlaneCI
   # All metadata about a project.
   # A project is usually a git url, a lane, and a project name, like "Production Build"
   class Project
+    include FastlaneCI::Logging
+
     # @return [GitRepoConfig] URL to the Git repo
     attr_accessor :repo_config
 
