@@ -25,7 +25,7 @@ module FastlaneCI
             self.work
             # If we're running in debug mode, don't run these things continuously
             if ENV["FASTLANE_CI_THREAD_DEBUG_MODE"]
-              logger.debug("stopping worker after this work unit")
+              logger.debug("Stopping worker after this work unit")
               self.die!
             end
           end

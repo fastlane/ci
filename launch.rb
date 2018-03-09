@@ -11,11 +11,7 @@ module FastlaneCI
   class Launch
     class << self
       include FastlaneCI::Logging
-
-      attr_accessor :build_queue
     end
-
-    Launch.build_queue = TaskQueue::TaskQueue.new(name: "ci startup build queue")
 
     def self.take_off
       require_fastlane_ci
@@ -136,6 +132,7 @@ module FastlaneCI
     end
 
     def self.launch_workers
+      logger.debug("Starting workers to monitor projects")
       # Iterate through all provider credentials and their projects and start a worker for each project
       Services.ci_user.provider_credentials.each do |provider_credential|
         projects = Services.config_service.projects(provider_credential: provider_credential)
@@ -160,19 +157,20 @@ module FastlaneCI
     #
     # @return [nil]
     def self.run_pending_github_builds(projects: nil, github_service: nil)
+      logger.debug("Searching for commits with pending status and starting a new build")
       # For each project, rerun all builds with the status of "pending"
       projects.each do |project|
         pending_builds = Services.build_service.pending_builds(project: project)
 
-        # TODO: I think we can change this to pull the most recent sha from github
-        repo = FastlaneCI::GitRepo.new(git_config: project.repo_config, provider_credential: self.provider_credential)
-        current_sha = repo.most_recent_commit.sha
-        runner_service = FastlaneCI::BuildRunnerService.new(project: project, sha: current_sha, github_service: github_service)
-
         # Enqueue each pending build rerun in an asynchronous task queue
         pending_builds.each do |build|
-          task = TaskQueue::Task.new(work_block: proc { runner_service.rerun(build) })
-          Launch.build_queue.add_task_async(task: task)
+          build_runner = FastlaneBuildRunner.new(
+            project: project,
+            sha: build.sha,
+            github_service: github_service
+          )
+          build_runner.setup(parameters: nil)
+          Services.build_runner_service.add_build_runner(build_runner: build_runner)
         end
       end
     end
@@ -180,6 +178,7 @@ module FastlaneCI
     # We might be in a situation where we have an open pr, but no status yet
     # if that's the case, we should enqueue a build for it
     def self.enqueue_builds_for_open_github_prs_with_no_status(projects: nil, github_service: nil)
+      logger.debug("Searching for open PRs with no status and starting a build for them")
       projects.each do |project|
         # TODO: generalize this sort of thing
         credential_type = project.repo_config.provider_credential_type_needed
@@ -208,9 +207,14 @@ module FastlaneCI
           next if statuses.count > 0
 
           logger.debug("Found sha: #{current_sha} in #{repo_full_name} missing status, adding build.")
-          runner_service = FastlaneCI::BuildRunnerService.new(project: project, sha: current_sha, github_service: github_service)
-          task = TaskQueue::Task.new(work_block: proc { runner_service.run })
-          Launch.build_queue.add_task_async(task: task)
+
+          build_runner = FastlaneBuildRunner.new(
+            project: project,
+            sha: current_sha,
+            github_service: github_service
+          )
+          build_runner.setup(parameters: nil)
+          Services.build_runner_service.add_build_runner(build_runner: build_runner)
         end
       end
     end

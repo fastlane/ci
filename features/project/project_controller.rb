@@ -12,9 +12,6 @@ module FastlaneCI
     # TODO: this should actually be a POST request
     get "#{HOME}/:project_id/trigger" do
       project_id = params[:project_id]
-      lane = params[:lane] # TODO: not sent yet
-      platform = params[:platform] # TODO: not sent yet
-
       project = self.user_project_with_id(project_id: project_id)
       current_github_provider_credential = self.check_and_get_provider_credential
 
@@ -33,9 +30,7 @@ module FastlaneCI
         sha: current_sha,
         github_service: FastlaneCI::GitHubService.new(provider_credential: current_github_provider_credential)
       )
-
-      lane ||= project.lane
-      build_runner.setup(platform: platform, lane: lane, parameters: nil) # specific to fastlane
+      build_runner.setup(parameters: nil)
       Services.build_runner_service.add_build_runner(build_runner: build_runner)
 
       redirect("#{HOME}/#{project_id}/builds/#{build_runner.current_build_number}")

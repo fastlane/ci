@@ -1,6 +1,8 @@
 # We're not joking around
 Style/Documentation:
   Enabled: true
+  Exclude:
+    - '**/spec/**/*'
 
 Style/MultipleComparison:
   Enabled: false

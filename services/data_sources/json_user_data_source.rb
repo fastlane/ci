@@ -113,14 +113,8 @@ module FastlaneCI
           password: BCrypt::Password.create(ENV["FASTLANE_CI_PASSWORD"]),
           provider_credentials: []
         )
-        credentials = FastlaneCI::GitHubProviderCredential.new(
-          email: FastlaneCI.env.initial_clone_email,
-          api_token: FastlaneCI.env.clone_user_api_token,
-          full_name: "CI User credentials"
-        )
-        # Without the backreference many things fail.
-        credentials.ci_user = ci_user
-        ci_user.provider_credentials << credentials
+        # We need to set the backreferences here
+        ci_user.provider_credentials.each { |credential| credential.ci_user = ci_user }
         return ci_user
       end
       # END: nasty hack :puke:
@@ -135,12 +129,12 @@ module FastlaneCI
 
       # sweet, it matches, return the user
       if user_password == password
-        logger.debug("user #{email} authenticated")
+        logger.debug("User #{email} authenticated")
         return user
       end
 
       # nope, wrong password
-      logger.debug("user #{email} authentication failed")
+      logger.debug("User #{email} authentication failed")
       return nil
     end
 

@@ -11,7 +11,7 @@ module FastlaneCI
         ci_user_password: ci_user_password,
         repo_url: repo_url,
         clone_user_email: initial_clone_email,
-        clone_user_api_token: initial_clone_api_token
+        clone_user_api_token: clone_user_api_token
       }
     end
 

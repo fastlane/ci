@@ -25,25 +25,8 @@ module FastlaneCI
       super(provider_credential: provider_credential, project: project) # This starts the work by calling `work`
     end
 
-    def wait_for_previous_tasks?
-      # see how many tasks have not completed
-      not_finished_tasks = self.current_tasks.reject(&:completed)
-
-      # if we have any tasks that are not complete, return true so that we don't enque more
-      return not_finished_tasks.length > 0
-    end
-
     def work
-      logger.debug("Checking for new commits on GitHub")
-
-      logger.info("Checking if we should wait for any previous previous tasks to complete")
-      should_wait = self.wait_for_previous_tasks?
-      if should_wait
-        logger.info("We still have test runner tasks to finish, not enqueuing any more")
-        return
-      end
-
-      logger.info("No old test runner tasks, enqueuing new runner tasks")
+      logger.debug("Checking for new commits on GitHub and creating and enqueuing new build tasks as needed")
       repo = self.git_repo
 
       # TODO: ensure BuildService subclasses are thread-safe

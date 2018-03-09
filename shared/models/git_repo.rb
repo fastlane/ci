@@ -88,9 +88,9 @@ module FastlaneCI
       logger.debug("Adding task to setup repo #{self.git_config.git_url} at: #{self.git_config.local_repo_path}")
 
       setup_task = git_action_with_queue(ensure_block: proc { callback_block(async_start) }) do
-        logger.debug("starting setup_repo #{self.git_config.git_url}".freeze)
+        logger.debug("Starting setup_repo #{self.git_config.git_url}".freeze)
         self.setup_repo
-        logger.debug("done setup_repo #{self.git_config.git_url}".freeze)
+        logger.debug("Done setup_repo #{self.git_config.git_url}".freeze)
       end
 
       # if we're starting asynchronously, we can return now.
@@ -178,13 +178,13 @@ module FastlaneCI
     # call like you would, but you also get the git repo involved, so it's  .each { |git, branch| branch.yolo; git.yolo }
     def git_and_remote_branches_each(&each_block)
       git_action_with_queue do
-        logger.debug("iterating through all remote branches of #{self.git_config.git_url}")
+        logger.debug("Iterating through all remote branches of #{self.git_config.git_url}")
         branch_count = 0
         self.git.branches.remote.each do |branch|
           each_block.call(self.git, branch)
           branch_count += 1
         end
-        logger.debug("done iterating through all #{branch_count} remote branches of #{self.git_config.git_url}")
+        logger.debug("Done iterating through all #{branch_count} remote branches of #{self.git_config.git_url}")
       end
     end
 
@@ -261,21 +261,21 @@ module FastlaneCI
     def pull(repo_auth: self.repo_auth)
       git_action_with_queue(ensure_block: proc { unset_auth }) do
         logger.info("Starting pull #{self.git_config.git_url}")
-        logger.debug("setting auth in pull #{self.git_config.git_url}")
+        logger.debug("Setting auth in pull #{self.git_config.git_url}")
         self.setup_auth(repo_auth: repo_auth)
-        logger.debug("done setting auth in pull #{self.git_config.git_url}")
-        logger.debug("pulling #{self.git_config.git_url}")
+        logger.debug("Done setting auth in pull #{self.git_config.git_url}")
+        logger.debug("Pulling #{self.git_config.git_url}")
         git.pull
-        logger.debug("done pulling #{self.git_config.git_url}")
+        logger.debug("Done pulling #{self.git_config.git_url}")
       end
     end
 
     # This method commits and pushes all changes
     # if `file_to_commit` is `nil`, all files will be added
     # TODO: this method isn't actually tested yet
-    def commit_changes!(commit_message: nil, file_to_commit: nil, repo_auth: self.repo_auth, async: false)
-      task = git_action_with_queue do
-        logger.debug("starting commit_changes! #{self.git_config.git_url}")
+    def commit_changes!(commit_message: nil, file_to_commit: nil, repo_auth: self.repo_auth)
+      git_action_with_queue do
+        logger.debug("Starting commit_changes! #{self.git_config.git_url}")
         raise "file_to_commit not yet implemented" if file_to_commit
         commit_message ||= "Automatic commit by fastlane.ci"
 
@@ -291,7 +291,7 @@ module FastlaneCI
         else
           git.commit(commit_message)
           git.push
-          logger.debug("done commit_changes! #{self.git_config.full_name}")
+          logger.debug("Done commit_changes! #{self.git_config.full_name}")
         end
       end
     end
@@ -321,19 +321,19 @@ module FastlaneCI
     # Discard any changes
     def reset_hard!
       git_action_with_queue do
-        logger.debug("starting reset_hard! #{self.git_config.git_url}".freeze)
+        logger.debug("Starting reset_hard! #{self.git_config.git_url}".freeze)
         self.git.reset_hard
         self.git.clean(force: true, d: true)
-        logger.debug("done reset_hard! #{self.git_config.git_url}".freeze)
+        logger.debug("Done reset_hard! #{self.git_config.git_url}".freeze)
       end
     end
 
     def fetch
       git_action_with_queue(ensure_block: proc { unset_auth }) do
-        logger.debug("starting fetch #{self.git_config.git_url}".freeze)
+        logger.debug("Starting fetch #{self.git_config.git_url}".freeze)
         self.temporary_storage_path = self.setup_auth(repo_auth: repo_auth)
         self.git.fetch
-        logger.debug("done fetching #{self.git_config.git_url}".freeze)
+        logger.debug("Done fetching #{self.git_config.git_url}".freeze)
       end
     end
 
@@ -341,9 +341,9 @@ module FastlaneCI
       if async
         # If we're async, just push it on the queue
         git_action_with_queue(ensure_block: proc { unset_auth }) do
-          logger.debug("starting clone_synchronously of #{self.git_config.git_url}".freeze)
+          logger.debug("Starting clone_synchronously of #{self.git_config.git_url}".freeze)
           clone_synchronously(repo_auth: repo_auth)
-          logger.debug("done clone_synchronously of #{self.git_config.git_url}".freeze)
+          logger.debug("Done clone_synchronously of #{self.git_config.git_url}".freeze)
         end
       else
         clone_synchronously(repo_auth: repo_auth)

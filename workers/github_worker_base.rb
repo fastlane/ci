@@ -92,18 +92,17 @@ module FastlaneCI
       current_project = self.project
       current_sha = repo.most_recent_commit.sha
 
-      build_task = TaskQueue::Task.new(work_block: proc {
-        FastlaneCI::BuildRunnerService.new(
-          project: current_project,
-          sha: current_sha,
-          github_service: self.github_service
-        ).run
-      })
+      build_runner = FastlaneBuildRunner.new(
+        project: current_project,
+        sha: current_sha,
+        github_service: self.github_service
+      )
+      build_runner.setup(parameters: nil)
+      build_task = Services.build_runner_service.add_build_runner(build_runner: build_runner)
 
       logger.debug("Adding task for #{self.project_full_name}: #{credential.ci_user.email}: #{current_sha[-6..-1]}")
-      self.serial_task_queue.add_task_async(task: build_task)
 
-      build_task
+      return build_task
     end
 
     def trigger_type

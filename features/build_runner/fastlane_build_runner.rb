@@ -18,9 +18,17 @@ module FastlaneCI
     attr_reader :lane
     attr_reader :parameters
 
-    def setup(platform: nil, lane: nil, parameters: nil)
-      @platform = platform
-      @lane = lane
+    # Set additional values specific to the fastlane build runner
+    def setup(parameters: nil)
+      # TODO: We have to update `Project` to properly let the user define platform and lane
+      #   Currently we just split the string
+      #   See https://github.com/fastlane/ci/issues/236
+      lane_pieces = self.project.lane.split(" ")
+
+      # Setting the variables directly (only having `attr_reader`) as they're immutable
+      # Once you define a FastlaneBuildRunner, you shouldn't be able to modify them
+      @platform = lane_pieces.count > 1 ? lane_pieces.first : nil
+      @lane = lane_pieces.last
       @parameters = parameters
     end
 
@@ -34,12 +42,12 @@ module FastlaneCI
           # Additionally to transfering the original metadata of this message
           # that look like this:
           #
-          #   {:type=>:success, :message=>"Everything worked"}
+          #   {:type=>:success, :message=>"Everything worked", :time=>...}
           #
           # we append the HTML code that should be used in the `html` key
           # the result looks like this
           #
-          #   {"type":"success","message":"Driving the lane 'ios beta'","html":"<p class=\"success\">Driving the lane 'ios beta'</p>"}
+          #   {"type":"success","message":"Driving the lane 'ios beta'","html":"<p class=\"success\">Driving the lane 'ios beta'</p>","time"=>...}
           #
           row[:html] = FastlaneOutputToHtml.convert_row(row)
           yield(row)

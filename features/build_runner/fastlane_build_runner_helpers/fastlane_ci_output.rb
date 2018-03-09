@@ -42,7 +42,8 @@ module FastlaneCI
       log.error(message.to_s.red)
       self.each_line_block.call(
         type: :error,
-        message: message
+        message: message,
+        time: Time.now
       )
     end
 
@@ -50,7 +51,8 @@ module FastlaneCI
       log.warn(message.to_s.yellow)
       self.each_line_block.call(
         type: :important,
-        message: message
+        message: message,
+        time: Time.now
       )
     end
 
@@ -58,7 +60,8 @@ module FastlaneCI
       log.info(message.to_s.green)
       self.each_line_block.call(
         type: :success,
-        message: message
+        message: message,
+        time: Time.now
       )
     end
 
@@ -68,7 +71,8 @@ module FastlaneCI
       log.info(message.to_s)
       self.each_line_block.call(
         type: :message,
-        message: message
+        message: message,
+        time: Time.now
       )
     end
 
@@ -76,7 +80,8 @@ module FastlaneCI
       log.error(message.to_s.deprecated)
       self.each_line_block.call(
         type: :error,
-        message: message
+        message: message,
+        time: Time.now
       )
     end
 
@@ -84,7 +89,8 @@ module FastlaneCI
       log.info("$ #{message}".cyan)
       self.each_line_block.call(
         type: :command,
-        message: message
+        message: message,
+        time: Time.now
       )
     end
 
@@ -92,7 +98,11 @@ module FastlaneCI
       actual = (message.split("\r").last || "") # as clearing the line will remove the `>` and the time stamp
       actual.split("\n").each do |msg|
         prefix = msg.include?("▸") ? "" : "▸ "
-        log.info(prefix + "" + msg.magenta)
+        self.each_line_block.call(
+          type: :command_output,
+          message: prefix + msg,
+          time: Time.now
+        )
       end
     end
 
@@ -112,7 +122,8 @@ module FastlaneCI
 
       self.each_line_block.call(
         type: :header,
-        message: message
+        message: message,
+        time: Time.now
       )
     end
 
@@ -121,7 +132,8 @@ module FastlaneCI
     def crash!(exception)
       self.each_line_block.call(
         type: :crash,
-        message: exception.to_s
+        message: exception.to_s,
+        time: Time.now
       )
       raise FastlaneCrash.new, exception.to_s
     end
@@ -129,7 +141,8 @@ module FastlaneCI
     def user_error!(error_message, options = {})
       self.each_line_block.call(
         type: :user_error,
-        message: error_message
+        message: error_message,
+        time: Time.now
       )
       super(error_message, options)
     end
@@ -137,7 +150,8 @@ module FastlaneCI
     def shell_error!(error_message, options = {})
       self.each_line_block.call(
         type: :shell_error,
-        message: error_message
+        message: error_message,
+        time: Time.now
       )
       super(error_message, options)
     end
@@ -145,7 +159,8 @@ module FastlaneCI
     def build_failure!(error_message, options = {})
       self.each_line_block.call(
         type: :build_failure,
-        message: error_message
+        message: error_message,
+        time: Time.now
       )
       super(error_message, options)
     end
@@ -153,7 +168,8 @@ module FastlaneCI
     def test_failure!(error_message)
       self.each_line_block.call(
         type: :test_failure,
-        message: error_message
+        message: error_message,
+        time: Time.now
       )
       super(error_message)
     end
@@ -161,7 +177,8 @@ module FastlaneCI
     def abort_with_message!(error_message)
       self.each_line_block.call(
         type: :abort,
-        message: error_message
+        message: error_message,
+        time: Time.now
       )
       super(error_message)
     end
@@ -195,7 +212,7 @@ module FastlaneCI
 
     def non_interactive!(message)
       important(message)
-      crash!("Could not retrieve response as fastlane runs fastlane.ci and can't ask for additional inputs during its run")
+      self.crash!("Could not retrieve response as fastlane runs fastlane.ci and can't ask for additional inputs during its run")
     end
   end
 end

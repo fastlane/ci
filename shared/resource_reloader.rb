@@ -10,7 +10,7 @@ module FastlaneCI
     include FastlaneCI::Logging
 
     def enable_resource_reloading(file_path: nil)
-      logger.debug("enabling resource reloading for: #{file_path}")
+      logger.debug("Enabling resource reloading for: #{file_path}")
       self.class.configure(:development) do |configuration|
         self.class.register(Sinatra::Reloader)
         configuration.also_reload(file_path)
