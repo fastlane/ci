@@ -19,6 +19,8 @@ module FastlaneCI
 
     def self.map_enumerable_type(enumerable_property_name: nil, current_json_object: nil)
       if enumerable_property_name == :@provider_credentials
+        require "pry"
+        binding.pry
         type = current_json_object["type"]
         # currently only supports 1 type, but we could automate this part too
         provider_credential = nil

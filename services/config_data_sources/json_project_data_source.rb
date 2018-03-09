@@ -135,6 +135,8 @@ module FastlaneCI
     end
 
     def projects=(projects)
+      require "pry"
+      binding.pry
       JSONProjectDataSource.projects_file_semaphore.synchronize do
         File.write(self.git_repo.file_path("projects.json"), JSON.pretty_generate(projects.map(&:to_object_dictionary)))
       end
@@ -164,6 +166,7 @@ module FastlaneCI
                                 project_name: name,
                                 lane: lane,
                                 artifact_provider: artifact_provider)
+      _ = GitRepo
       if !self.project_exist?(new_project.project_name)
         projects << new_project
         self.projects = projects

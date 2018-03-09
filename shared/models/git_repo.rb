@@ -308,6 +308,7 @@ module FastlaneCI
           logger.debug("Done commit_changes! #{self.git_config.full_name} for #{repo_auth.username}")
         end
       end
+      wait_for_task_to_complete(task: task) unless async
     end
 
     def push(repo_auth: self.repo_auth)
@@ -387,6 +388,10 @@ module FastlaneCI
                 path: self.git_config.containing_path,
                 recursive: true,
                 depth: 1)
+    end
+
+    def wait_for_task_to_complete(task: nil)
+      sleep 0.001 until task.completed
     end
   end
 end
