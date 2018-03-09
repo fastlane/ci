@@ -72,8 +72,8 @@ module FastlaneCI
       repo.fetch
 
       repo.git_and_remote_branches_each do |git, branch|
-        # Only need to look at branches that have associated nightly build triggers
-        next unless self.target_branches_set.include?(branch.name)
+        next if branch.name.include?("HEAD ->")
+        # next unless self.target_branches_set.include?(branch.name)
 
         # There might be un-committed changes in there, so ignore
         git.reset_hard

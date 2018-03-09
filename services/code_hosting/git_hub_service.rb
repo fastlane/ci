@@ -51,11 +51,11 @@ module FastlaneCI
       # if no specific branch, return all open prs
       return all_open_pull_requests if branches.nil? || branches.count == 0
 
-      # we want only the PRs whose latest commit was to one of the branches passed in
-      logger.debug("Returning all open prs from: #{repo_full_name}, branches: #{branches}")
-
       branch_set = branches.to_set
       all_open_pull_requests_on_branch = all_open_pull_requests.select { |pull_request| branch_set.include?(pull_request.head.ref) }
+
+      # we want only the PRs whose latest commit was to one of the branches passed in
+      logger.debug("Returning all open prs from: #{repo_full_name}, branches: #{branches}, pr count: #{all_open_pull_requests.count}")
       return all_open_pull_requests_on_branch
     end
 

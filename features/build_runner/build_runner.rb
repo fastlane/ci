@@ -88,18 +88,17 @@ module FastlaneCI
       self.current_build.artifacts = artifacts
 
       duration = Time.now - start_time
-
       current_build.duration = duration
-      current_build.status = :success
 
-      self.update_build_status!
+      # Status is set on the `current_build` object by the subclass
+      self.save_build_status!
     rescue StandardError => ex
       # TODO: better error handling, don't catch all Exception
       logger.error(ex)
       duration = Time.now - start_time
       current_build.duration = duration
       current_build.status = :failure # TODO: also handle failure
-      self.update_build_status!
+      self.save_build_status!
     end
 
     # @return [Array[String]] of references for the different artifacts created by the runner.
@@ -109,9 +108,9 @@ module FastlaneCI
 
     # Responsible for updating the build status in our local config
     # and on GitHub
-    def update_build_status!
-      update_build_status_locally!
-      update_build_status_source!
+    def save_build_status!
+      save_build_status_locally!
+      save_build_status_source!
     end
 
     # Handle a new incoming row, and alert every stakeholder who is interested
@@ -151,12 +150,12 @@ module FastlaneCI
         duration: -1,
         sha: self.sha
       )
-      update_build_status!
+      save_build_status!
     end
 
     private
 
-    def update_build_status_locally!
+    def save_build_status_locally!
       # Create or update the local build file in the config directory
       Services.build_service.add_build!(
         project: self.project,
@@ -178,7 +177,7 @@ module FastlaneCI
     # Let GitHub know about the current state of the build
     # Using a `rescue` block here is important
     # As the build is still green, even though we couldn't set the GH status
-    def update_build_status_source!
+    def save_build_status_source!
       self.code_hosting_service.set_build_status!(
         repo: self.project.repo_config.git_url,
         sha: self.sha,
