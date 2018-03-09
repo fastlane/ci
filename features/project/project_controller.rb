@@ -100,7 +100,7 @@ module FastlaneCI
       }
 
       # Delete the project
-      FileUtils.rm_rf(repo_path)
+      FileUtils.rm_rf(repo_path) if File.directory?(File.join(repo_path, ".git"))
 
       erb(:new_project_form, locals: locals, layout: FastlaneCI.default_layout)
     end
