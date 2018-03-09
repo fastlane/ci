@@ -15,6 +15,9 @@ module FastlaneCI
   class ControllerBase < Sinatra::Base
     include FastlaneCI::Logging
 
+    # Enum for status of POST operations
+    STATUS = { success: :success, error: :error }
+
     # I don't like this here, I'd rather use the mixin for organization, but that isn't done
     # TODO: use mixin
     configure :development do
@@ -82,6 +85,14 @@ module FastlaneCI
     end
 
     protected
+
+    # Parses the JSON request body and returns a Ruby hash
+    #
+    # @param  [Sinatra::Request] request
+    # @return [Hash]
+    def parse_request_body(request)
+      JSON.parse(request.body.read).symbolize_keys
+    end
 
     # Converts keys from strings to symbols and selects only the expected keys
     #

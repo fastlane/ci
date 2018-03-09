@@ -7,6 +7,7 @@ require_relative "./fastfile-parser/fastfile_parser"
 require_relative "services/services"
 require_relative "workers/refresh_config_data_sources_worker"
 require_relative "shared/logging_module"
+require_relative "shared/environment_variables"
 require_relative "shared/fastlane_ci_error" # TODO: move somewhere else
 require_relative "features/build_runner/build_runner"
 
@@ -16,6 +17,10 @@ module FastlaneCI
   # https://stackoverflow.com/questions/26080599/sinatra-method-to-set-layout
   def self.default_layout
     "../../../features/global/layout".to_sym
+  end
+
+  def self.env
+    @env ||= FastlaneCI::EnvironmentVariables.new
   end
 
   # Our CI app main class

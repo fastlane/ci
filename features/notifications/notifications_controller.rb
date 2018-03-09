@@ -38,14 +38,6 @@ module FastlaneCI
 
     private
 
-    # Parses the JSON request body and returns a Ruby hash
-    #
-    # @param  [Sinatra::Request] request
-    # @return [Hash]
-    def parse_request_body(request)
-      JSON.parse(request.body.read).symbolize_keys
-    end
-
     # Parameters used for creating and updating notifications:
     #   { :id, :priority, :type, :user_id, :name, :message }
     #

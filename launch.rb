@@ -14,22 +14,19 @@ module FastlaneCI
     end
 
     def self.take_off
+      require_fastlane_ci
       verify_dependencies
       verify_system_requirements
-      load_dot_env
-      verify_env_variables
+      Services.environment_variable_service.reload_dot_env!
+      Services.environment_variable_service.verify_env_variables
+
+      # done making sure our env is sane, let's move on to the next step
       write_configuration_directories
-      setup_threads
-      require_fastlane_ci
+      configure_thread_abort
       check_for_existing_setup
-      prepare_server
-      launch_workers
-
-      github_projects = Services.config_service.projects(provider_credential: self.provider_credential)
-      github_service = FastlaneCI::GitHubService.new(provider_credential: self.provider_credential)
-
-      run_pending_github_builds(projects: github_projects, github_service: github_service)
-      enqueue_builds_for_open_github_prs_with_no_status(projects: github_projects, github_service: github_service)
+      register_available_controllers
+      start_github_workers
+      restart_any_pending_work
     end
 
     def self.require_fastlane_ci
@@ -39,13 +36,6 @@ module FastlaneCI
 
       # allow use of `require` for all things under `shared`, helps with some cycle issues
       $LOAD_PATH << "shared"
-    end
-
-    def self.load_dot_env
-      return unless File.exist?(".keys")
-
-      require "dotenv"
-      Dotenv.load(".keys")
     end
 
     def self.verify_dependencies
@@ -70,30 +60,7 @@ module FastlaneCI
       end
     end
 
-    def self.verify_env_variables
-      # Don't even try to run without having those
-      if ENV["FASTLANE_CI_ENCRYPTION_KEY"].nil?
-        warn("Error: unable to decrypt sensitive data without environment variable `FASTLANE_CI_ENCRYPTION_KEY` set")
-        exit(1)
-      end
-
-      if ENV["FASTLANE_CI_USER"].nil? || ENV["FASTLANE_CI_PASSWORD"].nil?
-        warn("Error: ensure you have your `FASTLANE_CI_USER` and `FASTLANE_CI_PASSWORD`environment variables set")
-        exit(1)
-      end
-
-      if ENV["FASTLANE_CI_REPO_URL"].nil?
-        warn("Error: ensure you have your `FASTLANE_CI_REPO_URL` environment variable set")
-        exit(1)
-      end
-
-      # force verbose mode if we're debugging threads
-      if ENV["FASTLANE_CI_THREAD_DEBUG_MODE"]
-        ENV["FASTLANE_CI_VERBOSE"] = "1"
-      end
-    end
-
-    def self.setup_threads
+    def self.configure_thread_abort
       if ENV["RACK_ENV"] == "development"
         logger.info("development mode, aborting on any thread exceptions")
         Thread.abort_on_exception = true
@@ -105,18 +72,15 @@ module FastlaneCI
     # If not, this is where we do the initial clone
     def self.check_for_existing_setup
       # TODO: should we also trigger a blocking `git pull` here?
-      unless self.ci_config_repo.exists?
-        self.trigger_initial_ci_setup
-      end
-
-      Services.ci_config_repo = self.ci_config_repo
+      self.trigger_initial_ci_setup unless first_time_user?
+      Services.reset_services!
     end
 
     def self.ci_config_repo
       # Setup the fastlane.ci GitRepoConfig
       @_ci_config_repo ||= GitRepoConfig.new(
         id: "fastlane-ci-config",
-        git_url: ENV["FASTLANE_CI_REPO_URL"],
+        git_url: FastlaneCI.env.repo_url,
         description: "Contains the fastlane.ci configuration",
         name: "fastlane ci",
         hidden: true
@@ -125,8 +89,9 @@ module FastlaneCI
 
     # We can't actually launch the server here
     # as it seems like it has to happen in `config.ru`
-    def self.prepare_server
+    def self.register_available_controllers
       # require all controllers
+      require_relative "features/configuration/configuration_controller"
       require_relative "features/dashboard/dashboard_controller"
       require_relative "features/login/login_controller"
       require_relative "features/notifications/notifications_controller"
@@ -136,6 +101,7 @@ module FastlaneCI
       require_relative "features/build/build_controller"
 
       # Load up all the available controllers
+      FastlaneCI::FastlaneApp.use(FastlaneCI::ConfigurationController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::DashboardController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::LoginController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::NotificationsController)
@@ -143,6 +109,26 @@ module FastlaneCI
       FastlaneCI::FastlaneApp.use(FastlaneCI::ProviderCredentialsController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::UsersController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::BuildController)
+    end
+
+    def self.start_github_workers
+      return if first_time_user?
+
+      launch_workers unless ENV["FASTLANE_CI_SKIP_WORKER_LAUNCH"]
+    end
+
+    def self.restart_any_pending_work
+      return if first_time_user?
+
+      # this helps during debugging
+      # in the future we should allow this to be configurable behavior
+      return if ENV["FASTLANE_CI_SKIP_RESTARTING_PENDING_WORK"]
+
+      github_projects = Services.config_service.projects(provider_credential: self.provider_credential)
+      github_service = FastlaneCI::GitHubService.new(provider_credential: self.provider_credential)
+
+      run_pending_github_builds(projects: github_projects, github_service: github_service)
+      enqueue_builds_for_open_github_prs_with_no_status(projects: github_projects, github_service: github_service)
     end
 
     def self.launch_workers
@@ -247,8 +233,8 @@ module FastlaneCI
     rescue StandardError => ex
       logger.error("Something went wrong on the initial clone")
 
-      if ENV["FASTLANE_CI_INITIAL_CLONE_API_TOKEN"].to_s.length == 0 || ENV["FASTLANE_CI_INITIAL_CLONE_EMAIL"].to_s.length == 0
-        logger.error("Make sure to provide your `FASTLANE_CI_INITIAL_CLONE_EMAIL` and `FASTLANE_CI_INITIAL_CLONE_API_TOKEN` ENV variables")
+      if FastlaneCI.env.clone_user_api_token.to_s.empty?
+        logger.error("Make sure to provide your `FASTLANE_CI_INITIAL_CLONE_API_TOKEN` ENV variable")
       end
 
       raise ex
@@ -266,9 +252,14 @@ module FastlaneCI
     # @return [GitHubProviderCredential]
     def self.provider_credential
       @provider_credential ||= GitHubProviderCredential.new(
-        email: ENV["FASTLANE_CI_INITIAL_CLONE_EMAIL"],
-        api_token: ENV["FASTLANE_CI_INITIAL_CLONE_API_TOKEN"]
+        email: FastlaneCI.env.initial_clone_email,
+        api_token: FastlaneCI.env.clone_user_api_token
       )
+    end
+
+    def self.first_time_user?
+      !self.ci_config_repo.exists? ||
+        !Services.configuration_repository_service.configuration_repository_valid?
     end
   end
 end

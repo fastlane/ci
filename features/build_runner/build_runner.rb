@@ -69,7 +69,7 @@ module FastlaneCI
     def start
       start_time = Time.now
 
-      logger.debug("Starting runner #{self.class} for #{self.project.project_name} (self.project.id) now...")
+      logger.debug("Starting build runner #{self.class} for #{self.project.project_name} #{self.project.id} now...")
 
       artifact_paths = self.run do |current_row|
         new_row(current_row)

@@ -4,10 +4,12 @@ require_relative "logging_module"
 module FastlaneCI
   # makes encrypting string as easy as ijFkpReUM6kLfvry0A78cQ==
   class StringEncrypter
-    include FastlaneCI::Logging
+    class << self
+      include FastlaneCI::Logging
+    end
 
     def self.default_key
-      @_key ||= Digest::SHA256.digest(ENV["FASTLANE_CI_ENCRYPTION_KEY"])
+      @_key ||= Digest::SHA256.digest(FastlaneCI.env.encryption_key)
     end
 
     def self.encode(string, key: StringEncrypter.default_key)

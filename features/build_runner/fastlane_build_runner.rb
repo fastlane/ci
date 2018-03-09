@@ -60,7 +60,7 @@ module FastlaneCI
 
       # Load and parse the Fastfile
       # TODO: This won't work for now, as it is evaluating to the local CI fastlane.
-      fast_file_path = FastlaneCore::FastlaneFolder.fastfile_path
+      fast_file_path = self.project.local_fastfile_path
       fast_file = Fastlane::FastFile.new(fast_file_path)
 
       begin
