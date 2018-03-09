@@ -12,6 +12,8 @@ module FastlaneCI
     # TODO: this should actually be a POST request
     get "#{HOME}/:project_id/trigger" do
       project_id = params[:project_id]
+      lane = params[:lane] # TODO: not sent yet
+      platform = params[:platform] # TODO: not sent yet
 
       project = self.user_project_with_id(project_id: project_id)
       current_github_provider_credential = self.check_and_get_provider_credential
@@ -29,9 +31,11 @@ module FastlaneCI
       build_runner = FastlaneBuildRunner.new(
         project: project,
         sha: current_sha,
-        github_service: current_github_provider_credential
+        github_service: FastlaneCI::GitHubService.new(provider_credential: current_github_provider_credential)
       )
-      build_runner.setup(platform: "ios", lane: "beta", parameters: nil) # specific to fastlane
+
+      lane ||= project.lane
+      build_runner.setup(platform: platform, lane: lane, parameters: nil) # specific to fastlane
       Services.build_runner_service.add_build_runner(build_runner: build_runner)
 
       redirect("#{HOME}/#{project_id}/builds/#{build_runner.current_build_number}")
@@ -46,36 +50,23 @@ module FastlaneCI
       # Long term, the best appraoch would probably to have the FastfileParser be
       # its own Ruby gem, or even part of the fastlane/fastlane main repo
       # For now, this is good enough, as we'll be moving so fast with this one
-      project_path = project.repo_config.local_repo_path
 
-      # First assume the fastlane directory and its file is in the root of the project
-      fastfiles = Dir[File.join(project_path, "fastlane/Fastfile")]
-      # If not, it might be in a subfolder
-      fastfiles = Dir[File.join(project_path, "**/fastlane/Fastfile")] if fastfiles.count == 0
-
-      if fastfiles.count > 1
-        logger.error("Ugh, multiple Fastfiles found, we're gonna have to build a selection in the future")
-        # for now, just take the first one
-      end
-
-      available_lanes = []
       relative_fastfile_path = nil
-      if fastfiles.count == 0
-        logger.error("No Fastfile founds at #{project_path}/fastlane/Fastfile, or any descendants")
-      else
-        fastfile_path = fastfiles.first
-
-        parser = Fastlane::FastfileParser.new(path: fastfile_path)
+      available_lanes = []
+      absolute_fastfile_path = project.local_fastfile_path
+      unless absolute_fastfile_path.nil?
+        parser = Fastlane::FastfileParser.new(path: absolute_fastfile_path)
         available_lanes = parser.available_lanes
 
-        relative_fastfile_path = Pathname.new(fastfile_path).relative_path_from(Pathname.new(project_path))
+        project_path = project.repo_config.local_repo_path
+        relative_fastfile_path = Pathname.new(absolute_fastfile_path).relative_path_from(Pathname.new(project_path))
       end
 
       locals = {
         project: project,
         title: "Project #{project.project_name}",
         available_lanes: available_lanes,
-        fastfile_path: relative_fastfile_path
+        fastfile_path: relative_fastfile_path # TODO: rename param `fastfile_path` to `relative_fastfile_path`
       }
 
       erb(:project, locals: locals, layout: FastlaneCI.default_layout)
