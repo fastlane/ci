@@ -1,3 +1,15 @@
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
+  <header class="mdl-layout__header">
+    <div class="mdl-layout__header-row">
+      <span class="mdl-layout__title"><%= title %></span>
+    </div>
+  </header>
+
+  <%= erb :"../../partials/navigation" %>
+
+  <main class="mdl-layout__content" style="padding: 40px" id="main">
+
+
 <h1>Build Log <%= build.number %></h1>
 
 <code id="log">
@@ -25,6 +37,9 @@
       var data = JSON.parse(message.data)
       console.log(data)
       document.getElementById("log").innerHTML += data["html"]
+
+      var mainView = document.getElementById("main")
+      mainView.scrollTo(0, mainView.scrollHeight)
     }
     ws.onopen = function(something) {
       console.log("Open")
@@ -43,10 +58,19 @@
 </script>
 
 <style type="text/css">
-  .success {
+  p.success {
     color: green;
   }
-  .error {
+  p.error {
     color: red;
   }
+  p.command_output {
+    color: #005aff;
+  }
+  code > p {
+    margin: 0 0 -3px;
+  }
 </style>
+
+  </main>
+</div>
