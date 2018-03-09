@@ -20,7 +20,7 @@ module FastlaneCI
         wrapping_type = "p"
         wrapping_class = type_to_class(row[:type])
 
-        return "<#{wrapping_type} class=\"#{wrapping_class}\">#{row[:message]}</#{wrapping_type}>"
+        return "<#{wrapping_type} class=\"#{wrapping_class}\">#{format_string(row[:time])}#{row[:message]}</#{wrapping_type}>"
       end
 
       def type_to_class(type)
@@ -31,6 +31,10 @@ module FastlaneCI
         else
           return type.to_s
         end
+      end
+
+      def format_string(datetime)
+        "[#{datetime.strftime('%H:%M:%S')}]: "
       end
     end
   end

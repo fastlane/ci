@@ -42,12 +42,12 @@ module FastlaneCI
           # Additionally to transfering the original metadata of this message
           # that look like this:
           #
-          #   {:type=>:success, :message=>"Everything worked"}
+          #   {:type=>:success, :message=>"Everything worked", :time=>...}
           #
           # we append the HTML code that should be used in the `html` key
           # the result looks like this
           #
-          #   {"type":"success","message":"Driving the lane 'ios beta'","html":"<p class=\"success\">Driving the lane 'ios beta'</p>"}
+          #   {"type":"success","message":"Driving the lane 'ios beta'","html":"<p class=\"success\">Driving the lane 'ios beta'</p>","time"=>...}
           #
           row[:html] = FastlaneOutputToHtml.convert_row(row)
           yield(row)
