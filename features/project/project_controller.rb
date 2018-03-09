@@ -50,8 +50,6 @@ module FastlaneCI
 
     get "#{HOME}/add" do
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
-      # Before making adding a project, make sure we have the ci-config-repo ready.
-      # Services.configuration_git_repo
 
       locals = {
           title: "Add new project",
