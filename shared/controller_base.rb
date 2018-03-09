@@ -50,15 +50,15 @@ module FastlaneCI
       # by default, the erb root incorrectly uses __FILE__ and it picks up the wrong directory
       # we need to correct that here
       erb_root = File.dirname(self.class._file)
-      logger.debug("setting erb root to #{erb_root}")
+      logger.debug("Setting erb root to #{erb_root}")
       self.class.set(:root, erb_root)
 
       # /dashboard and /dashboard/ should route the same
-      logger.debug("turning off strict paths")
+      logger.debug("Turning off strict paths")
       self.class.set(:strict_paths, false)
 
       # enable access to the session in this class
-      logger.debug("enabling sessions")
+      logger.debug("Enabling sessions")
       self.class.enable(:sessions)
 
       # TODO: This should be removed once it's used in production

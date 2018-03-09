@@ -36,12 +36,12 @@ module FastlaneCI
       email = email.strip
 
       unless self.user_data_source.user_exist?(email: email)
-        logger.debug("creating account #{email}")
+        logger.debug("Creating account #{email}")
         provider_credential = GitHubProviderCredential.new(email: email)
         return self.user_data_source.create_user!(id: id, email: email, password: password, provider_credential: provider_credential)
       end
 
-      logger.debug("account #{email} already exists!")
+      logger.debug("Account #{email} already exists!")
       return nil
     end
 
@@ -57,7 +57,7 @@ module FastlaneCI
     def login(email: nil, password: nil, ci_config_repo: nil)
       email = email.strip
 
-      logger.debug("attempting to login user with email #{email}")
+      logger.debug("Attempting to login user with email #{email}")
       user = self.user_data_source.login(email: email, password: password)
       return user
     end
