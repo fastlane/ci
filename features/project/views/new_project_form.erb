@@ -11,7 +11,7 @@
     <form method="POST" action="/projects/add/<%= repo.git_config.name %>">
       <h5>Adding <%= repo.git_config.full_name %></h5>
       <div class="mdl-textfield mdl-js-textfield">
-        <input class="mdl-textfield__input" type="text" name="project_name">
+        <input class="mdl-textfield__input" type="text" name="project_name" value="<%= repo.git_config.full_name %>">
         <label class="mdl-textfield__label" for="project_name">Project Name</label>
       </div>
       <br />
