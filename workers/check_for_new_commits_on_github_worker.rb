@@ -13,14 +13,11 @@ module FastlaneCI
     include FastlaneCI::Logging
 
     attr_accessor :trigger_type
-    attr_accessor :current_tasks
     attr_accessor :scheduler
 
     def initialize(provider_credential: nil, project: nil)
       self.trigger_type = FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit]
       self.scheduler = WorkerScheduler.new(interval_time: 10)
-
-      self.current_tasks = []
 
       super(provider_credential: provider_credential, project: project) # This starts the work by calling `work`
     end
@@ -32,7 +29,6 @@ module FastlaneCI
       # TODO: ensure BuildService subclasses are thread-safe
       build_service = FastlaneCI::Services.build_service
 
-      self.current_tasks = []
       self.target_branches do |git, branch|
         current_sha = repo.most_recent_commit.sha
 
@@ -44,10 +40,7 @@ module FastlaneCI
 
         logger.debug("Detected new commit on branch #{branch.name} with sha #{current_sha}")
         # This never stops because with each commit, it creates a new commit and then we think it's new, LOL
-        check_for_commit_task = self.create_and_queue_build_task
-
-        # We need this so we can check later if we should skip creating new test runner tasks
-        self.current_tasks << check_for_commit_task
+        self.create_and_queue_build_task
       end
     end
   end
