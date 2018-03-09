@@ -118,6 +118,9 @@ module FastlaneCI
             )
           ]
         )
+
+        # We need to set the backreferences here
+        ci_user.provider_credentials.each { |credential| credential.ci_user = ci_user }
         return ci_user
       end
       # END: nasty hack :puke:
@@ -132,12 +135,12 @@ module FastlaneCI
 
       # sweet, it matches, return the user
       if user_password == password
-        logger.debug("user #{email} authenticated")
+        logger.debug("User #{email} authenticated")
         return user
       end
 
       # nope, wrong password
-      logger.debug("user #{email} authentication failed")
+      logger.debug("User #{email} authentication failed")
       return nil
     end
 

@@ -110,7 +110,7 @@ module FastlaneCI
         end
 
         if needs_github_provider_credential
-          logger.debug("account #{github_provider_credential.email} needs updating")
+          logger.debug("Account #{github_provider_credential.email} needs updating")
           provider_credentials << github_provider_credential
           user.provider_credentials = provider_credentials
           updated_user = true

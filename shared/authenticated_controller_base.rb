@@ -24,7 +24,7 @@ module FastlaneCI
 
     def current_user_config_service
       if @user_config_service.nil?
-        logger.debug("no user_config_service for #{self.user.email}, creating one")
+        logger.debug("No user_config_service for #{self.user.email}, creating one")
         @user_config_service = FastlaneCI::ConfigService.new(ci_user: self.user)
       end
       return @user_config_service
@@ -33,13 +33,13 @@ module FastlaneCI
     # assume we need a user's provider credential for GitHub, realy though, a provider credential type should come from the controller
     def check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
       provider_credential = self.user.provider_credential(type: type)
-      raise "user #{self.user.email} doesn't have any linked `#{type}` accounts" if provider_credential.nil?
+      raise "User #{self.user.email} doesn't have any linked `#{type}` accounts" if provider_credential.nil?
       return provider_credential
     end
 
     def user_project_with_id(project_id: nil)
       project = FastlaneCI::Services.project_service.project_by_id(project_id)
-      raise "user #{self.user.email} doesn't have access to a project with id `#{project_id}`" if project.nil?
+      raise "User #{self.user.email} doesn't have access to a project with id `#{project_id}`" if project.nil?
       return project
     end
   end
