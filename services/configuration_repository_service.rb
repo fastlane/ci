@@ -4,6 +4,8 @@ module FastlaneCI
   # Provides operations to create and mutate the FastlaneCI configuration
   # repository
   class ConfigurationRepositoryService
+    include FastlaneCI::Logging
+
     # @return [Octokit::Client]
     attr_reader :client
 
@@ -31,9 +33,20 @@ module FastlaneCI
     #
     # @return [Boolean]
     def configuration_repository_valid?
-      configuration_repository_exists? &&
-        remote_file_a_json_array?("users.json") &&
-        remote_file_a_json_array?("projects.json")
+      valid = configuration_repository_exists?
+      logger.debug("Configuration repo #{repo_shortform} doesn't exist") unless valid
+
+      if valid
+        valid = remote_file_a_json_array?("users.json")
+        logger.debug("users.json file is not correct, it should be a json array") unless valid
+      end
+
+      if valid
+        valid = remote_file_a_json_array?("projects.json")
+        logger.debug("projects.json file is not correct, it should be a json array") unless valid
+      end
+
+      return valid
     end
 
     # Returns `true` if the remote configuration repository exists
@@ -105,13 +118,26 @@ module FastlaneCI
     # @return [Boolean]
     def remote_file_a_json_array?(file_path)
       return false unless configuration_repository_exists?
-      contents = JSON.parse(client.contents(repo_shortform, path: file_path))
+
+      logger.debug("Checking that #{repo_shortform}/#{file_path} is a json array")
+
+      contents_map = client.contents(repo_shortform, path: file_path)
+      contents_json = contents_map[:encoding] == "base64" ? Base64.decode64(contents_map[:content]) : contents_map[:content]
+      contents = JSON.parse(contents_json)
+
       contents.kind_of?(Array)
     rescue TypeError
+      if contents.nil?
+        logger.debug("#{repo_shortform}/#{file_path} has no content")
+      else
+        logger.debug("#{repo_shortform}/#{file_path} is type #{contents.type}, should be Array")
+      end
       false
     rescue Octokit::NotFound
+      logger.debug("#{repo_shortform}/#{file_path} couldn't be found")
       false
     rescue JSON::ParserError
+      logger.debug("#{repo_shortform}/#{file_path} couldn't be json-parsed, object type: #{contents.type}")
       false
     end
 

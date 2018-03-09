@@ -118,6 +118,9 @@ module FastlaneCI
             )
           ]
         )
+
+        # We need to set the backreferences here
+        ci_user.provider_credentials.each { |credential| credential.ci_user = ci_user }
         return ci_user
       end
       # END: nasty hack :puke:
