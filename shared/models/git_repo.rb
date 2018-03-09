@@ -294,7 +294,6 @@ module FastlaneCI
           logger.debug("done commit_changes! #{self.git_config.full_name}")
         end
       end
-      wait_for_task_to_complete(task: task) unless async
     end
 
     def push(repo_auth: self.repo_auth)
@@ -373,10 +372,6 @@ module FastlaneCI
       Git.clone(self.git_config.git_url, self.git_config.id,
                 path: self.git_config.containing_path,
                 recursive: true)
-    end
-
-    def wait_for_task_to_complete(task: nil)
-      sleep(0.001) until task.completed
     end
   end
 end

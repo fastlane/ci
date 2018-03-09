@@ -108,7 +108,7 @@ module FastlaneCI
     # @return [Boolean]
     def remote_file_a_json_array?(file_path)
       return false unless configuration_repository_exists?
-      contents = JSON.parse(client.contents(repo_shortform, path: file_path))
+      contents = JSON.parse(Base64.decode64(client.contents(repo_shortform, path: file_path).content))
       contents.kind_of?(Array)
     rescue TypeError
       false

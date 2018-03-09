@@ -111,14 +111,16 @@ module FastlaneCI
         ci_user = create_user!(
           email: ENV["FASTLANE_CI_USER"],
           password: BCrypt::Password.create(ENV["FASTLANE_CI_PASSWORD"]),
-          provider_credentials: [
-            FastlaneCI::GitHubProviderCredential.new(
-              email: FastlaneCI.env.initial_clone_email,
-              api_token: FastlaneCI.env.clone_user_api_token,
-              full_name: "CI User credentials"
-            )
-          ]
+          provider_credentials: []
         )
+        credentials = FastlaneCI::GitHubProviderCredential.new(
+          email: FastlaneCI.env.initial_clone_email,
+          api_token: FastlaneCI.env.clone_user_api_token,
+          full_name: "CI User credentials"
+        )
+        # Without the backreference many things fail.
+        credentials.ci_user = ci_user
+        ci_user.provider_credentials << credentials
         return ci_user
       end
       # END: nasty hack :puke:

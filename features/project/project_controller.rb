@@ -55,6 +55,9 @@ module FastlaneCI
 
     get "#{HOME}/add" do
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
+      # Before making adding a project, make sure we have the ci-config-repo ready.
+      # Services.configuration_git_repo
+
       locals = {
           title: "Add new project",
           repos: FastlaneCI::GitHubService.new(provider_credential: provider_credential).repos
@@ -119,13 +122,6 @@ module FastlaneCI
 
       lane = params["selected_lane"]
       project_name = params["project_name"]
-
-      # TODO: Trigger the clone
-      _repo = GitRepo.new(
-        git_config: repo_config,
-        provider_credential: provider_credential,
-        async_start: false
-      )
 
       # We now have enough information to create the new project.
       # TODO: add job_triggers here
