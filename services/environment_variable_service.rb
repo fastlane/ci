@@ -11,7 +11,7 @@ module FastlaneCI
       locals: {
         encryption_key: nil,
         ci_user_email: nil,
-        ci_user_api_token: nil,
+        ci_user_password: nil,
         repo_url: nil,
         clone_user_email: nil,
         clone_user_api_token: nil

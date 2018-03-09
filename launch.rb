@@ -232,7 +232,7 @@ module FastlaneCI
     rescue StandardError => ex
       logger.error("Something went wrong on the initial clone")
 
-      if FastlaneCI.env.initial_clone_api_token.to_s.empty?
+      if FastlaneCI.env.clone_user_api_token.to_s.empty?
         logger.error("Make sure to provide your `FASTLANE_CI_INITIAL_CLONE_API_TOKEN` ENV variable")
       end
 
@@ -252,7 +252,7 @@ module FastlaneCI
     def self.provider_credential
       @provider_credential ||= GitHubProviderCredential.new(
         email: FastlaneCI.env.initial_clone_email,
-        api_token: FastlaneCI.env.initial_clone_api_token
+        api_token: FastlaneCI.env.clone_user_api_token
       )
     end
 

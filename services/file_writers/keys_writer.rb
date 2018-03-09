@@ -16,7 +16,7 @@ module FastlaneCI
         FASTLANE_CI_USER='#{locals[:ci_user_email]}'
 
         # The encrypted API token of your fastlane CI bot account
-        FASTLANE_CI_PASSWORD='#{locals[:ci_user_api_token]}'
+        FASTLANE_CI_PASSWORD='#{locals[:ci_user_password]}'
 
         # The git URL (https) for the configuration repo
         FASTLANE_CI_REPO_URL='#{locals[:repo_url]}'

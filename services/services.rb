@@ -95,7 +95,7 @@ module FastlaneCI
     def self.provider_credential
       @_provider_credential ||= GitHubProviderCredential.new(
         email: FastlaneCI.env.initial_clone_email,
-        api_token: FastlaneCI.env.initial_clone_api_token
+        api_token: FastlaneCI.env.clone_user_api_token
       )
     end
 

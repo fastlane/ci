@@ -41,37 +41,6 @@ module FastlaneCI
       redirect("#{HOME}/#{project_id}/builds/#{build_runner.current_build_number}")
     end
 
-    # Details of a project settings
-    get "#{HOME}/:project_id" do
-      project = self.user_project_with_id(project_id: params[:project_id])
-
-      # TODO: We now access a file directly from the submodule
-      # That's of course far from ideal, and not something we want to do long term
-      # Long term, the best appraoch would probably to have the FastfileParser be
-      # its own Ruby gem, or even part of the fastlane/fastlane main repo
-      # For now, this is good enough, as we'll be moving so fast with this one
-
-      relative_fastfile_path = nil
-      available_lanes = []
-      absolute_fastfile_path = project.local_fastfile_path
-      unless absolute_fastfile_path.nil?
-        parser = Fastlane::FastfileParser.new(path: absolute_fastfile_path)
-        available_lanes = parser.available_lanes
-
-        project_path = project.repo_config.local_repo_path
-        relative_fastfile_path = Pathname.new(absolute_fastfile_path).relative_path_from(Pathname.new(project_path))
-      end
-
-      locals = {
-        project: project,
-        title: "Project #{project.project_name}",
-        available_lanes: available_lanes,
-        fastfile_path: relative_fastfile_path # TODO: rename param `fastfile_path` to `relative_fastfile_path`
-      }
-
-      erb(:project, locals: locals, layout: FastlaneCI.default_layout)
-    end
-
     post "#{HOME}/:project_id/save" do
       project_id = params[:project_id]
       project = self.user_project_with_id(project_id: project_id)
@@ -162,6 +131,37 @@ module FastlaneCI
       else
         raise "Project couldn't be created"
       end
+    end
+
+    # Details of a project settings
+    get "#{HOME}/:project_id" do
+      project = self.user_project_with_id(project_id: params[:project_id])
+
+      # TODO: We now access a file directly from the submodule
+      # That's of course far from ideal, and not something we want to do long term
+      # Long term, the best appraoch would probably to have the FastfileParser be
+      # its own Ruby gem, or even part of the fastlane/fastlane main repo
+      # For now, this is good enough, as we'll be moving so fast with this one
+
+      relative_fastfile_path = nil
+      available_lanes = []
+      absolute_fastfile_path = project.local_fastfile_path
+      unless absolute_fastfile_path.nil?
+        parser = Fastlane::FastfileParser.new(path: absolute_fastfile_path)
+        available_lanes = parser.available_lanes
+
+        project_path = project.repo_config.local_repo_path
+        relative_fastfile_path = Pathname.new(absolute_fastfile_path).relative_path_from(Pathname.new(project_path))
+      end
+
+      locals = {
+        project: project,
+        title: "Project #{project.project_name}",
+        available_lanes: available_lanes,
+        fastfile_path: relative_fastfile_path # TODO: rename param `fastfile_path` to `relative_fastfile_path`
+      }
+
+      erb(:project, locals: locals, layout: FastlaneCI.default_layout)
     end
   end
 end

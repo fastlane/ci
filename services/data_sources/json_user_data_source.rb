@@ -112,8 +112,8 @@ module FastlaneCI
           password_hash: BCrypt::Password.create(ENV["FASTLANE_CI_PASSWORD"]),
           provider_credentials: [
             FastlaneCI::GitHubProviderCredential.new(
-              email: FastlaneCI.env.ci_user_email,
-              api_token: FastlaneCI.env.ci_user_password,
+              email: FastlaneCI.env.initial_clone_email,
+              api_token: FastlaneCI.env.clone_user_api_token,
               full_name: "CI User credentials"
             )
           ]
