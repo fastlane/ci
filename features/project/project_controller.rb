@@ -58,12 +58,18 @@ module FastlaneCI
         # for now, just take the first one
       end
 
-      fastfile_path = fastfiles.first
+      available_lanes = []
+      relative_fastfile_path = nil
+      if fastfiles.count == 0
+        logger.error("No Fastfile founds at #{project_path}/fastlane/Fastfile, or any descendants")
+      else
+        fastfile_path = fastfiles.first
 
-      parser = Fastlane::FastfileParser.new(path: fastfile_path)
-      available_lanes = parser.available_lanes
+        parser = Fastlane::FastfileParser.new(path: fastfile_path)
+        available_lanes = parser.available_lanes
 
-      relative_fastfile_path = Pathname.new(fastfile_path).relative_path_from(Pathname.new(project_path))
+        relative_fastfile_path = Pathname.new(fastfile_path).relative_path_from(Pathname.new(project_path))
+      end
 
       locals = {
         project: project,
