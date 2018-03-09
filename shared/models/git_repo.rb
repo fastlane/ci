@@ -376,7 +376,7 @@ module FastlaneCI
     end
 
     def wait_for_task_to_complete(task: nil)
-      sleep 0.001 until task.completed
+      sleep(0.001) until task.completed
     end
   end
 end
