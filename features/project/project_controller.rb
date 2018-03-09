@@ -12,9 +12,6 @@ module FastlaneCI
     # TODO: this should actually be a POST request
     get "#{HOME}/:project_id/trigger" do
       project_id = params[:project_id]
-      lane = params[:lane] # TODO: not sent yet
-      platform = params[:platform] # TODO: not sent yet
-
       project = self.user_project_with_id(project_id: project_id)
       current_github_provider_credential = self.check_and_get_provider_credential
 

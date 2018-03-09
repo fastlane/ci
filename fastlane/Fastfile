@@ -1,4 +1,3 @@
-default_platform(:ios)
 
 lane :rspec_me do
   desc "Run all the rspec tests"
@@ -9,17 +8,5 @@ end
 lane :rubocop do
   desc "Rubocop the whole project to ensure no style violations"
   sh("cd ..;bundle update")
-  sh("cd ..;bundle exec rubocop")
-end
-
-platform :ios do
-  desc "Description of what the lane does"
-  lane :beta do
-    UI.message("It works, what kind of magic is this?")
-    UI.message("Building now...")
-    sleep(5)
-    UI.error("One error in your project, trying to fix it for you...")
-    sleep(5)
-    UI.success("Building complete")
-  end
+  sh("bundle exec rubocop ../")
 end
