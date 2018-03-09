@@ -164,11 +164,16 @@ module FastlaneCI
                                 project_name: name,
                                 lane: lane,
                                 artifact_provider: artifact_provider)
-      _ = GitRepo
       if !self.project_exist?(new_project.project_name)
         projects << new_project
         self.projects = projects
         logger.debug("Added project #{new_project.project_name} to projets.json in #{self.json_folder_path}")
+        logger.debug("Trigger clone project #{new_project.project_name}")
+        _ = GitRepo.new(
+          git_config: repo_config,
+          provider_credential: Services.provider_credential,
+          async_start: false
+        )
         return new_project
       else
         logger.debug("Couldn't add project #{new_project.project_name} because it already exists")
