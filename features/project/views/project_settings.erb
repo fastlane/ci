@@ -5,6 +5,8 @@
     <label class="mdl-textfield__label" for="project_name">Project Name</label>
   </div>
   <br />
+  <h5>Git URL</h5>
+  <p><code><%= project.repo_config.git_url %></code></p>
   <h5>Lane to run</h5>
   <p><code>Fastfile</code> located at path <code><%= fastfile_path %></code></p>
   <select name="selected_lane">
