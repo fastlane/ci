@@ -1,6 +1,7 @@
 require_relative "config_data_sources/json_project_data_source"
 require_relative "../shared/models/repo_config"
 require_relative "../shared/models/local_artifact_provider"
+require_relative "../shared/models/gcp_artifact_provider"
 require_relative "../shared/models/git_repo"
 require_relative "../shared/logging_module"
 require_relative "./user_service"
@@ -33,7 +34,11 @@ module FastlaneCI
       # we infer that the new project will be enabled by default
       enabled ||= true
       # we use LocalArtifactProvider by default
-      artifact_provider ||= LocalArtifactProvider.new
+      #artifact_provider ||= LocalArtifactProvider.new
+      artifact_provider ||= GCPStorageArtifactProvider.new(
+        cloud_project: "fastlane-197323",
+        json_keyfile_path: "/Users/GabrielVillarrubia/Downloads/fastlane-daf55f45e3d6.json",
+        bucket_name: "fastlane-101")
       project = self.project_data_source.create_project!(name: name, repo_config: repo_config, enabled: enabled, lane: lane, artifact_provider: artifact_provider)
       raise "Project couldn't be created" if project.nil?
       self.commit_repo_changes!(message: "Created project #{project.project_name}.")
