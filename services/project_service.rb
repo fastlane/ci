@@ -1,6 +1,7 @@
 require_relative "config_data_sources/json_project_data_source"
 require_relative "../shared/models/repo_config"
 require_relative "../shared/models/local_artifact_provider"
+require_relative "../shared/models/git_repo"
 require_relative "../shared/logging_module"
 require_relative "./user_service"
 require_relative "./services"
@@ -36,6 +37,8 @@ module FastlaneCI
       project = self.project_data_source.create_project!(name: name, repo_config: repo_config, enabled: enabled, lane: lane, artifact_provider: artifact_provider)
       raise "Project couldn't be created" if project.nil?
       self.commit_repo_changes!(message: "Created project #{project.project_name}.")
+      # We shallow clone the repo to have the information needed for retrieving lanes.
+      _ = self.git_repo_for_project(project: project)
       return project
     end
 
@@ -75,6 +78,18 @@ module FastlaneCI
     def commit_repo_changes!(message: nil, file_to_commit: nil)
       Services.configuration_git_repo.commit_changes!(commit_message: message,
                                                         file_to_commit: file_to_commit)
+    end
+
+    def git_repo_for_project(project:)
+      # TODO: For now we'll clone the project synchronously,
+      # we may revisit this later to handle async operations
+      # between Service <-> WebServer <-> Client.
+      repo = GitRepo.new(
+        git_config: project.repo_config,
+        provider_credential: Services.provider_credential,
+        async_start: false
+      )
+      repo
     end
   end
 end

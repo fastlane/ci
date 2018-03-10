@@ -123,11 +123,26 @@ module FastlaneCI
           # Now we have to check if the repo is actually from the
           # same repo URL
           if repo.remote("origin").url.casecmp(self.git_config.git_url.downcase).zero?
-            logger.debug("Resetting #{self.git_config.git_url}")
-            self.git.reset_hard
+            # If our courrent repo is the ci-config repo and has changes on it, we should commit them before
+            # other actions, to prevent local changes to be lost.
+            # This is a common issue, ci_config repo gets recreated several times trough the Services.configuration_git_repo
+            # and if some changes in the local repo (added projects, etc.) have been added, they're destroyed.
+            if self.git_config.local_repo_path == File.expand_path("~/.fastlane/ci/fastlane-ci-config")
+              # TODO: In case there are conflicts with remote, we want to decide which way we take.
+              # For now, we merge using the 'recursive' strategy.
+              unless git.status.changed == 0 && git.status.added == 0 && git.status.deleted == 0
+                repo.add(all: true)
+                repo.commit("Sync changes")
+                repo.pull
+                repo.push
+              end
+            else
+              logger.debug("Resetting #{self.git_config.git_url}")
+              self.git.reset_hard
 
-            logger.debug("Pulling #{self.git_config.git_url}")
-            self.pull
+              logger.debug("Pulling #{self.git_config.git_url}")
+              self.pull
+            end
           else
             logger.debug("[#{self.git_config.id}] Repo URL seems to have changed... deleting the old directory and cloning again")
             self.clear_directory
@@ -370,7 +385,8 @@ module FastlaneCI
       logger.debug("[#{self.git_config.id}]: Cloning git repo #{self.git_config.git_url}")
       Git.clone(self.git_config.git_url, self.git_config.id,
                 path: self.git_config.containing_path,
-                recursive: true)
+                recursive: true,
+                depth: 1)
     end
   end
 end

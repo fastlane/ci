@@ -77,7 +77,6 @@ module FastlaneCI
         self.add_listener(proc do |row|
           build_output << "#{row[:time]}: #{row[:message]}"
         end)
-        
 
         fast_file.runner.execute(self.lane, self.platform, self.parameters)
 
