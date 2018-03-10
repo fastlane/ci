@@ -12,24 +12,6 @@
       <%= erb :"./errors/_keys" %>
     <% end %>
 
-    <p><%= variables[:message] %></p>
-
-    <% if first_time_user? %>
-      <h1>Welcome to <code>fastlane.ci</code> 👋!</h1>
-      <b>
-        <p>A mobile-optimized, self-hosted continuous integration platform.</p>
-      </b>
-
-      <p>We've noticed this is your first time running the server.
-        <code>fastlane.ci</code> requires you setup a private configuration
-        repository on GitHub. Would you like us to create the private repo at
-        the url below?</p>
-
-      <!-- Form to create private remote github repository -->
-
-      <%= erb :"./forms/_git_repo" %>
-    <% end %>
-
     <% if keys.any?(&:nil?) %>
       <%= erb :"./warnings/_env_variables" %>
     <% end %>

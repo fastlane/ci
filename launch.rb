@@ -18,13 +18,13 @@ module FastlaneCI
       verify_dependencies
       verify_system_requirements
       Services.environment_variable_service.reload_dot_env!
-      Services.environment_variable_service.verify_env_variables
 
       # done making sure our env is sane, let's move on to the next step
       write_configuration_directories
       configure_thread_abort
-      check_for_existing_setup
+      Services.reset_services!
       register_available_controllers
+      launch_onboarding
       start_github_workers
       restart_any_pending_work
     end
@@ -43,6 +43,14 @@ module FastlaneCI
     rescue LoadError
       warn("Error: no such file to load -- openssl. Make sure you have openssl installed")
       exit(1)
+    end
+
+    def self.launch_onboarding
+      if !Services.onboarding_service.correct_setup?
+        Services.onboarding_service.launch_onboarding!
+      else
+        logger.info("Setup correct, skipping onboarding.")
+      end
     end
 
     def self.write_configuration_directories
@@ -67,26 +75,6 @@ module FastlaneCI
       end
     end
 
-    # Check if fastlane.ci already ran on this machine
-    # and with that, have the initial `users.json`, etc.
-    # If not, this is where we do the initial clone
-    def self.check_for_existing_setup
-      # TODO: should we also trigger a blocking `git pull` here?
-      self.trigger_initial_ci_setup unless first_time_user?
-      Services.reset_services!
-    end
-
-    def self.ci_config_repo
-      # Setup the fastlane.ci GitRepoConfig
-      @_ci_config_repo ||= GitRepoConfig.new(
-        id: "fastlane-ci-config",
-        git_url: FastlaneCI.env.repo_url,
-        description: "Contains the fastlane.ci configuration",
-        name: "fastlane ci",
-        hidden: true
-      )
-    end
-
     # We can't actually launch the server here
     # as it seems like it has to happen in `config.ru`
     def self.register_available_controllers
@@ -95,6 +83,7 @@ module FastlaneCI
       require_relative "features/dashboard/dashboard_controller"
       require_relative "features/login/login_controller"
       require_relative "features/notifications/notifications_controller"
+      require_relative "features/onboarding/onboarding_controller"
       require_relative "features/project/project_controller"
       require_relative "features/credentials/provider_credentials_controller"
       require_relative "features/users/users_controller"
@@ -105,6 +94,7 @@ module FastlaneCI
       FastlaneCI::FastlaneApp.use(FastlaneCI::DashboardController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::LoginController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::NotificationsController)
+      FastlaneCI::FastlaneApp.use(FastlaneCI::OnboardingController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::ProjectController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::ProviderCredentialsController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::UsersController)
@@ -112,20 +102,20 @@ module FastlaneCI
     end
 
     def self.start_github_workers
-      return if first_time_user?
+      return unless Services.onboarding_service.correct_setup?
 
       launch_workers unless ENV["FASTLANE_CI_SKIP_WORKER_LAUNCH"]
     end
 
     def self.restart_any_pending_work
-      return if first_time_user?
+      return unless Services.onboarding_service.correct_setup?
 
       # this helps during debugging
       # in the future we should allow this to be configurable behavior
       return if ENV["FASTLANE_CI_SKIP_RESTARTING_PENDING_WORK"]
 
-      github_projects = Services.config_service.projects(provider_credential: self.provider_credential)
-      github_service = FastlaneCI::GitHubService.new(provider_credential: self.provider_credential)
+      github_projects = Services.config_service.projects(provider_credential: Services.provider_credential)
+      github_service = FastlaneCI::GitHubService.new(provider_credential: Services.provider_credential)
 
       run_pending_github_builds(projects: github_projects, github_service: github_service)
       enqueue_builds_for_open_github_prs_with_no_status(projects: github_projects, github_service: github_service)
@@ -217,52 +207,6 @@ module FastlaneCI
           Services.build_runner_service.add_build_runner(build_runner: build_runner)
         end
       end
-    end
-
-    # Verify that fastlane.ci is already set up on this machine.
-    # If that's not the case, we have to make sure to trigger the initial clone
-    def self.trigger_initial_ci_setup
-      logger.info("No config repo cloned yet, doing that now")
-
-      # Trigger the initial clone
-      FastlaneCI::ProjectService.new(
-        project_data_source: FastlaneCI::JSONProjectDataSource.create(
-          ci_config_repo,
-          git_repo_config: ci_config_repo,
-          provider_credential: self.provider_credential
-        )
-      )
-      logger.info("Successfully did the initial clone on this machine")
-    rescue StandardError => ex
-      logger.error("Something went wrong on the initial clone")
-
-      if FastlaneCI.env.clone_user_api_token.to_s.empty?
-        logger.error("Make sure to provide your `FASTLANE_CI_INITIAL_CLONE_API_TOKEN` ENV variable")
-      end
-
-      raise ex
-    end
-
-    # This happens on the first launch of CI
-    # We don't have access to the config directory yet
-    # So we'll use ENV variables that are used for the initial clone only
-    #
-    # Long term, we'll have a nice onboarding flow, where you can enter those credentials
-    # as part of a web UI. But for containers (e.g. Google Cloud App Engine)
-    # we'll have to support ENV variables also, for the initial clone, so that's the code below
-    # Clone the repo, and login the user
-    #
-    # @return [GitHubProviderCredential]
-    def self.provider_credential
-      @provider_credential ||= GitHubProviderCredential.new(
-        email: FastlaneCI.env.initial_clone_email,
-        api_token: FastlaneCI.env.clone_user_api_token
-      )
-    end
-
-    def self.first_time_user?
-      !self.ci_config_repo.exists? ||
-        !Services.configuration_repository_service.configuration_repository_valid?
     end
   end
 end

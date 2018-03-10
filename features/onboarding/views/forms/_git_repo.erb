@@ -1,0 +1,28 @@
+<form id="git_repo" method="POST" action="/onboarding/git_repo">
+  <h4>4. Configuration Git Repository</h4>
+
+  <p>
+    You setup a private configuration repository on GitHub. Would you like us
+    to create the private repository at the url below?
+  </p>
+
+  <ol>
+    <li>Enter the url for the github configuration repository you wish to create</li>
+    <div class="mdl-textfield mdl-js-textfield">
+      <label for="input"><code>FASTLANE_CI_REPO_URL</code></label>
+      <input
+          id="ci_user_email"
+          class="mdl-textfield__input"
+          type="text"
+          name="ci_user_email"
+          value="<%= keys[:repo_url] %>"
+          placeholder="https://github.com/username/reponame"
+      />
+    </div>
+
+    <!-- TODO: show the user what files this will generate -->
+    <!-- TODO: let the user know they will be redirected following this -->
+    <li>Create your remote repository by sumitting the form:</li>
+    <input type="submit" value="Create private configuration repo">
+  </ol>
+</form>

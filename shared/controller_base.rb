@@ -5,6 +5,7 @@ require "set"
 require "logger"
 
 require_relative "logging_module"
+require_relative "setup_checker"
 require_relative "resource_reloader"
 
 module FastlaneCI
@@ -13,7 +14,13 @@ module FastlaneCI
   # Handles default configuration like auto-reloading, session management, and erb path correcting
   #
   class ControllerBase < Sinatra::Base
+    register SetupChecker
     include FastlaneCI::Logging
+
+    # A message to be displayed in a pop-up after POST requests
+    #
+    # @return [String]
+    attr_reader :message
 
     # Enum for status of POST operations
     STATUS = { success: :success, error: :error }
@@ -22,6 +29,14 @@ module FastlaneCI
     # TODO: use mixin
     configure :development do
       register Sinatra::Reloader
+    end
+
+    # After a POST request where a status is set, clear the session[:method]
+    # variable to avoid displaying the same message multiple times
+    before do
+      next unless request.post?
+      @message = session[:message]
+      session[:message] = nil
     end
 
     class << self
@@ -42,6 +57,8 @@ module FastlaneCI
 
       setup_common_controller_configuration
       super(app)
+
+      self.class.ensure_proper_setup
     end
 
     # setup all the common configuration required for the controller,

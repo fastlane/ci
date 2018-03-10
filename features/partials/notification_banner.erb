@@ -1,0 +1,11 @@
+<dialog class="mdl-dialog">
+  <div class="mdl-dialog__content">
+    <% if defined?(message) && message %>
+      <p><%= message %></p>
+    <% end %>
+  </div>
+
+  <div class="mdl-dialog__actions mdl-dialog__actions--full-width">
+    <button type="button" class="mdl-button close">Okay</button>
+  </div>
+</dialog>
