@@ -13,6 +13,7 @@ module FastlaneCI
     attr_accessor :hidden # Do we want normal users to be able to see this?
     attr_accessor :provider_credential_type_needed # what kind of provider is needed? PROVIDER_CREDENTIAL_TYPES[]
     attr_writer :containing_path # directory containing the `local_repo_path`
+    attr_accessor :local_repo_path # mandatory to add this if we want to be serialized.
 
     def initialize(id: nil,
                    git_url: nil,
@@ -20,13 +21,13 @@ module FastlaneCI
                    description: nil, name: nil,
                    containing_path: nil,
                    hidden: false)
-      @id = id || SecureRandom.uuid
-      @git_url = git_url
-      @description = description
-      @provider_credential_type_needed = provider_credential_type_needed
-      @name = name
-      @hidden = hidden
-      @containing_path = containing_path
+      self.id = id || SecureRandom.uuid
+      self.git_url = git_url
+      self.description = description
+      self.provider_credential_type_needed = provider_credential_type_needed
+      self.name = name
+      self.hidden = hidden
+      @local_repo_path = File.join(self.containing_path, @id)
     end
 
     # This is where we store the local git repo
@@ -35,10 +36,6 @@ module FastlaneCI
     # TODO: Switch to something else if we don't have write permission to this directory
     def containing_path
       @containing_path || File.expand_path("~/.fastlane/ci/")
-    end
-
-    def local_repo_path
-      File.join(self.containing_path, self.id)
     end
 
     # Is the repo already cloned on the local machine?

@@ -50,6 +50,7 @@ module FastlaneCI
 
     get "#{HOME}/add" do
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
+
       locals = {
           title: "Add new project",
           repos: FastlaneCI::GitHubService.new(provider_credential: provider_credential).repos
@@ -97,6 +98,9 @@ module FastlaneCI
           lanes: available_lanes,
           fastfile_path: fastfile_path
       }
+
+      # Delete the project
+      FileUtils.rm_rf(repo_path) if File.directory?(File.join(repo_path, ".git"))
 
       erb(:new_project_form, locals: locals, layout: FastlaneCI.default_layout)
     end

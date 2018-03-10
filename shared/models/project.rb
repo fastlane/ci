@@ -3,6 +3,7 @@ require "securerandom"
 require_relative "../../shared/logging_module"
 require_relative "artifact_provider"
 require_relative "local_artifact_provider"
+require_relative "job_trigger"
 
 module FastlaneCI
   # All metadata about a project.
@@ -38,6 +39,10 @@ module FastlaneCI
       self.id = id || SecureRandom.uuid
       self.lane = lane
       self.artifact_provider = artifact_provider
+      # TODO: This is fine for now to avoid runtime fails due to lack of triggers.
+      # In the future, the Add Project workflow, should provide the enough interface
+      # in order to add as many JobTriggers as the user wants.
+      self.job_triggers = [ManualJobTrigger.new(branch: "master")]
     end
 
     def builds
