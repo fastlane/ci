@@ -149,24 +149,23 @@ module FastlaneCI
       end
     end
 
-    def create_user!(id: nil, email: nil, password: nil, provider_credential: nil)
+    def create_user!(id: nil, email: nil, password: nil, provider_credentials: nil)
       users = self.users
       new_user = User.new(
         id: id,
         email: email,
         password_hash: BCrypt::Password.create(password),
-        provider_credentials: [provider_credential]
+        provider_credentials: provider_credentials
       )
 
       if !self.user_exist?(email: email)
         users.push(new_user)
         self.users = users
         logger.debug("Added user #{new_user.email}, writing out users.json to #{user_file_path}")
-        return new_user
       else
         logger.debug("Couldn't add user #{new_user.email} because they already exist")
-        return nil
       end
+      return new_user
     end
 
     # Finds a user with a given id

@@ -158,14 +158,14 @@ module FastlaneCI
     end
 
     def create_project!(name: nil, repo_config: nil, enabled: nil, lane: nil, artifact_provider: nil)
-      projects = self.projects
+      projects = self.projects.clone
       new_project = Project.new(repo_config: repo_config,
                                 enabled: enabled,
                                 project_name: name,
                                 lane: lane,
                                 artifact_provider: artifact_provider)
       if !self.project_exist?(new_project.project_name)
-        projects.push(new_project)
+        projects << new_project
         self.projects = projects
         logger.debug("Added project #{new_project.project_name} to projets.json in #{self.json_folder_path}")
         return new_project
