@@ -2,11 +2,6 @@
   <h4>3. Initial Clone User</h4>
 
   <p>
-    <code>fastlane.ci</code> requires you setup a CI <i>bot account</i> to
-    update the build status, etc.
-  </p>
-
-  <p>
     To properly create the configuration repository, <code>fastlane.ci</code>
     requires two configuration envorinment variables:
     <code>FASTLANE_CI_INITIAL_CLONE_EMAIL</code> and
@@ -19,7 +14,7 @@
   </p>
 
   <ol>
-    <li>Enter your bot user account email:</li>
+    <li>Enter your initial clone account email:</li>
 
     <div class="mdl-textfield mdl-js-textfield">
       <label for="input"><code>FASTLANE_CI_INITIAL_CLONE_EMAIL</code></label>
@@ -33,7 +28,15 @@
       />
     </div>
 
-    <li>Enter your bot user account password:</li>
+    <li>
+      Create a personal access token <a href="https://github.com/settings/tokens/new">
+      on GitHub</a> with <code>repo</code> permissions using the
+      <code>FASTLANE_CI_INITIAL_CLONE_EMAIL</code> you've set above:
+
+      <img src="images/github_access_token.png" width="80%">
+    </li>
+
+    <li>Enter the API token you created below:</li>
 
     <div class="mdl-textfield mdl-js-textfield">
       <label for="input"><code>FASTLANE_CI_INITIAL_CLONE_API_TOKEN</code></label>
