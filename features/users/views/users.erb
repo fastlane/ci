@@ -8,32 +8,28 @@
   <%= erb :"../../partials/navigation" %>
 
   <main class="mdl-layout__content" style="padding: 40px">
-    <% if users.nil? %>
-      <%= erb :"./warnings/_users_json" %>
-    <% else %>
-      <!-- Users found in users.json -->
+    <!-- Users found in users.json -->
 
-      <h3>Existing users found in <code>users.json</code></h3>
-      <table>
-        <thead>
+    <h3>Existing users found in <code>users.json</code></h3>
+    <table>
+      <thead>
+        <tr>
+          <th>id</th>
+          <th>Email</th>
+          <th>Password Hash</th>
+          <th>Provider Credentials</th>
+          <th></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% users.each do |user| %>
           <tr>
-            <th>id</th>
-            <th>Email</th>
-            <th>Password Hash</th>
-            <th>Provider Credentials</th>
-            <th></th>
+            <%= erb :"./forms/_users", locals: { user: user, action: "update" } %>
           </tr>
-        </thead>
-
-        <tbody>
-          <% users.each do |user| %>
-            <tr>
-              <%= erb :"./forms/_users", locals: { user: user, action: "update" } %>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    <% end %>
+        <% end %>
+      </tbody>
+    </table>
 
     <!-- Form to create another user to add to the `users.json` -->
 

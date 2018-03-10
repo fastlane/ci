@@ -8,14 +8,6 @@
   <%= erb :"../../partials/navigation" %>
 
   <main class="mdl-layout__content" style="padding: 40px">
-    <% if variables[:status] == :error %>
-      <%= erb :"./errors/_keys" %>
-    <% end %>
-
-    <% if keys.any?(&:nil?) %>
-      <%= erb :"./warnings/_env_variables" %>
-    <% end %>
-
     <!-- Form to create/mutate environment variable data -->
 
     <h3>Environment Variables</h3>
