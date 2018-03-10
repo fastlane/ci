@@ -131,8 +131,6 @@ module FastlaneCI
               # TODO: In case there are conflicts with remote, we want to decide which way we take.
               # For now, we merge using the 'recursive' strategy.
               if !repo.status.changed == 0 && !repo.status.added == 0 && !repo.status.deleted == 0 && !repo.status.untracked == 0
-                require "pry"
-                binding.pry
                 begin
                   repo.add(all: true)
                   repo.commit("Sync changes")
