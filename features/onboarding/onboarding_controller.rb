@@ -123,10 +123,15 @@ module FastlaneCI
     # 2) Redirect back to `/configuration`
     post "#{HOME}/git_repo" do
       if valid_params?(params, post_parameter_list_for_git_repo_validation)
+        Services.environment_variable_service.write_keys_file!(
+          locals: format_params(
+            params, post_parameter_list_for_git_repo_validation
+          )
+        )
         Services.configuration_repository_service.create_private_remote_configuration_repo
         Services.reset_services!
         Services.onboarding_service.trigger_initial_ci_setup
-        Launch.run_github_workers
+        Launch.start_github_workers
         session[:message] = <<~MESSAGE
           Remote repo #{params[:repo_url]} successfully created
         MESSAGE
@@ -177,7 +182,7 @@ module FastlaneCI
       return false unless not_nil_and_not_empty?(FastlaneCI.env.encryption_key)
 
       not_nil_and_not_empty?(FastlaneCI.env.repo_url) &&
-        Services.configuration_repository_service.configuration_repository_valid?
+        Services.onboarding_service.correct_setup?
     end
 
     #####################################################

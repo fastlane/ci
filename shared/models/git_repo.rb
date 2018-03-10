@@ -130,8 +130,9 @@ module FastlaneCI
             if self.git_config.local_repo_path == File.expand_path("~/.fastlane/ci/fastlane-ci-config")
               # TODO: In case there are conflicts with remote, we want to decide which way we take.
               # For now, we merge using the 'recursive' strategy.
+              repo.add(all: true)
+
               unless git.status.changed == 0 && git.status.added == 0 && git.status.deleted == 0
-                repo.add(all: true)
                 repo.commit("Sync changes")
                 repo.pull
                 repo.push
