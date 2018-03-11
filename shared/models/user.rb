@@ -11,7 +11,7 @@ module FastlaneCI
 
     attr_accessor :provider_credentials # Array of {GitHubProviderCredential, BitBucketProvider, etc...}
 
-    def initialize(id: nil, email: nil, password_hash: nil, provider_credentials: nil)
+    def initialize(id: nil, email: nil, password_hash: nil, provider_credentials: [])
       @id = id || SecureRandom.uuid
       @email = email
       @password_hash = password_hash

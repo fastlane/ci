@@ -110,18 +110,17 @@ module FastlaneCI
         # We do not create users outside of create_user! method because they're not stored!
         ci_user = create_user!(
           email: ENV["FASTLANE_CI_USER"],
-          password: BCrypt::Password.create(ENV["FASTLANE_CI_PASSWORD"]),
-          provider_credentials: [
-            FastlaneCI::GitHubProviderCredential.new(
-              email: FastlaneCI.env.initial_clone_email,
-              api_token: FastlaneCI.env.clone_user_api_token,
-              full_name: "CI User credentials"
-            )
-          ]
+          password: ENV["FASTLANE_CI_PASSWORD"]
         )
+        provider_credential = FastlaneCI::GitHubProviderCredential.new(
+          email: FastlaneCI.env.initial_clone_email,
+          api_token: FastlaneCI.env.clone_user_api_token,
+          full_name: "CI User credentials"
+        )
+        ci_user.provider_credentials << provider_credential
         # We need to set the backreferences here
-        ci_user.provider_credentials.each { |credential| credential.ci_user = ci_user }
-        return ci_user
+        ci_user.provider_credentials.each { |credential| credential.ci_user = ci_user } unless ci_user.nil?
+        return ci_user if ci_user
       end
       # END: nasty hack :puke:
 
@@ -172,7 +171,7 @@ module FastlaneCI
       end
     end
 
-    def create_user!(id: nil, email: nil, password: nil, provider_credentials: nil)
+    def create_user!(id: nil, email: nil, password: nil, provider_credentials: [])
       users = self.users
       new_user = User.new(
         id: id,
@@ -185,10 +184,11 @@ module FastlaneCI
         users.push(new_user)
         self.users = users
         logger.debug("Added user #{new_user.email}, writing out users.json to #{user_file_path}")
+        return new_user
       else
         logger.debug("Couldn't add user #{new_user.email} because they already exist")
+        return nil
       end
-      return new_user
     end
 
     # Finds a user with a given id
