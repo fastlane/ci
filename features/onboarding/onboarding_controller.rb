@@ -8,6 +8,15 @@ module FastlaneCI
   class OnboardingController < ControllerBase
     HOME = "/onboarding"
 
+    # After a POST request where a status is set, clear the session[:method]
+    # variable to avoid displaying the same message multiple times
+    before do
+      if !session[:message].nil? && request.get?
+        @message = session[:message]
+        session[:message] = nil
+      end
+    end
+
     get HOME do
       locals = { title: "Onboarding", variables: {} }
       erb(:index, locals: locals, layout: FastlaneCI.default_layout)
@@ -31,15 +40,14 @@ module FastlaneCI
           )
         )
 
-        session[:message] = <<~MESSAGE
-          ~/.fastlane/ci/keys file written with the configuration values:
-
+        session[:message] = <<~HTML
+          ~/.fastlane/ci/keys file written with the configuration values:<br />
             FASTLANE_CI_ENCRYPTION_KEY=#{params[:encryption_key]}
-        MESSAGE
+        HTML
       else
-        session[:message] = <<~MESSAGE
+        session[:message] = <<~HTML
           ERROR: ~/.fastlane/ci/keys file not written.
-        MESSAGE
+        HTML
       end
 
       redirect("#{HOME}#encryption_key")
@@ -63,16 +71,18 @@ module FastlaneCI
           )
         )
 
-        session[:message] = <<~MESSAGE
-          ~/.fastlane/ci/keys file written with the configuration values:
+        session[:message] = <<~HTML
+          ~/.fastlane/ci/keys file written with the configuration values:<br />
 
-            FASTLANE_CI_USER=#{params[:ci_user_email]}
-            FASTLANE_CI_PASSWORD=#{params[:ci_user_password]}
-        MESSAGE
+          <ul>
+            <li>FASTLANE_CI_USER=#{params[:ci_user_email]}</li>
+            <li>FASTLANE_CI_PASSWORD=#{params[:ci_user_password]}</li>
+          </ul>
+        HTML
       else
-        session[:message] = <<~MESSAGE
+        session[:message] = <<~HTML
           ERROR: ~/.fastlane/ci/keys file not written.
-        MESSAGE
+        HTML
       end
 
       redirect("#{HOME}#ci_bot_account")
@@ -96,16 +106,18 @@ module FastlaneCI
           )
         )
 
-        session[:message] = <<~MESSAGE
+        session[:message] = <<~HTML
           ~/.fastlane/ci/keys file written with the configuration values:
 
-            FASTLANE_CI_INITIAL_CLONE_EMAIL='#{params[:ci_user_email]}'
-            FASTLANE_CI_INITIAL_CLONE_API_TOKEN='#{params[:ci_user_password]}'
-        MESSAGE
+          <ul>
+            <li>FASTLANE_CI_INITIAL_CLONE_EMAIL='#{params[:ci_user_email]}'</li>
+            <li>FASTLANE_CI_INITIAL_CLONE_API_TOKEN='#{params[:ci_user_password]}'</li>
+          </ul>
+        HTML
       else
-        session[:message] = <<~MESSAGE
+        session[:message] = <<~HTML
           ERROR: ~/.fastlane/ci/keys file not written.
-        MESSAGE
+        HTML
       end
 
       redirect("#{HOME}#initial_clone_user")
@@ -115,10 +127,10 @@ module FastlaneCI
     #
     # 1) Creates and clones a private configuration repository:
     #
-    #    i.   create the private configuration git repo remotely
-    #    ii.  reset the services that rely on environment variables
-    #    iii. clone the configuration repo
-    #    iv.  run github workers
+    #    i.   create the private configuration git repo remotely (if it doesn't
+    #         already exist)
+    #    ii.  clone the configuration repo
+    #    iii. run github workers
     #
     # 2) Redirect back to `/configuration`
     post "#{HOME}/git_repo" do
@@ -129,16 +141,16 @@ module FastlaneCI
           )
         )
         Services.configuration_repository_service.create_private_remote_configuration_repo
-        Services.reset_services!
         Services.onboarding_service.trigger_initial_ci_setup
         Launch.start_github_workers
-        session[:message] = <<~MESSAGE
+
+        session[:message] = <<~HTML
           Remote repo #{params[:repo_url]} successfully created
-        MESSAGE
+        HTML
       else
-        session[:message] = <<~MESSAGE
+        session[:message] = <<~HTML
           ERROR: Remote repository was not successfully created
-        MESSAGE
+        HTML
       end
 
       redirect("#{HOME}#git_repo")

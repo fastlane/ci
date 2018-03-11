@@ -16,14 +16,13 @@
 <!-- Modal display script -->
 <script>
   var dialog = document.querySelector('dialog');
-  var showModalButton = document.querySelector('.show-modal');
   if (! dialog.showModal) dialogPolyfill.registerDialog(dialog);
 
-  <% if defined?(message) && message %>
+  <% if message %>
     dialog.showModal();
   <% end %>
 
   dialog.querySelector('.close').addEventListener('click', function() {
     dialog.close();
- });
+  });
 </script>

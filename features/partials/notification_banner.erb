@@ -1,8 +1,8 @@
-<dialog class="mdl-dialog">
+<dialog class="modal-dialog">
+  <h4 class="modal-title"><code>fastlane.ci</code> notification</h4>
+
   <div class="mdl-dialog__content">
-    <% if defined?(message) && message %>
-      <p><%= message %></p>
-    <% end %>
+    <%= message %>
   </div>
 
   <div class="mdl-dialog__actions mdl-dialog__actions--full-width">

@@ -31,14 +31,6 @@ module FastlaneCI
       register Sinatra::Reloader
     end
 
-    # After a POST request where a status is set, clear the session[:method]
-    # variable to avoid displaying the same message multiple times
-    before do
-      next unless request.post?
-      @message = session[:message]
-      session[:message] = nil
-    end
-
     class << self
       attr_accessor :_file
     end
