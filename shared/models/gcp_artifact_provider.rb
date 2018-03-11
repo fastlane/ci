@@ -57,9 +57,9 @@ module FastlaneCI
     end
 
     def store!(artifact: nil, build: nil, project: nil)
-      raise "Artifact to store was not provided or wrong type provided" if artifact.nil? || artifact&.class&.is_a?(Artifact)
-      raise "Build was not provided or wrong type provided" if build.nil? || build&.class&.is_a?(Build)
-      raise "Project was not provided or wrong type provided" if project.nil? || project&.class&.is_a?(Project)
+      raise "Artifact to store was not provided or wrong type provided" unless artifact&.is_a?(Artifact)
+      raise "Build was not provided or wrong type provided" unless build&.is_a?(Build)
+      raise "Project was not provided or wrong type provided" unless project&.is_a?(Project)
 
       init_storage!
 
@@ -80,7 +80,7 @@ module FastlaneCI
     end
 
     def retrieve!(artifact: nil)
-      raise "Artifact to store was not provided or wrong type provided" if artifact.nil? || artifact&.class&.is_a?(Artifact)
+      raise "Artifact to store was not provided or wrong type provided" unless artifact&.is_a?(Artifact)
 
       init_storage!
 
