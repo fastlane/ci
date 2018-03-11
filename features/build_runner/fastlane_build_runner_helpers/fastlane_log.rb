@@ -27,11 +27,11 @@ module FastlaneCI
 
       @log.sev_threshold = self.severity
 
-      @log
+      return @log
     end
 
     def format_string(datetime = Time.now, severity = "")
-      "[#{datetime.strftime('%H:%M:%S')}]: "
+      return "[#{datetime.strftime('%H:%M:%S')}]: "
     end
 
     #####################################################
