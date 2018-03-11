@@ -65,7 +65,7 @@ module FastlaneCI
 
       original_artifact_reference = Pathname.new(artifact.reference)
 
-      raise "Artifact reference not found." unless File.exist?(original_artifact_reference)
+      raise "Artifact referenced at #{original_artifact_reference} was not found" unless File.exist?(original_artifact_reference)
 
       new_artifact_reference = File.join(project.id, build.number.to_s, artifact.type, File.basename(original_artifact_reference))
 
