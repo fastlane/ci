@@ -82,7 +82,7 @@ module FastlaneCI
       init_storage!
 
       file = self.bucket.file(artifact.reference)
-      raise "Artifact reference not found" if file.nil?
+      raise "File pointed by #{artifact.reference} was not found on the configured bucket" if file.nil?
 
       # TODO: For now is ok to return just the link to the browser in the GCP Console itself,
       # this should be revisited later to address how we generate permanent public links to the artifact
