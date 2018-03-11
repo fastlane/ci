@@ -96,16 +96,15 @@ module FastlaneCI
         logger.error(ex.backtrace)
         return [] # TODO: return artifacts here (if any)
       # ensure
-        # WARN: Delete
         # Either the build was successfull or not, we have to ensure the artifacts for the execution.
         # artifact_paths = []
         # artifact_paths << { type: "log", path: "fastlane.log" }
         # constants_with_path = Fastlane::Actions::SharedValues.constants
-        #                                                     .select { |value| value.to_s.include?("PATH") } # Far from ideal, but meanwhile...
-        #                                                     .select { |value| !Fastlane::Actions.lane_context[value].nil? && !Fastlane::Actions.lane_context[value].empty? }
-        #                                                     .map { |value| { type: value.to_s, path: Fastlane::Actions.lane_context[value] } }
-        #artifact_paths.concat(constants_with_path)
-        #return artifact_paths
+        #                                                      .select { |value| value.to_s.include?("PATH") } # Far from ideal, but meanwhile...
+        #                                                      .select { |value| !Fastlane::Actions.lane_context[value].nil? && !Fastlane::Actions.lane_context[value].empty? }
+        #                                                      .map { |value| { type: value.to_s, path: Fastlane::Actions.lane_context[value] } }
+        # artifact_paths.concat(constants_with_path)
+        # return artifact_paths
       end
     end
   end
