@@ -127,7 +127,7 @@ module FastlaneCI
 
       # We now have enough information to create the new project.
       # TODO: add job_triggers here
-      # We shouldn't be blocking manual trigger builds 
+      # We shouldn't be blocking manual trigger builds
       # if we do not provide an interface to add them.
       project = Services.project_service.create_project!(
         name: project_name,

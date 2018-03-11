@@ -34,11 +34,7 @@ module FastlaneCI
       # we infer that the new project will be enabled by default
       enabled ||= true
       # we use LocalArtifactProvider by default
-      #artifact_provider ||= LocalArtifactProvider.new
-      artifact_provider ||= GCPStorageArtifactProvider.new(
-        cloud_project: "fastlane-197323",
-        json_keyfile_path: "/Users/GabrielVillarrubia/Downloads/fastlane-daf55f45e3d6.json",
-        bucket_name: "fastlane-101")
+      artifact_provider ||= LocalArtifactProvider.new
       project = self.project_data_source.create_project!(name: name, repo_config: repo_config, enabled: enabled, lane: lane, artifact_provider: artifact_provider)
       raise "Project couldn't be created" if project.nil?
       self.commit_repo_changes!(message: "Created project #{project.project_name}.")

@@ -48,9 +48,9 @@ module FastlaneCI
         keyfile: File.expand_path(self.json_keyfile_path)
       )
       self.bucket = self.storage.bucket(self.bucket_name)
-      permissions = self.bucket.test_permissions("storage.buckets.get", "storage.buckets.write")
+      permissions = self.bucket.test_permissions("storage.objects.create", "storage.objects.get")
       raise "Not enough permissions to the requested bucket" \
-        unless permissions.include?("storage.buckets.get") && permissions.include?("storage.buckets.write")
+        unless permissions.include?("storage.objects.create") && permissions.include?("storage.objects.get")
     end
 
     def store!(artifact: nil, build: nil, project: nil)
@@ -87,7 +87,7 @@ module FastlaneCI
       # TODO: For now is ok to return just the link to the browser in the GCP Console itself,
       # this should be revisited later to address how we generate permanent public links to the artifact
       # if the bucket is public (read-public) or expiring links for private buckets.
-      "#{self.class.root_browser}#{self.bucket_name}/#{artifact.reference}"
+      "#{self.class.root_browser}#{self.bucket_name}/#{artifacts.first.reference.split('/')[0..-2].join('/')}"
     end
   end
 end
