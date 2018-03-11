@@ -2,14 +2,35 @@
   <td>
     <code>id=<%= user.id %></code>
     <input type="hidden" name="id" value=<%= user.id %>>
+    <input
+      id="id"
+      class="mdl-textfield__input"
+      type="hidden"
+      name="id"
+      value="<%= user.id %>"
+    />
   </td>
 
   <td>
-    <input type="text" name="email" value=<%= user.email %>>
+    <input
+      id="email"
+      class="mdl-textfield__input"
+      type="text"
+      name="email"
+      value="<%= user.email %>"
+      placeholder="User's email"
+    />
   </td>
 
   <td>
-    <input type="text" name="password_hash" value=<%= user.password_hash %>>
+    <input
+      id="password_hash"
+      class="mdl-textfield__input"
+      type="text"
+      name="password_hash"
+      value="<%= user.password_hash %>"
+      placeholder="User's password hash"
+    />
   </td>
 
   <td>
@@ -37,6 +58,10 @@
   </td>
 
   <td>
-    <input type="submit" value="<%= action.capitalize %> user">
+    <input
+      class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+      type="submit"
+      value="<%= action.capitalize %> user"
+    />
   </td>
 </form>
