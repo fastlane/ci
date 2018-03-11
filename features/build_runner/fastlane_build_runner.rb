@@ -104,7 +104,6 @@ module FastlaneCI
         #                                                      .select { |value| !Fastlane::Actions.lane_context[value].nil? && !Fastlane::Actions.lane_context[value].empty? }
         #                                                      .map { |value| { type: value.to_s, path: Fastlane::Actions.lane_context[value] } }
         # artifact_paths.concat(constants_with_path)
-        # return artifact_paths
       end
     end
   end
