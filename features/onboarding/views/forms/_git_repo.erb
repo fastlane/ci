@@ -71,20 +71,41 @@
   </div>
 
   <ol>
-    <li>Enter the url for the github configuration repository you wish to create</li>
+    <li>
+      <p>Enter the url for the github configuration repository you wish to create:</p>
+
+      <i>
+        Note: if the private configuration repository already exists, it will
+        not overwrite your existing repository.
+      </i>
+    </li>
     <div class="mdl-textfield mdl-js-textfield">
       <label for="input"><code>FASTLANE_CI_REPO_URL</code></label>
       <input
-          id="repo_url"
-          class="mdl-textfield__input"
-          type="text"
-          name="repo_url"
-          value="<%= keys[:repo_url] %>"
-          placeholder="https://github.com/username/reponame"
+        id="repo_url"
+        class="mdl-textfield__input"
+        type="text"
+        name="repo_url"
+        value="<%= keys[:repo_url] %>"
+        placeholder="https://github.com/username/reponame"
       />
     </div>
-
-    <li>Create your remote repository by sumitting the form:</li>
-    <input type="submit" value="Create private configuration repo">
   </ol>
+
+  <input
+    class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+    href="/onboarding/initial_clone_user"
+    type="submit"
+    value="Set private configuration repository"
+  >
+</form>
+
+<!-- Progress to the next page -->
+<form method="GET" action="/">
+  <input
+    class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+    type="submit"
+    value="Next"
+    <%= "disabled" unless @progress %>
+  >
 </form>

@@ -1,6 +1,4 @@
-<!-- TODO: setup bot permisisons for the repo, etc. -->
-
-<form id="ci_bot_account" method="POST" action="/onboarding/ci_bot_account">
+<form method="POST" action="/onboarding/ci_bot_account">
   <h4>2. CI Bot Account</h4>
 
   <p>
@@ -37,12 +35,12 @@
     <div class="mdl-textfield mdl-js-textfield">
       <label for="input"><code>FASTLANE_CI_USER</code></label>
       <input
-          id="ci_user_email"
-          class="mdl-textfield__input"
-          type="text"
-          name="ci_user_email"
-          value="<%= keys[:ci_user_email] %>"
-          placeholder="your_github_bot_email@gmail.com"
+        id="ci_user_email"
+        class="mdl-textfield__input"
+        type="text"
+        name="ci_user_email"
+        value="<%= keys[:ci_user_email] %>"
+        placeholder="your_github_bot_email@gmail.com"
       />
     </div>
 
@@ -51,16 +49,29 @@
     <div class="mdl-textfield mdl-js-textfield">
       <label for="input"><code>FASTLANE_CI_PASSWORD</code></label>
       <input
-          id="ci_user_password"
-          class="mdl-textfield__input"
-          type="text"
-          name="ci_user_password"
-          value="<%= keys[:ci_user_password] %>"
-          placeholder="Your GitHub bot's password"
+        id="ci_user_password"
+        class="mdl-textfield__input"
+        type="text"
+        name="ci_user_password"
+        value="<%= keys[:ci_user_password] %>"
+        placeholder="Your GitHub bot's password"
       />
     </div>
-
-    <li>Submit the form to save your account information environment variables:</li>
-    <input type="submit" value="Save bot account information">
   </ol>
+
+  <input
+    class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+    type="submit"
+    value="Save bot account information"
+  >
+</form>
+
+<!-- Progress to the next page -->
+<form method="GET" action="/onboarding/initial_clone_user">
+  <input
+    class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+    type="submit"
+    value="Next"
+    <%= "disabled" unless @progress %>
+  >
 </form>

@@ -19,12 +19,12 @@
     <div class="mdl-textfield mdl-js-textfield">
       <label for="input"><code>FASTLANE_CI_INITIAL_CLONE_EMAIL</code></label>
       <input
-          id="clone_user_email"
-          class="mdl-textfield__input"
-          type="text"
-          name="clone_user_email"
-          value="<%= keys[:clone_user_email] %>"
-          placeholder="initial_clone_account_email@gmail.com"
+        id="clone_user_email"
+        class="mdl-textfield__input"
+        type="text"
+        name="clone_user_email"
+        value="<%= keys[:clone_user_email] %>"
+        placeholder="initial_clone_account_email@gmail.com"
       />
     </div>
 
@@ -41,16 +41,29 @@
     <div class="mdl-textfield mdl-js-textfield">
       <label for="input"><code>FASTLANE_CI_INITIAL_CLONE_API_TOKEN</code></label>
       <input
-          id="clone_user_api_token"
-          class="mdl-textfield__input"
-          type="text"
-          name="clone_user_api_token"
-          value="<%= keys[:clone_user_api_token] %>"
-          placeholder="The API token for your GitHub account"
+        id="clone_user_api_token"
+        class="mdl-textfield__input"
+        type="text"
+        name="clone_user_api_token"
+        value="<%= keys[:clone_user_api_token] %>"
+        placeholder="The API token for your GitHub account"
       />
     </div>
-
-    <li>Submit the form to save your account information environment variables:</li>
-    <input type="submit" value="Save configuration account information">
   </ol>
+
+  <input
+    class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+    type="submit"
+    value="Save configuration account information"
+  >
+</form>
+
+<!-- Progress to the next page -->
+<form method="GET" action="/onboarding/git_repo">
+  <input
+    class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+    type="submit"
+    value="Next"
+    <%= "disabled" unless @progress %>
+  >
 </form>

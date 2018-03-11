@@ -7,13 +7,6 @@ module FastlaneCI
   class OnboardingService
     include FastlaneCI::Logging
 
-    # Spawns a process that opens the onboarding page using the user's preferred
-    # web browser
-    def launch_onboarding!
-      logger.info("Launching onboarding web page.")
-      `open http://localhost:8080/onboarding`
-    end
-
     # Verify that fastlane.ci is already set up on this machine.
     # If that's not the case, we have to make sure to trigger the initial clone
     def trigger_initial_ci_setup

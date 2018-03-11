@@ -1,0 +1,14 @@
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
+  <header class="mdl-layout__header">
+    <div class="mdl-layout__header-row">
+      <span class="mdl-layout__title"><%= title %></span>
+    </div>
+  </header>
+
+  <%= erb :"../../partials/navigation" %>
+
+  <main class="mdl-layout__content" style="padding: 40px">
+    <!-- Initial Clone User Form -->
+    <%= erb :"./forms/_initial_clone_user" %>
+  </main>
+</div>

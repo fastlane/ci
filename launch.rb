@@ -24,7 +24,6 @@ module FastlaneCI
       configure_thread_abort
       Services.reset_services!
       register_available_controllers
-      launch_onboarding
       start_github_workers
       restart_any_pending_work
     end
@@ -43,14 +42,6 @@ module FastlaneCI
     rescue LoadError
       warn("Error: no such file to load -- openssl. Make sure you have openssl installed")
       exit(1)
-    end
-
-    def self.launch_onboarding
-      if !Services.onboarding_service.correct_setup?
-        Services.onboarding_service.launch_onboarding!
-      else
-        logger.info("Setup correct, skipping onboarding.")
-      end
     end
 
     def self.write_configuration_directories

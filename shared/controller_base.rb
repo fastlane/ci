@@ -120,7 +120,9 @@ module FastlaneCI
     # @param  [Set[Symbol] expected_keys
     # @return [Boolean]
     def valid_params?(actuals, expected_keys)
-      expected_keys.subset?(actuals.keys.to_set) && actuals.values.none?(&:nil?)
+      actuals = actuals.delete_if { |k, _v| k == "captures" }
+      expected_keys == actuals.keys.to_set &&
+        actuals.values.none? { |v| v.nil? || v.empty? }
     end
   end
 end

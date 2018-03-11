@@ -15,16 +15,30 @@
     <div class="mdl-textfield mdl-js-textfield">
       <label for="input"><code>FASTLANE_CI_ENCRYPTION_KEY</code></label>
       <input
-          id="encryption_key"
-          class="mdl-textfield__input"
-          type="text"
-          name="encryption_key"
-          value="<%= keys[:encryption_key] %>"
-          placeholder="Some custom encryption key"
+        id="encryption_key"
+        class="mdl-textfield__input"
+        type="text"
+        name="encryption_key"
+        value="<%= keys[:encryption_key] %>"
+        placeholder="Some custom encryption key"
       />
     </div>
 
-    <li>Save your encryption key by submitting the form:</li>
-    <input type="submit" value="Save encryption key">
   </ol>
+
+  <input
+    class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+    type="submit"
+    value="Save encryption key"
+  >
+</form>
+
+<!-- Progress to the next page -->
+<form method="GET" action="/onboarding/ci_bot_account">
+  <input
+    class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+    type="submit"
+    value="Next"
+    <%= "disabled" unless @progress %>
+  >
 </form>

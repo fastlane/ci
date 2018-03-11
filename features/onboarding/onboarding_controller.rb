@@ -11,6 +11,8 @@ module FastlaneCI
     # After a POST request where a status is set, clear the session[:method]
     # variable to avoid displaying the same message multiple times
     before do
+      @progress = false
+
       if !session[:message].nil? && request.get?
         @message = session[:message]
         session[:message] = nil
@@ -20,6 +22,30 @@ module FastlaneCI
     get HOME do
       locals = { title: "Onboarding", variables: {} }
       erb(:index, locals: locals, layout: FastlaneCI.default_layout)
+    end
+
+    get "#{HOME}/encryption_key" do
+      @progress = true if has_encryption_key?
+      locals = { title: "Onboarding", variables: {} }
+      erb(:encryption_key, locals: locals, layout: FastlaneCI.default_layout)
+    end
+
+    get "#{HOME}/ci_bot_account" do
+      @progress = true if has_ci_user?
+      locals = { title: "Onboarding", variables: {} }
+      erb(:ci_bot_account, locals: locals, layout: FastlaneCI.default_layout)
+    end
+
+    get "#{HOME}/initial_clone_user" do
+      @progress = true if has_clone_user?
+      locals = { title: "Onboarding", variables: {} }
+      erb(:initial_clone_user, locals: locals, layout: FastlaneCI.default_layout)
+    end
+
+    get "#{HOME}/git_repo" do
+      @progress = true if has_remote_github_repo?
+      locals = { title: "Onboarding", variables: {} }
+      erb(:git_repo, locals: locals, layout: FastlaneCI.default_layout)
     end
 
     # When the `/encryption_key` form is submitted:
@@ -50,7 +76,7 @@ module FastlaneCI
         HTML
       end
 
-      redirect("#{HOME}#encryption_key")
+      redirect("#{HOME}/encryption_key")
     end
 
     # When the `/ci_bot_account` form is submitted:
@@ -85,7 +111,7 @@ module FastlaneCI
         HTML
       end
 
-      redirect("#{HOME}#ci_bot_account")
+      redirect("#{HOME}/ci_bot_account")
     end
 
     # When the `/initial_clone_user` form is submitted:
@@ -110,8 +136,8 @@ module FastlaneCI
           ~/.fastlane/ci/keys file written with the configuration values:
 
           <ul>
-            <li>FASTLANE_CI_INITIAL_CLONE_EMAIL='#{params[:ci_user_email]}'</li>
-            <li>FASTLANE_CI_INITIAL_CLONE_API_TOKEN='#{params[:ci_user_password]}'</li>
+            <li>FASTLANE_CI_INITIAL_CLONE_EMAIL='#{params[:clone_user_email]}'</li>
+            <li>FASTLANE_CI_INITIAL_CLONE_API_TOKEN='#{params[:clone_user_api_token]}'</li>
           </ul>
         HTML
       else
@@ -120,7 +146,7 @@ module FastlaneCI
         HTML
       end
 
-      redirect("#{HOME}#initial_clone_user")
+      redirect("#{HOME}/initial_clone_user")
     end
 
     # When the `/git_repo` form is submitted:
@@ -153,7 +179,7 @@ module FastlaneCI
         HTML
       end
 
-      redirect("#{HOME}#git_repo")
+      redirect("#{HOME}/git_repo")
     end
 
     private
