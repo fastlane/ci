@@ -1,4 +1,5 @@
 require_relative "./fastlane_build_runner_helpers/fastlane_ci_output"
+require_relative "./fastlane_build_runner_helpers/fastlane_log"
 require_relative "./fastlane_build_runner_helpers/fastlane_output_to_html"
 require_relative "./build_runner"
 
@@ -37,7 +38,6 @@ module FastlaneCI
       require "fastlane"
 
       ci_output = FastlaneCI::FastlaneCIOutput.new(
-        file_path: "fastlane.log",
         each_line_block: proc do |row|
           # Additionally to transfering the original metadata of this message
           # that look like this:
@@ -53,6 +53,13 @@ module FastlaneCI
           yield(row)
         end
       )
+
+      verbose_log = FastlaneCI::FastlaneLog.new(file_path: "fastlane.verbose.log", severity: Logger::DEBUG)
+      info_log = FastlaneCI::FastlaneLog.new(file_path: "fastlane.log")
+
+      ci_output.add_output_listener!(verbose_log)
+      ci_output.add_output_listener!(info_log)
+
       FastlaneCore::UI.ui_object = ci_output
 
       # this only takes a few ms the first time being called
@@ -60,6 +67,7 @@ module FastlaneCI
 
       fast_file_path = self.project.local_fastfile_path
       fast_file = Fastlane::FastFile.new(fast_file_path)
+      FastlaneCore::Globals.verbose = true
 
       begin
         # TODO: I think we need to clear out the singleton values, such as lane context, and all that jazz

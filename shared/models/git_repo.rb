@@ -134,8 +134,7 @@ module FastlaneCI
                 begin
                   repo.add(all: true)
                   repo.commit("Sync changes")
-                  repo.pull
-                  repo.push
+                  git.push("origin", branch: "master", force: true)
                 rescue StandardError => ex
                   logger.error("Error commiting changes to ci-config repo")
                   logger.error(ex)
@@ -309,7 +308,6 @@ module FastlaneCI
           logger.debug("No changes in repo #{self.git_config.full_name}, skipping commit #{commit_message}")
         else
           git.commit(commit_message)
-          git.push
           logger.debug("Done commit_changes! #{self.git_config.full_name} for #{repo_auth.username}")
         end
       end

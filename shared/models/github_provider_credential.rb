@@ -51,10 +51,5 @@ module FastlaneCI
     def remote_host
       return @remote_host
     end
-
-    # TODO, this shouldn't be necesary, but we don't recurse properly in JSONConvertible
-    def dictionary_value
-      return { "email" => @email, "encrypted_api_token" => @encrypted_api_token }
-    end
   end
 end

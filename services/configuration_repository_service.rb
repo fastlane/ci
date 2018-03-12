@@ -100,6 +100,8 @@ module FastlaneCI
     # @raise  [Octokit::UnprocessableEntity] when file already exists
     # @param  [String] file_path
     def create_remote_json_file(file_path, json_string: "[]")
+      client.contents(repo_shortform, path: file_path)
+    rescue Octokit::NotFound
       client.create_contents(
         repo_shortform, file_path, "Adding #{file_path}", json_string
       )

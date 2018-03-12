@@ -1,37 +1,24 @@
+require_relative "./fastlane_log"
 require "fastlane"
 
 module FastlaneCI
   # Implementation for the FastlaneCore::Interface abstract class
   # this is set to the fastlane runner before executing the user's Fastfile
   class FastlaneCIOutput < FastlaneCore::Interface
-    # the file path to the log file for the output
-    attr_accessor :file_path
-
-    # The block that's being called for each new line
-    # that should be printed out to the user
+    # The block being called for each new line that should
+    # be stored in the log.
     attr_accessor :each_line_block
 
-    def initialize(file_path: nil, each_line_block: nil)
-      raise "No file path provided" if file_path.to_s.length == 0
+    def initialize(each_line_block: nil)
       raise "No each_line_block provided" if each_line_block.nil?
-      self.file_path = file_path
       self.each_line_block = each_line_block
+      @output_listeners = []
     end
 
-    def log
-      return @log if @log
-
-      @log ||= Logger.new(self.file_path)
-
-      @log.formatter = proc do |severity, datetime, progname, msg|
-        "#{format_string(datetime, severity)}#{msg}\n"
-      end
-
-      @log
-    end
-
-    def format_string(datetime = Time.now, severity = "")
-      "[#{datetime.strftime('%H:%M:%S')}]: "
+    def add_output_listener!(listener)
+      raise "Invalid listener provider, expected #{FastlaneLog.class.name} got #{listener.class.name}" \
+        unless listener.kind_of?(FastlaneLog)
+      @output_listeners << listener
     end
 
     #####################################################
@@ -39,7 +26,7 @@ module FastlaneCI
     #####################################################
 
     def error(message)
-      log.error(message.to_s.red)
+      @output_listeners.each { |listener| listener.error(message) }
       self.each_line_block.call(
         type: :error,
         message: message,
@@ -48,7 +35,7 @@ module FastlaneCI
     end
 
     def important(message)
-      log.warn(message.to_s.yellow)
+      @output_listeners.each { |listener| listener.important(message) }
       self.each_line_block.call(
         type: :important,
         message: message,
@@ -57,7 +44,7 @@ module FastlaneCI
     end
 
     def success(message)
-      log.info(message.to_s.green)
+      @output_listeners.each { |listener| listener.success(message) }
       self.each_line_block.call(
         type: :success,
         message: message,
@@ -68,7 +55,7 @@ module FastlaneCI
     # If you're here because you saw the exception: `wrong number of arguments (given 0, expected 1)`
     # that means you're accidentally calling this method instead of a local variable on the stack frame before this
     def message(message)
-      log.info(message.to_s)
+      @output_listeners.each { |listener| listener.message(message) }
       self.each_line_block.call(
         type: :message,
         message: message,
@@ -77,7 +64,7 @@ module FastlaneCI
     end
 
     def deprecated(message)
-      log.error(message.to_s.deprecated)
+      @output_listeners.each { |listener| listener.deprecated(message) }
       self.each_line_block.call(
         type: :error,
         message: message,
@@ -86,7 +73,7 @@ module FastlaneCI
     end
 
     def command(message)
-      log.info("$ #{message}".cyan)
+      @output_listeners.each { |listener| listener.command(message) }
       self.each_line_block.call(
         type: :command,
         message: message,
@@ -107,19 +94,11 @@ module FastlaneCI
     end
 
     def verbose(message)
-      # TODO: are we gonna have a verbose mode?
-      # Proposal: we can log into 2 files, one the normal output
-      #     and one with the verbose output
-      # log.debug(message.to_s) if FastlaneCore::Globals.verbose?
+      @output_listeners.each { |listener| listener.verbose(message) }
     end
 
     def header(message)
-      message = "--- #{message} ---"
-      i = message.length
-      success("-" * i)
-      success(message)
-      success("-" * i)
-
+      @output_listeners.each { |listener| listener.header(message) }
       self.each_line_block.call(
         type: :header,
         message: message,

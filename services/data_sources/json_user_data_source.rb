@@ -149,7 +149,7 @@ module FastlaneCI
       end
     end
 
-    def create_user!(id: nil, email: nil, password: nil, provider_credentials: nil)
+    def create_user!(id: nil, email: nil, password: nil, provider_credentials: [])
       users = self.users
       new_user = User.new(
         id: id,
@@ -162,10 +162,11 @@ module FastlaneCI
         users.push(new_user)
         self.users = users
         logger.debug("Added user #{new_user.email}, writing out users.json to #{user_file_path}")
+        return new_user
       else
         logger.debug("Couldn't add user #{new_user.email} because they already exist")
+        return nil
       end
-      return new_user
     end
 
     # Finds a user with a given id
