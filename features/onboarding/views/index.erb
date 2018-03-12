@@ -1,0 +1,66 @@
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
+  <header class="mdl-layout__header">
+    <div class="mdl-layout__header-row">
+      <span class="mdl-layout__title"><%= title %></span>
+    </div>
+  </header>
+
+  <%= erb :"../../partials/navigation" %>
+
+  <main class="mdl-layout__content" style="padding: 40px">
+    <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="width: 100%">
+      <div class="mdl-card__title">
+        <h2 class="mdl-card__title-text">
+          Welcome to fastlane.ci 👋!
+        </h2>
+      </div>
+
+      <div class="mdl-card__supporting-text">
+        <p>
+          <code>fastlane.ci</code> requires a few configuration values from you
+          to properly run the server.
+        </p>
+
+        The following items need to be addressed before you may properly run the
+        server:
+      </div>
+
+      <div class="mdl-card__actions mdl-card--border">
+        <ul>
+          <% if !has_encryption_key? %>
+            <li>
+              You are missing the <code>FASTLANE_CI_ENCRYPTION_KEY</code>
+              environment variable.
+            </li>
+          <% end %>
+
+          <% if !has_ci_user? %>
+            <li>
+              You are missing the <code>FASTLANE_CI_USER</code> and/or
+              <code>FASTLANE_CI_PASSWORD</code> environment variables.
+            </li>
+          <% end %>
+
+          <% if !has_clone_user? %>
+            <li>
+              You are missing the <code>FASTLANE_CI_INITIAL_CLONE_EMAIL</code>
+              and/or <code>FASTLANE_CI_INITIAL_CLONE_API_TOKEN</code> environment
+              variables.
+            </li>
+          <% end %>
+
+          <% if !has_remote_github_repo? %>
+            <li>
+              You are missing the <code>FASTLANE_CI_REPO_URL</code> and/or you
+              didn't submit the form to create the remote repository
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+
+    <a href="/onboarding/encryption_key" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+      Continue
+    </a>
+  </main>
+</div>

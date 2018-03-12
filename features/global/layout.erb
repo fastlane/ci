@@ -8,6 +8,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
   <body>
+    <%= erb :"../../partials/notification_banner" %>
     <%= yield %>
   </body>
 </html>
+
+<!-- Modal display script -->
+<script>
+  var dialog = document.querySelector('dialog');
+  if (! dialog.showModal) dialogPolyfill.registerDialog(dialog);
+
+  <% if message %>
+    dialog.showModal();
+  <% end %>
+
+  dialog.querySelector('.close').addEventListener('click', function() {
+    dialog.close();
+  });
+</script>

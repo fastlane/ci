@@ -5,6 +5,7 @@ require_relative "./configuration_repository_service"
 require_relative "./data_sources/json_build_data_source"
 require_relative "./data_sources/json_user_data_source"
 require_relative "./environment_variable_service"
+require_relative "./onboarding_service"
 require_relative "./project_service"
 require_relative "./notification_service"
 require_relative "./user_service"
@@ -167,6 +168,10 @@ module FastlaneCI
 
     def self.provider_credential_service
       @_provider_credential_service ||= FastlaneCI::ProviderCredentialService.new
+    end
+
+    def self.onboarding_service
+      @_onboarding_service ||= FastlaneCI::OnboardingService.new
     end
   end
 end

@@ -1,0 +1,111 @@
+<form id="git_repo" method="POST" action="/onboarding/git_repo">
+  <h4>4. Configuration Git Repository</h4>
+
+  <p>
+    <code>fastlane.ci</code> requires that you setup a private configuration
+    repository on GitHub for configuration purposes.
+
+    By submitting the form below, <code>fastlane.ci</code> will create a private
+    configuration repository at the url you set below, with the following files:
+  </p>
+
+  <div class="mdl-grid">
+    <div class="mdl-cell mdl-cell--6-col">
+      <b><code>projects.json</code></b>
+      <pre style="overflow: scroll">
+        <code>
+[
+  {
+    "repo_config": {
+      "id": "auto_generated_id",
+      "git_url": "https://github.com/your-name/fastlane-ci-demoapp",
+      "full_name": "your-name/fastlane-ci-demoapp",
+      "description": "Fastlane CI Demo App Repository",
+      "name": "Fastlane CI Demo App",
+      "provider_type_needed": "github",
+      "hidden": false
+    },
+    "id": "auto_generated_id",
+    "project_name": "fastlane CI demo app test",
+    "lane": "test",
+    "enabled": true,
+    "job_triggers": [
+      {
+        "type": "commit",
+        "branch": "master"
+      },
+      {
+        "type": "nightly",
+        "branch": "master"
+      }
+    ]
+  }
+]
+        </code>
+      </pre>
+    </div>
+
+    <div class="mdl-cell mdl-cell--6-col">
+      <b><code>users.json</code></b>
+      <pre style="overflow: scroll">
+        <code>
+[
+  {
+    "id": "auto_generated_id",
+    "email": "your-name@gmail.com",
+    "password_hash": "Your encrypted password (fastlane will encrypt for you)",
+    "provider_credentials": [
+      {
+        "email": "user-email@gmail.com",
+        "encrypted_api_token": "Encrypted GitHub API token",
+        "provider_name": "GitHub",
+        "type": "github",
+        "full_name": "Fastlane CI"
+      }
+    ]
+  }
+]
+        </code>
+      </pre>
+    </div>
+  </div>
+
+  <ol>
+    <li>
+      <p>Enter the url for the github configuration repository you wish to create:</p>
+
+      <i>
+        Note: if the private configuration repository already exists, it will
+        not overwrite your existing repository.
+      </i>
+    </li>
+    <div class="mdl-textfield mdl-js-textfield">
+      <label for="input"><code>FASTLANE_CI_REPO_URL</code></label>
+      <input
+        id="repo_url"
+        class="mdl-textfield__input"
+        type="text"
+        name="repo_url"
+        value="<%= keys[:repo_url] %>"
+        placeholder="https://github.com/username/reponame"
+      />
+    </div>
+  </ol>
+
+  <input
+    class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+    href="/onboarding/initial_clone_user"
+    type="submit"
+    value="Set private configuration repository"
+  >
+</form>
+
+<!-- Progress to the next page -->
+<form method="GET" action="/">
+  <input
+    class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+    type="submit"
+    value="Next"
+    <%= "disabled" unless @progress %>
+  >
+</form>

@@ -1,0 +1,77 @@
+<form method="POST" action="/onboarding/ci_bot_account">
+  <h4>2. CI Bot Account</h4>
+
+  <p>
+    <code>fastlane.ci</code> requires you setup a CI <i>bot account</i> to
+    update the build status, etc.
+  </p>
+
+  <p>
+    To properly setup the bot account, <code>fastlane.ci</code> requires
+    two configuration envorinment variables: <code>FASTLANE_CI_USER</code>
+    and <code>FASTLANE_CI_PASSWORD</code>.
+  </p>
+
+  <p>
+    Please follow the steps below to complete your <code>fastlane.ci</code>
+    cofiguration:
+  </p>
+
+  <ol>
+    <li>
+      <a href="https://help.github.com/articles/signing-up-for-a-new-github-account/">
+        Create an account</a> for your <code>fastlane.ci</code> bot on GitHub.
+
+      <p>
+        <i>
+          Note: it's important that you do not enable two-factor authentication
+          for your bot account.
+        </i>
+      </p>
+    </li>
+
+    <li>Enter your bot user account email:</li>
+
+    <div class="mdl-textfield mdl-js-textfield">
+      <label for="input"><code>FASTLANE_CI_USER</code></label>
+      <input
+        id="ci_user_email"
+        class="mdl-textfield__input"
+        type="text"
+        name="ci_user_email"
+        value="<%= keys[:ci_user_email] %>"
+        placeholder="your_github_bot_email@gmail.com"
+      />
+    </div>
+
+    <li>Enter your bot user account password:</li>
+
+    <div class="mdl-textfield mdl-js-textfield">
+      <label for="input"><code>FASTLANE_CI_PASSWORD</code></label>
+      <input
+        id="ci_user_password"
+        class="mdl-textfield__input"
+        type="text"
+        name="ci_user_password"
+        value="<%= keys[:ci_user_password] %>"
+        placeholder="Your GitHub bot's password"
+      />
+    </div>
+  </ol>
+
+  <input
+    class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+    type="submit"
+    value="Save bot account information"
+  >
+</form>
+
+<!-- Progress to the next page -->
+<form method="GET" action="/onboarding/initial_clone_user">
+  <input
+    class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+    type="submit"
+    value="Next"
+    <%= "disabled" unless @progress %>
+  >
+</form>

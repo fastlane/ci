@@ -4,7 +4,8 @@ require_relative "./services"
 module FastlaneCI
   # Logic pertaining to environment variable configuration
   class EnvironmentVariableService
-    # Write .keys configuration file with proper environment variables
+    # Write .keys configuration file with proper environment variables. Don't
+    # override old environment variables with `nil` values
     #
     # @param  [Hash] locals
     def write_keys_file!(
@@ -17,7 +18,10 @@ module FastlaneCI
         clone_user_api_token: nil
       }
     )
-      KeysWriter.new(path: keys_file_path, locals: locals).write!
+      non_nil_new_env_variables = locals.reject { |_k, v| v.nil? }
+      new_environment_variables = FastlaneCI.env.all.merge(non_nil_new_env_variables)
+      KeysWriter.new(path: keys_file_path, locals: new_environment_variables).write!
+      reload_dot_env!
     end
 
     # Reloads the environment variables and resets the memoized services that
@@ -33,21 +37,10 @@ module FastlaneCI
 
     # Verifies the proper environment variables needed to run the server are
     # present
-    def verify_env_variables
-      if FastlaneCI.env.encryption_key.nil?
-        warn("Error: unable to decrypt sensitive data without environment variable `FASTLANE_CI_ENCRYPTION_KEY` set")
-        exit(1)
-      end
-
-      if FastlaneCI.env.ci_user_email.nil? || FastlaneCI.env.ci_user_password.nil?
-        warn("Error: ensure you have your `FASTLANE_CI_USER` and `FASTLANE_CI_PASSWORD`environment variables set")
-        exit(1)
-      end
-
-      if FastlaneCI.env.repo_url.nil?
-        warn("Error: ensure you have your `FASTLANE_CI_REPO_URL` environment variable set")
-        exit(1)
-      end
+    #
+    # @return [Boolean]
+    def all_env_variables_non_nil?
+      FastlaneCI.env.all.none? { |_k, v| v.nil? || v.empty? }
     end
 
     # The path to the environment variables file
