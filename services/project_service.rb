@@ -1,6 +1,7 @@
 require_relative "config_data_sources/json_project_data_source"
 require_relative "../shared/models/repo_config"
 require_relative "../shared/models/local_artifact_provider"
+require_relative "../shared/models/gcp_artifact_provider"
 require_relative "../shared/models/git_repo"
 require_relative "../shared/logging_module"
 require_relative "./user_service"

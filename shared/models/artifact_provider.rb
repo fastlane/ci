@@ -22,10 +22,8 @@ module FastlaneCI
     # will always be a String.
     #
     # @param [Artifact] artifact, the artifact we want to retrieve.
-    # @param [Build] build, the build which generated the artifact.
-    # @param [Project] project, the project which generated the build.
     # @return [String] the resulting Artifact reference after being retrieved by the ArtifactProvider.
-    def retrieve!(artifact: nil, build: nil, project: nil)
+    def retrieve!(artifact: nil)
       not_implemented(__method__)
     end
   end
