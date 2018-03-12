@@ -18,6 +18,7 @@ Open source, self-hosted, mobile-optimized CI powered by [fastlane](https://fast
 - **Native fastlane integration**: Already use _fastlane_? `fastlane.ci` will work right out of the box for you
 - **Mobile first, mobile only**: For now, we're focusing exclusively on building the best CI system for mobile app devs
 - **Built in the open**: Together with all of you, MIT licensed
+- **Visual interface**: Thanks to `fastlane.ci` you'll be able to benefit from _fastlane_ without having to use the terminal
 
 ## Statement
 
