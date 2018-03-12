@@ -3,6 +3,8 @@ require_relative "../../shared/logging_module"
 
 require "set"
 require "octokit"
+require "git"
+require "addressable/uri"
 
 module FastlaneCI
   # Data source that interacts with GitHub
@@ -11,6 +13,12 @@ module FastlaneCI
 
     class << self
       attr_accessor :status_context_prefix
+
+      def self.temp_path
+        temporary_path = File.join(Dir.tmpdir, ".fastlane")
+        FileUtils.mkdir_p(temporary_path) unless File.directory?(temporary_path)
+        return temporary_path
+      end
     end
 
     GitHubService.status_context_prefix = "fastlane.ci: "
@@ -27,6 +35,17 @@ module FastlaneCI
       Octokit.auto_paginate = true # TODO: just for now, we probably should do smart pagination in the future
     end
 
+    # This method shallow clones the repo using the provider credential and looks for a valid _fastlane_
+    # configuration, parses the Fastfile (if found), and returns the lanes in the following way:
+    #     { 
+    #       :ios => [:lane_name, :other_lane_name],
+    #       :android => [:just_other_lane],
+    #       :no_platform => [:a_not_platform_lane]
+    #     }
+    # @param [String] repo_url
+    def self.peek_fastfile_configuration(repo_url: nil, provider_credential: nil)
+    end
+
     def client
       @_client
     end
@@ -41,26 +60,49 @@ module FastlaneCI
       client.login
     end
 
-    # returns all open pull requests on given repo
-    # branches should be nil if you want all branches to be considered
-    def open_pull_requests(repo_full_name: nil, branches: nil)
-      all_open_pull_requests = client.pull_requests(repo_full_name, state: "open")
+    # Returns the urls of the pull requests for a given branch and state.
+    # If branches is not provided, all target branches are considered.
+    # @param [String] repo_url
+    # @param [Array[String] || nil] branches, Either an array of target branches names or nil.
+    # @param [String] state, Either open, closed, or all to filter by state. Default: open.
+    # @return [String] HTML URL for the given pull request query.
+    def pull_requests(repo_url: nil, branches: nil, state: "open")
+      all_open_pull_requests = client.pull_requests(repo_from_url(repo_url), state: state)
 
       # if no specific branch, return all open prs
-      return all_open_pull_requests if branches.nil? || branches.count == 0
+      return all_open_pull_requests.map(&:html_url) if branches&.count == 0
 
-      branch_set = branches.to_set
-      all_open_pull_requests_on_branch = all_open_pull_requests.select { |pull_request| branch_set.include?(pull_request.head.ref) }
-
+      pull_requests_on_branch = all_open_pull_requests.select { |pull_request| branches.include?(pull_request.base.ref) }
       # we want only the PRs whose latest commit was to one of the branches passed in
-      logger.debug("Returning all open prs from: #{repo_full_name}, branches: #{branches}, pr count: #{all_open_pull_requests.count}")
-      return all_open_pull_requests_on_branch
+      logger.debug("Returning all open prs from: #{repo_full_name}, branches: #{branches}, pr count: #{pull_requests_on_branch.count}")
+      return pull_requests_on_branch.map(&:html_url)
     end
 
-    # returns only the most recent commit_sha for every open pr
-    # branches should be nil if you want all branches to be considered
-    def last_commit_sha_for_all_open_pull_requests(repo_full_name: nil, branches: nil)
-      return self.open_pull_requests(repo_full_name: repo_full_name, branches: branches).map { |pull_request| pull_request.head.sha }
+    # Retrieve all commits' sha from a given repo_url and branch.
+    # @param [String] repo_url
+    # @param [String] branch
+    # @return [Array[String]] List of SHA for a given branch and repo.
+    def all_commits_sha_for_branch(repo_url: nil, branch: nil)
+      return client.commits(repo_from_url(repo_url), branch).map(&:sha)
+    end
+
+    # Retrieve the list of sha for a given pull request number.
+    # @param [String] repo_url
+    # @param [Integer] number, of the pull request.
+    # @return [Array[String]] Array of SHA for the given pull request.
+    def commits_sha_from_pull_request(repo_url: nil, number: nil)
+      client.pull_commits(repo_from_url(repo_url), number).map(&:sha)
+    end
+
+    # Returns the last sha for every pull request that targets a list of branches (or all if not given) and status (or open if not given)
+    # @param [String] repo_url
+    # @param [Array[String] || nil] branches, Either an array of target branches names or nil.
+    # @param [String] state, Either open, closed, or all to filter by state. Default: open.
+    # @return [Array[String]] Array of the last commit SHA for the given repo and state.
+    def last_commit_sha_for_pull_requests(repo_url: nil, branches: nil, state: "open")
+      pull_requests_urls = self.pull_requests(repo_url: repo_from_url(repo_url), branches: branches, state: state)
+      numbers = pull_requests_urls.map { |url| URI.parse(url) }.map(&:path).collect { |path| path.split("/").last }
+      return numbers.map { |number| commits_sha_from_pull_request(repo_url: repo_from_url(repo_url), number: number) }.map(&:last)
     end
 
     # returns the statused of a given commit sha for a given repo specifically for fastlane.ci
@@ -88,15 +130,20 @@ module FastlaneCI
       return updated_commits
     end
 
-    # TODO: parse those here or in service layer?
+    # @return [Array[GitRepoConfig]]
     def repos
-      client.repos({}, query: { sort: "asc" })
+      client.repos({}, query: { sort: "asc" }).map(&GitRepoConfig.from_octokit_repo!)
+    end
+
+    # @return [Array[String]]
+    def branches(repo_url: nil)
+      client.branches(repo_from_url(repo_url)).map(&:name)
     end
 
     # Does the client with the associated credentials have access to the specified repo?
     # @repo [String] Repo URL as string
     def access_to_repo?(repo_url: nil)
-      client.repository?(repo_url.sub("https://github.com/", ""))
+      client.repository?(repo_from_url(repo_url))
     end
 
     # The `target_url`, `description` and `context` parameters are optional
@@ -139,6 +186,12 @@ module FastlaneCI
       # In this case `create_status` will cause an exception
       # if the user doesn't have write permission for the repo
       raise ex
+    end
+
+    protected
+
+    def repo_from_url(repo_url)
+      return repo_url.sub("https://github.com/", "")
     end
   end
 end
