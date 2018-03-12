@@ -19,11 +19,9 @@ module FastlaneCI
     # Creates a remote repository if it does not already exist, complete with
     # the expected remote files `user.json` and `projects.json`
     def create_private_remote_configuration_repo
-      unless configuration_repository_exists?
-        client.create_repository(repo_name, private: true)
-      end
-      create_remote_json_file("users.json", json_string: serialized_users) unless remote_file_a_json_array?("users.json")
-      create_remote_json_file("projects.json") unless remote_file_a_json_array?("projects.json")
+      client.create_repository(repo_name, private: true) unless configuration_repository_exists?
+      create_remote_json_file("users.json", json_string: serialized_users)
+      create_remote_json_file("projects.json")
     end
 
     # Returns `true` if the configuration repository is in proper format:
@@ -99,12 +97,20 @@ module FastlaneCI
 
     # Creates an empty json array file in the configuration repository
     #
+    # @raise  [Octokit::UnprocessableEntity] when file already exists
     # @param  [String] file_path
     def create_remote_json_file(file_path, json_string: "[]")
       client.contents(repo_shortform, path: file_path)
     rescue Octokit::NotFound
       client.create_contents(
         repo_shortform, file_path, "Adding #{file_path}", json_string
+      )
+    rescue Octokit::UnprocessableEntity
+      logger.debug(
+        <<~WARNING_MESSAGE
+          The file #{file_path} already exists in remote configuration repo:
+          #{repo_shortform}. Not overwriting the file.
+        WARNING_MESSAGE
       )
     end
 

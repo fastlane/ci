@@ -5,6 +5,7 @@ require "set"
 require "logger"
 
 require_relative "logging_module"
+require_relative "setup_checker"
 require_relative "resource_reloader"
 
 module FastlaneCI
@@ -13,7 +14,13 @@ module FastlaneCI
   # Handles default configuration like auto-reloading, session management, and erb path correcting
   #
   class ControllerBase < Sinatra::Base
+    register SetupChecker
     include FastlaneCI::Logging
+
+    # A message to be displayed in a pop-up after POST requests
+    #
+    # @return [String]
+    attr_reader :message
 
     # Enum for status of POST operations
     STATUS = { success: :success, error: :error }
@@ -42,6 +49,8 @@ module FastlaneCI
 
       setup_common_controller_configuration
       super(app)
+
+      self.class.ensure_proper_setup
     end
 
     # setup all the common configuration required for the controller,
@@ -111,7 +120,9 @@ module FastlaneCI
     # @param  [Set[Symbol] expected_keys
     # @return [Boolean]
     def valid_params?(actuals, expected_keys)
-      expected_keys.subset?(actuals.keys.to_set) && actuals.values.none?(&:nil?)
+      actuals = actuals.delete_if { |k, _v| k == "captures" }
+      expected_keys == actuals.keys.to_set &&
+        actuals.values.none? { |v| v.nil? || v.empty? }
     end
   end
 end

@@ -34,6 +34,9 @@ gem "rubocop"
 # Job scheduler for Ruby (at, cron, in and every jobs).
 gem "rufus-scheduler"
 
+# Access to Google Cloud Platform Storage API.
+gem "google-cloud-storage", "~> 1.5.0"
+
 # fastlane dependencies
 # TODO: point to minimum release instead of GitHub once
 # 	we shipped a new release

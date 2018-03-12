@@ -116,8 +116,19 @@ module FastlaneCI
       lane = params["selected_lane"]
       project_name = params["project_name"]
 
+      # Do this so we trigger the clone of the repo.
+      # TODO: Do this wherever it should be done, as we must redirect
+      # to the project details only when this task is finished.
+      _ = GitRepo.new(
+        git_config: repo_config,
+        provider_credential: provider_credential,
+        async_start: false
+      )
+
       # We now have enough information to create the new project.
       # TODO: add job_triggers here
+      # We shouldn't be blocking manual trigger builds
+      # if we do not provide an interface to add them.
       project = Services.project_service.create_project!(
         name: project_name,
         repo_config: repo_config,

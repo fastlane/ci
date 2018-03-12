@@ -102,28 +102,6 @@ module FastlaneCI
     end
 
     def login(email: nil, password: nil)
-      # TODO: Andrew will remove this nasty hack in the onboarding refactor
-      #
-      # I made a bad assumption because of a cached browser which made me ignore a simple
-      # usecase
-      if email == ENV["FASTLANE_CI_USER"] && password == ENV["FASTLANE_CI_PASSWORD"]
-        # We do not create users outside of create_user! method because they're not stored!
-        ci_user = create_user!(
-          email: ENV["FASTLANE_CI_USER"],
-          password: ENV["FASTLANE_CI_PASSWORD"]
-        )
-        provider_credential = FastlaneCI::GitHubProviderCredential.new(
-          email: FastlaneCI.env.initial_clone_email,
-          api_token: FastlaneCI.env.clone_user_api_token,
-          full_name: "CI User credentials"
-        )
-        ci_user.provider_credentials << provider_credential
-        # We need to set the backreferences here
-        ci_user.provider_credentials.each { |credential| credential.ci_user = ci_user } unless ci_user.nil?
-        return ci_user if ci_user
-      end
-      # END: nasty hack :puke:
-
       user = self.users.select { |existing_user| existing_user.email.casecmp(email.downcase).zero? }.first
 
       # user doesn't exist

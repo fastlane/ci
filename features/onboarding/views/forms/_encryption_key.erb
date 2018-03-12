@@ -1,0 +1,44 @@
+<form id="encryption_key" method="POST" action="/onboarding/encryption_key">
+  <h4>1. Encryption Key</h4>
+
+  <p>
+    <code>fastlane.ci</code> uses an encryption key to encrypt your API tokens
+    and passwords written out to the private configuration repository generated
+    at the end of onboarding.
+  </p>
+
+  <ol>
+    <li>
+      Enter an encryption key we will use to encrypt your password in the
+      private configuration repo we will generate:
+    </li>
+    <div class="mdl-textfield mdl-js-textfield">
+      <label for="input"><code>FASTLANE_CI_ENCRYPTION_KEY</code></label>
+      <input
+        id="encryption_key"
+        class="mdl-textfield__input"
+        type="text"
+        name="encryption_key"
+        value="<%= keys[:encryption_key] %>"
+        placeholder="Some custom encryption key"
+      />
+    </div>
+
+  </ol>
+
+  <input
+    class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+    type="submit"
+    value="Save encryption key"
+  >
+</form>
+
+<!-- Progress to the next page -->
+<form method="GET" action="/onboarding/ci_bot_account">
+  <input
+    class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+    type="submit"
+    value="Next"
+    <%= "disabled" unless @progress %>
+  >
+</form>
