@@ -1,33 +1,93 @@
 <form method="POST" action="/configuration/keys">
-  <p>
-    <code>FASTLANE_CI_ENCRYPTION_KEY=</code>
-    <input type="text" name="encryption_key", value=<%= keys[:encryption_key] %>>
-  </p>
+  <ul class="mdc-list mdc-list--dense demo-list" style="list-style: none">
+    <li class="mdc-list-item">
+      <div class="mdl-textfield mdl-js-textfield">
+        <label for="input"><code>FASTLANE_CI_ENCRYPTION_KEY</code></label>
+        <input
+            id="encryption_key"
+            class="mdl-textfield__input"
+            type="text"
+            name="encryption_key"
+            value="<%= keys[:encryption_key] %>"
+            placeholder="Some custom encryption key"
+        />
+      </div>
+    </li>
 
-  <p>
-    <code>FASTLANE_CI_USER=</code>
-    <input type="text" name="ci_user_email", value=<%= keys[:ci_user_email] %>>
-  </p>
+    <li class="mdc-list-item">
+      <div class="mdl-textfield mdl-js-textfield">
+        <label for="input"><code>FASTLANE_CI_USER</code></label>
+        <input
+            id="ci_user_email"
+            class="mdl-textfield__input"
+            type="text"
+            name="ci_user_email"
+            value="<%= keys[:ci_user_email] %>"
+            placeholder="your_github_bot_email@gmail.com"
+        />
+      </div>
+    </li>
 
-  <p>
-    <code>FASTLANE_CI_PASSWORD=</code>
-    <input type="text" name="ci_user_password", value=<%= keys[:ci_user_password] %>>
-  </p>
+    <li class="mdc-list-item">
+      <div class="mdl-textfield mdl-js-textfield">
+        <label for="input"><code>FASTLANE_CI_PASSWORD</code></label>
+        <input
+            id="ci_user_password"
+            class="mdl-textfield__input"
+            type="text"
+            name="ci_user_password"
+            value="<%= keys[:ci_user_password] %>"
+            placeholder="Your GitHub bot's password"
+        />
+      </div>
+    </li>
 
-  <p>
-    <code>FASTLANE_CI_REPO_URL=</code>
-    <input type="text" name="repo_url" value=<%= keys[:repo_url] %>>
-  </p>
+    <li class="mdc-list-item">
+      <div class="mdl-textfield mdl-js-textfield">
+        <label for="input"><code>FASTLANE_CI_REPO_URL</code></label>
+        <input
+            id="repo_url"
+            class="mdl-textfield__input"
+            type="text"
+            name="repo_url"
+            value="<%= keys[:repo_url] %>"
+            placeholder="https://github.com/username/reponame"
+        />
+      </div>
+    </li>
 
-  <p>
-    <code>FASTLANE_CI_INITIAL_CLONE_EMAIL=</code>
-    <input type="text" name="clone_user_email", value=<%= keys[:clone_user_email] %>>
-  </p>
+    <li class="mdc-list-item">
+      <div class="mdl-textfield mdl-js-textfield">
+        <label for="input"><code>FASTLANE_CI_INITIAL_CLONE_EMAIL</code></label>
+        <input
+            id="clone_user_email"
+            class="mdl-textfield__input"
+            type="text"
+            name="clone_user_email"
+            value="<%= keys[:clone_user_email] %>"
+            placeholder="initial_clone_account_email@gmail.com"
+        />
+      </div>
+    </li>
 
-  <p>
-    <code>FASTLANE_CI_INITIAL_CLONE_API_TOKEN=</code>
-    <input type="text" name="clone_user_api_token", value=<%= keys[:clone_user_api_token] %>>
-  </p>
+    <li class="mdc-list-item">
+      <div class="mdl-textfield mdl-js-textfield">
+        <label for="input"><code>FASTLANE_CI_INITIAL_CLONE_API_TOKEN</code></label>
+        <input
+            id="clone_user_api_token"
+            class="mdl-textfield__input"
+            type="text"
+            name="clone_user_api_token"
+            value="<%= keys[:clone_user_api_token] %>"
+            placeholder="The API token for your GitHub account"
+        />
+      </div>
+    </li>
 
-  <input type="submit" value="Update configuration variables.">
+    <input
+        class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+        type="submit"
+        value="Update configuration variables."
+    >
+  </ul>
 </form>
