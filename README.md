@@ -49,6 +49,7 @@ With this project, we don't just want to make using CI easier, we want to bring 
 - [docs/SystemArchitecture.md](docs/SystemArchitecture.md): Describes the overall design architecture of `fastlane.ci`, including the controllers, services, data sources, and data objects
 - [docs/ArtifactsAndBuilds.md](docs/ArtifactsAndBuilds.md): Describes how we store builds and their artifacts
 - [docs/use_cases](docs/use_cases): Describe the ideal use cases and the user flow
+- [docs/EnvironmentVariables.md](docs/EnvironmentVariables.md): Describe the various environment variables that are available
 
 ## System Requirements
 
