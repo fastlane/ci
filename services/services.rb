@@ -157,9 +157,7 @@ module FastlaneCI
 
     # @return [ConfigurationRepositoryService]
     def self.configuration_repository_service
-      @_configuration_repository_service ||= FastlaneCI::ConfigurationRepositoryService.new(
-        provider_credential: provider_credential
-      )
+      @_configuration_repository_service ||= FastlaneCI::ConfigurationRepositoryService.new
     end
 
     def self.environment_variable_service
