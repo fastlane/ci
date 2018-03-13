@@ -1,10 +1,13 @@
 require_relative "code_hosting_service"
 require_relative "../../shared/logging_module"
+require_relative "../../fastfile-parser/fastfile_parser"
 
 require "set"
 require "octokit"
 require "git"
 require "addressable/uri"
+require "tty-command"
+require "securerandom"
 
 module FastlaneCI
   # Data source that interacts with GitHub
@@ -14,10 +17,146 @@ module FastlaneCI
     class << self
       attr_accessor :status_context_prefix
 
-      def self.temp_path
+      attr_writer :temporary_git_storage
+
+      attr_accessor :temporary_storage_path
+
+      attr_writer :cache
+
+      def cache
+        @cache ||= {}
+        return @cache
+      end
+
+      def temp_path
         temporary_path = File.join(Dir.tmpdir, ".fastlane")
         FileUtils.mkdir_p(temporary_path) unless File.directory?(temporary_path)
         return temporary_path
+      end
+
+      def temporary_git_storage
+        temp_storage = File.join(Dir.tmpdir, ".tmp")
+        @temporary_git_storage ||= temp_storage
+        FileUtils.mkdir_p(@temporary_git_storage) unless File.directory?(@temporary_git_storage)
+        return @temporary_git_storage
+      end
+
+      # This method shallow clones the repo using the provider credential and looks for a valid _fastlane_
+      # configuration, parses the Fastfile (if found), and returns the lanes in the following way:
+      #     {
+      #       :ios => [:lane_name, :other_lane_name],
+      #       :android => [:just_other_lane],
+      #       :no_platform => [:a_not_platform_lane]
+      #     }
+      # @param repo_url [String]
+      # @param branch [String]
+      # @param provider_credential [GithubProviderCredential]
+      def peek_fastfile_configuration(repo_url: nil, branch: "master", provider_credential: nil, cache: true)
+        repo = repo_from_url(repo_url)
+        return self.cache[repo + branch] if self.cache && !self.cache[repo + branch].nil? && self.cache[repo + branch].kind_of?(Hash)
+        path = File.join(temp_path, repo, branch)
+        begin
+          git_path = File.join(path, repo.split("/").last)
+          # This triggers the check of an existing repo in the given path,
+          # we recover from the error making the clone and checkout
+          Git.open(git_path)
+          fastfile_path = self.fastfile_path(root_path: git_path)
+          fastfile = Fastlane::FastfileParser.new(path: fastfile_path)
+          fastfile_config = {}
+          fastfile.tree.each_key do |key|
+            if key.nil?
+              fastfile_config[:no_platform] = fastfile.tree[key]
+            else
+              fastfile_config[key.to_sym] = fastfile.tree[key]
+            end
+          end
+          fastfile_json_path = File.join(path, "fastfile.json")
+          FileUtils.touch(fastfile_json_path) unless File.exist?(fastfile_json_path) && !File.zero?(fastfile_json_path)
+          File.write(fastfile_json_path, JSON.pretty_generate(fastfile_config))
+          self.cache[repo + branch] = fastfile_config
+          return fastfile_config
+        rescue ArgumentError
+          self.setup_auth(
+            repo_url: repo_url,
+            provider_credential: provider_credential,
+            path: path
+          )
+          self.clone(
+            repo_url: repo_url,
+            branch: branch,
+            provider_credential: provider_credential
+          )
+          self.peek_fastfile_configuration(
+            repo_url: repo_url,
+            branch: branch,
+            provider_credential: provider_credential
+          )
+          self.unset_auth
+        end
+      end
+
+      # @return [Git::Base]
+      def clone(repo_url: nil, branch: "master", provider_credential: nil)
+        repo = self.repo_from_url(repo_url)
+        path = File.join(self.class.temp_path, repo, branch)
+        FileUtils.rm_rf(path) if File.directory?(path)
+        FileUtils.mkdir_p(path)
+        self.setup_auth(repo_url: repo_url, provider_credential: provider_credential, path: path)
+        Git.clone(repo_url, repo.split("/").last,
+                  path: path,
+                  recursive: true,
+                  depth: 1)
+        git = Git.open(File.join(path, repo.split("/").last))
+        git.branch(branch).checkout
+        return git
+      end
+
+      def fastfile_path(root_path: nil)
+        fastfiles = Dir[File.join(root_path, "fastlane/Fastfile")]
+        fastfiles = Dir[File.join(root_path, "**/fastlane/Fastfile")] if fastfiles.count == 0
+        fastfile_path = fastfiles&.first
+        return fastfile_path
+      end
+
+      def setup_auth(repo_url: nil, provider_credential: nil, path: nil)
+        repo = repo_from_url(repo_url)
+        temporary_storage_path = File.join(self.temporary_git_storage, "git-auth-#{SecureRandom.uuid}")
+        # More details: https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
+
+        FileUtils.mkdir_p(path) unless File.directory?(path)
+
+        store_credentials_command = "git credential-store --file #{self.temporary_storage_path.shellescape} store"
+        content = [
+          "protocol=https",
+          "host=#{provider_credential.remote_host}",
+          "username=#{provider_credential.email}",
+          "password=#{provider_credential.api_token}",
+          ""
+        ].join("\n")
+
+        scope = "local"
+
+        unless File.directory?(File.join(path, repo.split("/").last, ".git"))
+          # we don't have a git repo yet, we have no choice
+          # TODO: check if we find a better way for the initial clone to work without setting system global state
+          scope = "global"
+        end
+        use_credentials_command = "git config --#{scope} credential.helper 'store --file #{self.temporary_storage_path.shellescape}' #{local_repo_path}"
+
+        logger.debug("Setting credentials with command: #{use_credentials_command}")
+        cmd = TTY::Command.new(printer: :quiet)
+        cmd.run(store_credentials_command, input: content)
+        cmd.run(use_credentials_command)
+      end
+
+      def unset_auth
+        return unless self.temporary_storage_path.kind_of?(String)
+        # TODO: Also auto-clean those files from time to time, on server re-launch maybe, or background worker
+        FileUtils.rm(self.temporary_storage_path) if File.exist?(self.temporary_storage_path)
+      end
+
+      def repo_from_url(repo_url)
+        return repo_url.sub("https://github.com/", "")
       end
     end
 
@@ -33,17 +172,6 @@ module FastlaneCI
 
       @_client = Octokit::Client.new(access_token: provider_credential.api_token)
       Octokit.auto_paginate = true # TODO: just for now, we probably should do smart pagination in the future
-    end
-
-    # This method shallow clones the repo using the provider credential and looks for a valid _fastlane_
-    # configuration, parses the Fastfile (if found), and returns the lanes in the following way:
-    #     { 
-    #       :ios => [:lane_name, :other_lane_name],
-    #       :android => [:just_other_lane],
-    #       :no_platform => [:a_not_platform_lane]
-    #     }
-    # @param [String] repo_url
-    def self.peek_fastfile_configuration(repo_url: nil, provider_credential: nil)
     end
 
     def client
@@ -132,7 +260,7 @@ module FastlaneCI
 
     # @return [Array[GitRepoConfig]]
     def repos
-      client.repos({}, query: { sort: "asc" }).map(&GitRepoConfig.from_octokit_repo!)
+      client.repos({}, query: { sort: "asc" }).map { |repo| GitRepoConfig.from_octokit_repo!(repo: repo) }
     end
 
     # @return [Array[String]]

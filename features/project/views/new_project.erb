@@ -13,13 +13,27 @@
         <tr>
           <th>Status</th>
           <th style="width: 300px;">Project Name</th>
+          <th style="width: 400px;">Branches</th>
         </tr>
       </thead>
       <tbody>
         <% repos.each do |repo| %>
           <tr style="cursor: pointer;">
             <td>💚</td>
-            <td onclick="document.location = '/projects_erb/add/<%= repo[:name] %>';"><%= repo[:name] %></td>
+            <td><%= repo.name %></td>
+            <td>
+            <!-- TODO: Heyo! This is totally far from ideal, we'd want to load the branches of a selected repo under demand, but for development purposes, you know -->
+              <div class="mdl-textfield mdl-js-textfield getmdl-select">
+                <input type="text" value="" class="mdl-textfield__input" id="<%= repo.name %>" readonly>
+                <input type="hidden" value="" name="<%= repo.name %>">
+                <label for="<%= repo.name %>" class="mdl-textfield__label">Branch</label>
+                <ul for="<%= repo.name %>" class="mdl-menu mdl-menu--bottom-left mdl-js-menu">
+                  <% service.branches(repo_url: repo.git_url).each do |branch| %>
+                    <li class="mdl-menu__item" data-val="<%= branch %>>"><%= branch %></li>
+                  <% end %>
+                </ul>
+              </div>
+            </td>
           </tr>
         <% end %>
       </tbody>

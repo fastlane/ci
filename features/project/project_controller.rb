@@ -58,49 +58,24 @@ module FastlaneCI
 
       locals = {
           title: "Add new project",
-          repos: FastlaneCI::GitHubService.new(provider_credential: provider_credential).repos
+          repos: FastlaneCI::GitHubService.new(provider_credential: provider_credential).repos,
+          service: FastlaneCI::GitHubService.new(provider_credential: provider_credential)
       }
       erb(:new_project, locals: locals, layout: FastlaneCI.default_layout)
     end
 
-    get "#{HOME}/add/*" do |repo_name|
+    get "#{HOME}/add/*" do |repo_url|
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
-      github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
-      selected_repo = github_service.repos.select { |repo| repo_name == repo.name }.first
-
-      # We need to check whether we can checkout the project without issues.
-      # So a new project is created with default settings so we can fetch it.
-      repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
-
-      repo = GitRepo.new(
-        git_config: repo_config,
-        provider_credential: provider_credential,
-        async_start: false
-      )
-
-      # TODO: This should be refactored in some kind of FastlaneUtils` class.`
-      # We have synchronously cloned the repo, now we need to get the lanes.
-      repo_path = repo.git_config.local_repo_path
-      # First assume the fastlane directory and its file is in the root of the project
-      fastfiles = Dir[File.join(repo_path, "fastlane/Fastfile")]
-      # If not, it might be in a subfolder
-      fastfiles = Dir[File.join(repo_path, "**/fastlane/Fastfile")] if fastfiles.count == 0
-
-      if fastfiles.count > 1
-        logger.error("Ugh, multiple Fastfiles found, we're gonna have to build a selection in the future")
-        # for now, just take the first one
-      end
-
-      fastfile_path = fastfiles.first
-
-      parser = Fastlane::FastfileParser.new(path: fastfile_path)
-      available_lanes = parser.available_lanes
+      fastfile_config = FastlaneCI::GitHubService.peek_fastfile_configuration(
+        repo_url: repo_url, 
+        branch: "master", # TODO: Pass the selected branch into this step of the config.
+        provider_credential: provider_credential)
 
       locals = {
           title: "Add new project",
           repo: repo,
-          lanes: available_lanes,
+          lanes: fastfile_config,
           fastfile_path: fastfile_path
       }
 
