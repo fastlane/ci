@@ -55,13 +55,6 @@ module FastlaneCI
       return true
     end
 
-    private
-
-    # @return [Boolean]
-    def no_missing_keys?
-      Services.environment_variable_service.all_env_variables_non_nil?
-    end
-
     # @return [Boolean]
     def local_configuration_repo_exists?
       Services.ci_config_repo.exists?
@@ -70,6 +63,13 @@ module FastlaneCI
     # @return [Boolean]
     def remote_configuration_repository_valid?
       Services.configuration_repository_service.configuration_repository_valid?
+    end
+
+    private
+
+    # @return [Boolean]
+    def no_missing_keys?
+      Services.environment_variable_service.all_env_variables_non_nil?
     end
   end
 end
