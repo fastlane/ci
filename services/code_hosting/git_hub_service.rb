@@ -53,7 +53,7 @@ module FastlaneCI
       # @param provider_credential [GithubProviderCredential]
       def peek_fastfile_configuration(repo_url: nil, branch: "master", provider_credential: nil, cache: true)
         repo = repo_from_url(repo_url)
-        return self.cache[repo + branch] if self.cache && !self.cache[repo + branch].nil? && self.cache[repo + branch].kind_of?(Hash)
+        return self.cache[repo + branch] if cache && self.cache && !self.cache[repo + branch].nil? && self.cache[repo + branch].kind_of?(Hash)
         path = File.join(temp_path, repo, branch)
         begin
           git_path = File.join(path, repo.split("/").last)
