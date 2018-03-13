@@ -1,20 +1,12 @@
 require "json"
+require_relative "./api_clients/github_clients/clone_user_github_client"
 
 module FastlaneCI
   # Provides operations to create and mutate the FastlaneCI configuration
   # repository
   class ConfigurationRepositoryService
+    include FastlaneCI::CloneUserGitHubClient
     include FastlaneCI::Logging
-
-    # @return [Octokit::Client]
-    attr_reader :client
-
-    # Instantiates new `ConfigurationRepositoryService` class
-    #
-    # @param  [ProviderCredential] provider_credential
-    def initialize(provider_credential: nil)
-      @client = Octokit::Client.new(access_token: provider_credential.api_token)
-    end
 
     # Creates a remote repository if it does not already exist, complete with
     # the expected remote files `user.json` and `projects.json`

@@ -1,6 +1,7 @@
 require_relative "code_hosting_service"
 require_relative "../../taskqueue/task_queue"
 require_relative "../../shared/logging_module"
+require_relative "../api_clients/github_clients/clone_user_github_client"
 
 require "set"
 require "octokit"
@@ -8,6 +9,7 @@ require "octokit"
 module FastlaneCI
   # Data source that interacts with GitHub
   class GitHubService < CodeHostingService
+    include FastlaneCI::CloneUserGitHubClient
     include FastlaneCI::Logging
 
     class << self
@@ -24,13 +26,8 @@ module FastlaneCI
     def initialize(provider_credential: nil)
       self.provider_credential = provider_credential
 
-      @_client = Octokit::Client.new(access_token: provider_credential.api_token)
       Octokit.auto_paginate = true # TODO: just for now, we probably should do smart pagination in the future
       @task_queue = TaskQueue::TaskQueue.new(name: "#{provider_credential.type}-#{provider_credential.email}")
-    end
-
-    def client
-      @_client
     end
 
     def session_valid?
