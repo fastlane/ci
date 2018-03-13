@@ -18,6 +18,7 @@ module FastlaneCI
       verify_dependencies
       verify_system_requirements
       Services.environment_variable_service.reload_dot_env!
+      clone_repo_if_no_local_repo_and_remote_repo_exists
 
       # done making sure our env is sane, let's move on to the next step
       write_configuration_directories
@@ -56,6 +57,16 @@ module FastlaneCI
       if Gem::Version.new(RUBY_VERSION) < required_version
         warn("Error: ensure you have at least Ruby #{required_version}")
         exit(1)
+      end
+    end
+
+    # Will clone the remote configuration repository if the local repository is
+    # not found, but the user has a `FastlaneCI.env.repo_url` which corresponds
+    # to a valid remote configuration repository
+    def self.clone_repo_if_no_local_repo_and_remote_repo_exists
+      if !Services.onboarding_service.local_configuration_repo_exists? &&
+         Services.onboarding_service.remote_configuration_repository_valid?
+        Services.onboarding_service.trigger_initial_ci_setup
       end
     end
 
