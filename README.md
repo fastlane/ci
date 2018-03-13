@@ -49,6 +49,7 @@ With this project, we don't just want to make using CI easier, we want to bring 
 - [docs/SystemArchitecture.md](docs/SystemArchitecture.md): Describes the overall design architecture of `fastlane.ci`, including the controllers, services, data sources, and data objects
 - [docs/ArtifactsAndBuilds.md](docs/ArtifactsAndBuilds.md): Describes how we store builds and their artifacts
 - [docs/use_cases](docs/use_cases): Describe the ideal use cases and the user flow
+- [docs/EnvironmentVariables.md](docs/EnvironmentVariables.md): Describe the various environment variables that are available
 
 ## System Requirements
 
@@ -64,9 +65,11 @@ git submodule init
 git submodule update
 ```
 
-## Environment variables
+## Environment variables for first run
 
-We recommend create a local `.keys` file that you can load using `source .keys` before starting the server.
+These are the environment variables that you must have resolved before you can run fastlane.ci. We recommend create a local `.keys` file that you can load using `source .keys` before starting the server.
+
+*Note:* For a full list of environment variables and their description, check out [docs/EnvironmentVariables.md](docs/EnvironmentVariables.md).
 
 `fastlane.ci` needs a CI-account that is used by `fastlane.ci` to commit and push changes that happen from the CI-side of things (e.g. a new build is triggered by a new commit).
 
