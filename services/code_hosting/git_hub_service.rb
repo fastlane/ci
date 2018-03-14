@@ -1,5 +1,4 @@
 require_relative "code_hosting_service"
-require_relative "../../taskqueue/task_queue"
 require_relative "../../shared/logging_module"
 
 require "set"
@@ -26,7 +25,6 @@ module FastlaneCI
 
       @_client = Octokit::Client.new(access_token: provider_credential.api_token)
       Octokit.auto_paginate = true # TODO: just for now, we probably should do smart pagination in the future
-      @task_queue = TaskQueue::TaskQueue.new(name: "#{provider_credential.type}-#{provider_credential.email}")
     end
 
     def client
@@ -123,18 +121,16 @@ module FastlaneCI
         description = "Something went wrong" if state == "error"
       end
 
-      task = TaskQueue::Task.new(work_block: proc {
-        state_details = target_url.nil? ? "#{repo}, sha #{sha}" : target_url
-        logger.debug("Setting status #{state} on #{state_details}")
-        client.create_status(repo, sha, state, {
-          target_url: target_url,
-          description: description,
-          context: status_context
-        })
+      # this needs to be synchronous because we're doing it during initialization of our build runner
+      state_details = target_url.nil? ? "#{repo}, sha #{sha}" : target_url
+      logger.debug("Setting status #{state} on #{state_details}")
+      client.create_status(repo, sha, state, {
+        target_url: target_url,
+        description: description,
+        context: status_context
       })
-
-      @task_queue.add_task_async(task: task)
     rescue StandardError => ex
+      logger.error(ex)
       # TODO: how do we handle GitHub errors
       # In this case `create_status` will cause an exception
       # if the user doesn't have write permission for the repo
