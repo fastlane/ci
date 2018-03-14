@@ -45,7 +45,7 @@ module FastlaneCI
       # TODO: This will break when google-cloud-storage is updated.
       # For now we have set the version at: gem "google-cloud-storage", "~> 1.5.0"
       # Because _fastlane_ has a fixed dependency on "google-api-client"
-      # Ideally, in a near future this should be upgraded which may lead to breaking syntax. 
+      # Ideally, in a near future this should be upgraded which may lead to breaking syntax.
       self.storage = Google::Cloud::Storage.new(
         project: self.cloud_project,
         keyfile: File.expand_path(self.json_keyfile_path)
