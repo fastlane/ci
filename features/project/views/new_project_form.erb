@@ -4,27 +4,62 @@
       <span class="mdl-layout__title"><%= title %></span>
     </div>
   </header>
-
+  <script>
+  $(document).ready(function() {
+    $("#submit_form").prop("disabled", true);
+    $("#selected_lane").hide();
+  });
+  function check_branch(el) {
+    $("#submit_form").prop("disabled", true);
+    $("#selected_lane").hide();
+    $('#selected_lane').empty();
+    $.ajax({
+      method: "GET",
+      url: "/projects/lanes/<%= CGI.escape(repo) %>/" + el.value
+    }).done(function(data) {
+      $('#selected_lane').append("<option disabled selected value>Select a lane</option>");
+      console.log(data)
+      for (var platform in data) {
+        for (var lane in data[platform]) {
+          if (lane && platform) {
+            $('#selected_lane').append('<option value="'+ platform + " " + lane +'">'+ platform + " " + lane +'</option>')
+          } else if (lane && platform === "no_platform") {
+            $('#selected_lane').append('<option value="no_platform '+ lane +'">no_platform ' + lane +'</option>')
+          }
+        }
+      }
+      $("#selected_lane").show();
+    });
+  }
+  function check_lane(el) {
+    $("#submit_form").prop("disabled", false);
+  }
+  </script>
+  
   <%= erb :"../../partials/navigation" %>
 
   <main class="mdl-layout__content" style="padding: 40px">
     <form method="POST" action="/projects_erb/add/<%= repo.git_config.name %>">
-      <h5>Adding <%= repo.git_config.full_name %></h5>
+      <h5>Adding <%= repo %></h5>
       <div class="mdl-textfield mdl-js-textfield">
-        <input class="mdl-textfield__input" type="text" name="project_name" value="<%= repo.git_config.full_name %>">
+        <input class="mdl-textfield__input" type="text" name="project_name" value="<%= repo %>">
         <label class="mdl-textfield__label" for="project_name">Project Name</label>
       </div>
       <br />
-      <h5>Lane to run</h5>
-      <p><code>Fastfile</code> located at path <code><%= fastfile_path.split("/").last(2).join("/") %></code></p>
-      <select name="selected_lane">
-        <% lanes.each do |current_lane| %>
-          <option value="<%= current_lane %>"><%= current_lane %></option>
+      <h5>Select a branch</h5>
+      <select name="branch" id="branch" onchange="check_branch(this)">
+        <option disabled selected value>Select a branch</option>
+        <% branches.each do |branch| %>
+          <option value="<%= branch %>"><%= branch %></option>
         <% end %>
       </select>
       <br />
+      <h5>Lane to run</h5>
+      <select name="selected_lane", id="selected_lane" onchange="check_lane(this)">
+      </select>
       <br />
-      <input class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" type="submit" title="Save">
+      <br />
+      <input id="submit_form" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" type="submit" title="Save">
     </form>
   </main>
 </div>

@@ -98,11 +98,11 @@ module FastlaneCI
       # @return [Git::Base]
       def clone(repo_url: nil, branch: "master", provider_credential: nil)
         repo = self.repo_from_url(repo_url)
-        path = File.join(self.class.temp_path, repo, branch)
+        path = File.join(self.temp_path, repo, branch)
         FileUtils.rm_rf(path) if File.directory?(path)
         FileUtils.mkdir_p(path)
         self.setup_auth(repo_url: repo_url, provider_credential: provider_credential, path: path)
-        Git.clone(repo_url, repo.split("/").last,
+        Git.clone(url_from_repo(repo_url), repo.split("/").last,
                   path: path,
                   recursive: true,
                   depth: 1)
@@ -120,7 +120,7 @@ module FastlaneCI
 
       def setup_auth(repo_url: nil, provider_credential: nil, path: nil)
         repo = repo_from_url(repo_url)
-        temporary_storage_path = File.join(self.temporary_git_storage, "git-auth-#{SecureRandom.uuid}")
+        self.temporary_storage_path = File.join(self.temporary_git_storage, "git-auth-#{SecureRandom.uuid}")
         # More details: https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
 
         FileUtils.mkdir_p(path) unless File.directory?(path)
@@ -141,9 +141,8 @@ module FastlaneCI
           # TODO: check if we find a better way for the initial clone to work without setting system global state
           scope = "global"
         end
-        use_credentials_command = "git config --#{scope} credential.helper 'store --file #{self.temporary_storage_path.shellescape}' #{local_repo_path}"
+        use_credentials_command = "git config --#{scope} credential.helper 'store --file #{self.temporary_storage_path.shellescape}' #{File.join(path, repo.split("/").last)}"
 
-        logger.debug("Setting credentials with command: #{use_credentials_command}")
         cmd = TTY::Command.new(printer: :quiet)
         cmd.run(store_credentials_command, input: content)
         cmd.run(use_credentials_command)
@@ -157,6 +156,10 @@ module FastlaneCI
 
       def repo_from_url(repo_url)
         return repo_url.sub("https://github.com/", "")
+      end
+
+      def url_from_repo(repo)
+        return "https://github.com/" + repo unless repo.include?("https://github.com/")
       end
     end
 

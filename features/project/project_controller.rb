@@ -2,6 +2,7 @@ require_relative "../../shared/authenticated_controller_base"
 require_relative "../../shared/models/git_repo"
 
 require "pathname"
+require "json"
 
 module FastlaneCI
   # Controller for a single project view. Responsible for updates, triggering builds, and displaying project info
@@ -58,31 +59,36 @@ module FastlaneCI
 
       locals = {
           title: "Add new project",
-          repos: FastlaneCI::GitHubService.new(provider_credential: provider_credential).repos,
-          service: FastlaneCI::GitHubService.new(provider_credential: provider_credential)
+          repos: FastlaneCI::GitHubService.new(provider_credential: provider_credential).repos
       }
       erb(:new_project, locals: locals, layout: FastlaneCI.default_layout)
     end
 
-    get "#{HOME}/add/*" do |repo_url|
+    get "#{HOME}/add/*" do |repo_name|
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
-      fastfile_config = FastlaneCI::GitHubService.peek_fastfile_configuration(
-        repo_url: repo_url, 
-        branch: "master", # TODO: Pass the selected branch into this step of the config.
-        provider_credential: provider_credential)
+      service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
 
       locals = {
           title: "Add new project",
-          repo: repo,
-          lanes: fastfile_config,
-          fastfile_path: fastfile_path
+          repo: repo_name,
+          branches: service.branches(repo_url: repo_name)
       }
 
-      # Delete the project
-      FileUtils.rm_rf(repo_path) if File.directory?(File.join(repo_path, ".git"))
-
       erb(:new_project_form, locals: locals, layout: FastlaneCI.default_layout)
+    end
+
+    get "#{HOME}/lanes/*/*/*" do |org, repo_name, branch|
+      content_type :json
+
+      provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
+
+      fastfile_config = FastlaneCI::GitHubService.peek_fastfile_configuration(
+        repo_url: "#{org}/#{repo_name}",
+        branch: branch,
+        provider_credential: provider_credential)
+
+      fastfile_config.to_json
     end
 
     post "#{HOME}/add/*" do |repo_name|
@@ -95,6 +101,7 @@ module FastlaneCI
 
       lane = params["selected_lane"]
       project_name = params["project_name"]
+      branch = params["branch"]
 
       # Do this so we trigger the clone of the repo.
       # TODO: Do this wherever it should be done, as we must redirect
