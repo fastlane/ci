@@ -118,6 +118,9 @@ module FastlaneCI
 
         Services.user_service.update_user!(user: user) if updated_user
 
+        # Reload the user because https://github.com/fastlane/ci/issues/292
+        user = Services.user_service.find_user(id: user.id)
+
         # update session user
         session[:user] = user
       end

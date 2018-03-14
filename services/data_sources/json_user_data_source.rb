@@ -126,6 +126,7 @@ module FastlaneCI
       return self.users.any? { |existing_user| existing_user.email.casecmp(email.downcase).zero? }
     end
 
+    # TODO: this isn't threadsafe
     def update_user!(user: nil)
       user_index = nil
       existing_user = nil
@@ -146,6 +147,7 @@ module FastlaneCI
         users[user_index] = user
         self.users = users
         logger.debug("Updating user #{existing_user.email}, writing out users.json to #{user_file_path}")
+        return true
       end
     end
 
