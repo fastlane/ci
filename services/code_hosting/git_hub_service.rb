@@ -82,7 +82,7 @@ module FastlaneCI
       # @param provider_credential [GithubProviderCredential]
       def peek_fastfile_configuration(repo_url: nil, branch: "master", provider_credential: nil, path: self.temp_path, cache: true)
         repo = repo_from_url(repo_url)
-        return self.cache[repo + branch] if cache && self.cache && !self.cache[repo + branch].nil? && self.cache[repo + branch].kind_of?(Hash)
+        return self.cache[[repo, branch].join("/")] if cache && self.cache && !self.cache[[repo, branch].join("/")].nil? && self.cache[[repo, branch].join("/")].kind_of?(Hash)
         path = File.join(path, repo, branch)
         begin
           git_path = File.join(path, repo.split("/").last)
@@ -102,7 +102,7 @@ module FastlaneCI
           fastfile_json_path = File.join(path, "fastfile.json")
           FileUtils.touch(fastfile_json_path) unless File.exist?(fastfile_json_path) && !File.zero?(fastfile_json_path)
           File.write(fastfile_json_path, JSON.pretty_generate(fastfile_config))
-          self.cache[repo + branch] = fastfile_config
+          self.cache[[repo, branch].join("/")] = fastfile_config
           return fastfile_config
         rescue ArgumentError
           self.setup_auth(
