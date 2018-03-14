@@ -38,21 +38,26 @@ module FastlaneCI
 
       unless self.user_data_source.user_exist?(email: email)
         logger.debug("Creating account #{email}")
-        provider_credential = GitHubProviderCredential.new(email: email)
-        self.user_data_source.create_user!(id: id, email: email, password: password, provider_credentials: [provider_credential])
+        return self.user_data_source.create_user!(id: id, email: email, password: password, provider_credentials: [])
       end
 
       logger.debug("Account #{email} already exists!")
       return nil
     end
 
+    # TODO: THIS ALWAYS TURNS THE PROVIDER CREDENTIALS INTO HASHES
     def update_user!(user: nil)
-      self.user_data_source.update_user!(user: user)
+      success = self.user_data_source.update_user!(user: user)
+      if success
+        # TODO: remove this message if https://github.com/fastlane/ci/issues/292 is fixed
+        logger.info("Updated user #{user.email}, that means you should call `find_user(id:)` see https://github.com/fastlane/ci/issues/292")
+      end
+      return success
     end
 
     # @return [User]
     def find_user(id: nil)
-      self.user_data_source.find_user(id: id)
+      return self.user_data_source.find_user(id: id)
     end
 
     def login(email: nil, password: nil, ci_config_repo: nil)
@@ -80,13 +85,8 @@ module FastlaneCI
       if user.nil?
         logger.error("Can't create provider credential for user, since user does not exist.")
       else
-        new_user = User.new(
-          id: user.id,
-          email: user.email,
-          password_hash: user.password_hash,
-          provider_credentials: user.provider_credentials.push(provider_credential)
-        )
-        update_user!(user: new_user)
+        user.provider_credentials << provider_credential
+        update_user!(user: user)
       end
     end
 
