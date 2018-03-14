@@ -38,7 +38,7 @@ module FastlaneCI
       require "fastlane"
 
       ci_output = FastlaneCI::FastlaneCIOutput.new(
-        each_line_block: proc do |row|
+        each_line_block: proc do |raw_row|
           # Additionally to transfering the original metadata of this message
           # that look like this:
           #
@@ -49,8 +49,14 @@ module FastlaneCI
           #
           #   {"type":"success","message":"Driving the lane 'ios beta'","html":"<p class=\"success\">Driving the lane 'ios beta'</p>","time"=>...}
           #
-          row[:html] = FastlaneOutputToHtml.convert_row(row)
-          yield(row)
+          # Also we use our custom BuildRunnerOutputRow class to represent the current row
+          current_row = FastlaneCI::BuildRunnerOutputRow.new(
+            type: raw_row[:type],
+            message: raw_row[:message],
+            time: raw_row[:time],
+            html: FastlaneOutputToHtml.convert_row(raw_row)
+          )
+          yield(current_row)
         end
       )
 

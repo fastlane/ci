@@ -1,4 +1,5 @@
 require_relative "../../shared/models/artifact"
+require_relative "./build_runner_output_row"
 
 module FastlaneCI
   # Class that represents a BuildRunner, used

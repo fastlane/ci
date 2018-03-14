@@ -12,7 +12,7 @@ module FastlaneCI
   #
   # It does so for each row
   #
-  # TODO: we decided to move this away long term, into the brower using JavaScript
+  # TODO: we decided to move this away long term, into the browser using JavaScript
   #
   class FastlaneOutputToHtml
     class << self
