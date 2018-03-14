@@ -20,7 +20,7 @@ module FastlaneCI
       disappearing: "disappearing"
     }
 
-    # Is a UDID so we're not open to ID guessing attacks
+    # Is a UUID so we're not open to ID guessing attacks
     #
     # @return [String]
     attr_accessor :id

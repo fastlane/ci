@@ -166,7 +166,7 @@ module FastlaneCI
         # now that we've cloned, we can setup the @_git variable
         @_git = Git.open(self.git_config.local_repo_path)
       end
-      logger.debug("Done, now using #{self.git_config.local_repo_path} for config repo")
+      logger.debug("Done, now using #{self.git_config.local_repo_path} for #{self.git_config.git_url}")
       # rubocop:enable Metrics/BlockNesting
     end
 
@@ -200,13 +200,11 @@ module FastlaneCI
     # call like you would, but you also get the git repo involved, so it's  .each { |git, branch| branch.yolo; git.yolo }
     def git_and_remote_branches_each(&each_block)
       git_action_with_queue do
-        logger.debug("Iterating through all remote branches of #{self.git_config.git_url}")
         branch_count = 0
         self.git.branches.remote.each do |branch|
           each_block.call(self.git, branch)
           branch_count += 1
         end
-        logger.debug("Done iterating through all #{branch_count} remote branches of #{self.git_config.git_url}")
       end
     end
 
@@ -288,10 +286,7 @@ module FastlaneCI
     def pull(repo_auth: self.repo_auth)
       git_action_with_queue(ensure_block: proc { unset_auth }) do
         logger.info("Starting pull #{self.git_config.git_url}")
-        logger.debug("Setting auth in pull #{self.git_config.git_url}")
         self.setup_auth(repo_auth: repo_auth)
-        logger.debug("Done setting auth in pull #{self.git_config.git_url}")
-        logger.debug("Pulling #{self.git_config.git_url}")
         git.pull
         logger.debug("Done pulling #{self.git_config.git_url}")
       end
@@ -365,14 +360,16 @@ module FastlaneCI
 
     def clone(repo_auth: self.repo_auth, async: false)
       if async
+        logger.debug("Asynchronously cloning #{self.git_config.git_url}".freeze)
         # If we're async, just push it on the queue
         git_action_with_queue(ensure_block: proc { unset_auth }) do
-          logger.debug("Starting clone_synchronously of #{self.git_config.git_url}".freeze)
           clone_synchronously(repo_auth: repo_auth)
-          logger.debug("Done clone_synchronously of #{self.git_config.git_url}".freeze)
+          logger.debug("Done asynchronously cloning of #{self.git_config.git_url}".freeze)
         end
       else
+        logger.debug("Synchronously cloning #{self.git_config.git_url}".freeze)
         clone_synchronously(repo_auth: repo_auth)
+        logger.debug("Done synchronously cloning of #{self.git_config.git_url}".freeze)
       end
     end
 
@@ -406,8 +403,7 @@ module FastlaneCI
       logger.debug("[#{self.git_config.id}]: Cloning git repo #{self.git_config.git_url}")
       Git.clone(self.git_config.git_url, self.git_config.id,
                 path: self.git_config.containing_path,
-                recursive: true,
-                depth: 1)
+                recursive: true)
     end
   end
 end
