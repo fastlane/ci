@@ -17,6 +17,9 @@ module FastlaneCI
     # @return [String] Name of the project, also shows up in status as "fastlane.ci: #{project_name}"
     attr_accessor :project_name
 
+    # @return [String] platform name
+    attr_accessor :platform
+
     # @return [String] lane name to run
     attr_accessor :lane
 
@@ -32,17 +35,15 @@ module FastlaneCI
     # @return [ArtifactProvider]
     attr_accessor :artifact_provider
 
-    def initialize(repo_config: nil, enabled: nil, project_name: nil, lane: nil, id: nil, artifact_provider: LocalArtifactProvider.new)
+    def initialize(repo_config: nil, enabled: nil, project_name: nil, platform: nil, lane: nil, id: nil, job_triggers: [], artifact_provider: LocalArtifactProvider.new)
       self.repo_config = repo_config
       self.enabled = enabled
       self.project_name = project_name
       self.id = id || SecureRandom.uuid
+      self.platform = platform
       self.lane = lane
       self.artifact_provider = artifact_provider
-      # TODO: This is fine for now to avoid runtime fails due to lack of triggers.
-      # In the future, the Add Project workflow, should provide the enough interface
-      # in order to add as many JobTriggers as the user wants.
-      self.job_triggers = [ManualJobTrigger.new(branch: "master")]
+      self.job_triggers = job_triggers
     end
 
     def builds

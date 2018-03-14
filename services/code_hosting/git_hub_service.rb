@@ -1,5 +1,6 @@
 require_relative "code_hosting_service"
 require_relative "../../shared/logging_module"
+require_relative "../../shared/models/project"
 require_relative "../../fastfile-parser/fastfile_parser"
 
 require "set"
@@ -15,8 +16,6 @@ module FastlaneCI
     include FastlaneCI::Logging
 
     class << self
-      attr_accessor :status_context_prefix
-
       attr_writer :temporary_git_storage
 
       attr_accessor :temporary_storage_path
@@ -43,18 +42,48 @@ module FastlaneCI
 
       # This method shallow clones the repo using the provider credential and looks for a valid _fastlane_
       # configuration, parses the Fastfile (if found), and returns the lanes in the following way:
-      #     {
-      #       :ios => [:lane_name, :other_lane_name],
-      #       :android => [:just_other_lane],
-      #       :no_platform => [:a_not_platform_lane]
-      #     }
+      #  {
+      #    "no_platform": {
+      #      "": {
+      #        "description": [
+      #
+      #        ],
+      #        "actions": [
+      #          {
+      #            "action": "default_platform",
+      #            "parameters": "ios"
+      #          }
+      #        ]
+      #      }
+      #    },
+      #    "ios": {
+      #      "test": {
+      #        "description": [
+      #          "Description of what the lane does"
+      #        ],
+      #        "actions": [
+      #          {
+      #            "action": "gym",
+      #            "parameters": {
+      #              "skip_package_ipa": false,
+      #              "clean": true,
+      #              "project": "../fastlane-ci-demoapp.xcodeproj",
+      #              "scheme": "fastlane-ci-demoapp"
+      #            }
+      #          }
+      #        ],
+      #        "private": false
+      #      }
+      #    }
+      #  }
       # @param repo_url [String]
       # @param branch [String]
+      # @param path [String]
       # @param provider_credential [GithubProviderCredential]
-      def peek_fastfile_configuration(repo_url: nil, branch: "master", provider_credential: nil, cache: true)
+      def peek_fastfile_configuration(repo_url: nil, branch: "master", provider_credential: nil, path: self.temp_path, cache: true)
         repo = repo_from_url(repo_url)
         return self.cache[repo + branch] if cache && self.cache && !self.cache[repo + branch].nil? && self.cache[repo + branch].kind_of?(Hash)
-        path = File.join(temp_path, repo, branch)
+        path = File.join(path, repo, branch)
         begin
           git_path = File.join(path, repo.split("/").last)
           # This triggers the check of an existing repo in the given path,
@@ -95,10 +124,14 @@ module FastlaneCI
         end
       end
 
+      # Class method that shallow clones the repo on the target branch.
+      # @param [String] repo_url
+      # @param [String] branch
+      # @param [GithubProviderCredential] provider_credential
       # @return [Git::Base]
-      def clone(repo_url: nil, branch: "master", provider_credential: nil)
+      def clone(repo_url: nil, branch: "master", provider_credential: nil, path: self.temp_path)
         repo = self.repo_from_url(repo_url)
-        path = File.join(self.temp_path, repo, branch)
+        path = File.join(path, repo, branch)
         FileUtils.rm_rf(path) if File.directory?(path)
         FileUtils.mkdir_p(path)
         self.setup_auth(repo_url: repo_url, provider_credential: provider_credential, path: path)
@@ -111,6 +144,9 @@ module FastlaneCI
         return git
       end
 
+      # Class method that finds the directory for the first Fastfile found given a root_path
+      # @param [String] root_path
+      # @return [String] the path of the Fastfile
       def fastfile_path(root_path: nil)
         fastfiles = Dir[File.join(root_path, "fastlane/Fastfile")]
         fastfiles = Dir[File.join(root_path, "**/fastlane/Fastfile")] if fastfiles.count == 0
@@ -118,6 +154,10 @@ module FastlaneCI
         return fastfile_path
       end
 
+      # Class method that setups the authentication needed for making git operations.
+      # @param [String] repo_url
+      # @param [GithubProviderCredential] provider_credential
+      # @param [String] path
       def setup_auth(repo_url: nil, provider_credential: nil, path: nil)
         repo = repo_from_url(repo_url)
         self.temporary_storage_path = File.join(self.temporary_git_storage, "git-auth-#{SecureRandom.uuid}")
@@ -141,17 +181,38 @@ module FastlaneCI
           # TODO: check if we find a better way for the initial clone to work without setting system global state
           scope = "global"
         end
-        use_credentials_command = "git config --#{scope} credential.helper 'store --file #{self.temporary_storage_path.shellescape}' #{File.join(path, repo.split("/").last)}"
+        use_credentials_command = "git config --#{scope} credential.helper 'store --file #{self.temporary_storage_path.shellescape}' #{File.join(path, repo.split('/').last)}"
 
         cmd = TTY::Command.new(printer: :quiet)
         cmd.run(store_credentials_command, input: content)
         cmd.run(use_credentials_command)
       end
 
+      # Class method that removes the authentication stored for git operations.
       def unset_auth
         return unless self.temporary_storage_path.kind_of?(String)
         # TODO: Also auto-clean those files from time to time, on server re-launch maybe, or background worker
         FileUtils.rm(self.temporary_storage_path) if File.exist?(self.temporary_storage_path)
+      end
+
+      # @param [GithubProviderCredential] provider_credential
+      # @return [Array<GitRepoConfig>]
+      def repos(provider_credential: nil)
+        client = Octokit::Client.new(access_token: provider_credential.api_token)
+        client.repos({}, query: { sort: "asc" }).map { |repo| GitRepoConfig.from_octokit_repo!(repo: repo) }
+      end
+
+      # Does the client with the associated credentials have access to the specified repo?
+      # @return [Bool]
+      def access_to_repo?(provider_credential: nil, repo_url: nil)
+        client = Octokit::Client.new(access_token: provider_credential.api_token)
+        client.repository?(repo_from_url(repo_url))
+      end
+
+      # @return [Array<String>]
+      def branches(provider_credential: nil, repo_full_name: nil)
+        client = Octokit::Client.new(access_token: provider_credential.api_token)
+        client.branches(repo_full_name).map(&:name)
       end
 
       def repo_from_url(repo_url)
@@ -163,18 +224,23 @@ module FastlaneCI
       end
     end
 
-    GitHubService.status_context_prefix = "fastlane.ci: "
-
     # The email is actually optional for API access
     # However we ask for the email on login, as we also plan on doing commits for the user
     # and this way we can make sure to configure things properly for git to use the email
     attr_accessor :provider_credential
 
-    def initialize(provider_credential: nil)
-      self.provider_credential = provider_credential
+    attr_accessor :project
 
+    def initialize(provider_credential: nil, project: nil)
+      self.provider_credential = provider_credential
+      raise "Project instance not provided or wrong type parameter" if project.nil? || !project&.kind_of?(Project)
+      self.project = project
       @_client = Octokit::Client.new(access_token: provider_credential.api_token)
       Octokit.auto_paginate = true # TODO: just for now, we probably should do smart pagination in the future
+    end
+
+    def status_context
+      "fastlane.ci: " + @project.id
     end
 
     def client
@@ -182,105 +248,95 @@ module FastlaneCI
     end
 
     def session_valid?
-      client.login.to_s.length > 0
+      self.client.login.to_s.length > 0
     rescue StandardError
       false
     end
 
     def username
-      client.login
+      self.client.login
     end
 
     # Returns the urls of the pull requests for a given branch and state.
     # If branches is not provided, all target branches are considered.
-    # @param [String] repo_url
-    # @param [Array[String] || nil] branches, Either an array of target branches names or nil.
+    # @param [Array<String>, nil] branches, Either an array of target branches names or nil.
     # @param [String] state, Either open, closed, or all to filter by state. Default: open.
     # @return [String] HTML URL for the given pull request query.
-    def pull_requests(repo_url: nil, branches: nil, state: "open")
-      all_open_pull_requests = client.pull_requests(repo_from_url(repo_url), state: state)
+    def pull_requests(branches: nil, state: "open")
+      all_open_pull_requests = client.pull_requests(self.project.repo_config.full_name, state: state)
 
       # if no specific branch, return all open prs
       return all_open_pull_requests.map(&:html_url) if branches&.count == 0
 
       pull_requests_on_branch = all_open_pull_requests.select { |pull_request| branches.include?(pull_request.base.ref) }
       # we want only the PRs whose latest commit was to one of the branches passed in
-      logger.debug("Returning all open prs from: #{repo_full_name}, branches: #{branches}, pr count: #{pull_requests_on_branch.count}")
+      logger.debug("Returning all open prs from: #{self.project.repo_config.full_name}, branches: #{branches}, pr count: #{pull_requests_on_branch.count}")
       return pull_requests_on_branch.map(&:html_url)
     end
 
     # Retrieve all commits' sha from a given repo_url and branch.
-    # @param [String] repo_url
     # @param [String] branch
-    # @return [Array[String]] List of SHA for a given branch and repo.
-    def all_commits_sha_for_branch(repo_url: nil, branch: nil)
-      return client.commits(repo_from_url(repo_url), branch).map(&:sha)
+    # @return [Array<String>] List of SHA for a given branch and repo.
+    def all_commits_sha_for_branch(branch: nil)
+      return client.commits(self.project.repo_config.full_name, branch).map(&:sha)
     end
 
     # Retrieve the list of sha for a given pull request number.
-    # @param [String] repo_url
     # @param [Integer] number, of the pull request.
-    # @return [Array[String]] Array of SHA for the given pull request.
-    def commits_sha_from_pull_request(repo_url: nil, number: nil)
-      client.pull_commits(repo_from_url(repo_url), number).map(&:sha)
+    # @return [Array<String>] Array of SHA for the given pull request.
+    def commits_sha_from_pull_request(number: nil)
+      client.pull_commits(self.project.repo_config.full_name, number).map(&:sha)
     end
 
     # Returns the last sha for every pull request that targets a list of branches (or all if not given) and status (or open if not given)
-    # @param [String] repo_url
-    # @param [Array[String] || nil] branches, Either an array of target branches names or nil.
+    # @param [Array<String>, nil] branches, Either an array of target branches names or nil.
     # @param [String] state, Either open, closed, or all to filter by state. Default: open.
-    # @return [Array[String]] Array of the last commit SHA for the given repo and state.
-    def last_commit_sha_for_pull_requests(repo_url: nil, branches: nil, state: "open")
-      pull_requests_urls = self.pull_requests(repo_url: repo_from_url(repo_url), branches: branches, state: state)
+    # @return [Array<String>] Array of the last commit SHA for the given repo and state.
+    def last_commit_sha_for_pull_requests(branches: nil, state: "open")
+      pull_requests_urls = self.pull_requests(branches: branches, state: state)
       numbers = pull_requests_urls.map { |url| URI.parse(url) }.map(&:path).collect { |path| path.split("/").last }
-      return numbers.map { |number| commits_sha_from_pull_request(repo_url: repo_from_url(repo_url), number: number) }.map(&:last)
+      return numbers.map { |number| commits_sha_from_pull_request(number: number) }.map(&:last)
     end
 
     # returns the statused of a given commit sha for a given repo specifically for fastlane.ci
     # TODO: add support for filtering status types, to allow listing of just fastlane.ci status reports
     #       This has to wait for now, until we decide how we separate them for each project, as multiple projects
     #       can run builds for one repo
-    def statuses_for_commit_sha(repo_full_name: nil, sha: nil)
-      all_statuses = client.statuses(repo_full_name, sha)
-      only_ci_statuses = all_statuses.select { |status| status.context.start_with?(GitHubService.status_context_prefix) }
+    def statuses_for_commit_sha(sha: nil)
+      all_statuses = client.statuses(self.project.repo_config.full_name, sha)
+      only_ci_statuses = all_statuses.select { |status| status.context == self.status_context }
       return only_ci_statuses
     end
 
     # updates the most current commit to "pending" on all open prs if they don't have a status.
     # returns a list of commits that have been updated to `pending` status
-    def update_all_open_prs_without_status_to_pending_status!(repo_full_name: nil, status_context: nil)
-      open_pr_commits = self.last_commit_sha_for_all_open_pull_requests(repo_full_name: repo_full_name)
+    def update_all_open_prs_without_status_to_pending_status!
+      open_pr_commits = self.last_commit_sha_for_all_open_pull_requests
       updated_commits = []
       open_pr_commits.each do |sha|
-        statuses = self.statuses_for_commit_sha(repo_full_name: repo_full_name, sha: sha)
+        statuses = self.statuses_for_commit_sha(sha: sha)
         if statuses.count == 0
-          self.set_build_status!(repo: repo_full_name, sha: sha, state: "pending", status_context: status_context)
+          self.set_build_status!(sha: sha, state: "pending")
           updated_commits << sha
         end
       end
       return updated_commits
     end
 
-    # @return [Array[GitRepoConfig]]
-    def repos
-      client.repos({}, query: { sort: "asc" }).map { |repo| GitRepoConfig.from_octokit_repo!(repo: repo) }
-    end
-
-    # @return [Array[String]]
-    def branches(repo_url: nil)
-      client.branches(repo_from_url(repo_url)).map(&:name)
+    # @return [Array<String>]
+    def branches
+      client.branches(self.project.repo_config.full_name).map(&:name)
     end
 
     # Does the client with the associated credentials have access to the specified repo?
-    # @repo [String] Repo URL as string
-    def access_to_repo?(repo_url: nil)
-      client.repository?(repo_from_url(repo_url))
+    # @return [Bool]
+    def access_to_repo?
+      client.repository?(self.project.repo_config.full_name)
     end
 
     # The `target_url`, `description` and `context` parameters are optional
     # @repo [String] Repo URL as string
-    def set_build_status!(repo: nil, sha: nil, state: nil, target_url: nil, description: nil, status_context:)
-      status_context = GitHubService.status_context_prefix + status_context
+    def set_build_status!(sha: nil, state: nil, target_url: nil, description: nil)
       state = state.to_s
 
       # Available states https://developer.github.com/v3/repos/statuses/
@@ -292,7 +348,7 @@ module FastlaneCI
       raise "Invalid state '#{state}'" unless available_states.include?(state)
 
       # We auto receive the SLUG, so that the user of this class can pass a full URL also
-      repo = repo.split("/")[-2..-1].join("/")
+      repo = self.project.repo_config.full_name
 
       if description.nil?
         description = "All green" if state == "success"
@@ -319,10 +375,28 @@ module FastlaneCI
       raise ex
     end
 
+    # This method shallow clones the project's repo given a branch,
+    # returns the Fastfile configuration. Always forces the clone.
+    # @param [String] branch
+    # @return [#peek_fastfile_configuration]
+    def shallow_clone(branch: nil)
+      self.class.peek_fastfile_configuration(
+        repo_url: self.project.repo_config.git_url,
+        branch: branch,
+        provider_credential: self.provider_credential,
+        path: self.project.repo_config.containing_path,
+        cache: false
+      )
+    end
+
     protected
 
     def repo_from_url(repo_url)
       return repo_url.sub("https://github.com/", "")
+    end
+
+    def url_from_repo(repo)
+      return "https://github.com/" + repo unless repo.include?("https://github.com/")
     end
   end
 end

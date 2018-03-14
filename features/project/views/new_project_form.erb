@@ -5,34 +5,50 @@
     </div>
   </header>
   <script>
-  $(document).ready(function() {
-    $("#submit_form").prop("disabled", true);
-    $("#selected_lane").hide();
+  document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll("#submit_form")[0].disabled = true;
+    document.querySelectorAll("#selected_lane")[0].style.display = "none";
+    document.querySelectorAll("#lane_to_run")[0].style.display = "none";
   });
+  function string_to_node(string) {
+    var d = document.createElement('div');
+    d.innerHTML = string;
+    return d.firstChild;
+  }
   function check_branch(el) {
-    $("#submit_form").prop("disabled", true);
-    $("#selected_lane").hide();
-    $('#selected_lane').empty();
-    $.ajax({
-      method: "GET",
-      url: "/projects/lanes/<%= CGI.escape(repo) %>/" + el.value
-    }).done(function(data) {
-      $('#selected_lane').append("<option disabled selected value>Select a lane</option>");
-      console.log(data)
-      for (var platform in data) {
-        for (var lane in data[platform]) {
-          if (lane && platform) {
-            $('#selected_lane').append('<option value="'+ platform + " " + lane +'">'+ platform + " " + lane +'</option>')
-          } else if (lane && platform === "no_platform") {
-            $('#selected_lane').append('<option value="no_platform '+ lane +'">no_platform ' + lane +'</option>')
+    document.querySelectorAll("#submit_form")[0].disabled = true;
+    document.querySelectorAll("#selected_lane")[0].style.display = "none";
+    document.querySelectorAll("#selected_lane")[0].innerHTML = "";
+    var request = new XMLHttpRequest();
+    request.responseType = 'json';
+    request.open('GET', "/projects/lanes/<%= CGI.escape(repo) %>/" + el.value, true);
+    request.onload = function() {
+      if (request.status >= 200 && request.status < 400) {
+        var data = request.response;
+        
+        document.querySelectorAll("#selected_lane")[0].appendChild(string_to_node("<option disabled selected value>Select a lane</option>"));
+        for (var platform in data) {
+          for (var lane in data[platform]) {
+            if (lane && platform) {
+              document.querySelectorAll("#selected_lane")[0].append(string_to_node('<option value="'+ platform + " " + lane +'">'+ platform + " " + lane +'</option>'));
+            } else if (lane && platform === "no_platform") {
+              document.querySelectorAll("#selected_lane")[0].append(string_to_node('<option value="no_platform '+ lane +'">no_platform ' + lane +'</option>'));
+            }
           }
         }
+        document.querySelectorAll("#selected_lane")[0].style.display = "";
+        document.querySelectorAll("#lane_to_run")[0].style.display = "";
+      } else {
+        // We reached our target server, but it returned an error
       }
-      $("#selected_lane").show();
-    });
+    };
+    request.onerror = function() {
+      // There was a connection error of some sort
+    };
+    request.send();
   }
-  function check_lane(el) {
-    $("#submit_form").prop("disabled", false);
+  function check_lane() {
+    document.querySelectorAll("#submit_form")[0].disabled = false;
   }
   </script>
   
@@ -54,8 +70,8 @@
         <% end %>
       </select>
       <br />
-      <h5>Lane to run</h5>
-      <select name="selected_lane", id="selected_lane" onchange="check_lane(this)">
+      <h5 id="lane_to_run">Lane to run</h5>
+      <select name="selected_lane", id="selected_lane" onchange="check_lane()">
       </select>
       <br />
       <br />

@@ -1,6 +1,5 @@
 require_relative "../../shared/authenticated_controller_base"
-require_relative "../../shared/models/git_repo"
-
+require_relative "../../shared/models/job_trigger"
 require "pathname"
 require "json"
 
@@ -59,7 +58,7 @@ module FastlaneCI
 
       locals = {
           title: "Add new project",
-          repos: FastlaneCI::GitHubService.new(provider_credential: provider_credential).repos
+          repos: FastlaneCI::GitHubService.repos(provider_credential: provider_credential)
       }
       erb(:new_project, locals: locals, layout: FastlaneCI.default_layout)
     end
@@ -67,12 +66,10 @@ module FastlaneCI
     get "#{HOME}/add/*" do |repo_name|
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
-      service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
-
       locals = {
           title: "Add new project",
           repo: repo_name,
-          branches: service.branches(repo_url: repo_name)
+          branches: FastlaneCI::GitHubService.branches(provider_credential: provider_credential, repo_full_name: repo_name)
       }
 
       erb(:new_project_form, locals: locals, layout: FastlaneCI.default_layout)
@@ -86,18 +83,16 @@ module FastlaneCI
       fastfile_config = FastlaneCI::GitHubService.peek_fastfile_configuration(
         repo_url: "#{org}/#{repo_name}",
         branch: branch,
-        provider_credential: provider_credential)
+        provider_credential: provider_credential
+      )
 
       fastfile_config.to_json
     end
 
-    post "#{HOME}/add/*" do |repo_name|
+    post "#{HOME}/add/*/*" do |org, repo_name|
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
-      github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
-      selected_repo = github_service.repos.select { |repo| repo_name == repo.name }.first
-
-      repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
+      repo_config = FastlaneCI::GitHubService.repos(provider_credential: provider_credential).select { |repo| repo.full_name == org + "/" + repo_name }.first
 
       lane = params["selected_lane"]
       project_name = params["project_name"]
@@ -113,17 +108,24 @@ module FastlaneCI
       )
 
       # We now have enough information to create the new project.
-      # TODO: add job_triggers here
-      # We shouldn't be blocking manual trigger builds
-      # if we do not provide an interface to add them.
       project = Services.project_service.create_project!(
         name: project_name,
         repo_config: repo_config,
         enabled: true,
-        lane: lane
+        platform: lane.split(" ").first,
+        lane: lane.split(" ").last,
+        # TODO: Until we make a proper interface to attach JobTriggers to a Project, let's add a manual one for the selected branch.
+        job_triggers: [FastlaneCI::ManualJobTrigger.new(branch: branch)]
       )
 
       if !project.nil?
+        github_service = FastlaneCI::GitHubService.new(
+          provider_credential: provider_credential,
+          project: project
+        )
+        require "pry"
+        binding.pry
+        github_service.shallow_clone(branch: branch)
         redirect("#{HOME}/#{project.id}")
       else
         raise "Project couldn't be created"
