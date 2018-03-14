@@ -225,6 +225,9 @@ module FastlaneCI
       # TODO: performance implications of settings this every time?
       # TODO: Set actual name + email here
       # TODO: see if we can set credentials here also
+      if full_name.nil? || full_name.length == 0
+        full_name = "Unknown user"
+      end
       logger.debug("Using #{full_name} with #{username} as author information on #{self.git_config.git_url}")
       git.config("user.name", full_name)
       git.config("user.email", username)
