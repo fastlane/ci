@@ -23,7 +23,7 @@ module FastlaneCI
     # @return [Boolean]
     attr_accessor :enabled
 
-    # @return [String] Is a UDID so we're not open to ID guessing attacks
+    # @return [String] Is a UUID so we're not open to ID guessing attacks
     attr_accessor :id
 
     # @return [Array[JobTrigger]] The job triggers
