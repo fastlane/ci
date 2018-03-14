@@ -3,6 +3,7 @@
 require "git"
 require "tty-command"
 require "securerandom"
+require "digest"
 require_relative "../logging_module"
 require_relative "../../taskqueue/task_queue"
 
@@ -114,6 +115,7 @@ module FastlaneCI
     end
 
     def setup_repo
+      # rubocop:disable Metrics/BlockNesting
       if File.directory?(self.git_config.local_repo_path)
         # TODO: test if this crashes if it's not a git directory
         @_git = Git.open(self.git_config.local_repo_path)
@@ -165,6 +167,7 @@ module FastlaneCI
         @_git = Git.open(self.git_config.local_repo_path)
       end
       logger.debug("Done, now using #{self.git_config.local_repo_path} for config repo")
+      # rubocop:enable Metrics/BlockNesting
     end
 
     def validate_initialization_params!(git_config: nil, provider_credential: nil, async_start: nil, callback: nil)
@@ -238,7 +241,11 @@ module FastlaneCI
     # Responsible for using the auth token to be able to push/pull changes
     # from git remote
     def setup_auth(repo_auth: self.repo_auth)
-      self.temporary_storage_path = File.join(self.temporary_git_storage, "git-auth-#{SecureRandom.uuid}")
+      # generate a unique file name for this specific user, host, and git url
+      git_auth_key = Digest::SHA2.hexdigest(repo_auth.remote_host + repo_auth.username + self.git_config.git_url)
+      temporary_storage_path = File.join(self.temporary_git_storage, "git-auth-#{git_auth_key}")
+      self.temporary_storage_path = temporary_storage_path
+
       # More details: https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
       local_repo_path = self.git_config.local_repo_path
 
@@ -246,7 +253,7 @@ module FastlaneCI
       # if they do not exist
       FileUtils.mkdir_p(local_repo_path) unless File.directory?(local_repo_path)
 
-      store_credentials_command = "git credential-store --file #{self.temporary_storage_path.shellescape} store"
+      store_credentials_command = "git credential-store --file #{temporary_storage_path.shellescape} store"
       content = [
         "protocol=https",
         "host=#{repo_auth.remote_host}",
@@ -262,12 +269,14 @@ module FastlaneCI
         # TODO: check if we find a better way for the initial clone to work without setting system global state
         scope = "global"
       end
-      use_credentials_command = "git config --#{scope} credential.helper 'store --file #{self.temporary_storage_path.shellescape}' #{local_repo_path}"
+      use_credentials_command = "git config --#{scope} credential.helper 'store --file #{temporary_storage_path.shellescape}' #{local_repo_path}"
 
-      logger.debug("Setting credentials with command: #{use_credentials_command}")
+      # Uncomment if you want to debug git credential stuff, keeping it commented out because it's very noisey
+      # logger.debug("Setting credentials for #{self.git_config.git_url} with command: #{use_credentials_command}")
       cmd = TTY::Command.new(printer: :quiet)
       cmd.run(store_credentials_command, input: content)
       cmd.run(use_credentials_command)
+      return temporary_storage_path
     end
 
     def unset_auth
@@ -383,6 +392,15 @@ module FastlaneCI
       # and just re-clones. So make sure it's fine if it gets deleted
       raise "No containing path available" unless self.git_config.containing_path
       logger.debug("Cloning git repo #{self.git_config.git_url}....")
+
+      existing_repo_for_project = File.join(self.git_config.containing_path, self.git_config.id)
+      # self.git_config.id.length > 1 to ensure we're not empty or a space
+      if self.git_config.id.length > 1 && Dir.exist?(existing_repo_for_project)
+        logger.debug("Removing existing repo at: #{existing_repo_for_project}")
+        require "fileutils"
+        # Danger zone
+        FileUtils.rm_r(existing_repo_for_project)
+      end
 
       self.temporary_storage_path = self.setup_auth(repo_auth: repo_auth)
       logger.debug("[#{self.git_config.id}]: Cloning git repo #{self.git_config.git_url}")
