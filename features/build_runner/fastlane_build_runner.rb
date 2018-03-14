@@ -83,7 +83,7 @@ module FastlaneCI
         build_success = true
         # Attach a listener to the output to see if we have a failure. If so, this build failed
         self.add_listener(proc do |row|
-          build_success = false if row[:type] == :error
+          build_success = false if row.did_fail_build?
         end)
 
         build_output = ["#{fast_file_path}, #{self.lane} platform: #{self.platform}, params: #{self.parameters} from output"]

@@ -21,6 +21,12 @@ module FastlaneCI
       self.time = time
     end
 
+    # Did this particular message fail the build? (e.g. `user_error` or `build_error`)
+    def did_fail_build?
+      return true if [:user_error, :build_error, :crash, :shell_error, :build_failure, :test_failure, :abort].include?(self.type)
+      return false
+    end
+
     def to_json
       return {
         type: self.type,
