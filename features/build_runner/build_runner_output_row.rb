@@ -15,11 +15,19 @@ module FastlaneCI
     # The plan is to remove this, as we want to render it on the front-end
     attr_accessor :html
 
-    def initialize(type: nil, message: nil, time: nil, html: nil)
+    def initialize(type: nil, message: nil, time: nil)
       self.type = type
       self.message = message
       self.time = time
-      self.html = html
+    end
+
+    def to_json
+      return {
+        type: self.type,
+        message: self.message,
+        time: self.time,
+        html: self.html
+      }
     end
   end
 end

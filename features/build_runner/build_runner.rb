@@ -30,8 +30,7 @@ module FastlaneCI
 
     # All lines that were generated so far, this might not be a complete run
     # This is an array of hashes
-    # TODO: have a class representing a Row (has to offer dynamic values though, as we might have non fastlane runners in the future)
-    attr_accessor :all_build_output_log_lines
+    attr_accessor :all_build_output_log_rows
 
     # All blocks listening to changes for this build
     attr_accessor :build_change_observer_blocks
@@ -42,7 +41,7 @@ module FastlaneCI
       @project = project
       @sha = sha
 
-      self.all_build_output_log_lines = []
+      self.all_build_output_log_rows = []
       self.build_change_observer_blocks = []
 
       # TODO: provider credential should determine what exact CodeHostingService gets instantiated
@@ -120,7 +119,7 @@ module FastlaneCI
 
       # Report back the row
       # 1) Store it in the history of logs (used to access half-built builds)
-      self.all_build_output_log_lines << row
+      self.all_build_output_log_rows << row
 
       # 2) Report back to all listeners, usually socket connections
       self.build_change_observer_blocks.each do |current_block|

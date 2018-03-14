@@ -53,9 +53,9 @@ module FastlaneCI
           current_row = FastlaneCI::BuildRunnerOutputRow.new(
             type: raw_row[:type],
             message: raw_row[:message],
-            time: raw_row[:time],
-            html: FastlaneOutputToHtml.convert_row(raw_row)
+            time: raw_row[:time]
           )
+          current_row.html = FastlaneOutputToHtml.convert_row(current_row)
           yield(current_row)
         end
       )
@@ -89,7 +89,7 @@ module FastlaneCI
         build_output = ["#{fast_file_path}, #{self.lane} platform: #{self.platform}, params: #{self.parameters} from output"]
         # Attach a listener so we can collect the build output and display it all at once
         self.add_listener(proc do |row|
-          build_output << "#{row[:time]}: #{row[:message]}"
+          build_output << "#{row.time}: #{row.message}"
         end)
 
         fast_file.runner.execute(self.lane, self.platform, self.parameters)
