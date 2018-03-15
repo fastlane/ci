@@ -6,6 +6,7 @@ require "securerandom"
 require "digest"
 require_relative "../logging_module"
 require_relative "../../taskqueue/task_queue"
+require_relative "../git_monkey_patches"
 
 module FastlaneCI
   # Encapsulates all the data that is needed by GitRepo
