@@ -16,18 +16,19 @@ module FastlaneCI
 
     def self.take_off
       require_fastlane_ci
-      verify_dependencies
-      verify_system_requirements
-      Services.environment_variable_service.reload_dot_env!
-      clone_repo_if_no_local_repo_and_remote_repo_exists
+      build_web_app
+      # verify_dependencies
+      # verify_system_requirements
+      # Services.environment_variable_service.reload_dot_env!
+      # clone_repo_if_no_local_repo_and_remote_repo_exists
 
-      # done making sure our env is sane, let's move on to the next step
-      write_configuration_directories
-      configure_thread_abort
-      Services.reset_services!
-      register_available_controllers
-      start_github_workers
-      restart_any_pending_work
+      # # done making sure our env is sane, let's move on to the next step
+      # write_configuration_directories
+      # configure_thread_abort
+      # Services.reset_services!
+      # register_available_controllers
+      # start_github_workers
+      # restart_any_pending_work
     end
 
     def self.require_fastlane_ci
@@ -37,6 +38,15 @@ module FastlaneCI
 
       # allow use of `require` for all things under `shared`, helps with some cycle issues
       $LOAD_PATH << "shared"
+    end
+
+    def self.build_web_app
+      target = ENV["RACK_ENV"] == "development" ? "development" : "production"
+      logger.info("Building the web application.")
+
+      Dir.chdir("fastlane-web") do
+        %x[ng build --deploy-url=\"/.dist\" --target=#{target}]
+      end
     end
 
     def self.verify_dependencies
