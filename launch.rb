@@ -40,10 +40,19 @@ module FastlaneCI
       $LOAD_PATH << "shared"
     end
 
+    def self.verify_app_built
       if ENV["WEB_APP"]
         app_exists = File.file?(File.join('public', '.dist', 'index.html'))
         raise "The web application is not built. Please build with the Angular CLI and Try Again.\nEx. ng build --deploy-url=\"/.dist\"" unless app_exists
       end
+    end
+
+    def self.verify_dependencies
+      require "openssl"
+    rescue LoadError
+      warn("Error: no such file to load -- openssl. Make sure you have openssl installed")
+      exit(1)
+    end
 
     def self.write_configuration_directories
       containing_path = File.expand_path("~/.fastlane/ci/")
