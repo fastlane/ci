@@ -69,7 +69,7 @@ module FastlaneCI
       locals = {
           title: "Add new project",
           repo: repo_name,
-          branches: FastlaneCI::GitHubService.branches(provider_credential: provider_credential, repo_full_name: repo_name)
+          branches: FastlaneCI::GitHubService.branch_names(provider_credential: provider_credential, repo_full_name: repo_name)
       }
 
       erb(:new_project_form, locals: locals, layout: FastlaneCI.default_layout)

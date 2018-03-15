@@ -232,8 +232,8 @@ module FastlaneCI
       end
 
       # @return [Array<String>]
-      def branches(provider_credential: nil, repo_full_name: nil)
-        self.client(provider_credential.api_token).branches(repo_full_name).map(&:name)
+      def branch_names(provider_credential: nil, repo_full_name: nil)
+        self.client(provider_credential.api_token).branch_names(repo_full_name).map(&:name)
       end
 
       def repo_from_url(repo_url)
@@ -332,7 +332,7 @@ module FastlaneCI
     # updates the most current commit to "pending" on all open prs if they don't have a status.
     # returns a list of commits that have been updated to `pending` status
     def update_all_open_prs_without_status_to_pending_status!
-      open_pr_commits = self.last_commit_sha_for_all_open_pull_requests
+      open_pr_commits = self.last_commit_sha_for_pull_requests
       updated_commits = []
       open_pr_commits.each do |sha|
         statuses = self.statuses_for_commit_sha(sha: sha)
@@ -345,8 +345,8 @@ module FastlaneCI
     end
 
     # @return [Array<String>]
-    def branches
-      client.branches(self.project.repo_config.full_name).map(&:name)
+    def branch_names
+      return client.branches(self.project.repo_config.full_name).map(&:name)
     end
 
     # Does the client with the associated credentials have access to the specified repo?
