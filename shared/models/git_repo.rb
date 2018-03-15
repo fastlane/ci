@@ -163,6 +163,7 @@ module FastlaneCI
       else
         logger.debug("Cloning #{self.git_config.git_url} into #{self.git_config.local_repo_path}")
         self.clone
+
         # now that we've cloned, we can setup the @_git variable
         @_git = Git.open(self.git_config.local_repo_path)
       end
