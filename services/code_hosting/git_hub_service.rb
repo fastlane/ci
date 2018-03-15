@@ -28,6 +28,9 @@ module FastlaneCI
         return @cache
       end
 
+      # Client for GitHub-related operations, uses an in-memory cache
+      # to fast things.
+      # @param [String] api_token
       def client(api_token)
         @client_cache ||= {}
         return @client_cache[api_token] unless @client_cache[api_token].nil?
@@ -36,14 +39,14 @@ module FastlaneCI
         return client
       end
 
-      def temp_path
-        temporary_path = File.join(Dir.tmpdir, ".fastlane")
+      def temp_path(root_path = Dir.tmpdir)
+        temporary_path = File.join(root_path, ".fastlane")
         FileUtils.mkdir_p(temporary_path) unless File.directory?(temporary_path)
         return temporary_path
       end
 
-      def temporary_git_storage
-        temp_storage = File.join(Dir.tmpdir, ".tmp")
+      def temporary_git_storage(root_path = Dir.tmpdir)
+        temp_storage = File.join(root_path, ".tmp")
         @temporary_git_storage ||= temp_storage
         FileUtils.mkdir_p(@temporary_git_storage) unless File.directory?(@temporary_git_storage)
         return @temporary_git_storage
@@ -120,11 +123,6 @@ module FastlaneCI
           self.cache[[repo, branch].join("/")] = fastfile_config
           return fastfile_config
         rescue ArgumentError
-          self.setup_auth(
-            repo_url: repo_url,
-            provider_credential: provider_credential,
-            path: path
-          )
           self.clone(
             repo_url: repo_url,
             branch: branch,
@@ -138,7 +136,6 @@ module FastlaneCI
             path: path,
             cache: cache
           )
-          self.unset_auth
           return fastfile_config
         rescue RuntimeError
           # This is because no Fastfile config was found, so we cannot go further.
@@ -162,7 +159,9 @@ module FastlaneCI
                   recursive: true,
                   depth: 1)
         git = Git.open(File.join(path, repo.split("/").last))
+        git.fetch
         git.branch(branch).checkout
+        self.unset_auth
         return git
       end
 
@@ -316,8 +315,8 @@ module FastlaneCI
     # @return [Array<String>] Array of the last commit SHA for the given repo and state.
     def last_commit_sha_for_pull_requests(branches: nil, state: "open")
       pull_requests_urls = self.pull_requests(branches: branches, state: state)
-      numbers = pull_requests_urls.map { |url| URI.parse(url) }.map(&:path).collect { |path| path.split("/").last }
-      return numbers.map { |number| commits_sha_from_pull_request(number: number) }.map(&:last)
+      numbers = pull_requests_urls.map { |url| URI.parse(url).path.split("/").last }
+      return numbers.map { |number| commits_sha_from_pull_request(number: number).last }
     end
 
     # returns the statused of a given commit sha for a given repo specifically for fastlane.ci
@@ -366,7 +365,7 @@ module FastlaneCI
         state = "failure"
       end
 
-      available_states = ["error", "failure", "pending", "success", "ci_problem"]
+      available_states = %w{error failure pending success}
       raise "Invalid state '#{state}'" unless available_states.include?(state)
 
       # We auto receive the SLUG, so that the user of this class can pass a full URL also
@@ -400,15 +399,15 @@ module FastlaneCI
     # This method shallow clones the project's repo given a branch,
     # returns the Fastfile configuration. Always forces the clone.
     # @param [String] branch
-    # @return [#peek_fastfile_configuration]
+    # @return [Git::Base]
     def shallow_clone(branch: nil)
-      self.class.peek_fastfile_configuration(
+      @_git = self.class.clone(
         repo_url: self.project.repo_config.git_url,
         branch: branch,
         provider_credential: self.provider_credential,
-        path: File.join(self.project.repo_config.containing_path, self.project.id),
-        cache: false
+        path: File.join(self.project.repo_config.containing_path, self.project.id)
       )
+      return git
     end
 
     protected

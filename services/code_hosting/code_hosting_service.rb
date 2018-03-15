@@ -22,5 +22,9 @@ module FastlaneCI
     def access_to_repo?(repo_url: nil)
       not_implemented(__method__)
     end
+
+    def git
+      return @_git
+    end
   end
 end

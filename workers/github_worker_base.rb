@@ -59,11 +59,17 @@ module FastlaneCI
     # This is a separate method, so it's lazy loaded
     # since it will be run on the "main" thread if it were
     # part of the #initialize method
-    def git_repo
-      @git_repo ||= GitRepo.new(
-        git_config: project.repo_config,
-        provider_credential: provider_credential
-      )
+    def git_repo_service
+      @git_repo ||= begin
+        case self.provider_credential.type
+        when FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
+          service = FastlaneCI::GitHubService.new(provider_credential: provider_credential, project: project)
+          service.clone
+          return service
+        else
+          return nil
+        end
+      end
     end
 
     def target_branches(&block)

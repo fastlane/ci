@@ -30,29 +30,29 @@ module FastlaneCI
 
     # Find the active code host for the provider_credential/user combination
     # or instantiate one if none are available
-    def code_hosting_service(provider_credential: nil)
+    def code_hosting_service_class(provider_credential: nil)
       code_hosting_service_key = active_code_hosting_service_key(provider_credential: provider_credential)
-      code_hosting_service = self.active_code_hosting_services[code_hosting_service_key]
-      return code_hosting_service if code_hosting_service.kind_of?(FastlaneCI::CodeHostingService)
+      code_hosting_service_class = self.active_code_hosting_services[code_hosting_service_key]
+      return code_hosting_service_class if code_hosting_service_class.kind_of?(FastlaneCI::CodeHostingService)
 
       # TODO: not a big deal right now, but we should have a way of automatically generating the correct
-      # CodeHostingService subclass based on the provider_credential type and maybe not have it right here.
-      # A Java-style factory might be the right move here.
+      # TODO: I think this is solved for the moment doesn't it? At the end of this work just the classes
+      # will be used, with a common interface between them using a mixin.
       case provider_credential.type
       when FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
-        code_hosting_service = FastlaneCI::GitHubService
-        active_code_hosting_services[code_hosting_service_key] = code_hosting_service
+        code_hosting_service_class = FastlaneCI::GitHubService
+        active_code_hosting_services[code_hosting_service_key] = code_hosting_service_class
       else
         raise "Unrecognized provider_credential #{provider_credential.type}"
       end
 
-      return code_hosting_service
+      return code_hosting_service_class
     end
 
-    def octokit_projects(provider_credential: nil)
+    def git_repos(provider_credential: nil)
       # Get a list of all the repos `provider` has access to
       logger.debug("Getting code host for #{provider_credential.ci_user.email}, #{provider_credential.type}") if provider_credential.ci_user
-      current_code_hosting_service = self.code_hosting_service(provider_credential: provider_credential)
+      current_code_hosting_service = self.code_hosting_service_class(provider_credential: provider_credential)
 
       logger.debug("Finding projects we have access to with #{provider_credential.ci_user.email}, #{provider_credential.type}") if provider_credential.ci_user
       projects = self.project_service.projects.select do |project|
@@ -74,7 +74,7 @@ module FastlaneCI
 
     def projects(provider_credential: nil)
       if provider_credential.type == FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
-        return self.octokit_projects(provider_credential: provider_credential)
+        return self.git_repos(provider_credential: provider_credential)
       else
         raise "Unrecognized provider_credential #{provider_credential.type}"
       end

@@ -45,13 +45,11 @@ module FastlaneCI
         artifact_provider: artifact_provider
       )
       raise "Project couldn't be created" if project.nil?
-      self.commit_repo_changes!(message: "Created project #{project.project_name}.")
       return project
     end
 
     def update_project!(project: nil)
       self.project_data_source.update_project!(project: project)
-      self.commit_repo_changes!(message: "Updated project #{project.project_name}.")
     end
 
     # @return [Project]
@@ -86,29 +84,6 @@ module FastlaneCI
 
     def delete_project!(project: nil)
       self.project_data_source.delete_project!(project: project)
-      self.commit_repo_changes!(message: "Deleted project #{project.project_name}.")
-    end
-
-    # Not sure if this must be here or not, but we can open a discussion on this.
-    def commit_repo_changes!(message: nil, file_to_commit: nil)
-      Services.configuration_git_repo.commit_changes!(commit_message: message,
-                                                        file_to_commit: file_to_commit)
-    end
-
-    def push_configuration_repo_changes!
-      Services.configuration_git_repo.push
-    end
-
-    # @return [GitRepo]
-    def git_repo_for_project(project:)
-      # TODO: For now we'll clone the project synchronously,
-      # we may revisit this later to handle async operations
-      # between Service <-> WebServer <-> Client.
-      return GitRepo.new(
-        git_config: project.repo_config,
-        provider_credential: Services.provider_credential,
-        async_start: false
-      )
     end
   end
 end
