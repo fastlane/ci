@@ -103,7 +103,7 @@ module FastlaneCI
       client.contents(repo_shortform, path: file_path)
     rescue Octokit::NotFound
       client.create_contents(
-        repo_shortform, file_path, "Adding #{file_path}", json_string
+        repo_shortform, file_path, "Add initial #{file_path}", json_string
       )
     rescue Octokit::UnprocessableEntity
       logger.debug(
