@@ -25,7 +25,7 @@ module FastlaneCI
         current_sha = repo.most_recent_commit.sha
         logger.debug("Running Nightly build on branch #{branch.name} with sha #{current_sha}")
 
-        self.create_and_queue_build_task
+        self.create_and_queue_build_task(sha: current_sha)
       end
     end
   end

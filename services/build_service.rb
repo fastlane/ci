@@ -15,11 +15,39 @@ module FastlaneCI
     end
 
     def list_builds(project: nil)
-      self.build_data_source.list_builds(project: project)
+      return self.build_data_source.list_builds(project: project)
     end
 
     def pending_builds(project: nil)
-      self.build_data_source.pending_builds(project: project)
+      return self.build_data_source.pending_builds(project: project)
+    end
+
+    # returns a list of commit shas where the status is pending
+    # and it hasn't been superceeded by a newer build
+    def pending_build_shas_needing_rebuilds(project:)
+      all_builds = self.list_builds(project: project)
+
+      all_completed_builds_shas = all_builds
+                                  .reject { |build| build.status == "pending" }
+                                  .map(&:sha)
+                                  .uniq
+
+      all_pending_builds_shas_needing_rebuilds = all_builds
+                                                 .select { |build| build.status == "pending" }
+                                                 .map(&:sha)
+                                                 .uniq
+                                                 .-(all_completed_builds_shas)
+
+      return all_pending_builds_shas_needing_rebuilds
+    end
+
+    # Checks if the most recent build is in pending state
+    def most_recent_build_in_pending_state?(project:)
+      builds = self.list_builds(project: project)
+      most_recent_build = builds.first
+      return false if most_recent_build.nil?
+
+      return most_recent_build.status == "pending"
     end
 
     def add_build!(project: nil, build: nil)

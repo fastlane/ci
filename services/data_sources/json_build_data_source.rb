@@ -104,7 +104,7 @@ module FastlaneCI
     end
 
     def pending_builds(project: nil)
-      list_builds(project: project).select { |build| build.status == "pending" }
+      return list_builds(project: project).select { |build| build.status == "pending" }
     end
 
     # Add or update a build
@@ -123,7 +123,7 @@ module FastlaneCI
     def builds_path(project: nil)
       raise "No project provided: #{project}" unless project.kind_of?(FastlaneCI::Project)
 
-      File.join(json_folder_path, "projects", project.id, "builds")
+      return File.join(json_folder_path, "projects", project.id, "builds")
     end
   end
 end

@@ -22,9 +22,7 @@ module FastlaneCI
 
       self.build_runners << build_runner
 
-      task = TaskQueue::Task.new(work_block: proc do
-        build_runner.start
-      end)
+      task = TaskQueue::Task.new(work_block: proc { build_runner.start })
       self.build_runner_task_queue.add_task_async(task: task)
 
       return task

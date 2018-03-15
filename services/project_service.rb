@@ -58,6 +58,7 @@ module FastlaneCI
       self.project_data_source.projects.select { |project| project.id == id }.first
     end
 
+    # TODO: remove this, we shouldn't be exposing implicitly private variables here
     def git_repo
       self.project_data_source.git_repo
     end
@@ -79,6 +80,10 @@ module FastlaneCI
     def commit_repo_changes!(message: nil, file_to_commit: nil)
       Services.configuration_git_repo.commit_changes!(commit_message: message,
                                                         file_to_commit: file_to_commit)
+    end
+
+    def push_configuration_repo_changes!
+      Services.configuration_git_repo.push
     end
 
     def git_repo_for_project(project:)
