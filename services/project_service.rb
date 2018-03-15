@@ -35,7 +35,7 @@ module FastlaneCI
       enabled ||= true
       # we use LocalArtifactProvider by default
       artifact_provider ||= LocalArtifactProvider.new
-      project = self.project_data_source.create_project!(name: name, repo_config: repo_config, enabled: enabled, lane: lane, artifact_provider: artifact_provider)
+      project = self.project_data_source.create_project!(name: name, repo_config: repo_config, enabled: enabled, lane: lane, job_triggers: job_triggers, artifact_provider: artifact_provider)
       raise "Project couldn't be created" if project.nil?
       self.commit_repo_changes!(message: "Created project #{project.project_name}.")
       return project

@@ -9,6 +9,7 @@ require "git"
 require "addressable/uri"
 require "tty-command"
 require "securerandom"
+require "digest"
 
 module FastlaneCI
   # Data source that interacts with GitHub
@@ -25,6 +26,14 @@ module FastlaneCI
       def cache
         @cache ||= {}
         return @cache
+      end
+
+      def client(api_token)
+        @client_cache ||= {}
+        return @client_cache[api_token] unless @client_cache[api_token].nil?
+        client = Octokit::Client.new(access_token: api_token)
+        @client_cache[api_token]
+        return client
       end
 
       def temp_path
@@ -113,14 +122,18 @@ module FastlaneCI
           self.clone(
             repo_url: repo_url,
             branch: branch,
-            provider_credential: provider_credential
+            provider_credential: provider_credential,
+            path: path
           )
-          self.peek_fastfile_configuration(
+          fastfile_config = self.peek_fastfile_configuration(
             repo_url: repo_url,
             branch: branch,
-            provider_credential: provider_credential
+            provider_credential: provider_credential,
+            path: path,
+            cache: cache
           )
           self.unset_auth
+          return fastfile_config
         end
       end
 
@@ -160,12 +173,14 @@ module FastlaneCI
       # @param [String] path
       def setup_auth(repo_url: nil, provider_credential: nil, path: nil)
         repo = repo_from_url(repo_url)
-        self.temporary_storage_path = File.join(self.temporary_git_storage, "git-auth-#{SecureRandom.uuid}")
+        git_auth_key = Digest::SHA2.hexdigest(repo_url)
+        temporary_storage_path = File.join(self.temporary_git_storage, "git-auth-#{git_auth_key}")
+        self.temporary_storage_path = temporary_storage_path
         # More details: https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
 
         FileUtils.mkdir_p(path) unless File.directory?(path)
 
-        store_credentials_command = "git credential-store --file #{self.temporary_storage_path.shellescape} store"
+        store_credentials_command = "git credential-store --file #{temporary_storage_path.shellescape} store"
         content = [
           "protocol=https",
           "host=#{provider_credential.remote_host}",
@@ -186,6 +201,7 @@ module FastlaneCI
         cmd = TTY::Command.new(printer: :quiet)
         cmd.run(store_credentials_command, input: content)
         cmd.run(use_credentials_command)
+        return temporary_storage_path
       end
 
       # Class method that removes the authentication stored for git operations.
@@ -198,21 +214,18 @@ module FastlaneCI
       # @param [GithubProviderCredential] provider_credential
       # @return [Array<GitRepoConfig>]
       def repos(provider_credential: nil)
-        client = Octokit::Client.new(access_token: provider_credential.api_token)
-        client.repos({}, query: { sort: "asc" }).map { |repo| GitRepoConfig.from_octokit_repo!(repo: repo) }
+        self.client(provider_credential.api_token).repos({}, query: { sort: "asc" }).map { |repo| GitRepoConfig.from_octokit_repo!(repo: repo) }
       end
 
       # Does the client with the associated credentials have access to the specified repo?
       # @return [Bool]
       def access_to_repo?(provider_credential: nil, repo_url: nil)
-        client = Octokit::Client.new(access_token: provider_credential.api_token)
-        client.repository?(repo_from_url(repo_url))
+        self.client(provider_credential.api_token).repository?(repo_from_url(repo_url))
       end
 
       # @return [Array<String>]
       def branches(provider_credential: nil, repo_full_name: nil)
-        client = Octokit::Client.new(access_token: provider_credential.api_token)
-        client.branches(repo_full_name).map(&:name)
+        self.client(provider_credential.api_token).branches(repo_full_name).map(&:name)
       end
 
       def repo_from_url(repo_url)
@@ -274,7 +287,7 @@ module FastlaneCI
       return pull_requests_on_branch.map(&:html_url)
     end
 
-    # Retrieve all commits' sha from a given repo_url and branch.
+    # Retrieve all commits' sha from a branch.
     # @param [String] branch
     # @return [Array<String>] List of SHA for a given branch and repo.
     def all_commits_sha_for_branch(branch: nil)

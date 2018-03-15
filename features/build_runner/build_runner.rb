@@ -41,7 +41,7 @@ module FastlaneCI
     def initialize(project:, sha:, github_service:, work_queue: nil)
       # Setting the variables directly (only having `attr_reader`) as they're immutable
       # Once you define a FastlaneBuildRunner, you shouldn't be able to modify them
-      @project = project
+      @project = github_service.project
       @sha = sha
 
       self.all_build_output_log_rows = []

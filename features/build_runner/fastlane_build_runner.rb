@@ -21,15 +21,10 @@ module FastlaneCI
 
     # Set additional values specific to the fastlane build runner
     def setup(parameters: nil)
-      # TODO: We have to update `Project` to properly let the user define platform and lane
-      #   Currently we just split the string
-      #   See https://github.com/fastlane/ci/issues/236
-      lane_pieces = self.project.lane.split(" ")
-
       # Setting the variables directly (only having `attr_reader`) as they're immutable
       # Once you define a FastlaneBuildRunner, you shouldn't be able to modify them
-      @platform = lane_pieces.count > 1 ? lane_pieces.first : nil
-      @lane = lane_pieces.last
+      @platform = self.project.platform
+      @lane = self.project.lane
       @parameters = parameters
       @encountered_failure_output = false # Did we encounter a row that signaled failure?
     end
@@ -96,9 +91,11 @@ module FastlaneCI
         logger.info("fastlane run complete")
         logger.debug(build_output.join("\n").to_s)
 
-        # TODO: need real artifacts here, are they artifacts or artifact paths?
+        # We remove the verbose log because the run ended successfully.
+        FileUtils.rm("fastlane.verbose.log") if File.exist?("fastlane.verbose.log")
+
+        artifacts = gather_build_artifact_paths
         # TODO: Update build_runner.rb `complete_run(artifact_paths: [])` if they are artifact objects
-        artifacts = []
         completion_block.call(artifacts)
       rescue StandardError => ex
         logger.debug("Setting build status to failure due to exception")
@@ -107,18 +104,8 @@ module FastlaneCI
 
         logger.error(ex)
         logger.error(ex.backtrace)
-
-        artifacts = []
+        artifacts = gather_build_artifact_paths(true)
         completion_block.call(artifacts)
-        # ensure
-        # Either the build was successfull or not, we have to ensure the artifacts for the execution.
-        # artifact_paths = []
-        # artifact_paths << { type: "log", path: "fastlane.log" }
-        # constants_with_path = Fastlane::Actions::SharedValues.constants
-        #                                                      .select { |value| value.to_s.include?("PATH") } # Far from ideal, but meanwhile...
-        #                                                      .select { |value| !Fastlane::Actions.lane_context[value].nil? && !Fastlane::Actions.lane_context[value].empty? }
-        #                                                      .map { |value| { type: value.to_s, path: Fastlane::Actions.lane_context[value] } }
-        # artifact_paths.concat(constants_with_path)
       end
     end
 
@@ -141,6 +128,19 @@ module FastlaneCI
       )
       current_row.html = FastlaneOutputToHtml.convert_row(current_row)
       return current_row
+    end
+
+    protected
+
+    def gather_build_artifact_paths(verbose)
+      artifact_paths = []
+      artifact_paths << { type: "log", path: "fastlane.log" }
+      artifact_paths << { type: "log", path: "fastlane.verbose.log" } if verbose
+      constants_with_path = Fastlane::Actions::SharedValues.constants
+                                                           .select { |value| value.to_s.include?("PATH") } # Far from ideal, but meanwhile...
+                                                           .select { |value| !Fastlane::Actions.lane_context[value].nil? && !Fastlane::Actions.lane_context[value].empty? }
+                                                           .map { |value| { type: value.to_s, path: Fastlane::Actions.lane_context[value] } }
+      return artifact_paths.concat(constants_with_path)
     end
   end
 end
