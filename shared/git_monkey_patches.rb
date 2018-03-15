@@ -25,7 +25,7 @@ module Git
         file = eval(file) if file =~ /^\".*\"$/ # This takes care of quoted strings returned from git
         hsh[file] = {:path => file, :mode_index => mode, :sha_index => sha, :stage => stage}
       end
-      hsh
+      return hsh
     end
   end
 end
