@@ -13,7 +13,6 @@ module FastlaneCI
     attr_accessor :hidden # Do we want normal users to be able to see this?
     attr_accessor :provider_credential_type_needed # what kind of provider is needed? PROVIDER_CREDENTIAL_TYPES[]
     attr_writer :containing_path # directory containing the `local_repo_path`
-    attr_accessor :local_repo_path # mandatory to add this if we want to be serialized.
 
     def initialize(id: nil,
                    git_url: nil,
@@ -27,7 +26,10 @@ module FastlaneCI
       self.provider_credential_type_needed = provider_credential_type_needed
       self.name = name
       self.hidden = hidden
-      @local_repo_path = File.join(self.containing_path, @id)
+    end
+
+    def local_repo_path
+      File.join(self.containing_path, @id)
     end
 
     # This is where we store the local git repo
