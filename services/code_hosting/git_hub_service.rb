@@ -85,6 +85,7 @@ module FastlaneCI
       #      }
       #    }
       #  }
+      #
       # @param repo_url [String]
       # @param branch [String]
       # @param path [String]
@@ -101,6 +102,11 @@ module FastlaneCI
           fastfile_path = self.fastfile_path(root_path: git_path)
           fastfile = Fastlane::FastfileParser.new(path: fastfile_path)
           fastfile_config = {}
+          # TODO: FastfileParser provides a nice and clean tree of the Fastfile given,
+          # but there's a specific case when there might be lanes or actions out of
+          # a platform scope, in those cases the key is nil. We sanitize that so the user
+          # still can select lanes without platform. But this should be done from the
+          # FastfileParser side.
           fastfile.tree.each_key do |key|
             if key.nil?
               fastfile_config[:no_platform] = fastfile.tree[key]
@@ -134,6 +140,9 @@ module FastlaneCI
           )
           self.unset_auth
           return fastfile_config
+        rescue RuntimeError
+          # This is because no Fastfile config was found, so we cannot go further.
+          return {}
         end
       end
 
@@ -397,7 +406,7 @@ module FastlaneCI
         repo_url: self.project.repo_config.git_url,
         branch: branch,
         provider_credential: self.provider_credential,
-        path: self.project.repo_config.containing_path,
+        path: File.join(self.project.repo_config.containing_path, self.project.id),
         cache: false
       )
     end
