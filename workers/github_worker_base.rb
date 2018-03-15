@@ -1,6 +1,7 @@
 require_relative "worker_base"
 require_relative "../shared/models/provider_credential"
 require_relative "../shared/logging_module"
+require_relative "../shared/models/git_repo"
 require_relative "../services/build_runner_service"
 require_relative "../services/code_hosting/git_hub_service"
 
@@ -85,23 +86,20 @@ module FastlaneCI
       end
     end
 
-    def create_and_queue_build_task
-      repo = self.git_repo
-
+    def create_and_queue_build_task(sha:)
       credential = self.provider_credential
       current_project = self.project
-      current_sha = repo.most_recent_commit.sha
-
+      current_sha = sha
       build_runner = FastlaneBuildRunner.new(
         project: current_project,
         sha: current_sha,
-        github_service: self.github_service
+        github_service: self.github_service,
+        work_queue: FastlaneCI::GitRepo.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
       )
       build_runner.setup(parameters: nil)
       build_task = Services.build_runner_service.add_build_runner(build_runner: build_runner)
 
       logger.debug("Adding task for #{self.project_full_name}: #{credential.ci_user.email}: #{current_sha[-6..-1]}")
-
       return build_task
     end
 

@@ -34,13 +34,11 @@ module FastlaneCI
 
         # Skips branches that have previously been built
         builds = build_service.list_builds(project: self.project)
-        if builds.map(&:sha).include?(current_sha)
-          next
-        end
+        next if builds.map(&:sha).include?(current_sha)
 
         logger.debug("Detected new commit on branch #{branch.name} with sha #{current_sha}")
         # This never stops because with each commit, it creates a new commit and then we think it's new, LOL
-        self.create_and_queue_build_task
+        self.create_and_queue_build_task(sha: current_sha)
       end
     end
   end

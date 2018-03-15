@@ -1,6 +1,7 @@
 require "set"
 require_relative "./shared/logging_module"
 require_relative "./shared/models/job_trigger"
+require_relative "./shared/models/git_repo" # for GitRepo.git_action_queue
 require_relative "./taskqueue/task_queue"
 
 module FastlaneCI
@@ -149,17 +150,20 @@ module FastlaneCI
     #
     # @return [nil]
     def self.run_pending_github_builds(projects: nil, github_service: nil)
-      logger.debug("Searching for commits with pending status and starting a new build")
+      logger.debug("Searching all projects for commits with pending status that need a new build")
       # For each project, rerun all builds with the status of "pending"
       projects.each do |project|
-        pending_builds = Services.build_service.pending_builds(project: project)
+        pending_build_shas_needing_rebuilds = Services.build_service.pending_build_shas_needing_rebuilds(project: project)
+        logger.debug("No pending work to reschedule for #{project.project_name}") if pending_build_shas_needing_rebuilds.count == 0
 
         # Enqueue each pending build rerun in an asynchronous task queue
-        pending_builds.each do |build|
+        pending_build_shas_needing_rebuilds.each do |sha|
+          logger.debug("Found sha #{sha} that needs a rebuild for #{project.project_name}")
           build_runner = FastlaneBuildRunner.new(
             project: project,
-            sha: build.sha,
-            github_service: github_service
+            sha: sha,
+            github_service: github_service,
+            work_queue: FastlaneCI::GitRepo.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
           )
           build_runner.setup(parameters: nil)
           Services.build_runner_service.add_build_runner(build_runner: build_runner)
@@ -203,7 +207,8 @@ module FastlaneCI
           build_runner = FastlaneBuildRunner.new(
             project: project,
             sha: current_sha,
-            github_service: github_service
+            github_service: github_service,
+            work_queue: FastlaneCI::GitRepo.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
           )
           build_runner.setup(parameters: nil)
           Services.build_runner_service.add_build_runner(build_runner: build_runner)
