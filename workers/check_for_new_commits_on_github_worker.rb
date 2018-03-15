@@ -23,7 +23,7 @@ module FastlaneCI
     end
 
     def work
-      logger.debug("Checking for new commits on GitHub and creating and enqueuing new build tasks as needed")
+      logger.debug("Checking for new commits in #{self.project.project_name}")
       repo = self.git_repo
 
       # TODO: ensure BuildService subclasses are thread-safe
@@ -36,7 +36,7 @@ module FastlaneCI
         builds = build_service.list_builds(project: self.project)
         next if builds.map(&:sha).include?(current_sha)
 
-        logger.debug("Detected new commit on branch #{branch.name} with sha #{current_sha}")
+        logger.debug("Detected new commit in #{self.project.project_name} on branch #{branch.name} with sha #{current_sha}")
         # This never stops because with each commit, it creates a new commit and then we think it's new, LOL
         self.create_and_queue_build_task(sha: current_sha)
       end
