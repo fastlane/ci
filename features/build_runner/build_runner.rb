@@ -38,7 +38,7 @@ module FastlaneCI
     # Work queue where builds should be run
     attr_accessor :work_queue
 
-    def initialize(project:, sha:, github_service:, work_queue: nil)
+    def initialize(sha:, github_service:, work_queue: nil)
       # Setting the variables directly (only having `attr_reader`) as they're immutable
       # Once you define a FastlaneBuildRunner, you shouldn't be able to modify them
       @project = github_service.project
@@ -50,7 +50,7 @@ module FastlaneCI
       # TODO: provider credential should determine what exact CodeHostingService gets instantiated
       @code_hosting_service = github_service
 
-      @work_queue = work_queue
+      self.work_queue = work_queue
 
       self.prepare_build_object
     end
