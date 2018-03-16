@@ -93,6 +93,7 @@ module FastlaneCI
       # @param branch [String]
       # @param path [String]
       # @param provider_credential [GithubProviderCredential]
+      # @return [Hash<String, Hash>] being the key the name of the platform (:ios, :android, :no_platform) and the Hash the underlying lane (name, actions).
       def peek_fastfile_configuration(repo_url: nil, branch: "master", provider_credential: nil, path: self.temp_path, cache: true)
         repo = repo_from_url(repo_url)
         return self.cache[[repo, branch].join("/")] if cache && self.cache && !self.cache[[repo, branch].join("/")].nil? && self.cache[[repo, branch].join("/")].kind_of?(Hash)
@@ -167,7 +168,7 @@ module FastlaneCI
 
       # Class method that finds the directory for the first Fastfile found given a root_path
       # @param [String] root_path
-      # @return [String] the path of the Fastfile
+      # @return [String, nil] the path of the Fastfile or nil if no Fastfile found.
       def fastfile_path(root_path: nil)
         fastfiles = Dir[File.join(root_path, "fastlane/Fastfile")]
         fastfiles = Dir[File.join(root_path, "**/fastlane/Fastfile")] if fastfiles.count == 0
@@ -179,6 +180,7 @@ module FastlaneCI
       # @param [String] repo_url
       # @param [GithubProviderCredential] provider_credential
       # @param [String] path
+      # @return [String] temporary storage path of the credential-store file.
       def setup_auth(repo_url: nil, provider_credential: nil, path: nil)
         repo = repo_from_url(repo_url)
         git_auth_key = Digest::SHA2.hexdigest(repo_url)
@@ -231,7 +233,7 @@ module FastlaneCI
         self.client(provider_credential.api_token).repository?(repo_from_url(repo_url))
       end
 
-      # @return [Array<String>]
+      # @return [Array<String>] names of the branches for the given repo
       def branch_names(provider_credential: nil, repo_full_name: nil)
         self.client(provider_credential.api_token).branches(repo_full_name).map(&:name)
       end
@@ -250,6 +252,7 @@ module FastlaneCI
     # and this way we can make sure to configure things properly for git to use the email
     attr_accessor :provider_credential
 
+    # @return [Project]
     attr_accessor :project
 
     def initialize(provider_credential: nil, project: nil)
@@ -268,6 +271,7 @@ module FastlaneCI
       @_client
     end
 
+    # @return [Bool] whether the session is valid or not.
     def session_valid?
       self.client.login.to_s.length > 0
     rescue StandardError
@@ -287,7 +291,9 @@ module FastlaneCI
       all_open_pull_requests = client.pull_requests(self.project.repo_config.full_name, state: state)
 
       # if no specific branch, return all open prs
-      return all_open_pull_requests.map(&:html_url) if branches&.count == 0
+      if branches&.empty?
+        return all_open_pull_requests.map(&:html_url)
+      end
 
       pull_requests_on_branch = all_open_pull_requests.select { |pull_request| branches.include?(pull_request.base.ref) }
       # we want only the PRs whose latest commit was to one of the branches passed in
@@ -380,7 +386,7 @@ module FastlaneCI
         description = "Build encountered an error " if state == "error"
       end
 
-      # this needs to be synchronous because we're doing it during initialization of our build runner
+      # This needs to be synchronous because we're doing it during initialization of our build runne
       state_details = target_url.nil? ? "#{repo}, sha #{sha}" : target_url
       logger.debug("Setting status #{state} -> #{status_context} on #{state_details}")
       client.create_status(repo, sha, state, {
