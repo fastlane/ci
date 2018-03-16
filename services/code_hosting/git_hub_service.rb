@@ -417,7 +417,7 @@ module FastlaneCI
     end
 
     def url_from_repo(repo)
-      return "https://github.com/" + repo unless repo.include?("https://github.com/")
+      return repo.include?("https://github.com/") ? repo : "https://github.com/" + repo
     end
   end
 end
