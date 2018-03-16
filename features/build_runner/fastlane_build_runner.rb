@@ -59,11 +59,8 @@ module FastlaneCI
       fast_file_path = self.project.local_fastfile_path
       if fast_file_path.nil? || !File.exist?(fast_file_path)
         logger.info("unable to start fastlane run lane: #{self.lane} platform: #{self.platform}, params: #{self.parameters}, no Fastfile for commit")
-        self.current_build.status = :failure
-        save_build_status!(extra_status_context: "No Fastfile in this commit")
-        # Switch it back to other so we don't send status again
-        self.current_build.status = :other
-        self.current_build.message = "We're nable to start fastlane run lane: #{self.lane} platform: #{self.platform}, params: #{self.parameters}, because no Fastfile existed at the time the commit was made"
+        self.current_build.status = :missing_fastfile
+        self.current_build.description = "We're nable to start fastlane run lane: #{self.lane} platform: #{self.platform}, params: #{self.parameters}, because no Fastfile existed at the time the commit was made"
         completion_block.call([])
         return
       end

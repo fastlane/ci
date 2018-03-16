@@ -67,14 +67,7 @@ module FastlaneCI
       not_implemented(__method__)
     end
 
-    def update_for_no_fastfile
-    end
-
     def complete_run(start_time:, artifact_paths: [])
-      # TODO: make this a lot more discoverable and understandable
-      # See note in `build.rb` about status `:other`
-      return if self.current_build.status == :other
-
       artifacts = artifact_paths.map do |artifact|
         Artifact.new(
           type: artifact[:type],
@@ -135,10 +128,10 @@ module FastlaneCI
 
     # Responsible for updating the build status in our local config
     # and on GitHub
-    def save_build_status!(extra_status_context: nil)
+    def save_build_status!
       # TODO: update so that we can strip out the SHAs that should never be attempted to be rebuilt
       save_build_status_locally!
-      save_build_status_source!(extra_status_context: extra_status_context)
+      save_build_status_source!
     end
 
     # Handle a new incoming row, and alert every stakeholder who is interested
@@ -208,15 +201,15 @@ module FastlaneCI
     # Let GitHub know about the current state of the build
     # Using a `rescue` block here is important
     # As the build is still green, even though we couldn't set the GH status
-    def save_build_status_source!(extra_status_context: nil)
+    def save_build_status_source!
       status_context = self.project.project_name
-      status_context += ": #{extra_status_context}" unless extra_status_context.nil?
 
       self.code_hosting_service.set_build_status!(
         repo: self.project.repo_config.git_url,
         sha: self.sha,
         state: self.current_build.status,
-        status_context: status_context
+        status_context: status_context,
+        description: self.current_build.description
       )
     rescue StandardError => ex
       logger.error("Error setting the build status on remote service")
