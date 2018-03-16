@@ -41,7 +41,7 @@ module FastlaneCI
 
       ci_output = FastlaneCI::FastlaneCIOutput.new(
         each_line_block: proc do |raw_row|
-          yield(self.convert_raw_row_to_object(raw_row))
+          block.call(self.convert_raw_row_to_object(raw_row))
         end
       )
 
