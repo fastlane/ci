@@ -64,9 +64,9 @@ module FastlaneCI
     # @param git_config [GitConfig]
     # @param provider_credential [ProviderCredential]
     # @param async_start [Bool] Whether the repo should be setup async or not. (Defaults to `true`)
-    # @param sync_setup_timeout_seconds [Integer] When in sync setup mode, how many seconds to wait until raise an exception. (Defaults to 120)
+    # @param sync_setup_timeout_seconds [Integer] When in sync setup mode, how many seconds to wait until raise an exception. (Defaults to 300)
     # @param callback [proc(GitRepo)] When in async setup mode, the proc to be called with the final GitRepo setup.
-    def initialize(git_config: nil, provider_credential: nil, async_start: false, sync_setup_timeout_seconds: 120, callback: nil)
+    def initialize(git_config: nil, provider_credential: nil, async_start: false, sync_setup_timeout_seconds: 300, callback: nil)
       self.validate_initialization_params!(git_config: git_config, provider_credential: provider_credential, async_start: async_start, callback: callback)
       @git_config = git_config
 
@@ -107,7 +107,7 @@ module FastlaneCI
       while !setup_task.completed && now < sleep_timeout
         time_left = sleep_timeout - now
         logger.debug("Not setup yet, sleeping (time before timeout: #{time_left}) #{self.git_config.git_url}")
-        sleep(1)
+        sleep(2)
         now = Time.now.utc
       end
 

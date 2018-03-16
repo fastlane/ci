@@ -35,7 +35,10 @@ module FastlaneCI
     # All blocks listening to changes for this build
     attr_accessor :build_change_observer_blocks
 
-    def initialize(project:, sha:, github_service:)
+    # Work queue where builds should be run
+    attr_accessor :work_queue
+
+    def initialize(project:, sha:, github_service:, work_queue: nil)
       # Setting the variables directly (only having `attr_reader`) as they're immutable
       # Once you define a FastlaneBuildRunner, you shouldn't be able to modify them
       @project = project
@@ -46,6 +49,8 @@ module FastlaneCI
 
       # TODO: provider credential should determine what exact CodeHostingService gets instantiated
       @code_hosting_service = github_service
+
+      @work_queue = work_queue
 
       self.prepare_build_object
     end
@@ -62,19 +67,7 @@ module FastlaneCI
       not_implemented(__method__)
     end
 
-    # Starts the build, incrementing the build number from the number of builds
-    # for a given project
-    #
-    # @return [nil]
-    def start
-      start_time = Time.now
-
-      logger.debug("Starting build runner #{self.class} for #{self.project.project_name} #{self.project.id} now...")
-
-      artifact_paths = self.run do |current_row|
-        new_row(current_row)
-      end
-
+    def complete_run(start_time:, artifact_paths: [])
       artifacts = artifact_paths.map do |artifact|
         Artifact.new(
           type: artifact[:type],
@@ -101,7 +94,34 @@ module FastlaneCI
       self.save_build_status!
     end
 
+    # Starts the build, incrementing the build number from the number of builds
+    # for a given project
+    #
+    # @return [nil]
+    def start
+      logger.debug("Starting build runner #{self.class} for #{self.project.project_name} #{self.project.id} sha: #{self.sha} now...")
+      start_time = Time.now
+      artifact_handler_block = proc { |artifact_paths| complete_run(start_time: start_time, artifact_paths: artifact_paths) }
+
+      work_block = proc {
+        self.run(completion_block: artifact_handler_block) do |current_row|
+          new_row(current_row)
+        end
+      }
+
+      # If we have a work_queue, execute on that
+      if self.work_queue
+        runner_task = TaskQueue::Task.new(work_block: work_block)
+        self.work_queue.add_task_async(task: runner_task)
+      else
+        # No work queue? Just call the block then
+        logger.debug("Not using a workqueue for build runner #{self.class}, this is probably a bug")
+        work_block.call
+      end
+    end
+
     # @return [Array[String]] of references for the different artifacts created by the runner.
+    # TODO: are these Artifact objects or paths?
     def run(*args)
       not_implemented(__method__)
     end
@@ -164,6 +184,9 @@ module FastlaneCI
 
       # Commit & Push the changes to git remote
       FastlaneCI::Services.project_service.git_repo.commit_changes!
+
+      # TODO: disabled for now so that while we developer we don't keep pushing to remote ci-config repo
+      # FastlaneCI::Services.project_service.push_configuration_repo_changes!
     rescue StandardError => ex
       logger.error("Error setting the build status as part of the config repo")
       logger.error(ex)
