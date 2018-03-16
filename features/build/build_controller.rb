@@ -27,7 +27,7 @@ module FastlaneCI
         project: project,
         build: build,
         title: "Project #{project.project_name}, Build #{build.number}",
-        existing_rows: current_build_runner.all_build_output_log_rows.collect(&:html)
+        existing_rows: current_build_runner.all_build_output_log_rows.map(&:html)
       }
       erb(:build, locals: locals, layout: FastlaneCI.default_layout)
     end

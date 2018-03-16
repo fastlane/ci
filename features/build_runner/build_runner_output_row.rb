@@ -15,9 +15,10 @@ module FastlaneCI
     attr_accessor :time
 
     # The plan is to remove this, as we want to render it on the front-end
+    # Tracked as GitHub issue https://github.com/fastlane/ci/issues/213
     attr_accessor :html
 
-    def initialize(type: nil, message: nil, time: nil)
+    def initialize(type:, message:, time:)
       self.type = type
       self.message = message
       self.time = time

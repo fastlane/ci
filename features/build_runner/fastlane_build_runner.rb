@@ -39,24 +39,7 @@ module FastlaneCI
 
       ci_output = FastlaneCI::FastlaneCIOutput.new(
         each_line_block: proc do |raw_row|
-          # Additionally to transfering the original metadata of this message
-          # that look like this:
-          #
-          #   {:type=>:success, :message=>"Everything worked", :time=>...}
-          #
-          # we append the HTML code that should be used in the `html` key
-          # the result looks like this
-          #
-          #   {"type":"success","message":"Driving the lane 'ios beta'","html":"<p class=\"success\">Driving the lane 'ios beta'</p>","time"=>...}
-          #
-          # Also we use our custom BuildRunnerOutputRow class to represent the current row
-          current_row = FastlaneCI::BuildRunnerOutputRow.new(
-            type: raw_row[:type],
-            message: raw_row[:message],
-            time: raw_row[:time]
-          )
-          current_row.html = FastlaneOutputToHtml.convert_row(current_row)
-          yield(current_row)
+          yield(self.convert_raw_row_to_object(convert_raw_row_to_object))
         end
       )
 
@@ -119,6 +102,29 @@ module FastlaneCI
         #                                                      .map { |value| { type: value.to_s, path: Fastlane::Actions.lane_context[value] } }
         # artifact_paths.concat(constants_with_path)
       end
+    end
+
+    private
+
+    def convert_raw_row_to_object(raw_row)
+      # Additionally to transfering the original metadata of this message
+      # that look like this:
+      #
+      #   {:type=>:success, :message=>"Everything worked", :time=>...}
+      #
+      # we append the HTML code that should be used in the `html` key
+      # the result looks like this
+      #
+      #   {"type":"success","message":"Driving the lane 'ios beta'","html":"<p class=\"success\">Driving the lane 'ios beta'</p>","time"=>...}
+      #
+      # Also we use our custom BuildRunnerOutputRow class to represent the current row
+      current_row = FastlaneCI::BuildRunnerOutputRow.new(
+        type: raw_row[:type],
+        message: raw_row[:message],
+        time: raw_row[:time]
+      )
+      current_row.html = FastlaneOutputToHtml.convert_row(current_row)
+      return current_row
     end
   end
 end
