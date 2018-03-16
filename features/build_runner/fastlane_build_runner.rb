@@ -101,12 +101,12 @@ module FastlaneCI
         artifacts = []
         completion_block.call(artifacts)
       rescue StandardError => ex
-        # TODO: Exception handling here
+        logger.debug("Setting build status to failure due to exception")
+        self.current_build.status = :failure
+
         logger.error(ex)
         logger.error(ex.backtrace)
 
-        # TODO: need real artifacts here, are they artifacts or artifact paths?
-        # TODO: Update build_runner.rb `complete_run(artifact_paths: [])` if they are artifact objects
         artifacts = []
         completion_block.call(artifacts)
         # ensure
