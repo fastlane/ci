@@ -104,8 +104,11 @@ module FastlaneCI
     def login(email: nil, password: nil)
       user = self.users.select { |existing_user| existing_user.email.casecmp(email.downcase).zero? }.first
 
-      # user doesn't exist
-      return nil if user.nil?
+      if user.nil?
+        logger.debug("Couldn't find user with email #{email} in list of available accounts")
+        # user doesn't exist
+        return nil
+      end
 
       # cool, the user exists, but we need to check the password
       user_password = BCrypt::Password.new(user.password_hash)

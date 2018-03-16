@@ -81,6 +81,10 @@ module FastlaneCI
         password: FastlaneCI.env.ci_user_password,
         ci_config_repo: self.ci_config_repo
       )
+      if @_ci_user.nil?
+        raise "Could not find ci_user for current setup, please make sure a user with the email #{FastlaneCI.env.ci_user_email} exists in your users.json"
+      end
+      return @_ci_user
     end
 
     # This happens on the first launch of CI
