@@ -112,7 +112,7 @@ module FastlaneCI
       not_implemented(__method__)
     end
 
-    def watch_for_changes(path)
+    def watch_for_changes(git, path)
       require "ruby-watchman"
       require "socket"
       sockname = RubyWatchman.load(
@@ -140,7 +140,7 @@ module FastlaneCI
         # could return error if watch is removed
         raise if paths.key?("error")
 
-        handle_repo_changes(paths["files"])
+        handle_repo_changes(git, paths["files"])
       end
     end
 
@@ -174,8 +174,6 @@ module FastlaneCI
       FileUtils.mkdir_p(path) unless File.directory?(path)
       return path
     end
-
-    protected
 
     def handle_repo_changes(git, files)
       @code_hosting_service_class.setup_auth(
