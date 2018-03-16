@@ -41,7 +41,7 @@ module FastlaneCI
 
       ci_output = FastlaneCI::FastlaneCIOutput.new(
         each_line_block: proc do |raw_row|
-          yield(self.convert_raw_row_to_object(convert_raw_row_to_object))
+          yield(self.convert_raw_row_to_object(raw_row))
         end
       )
 
@@ -57,9 +57,11 @@ module FastlaneCI
       Fastlane.load_actions
 
       fast_file_path = self.project.local_fastfile_path
-      unless File.exist?(fast_file_path)
+      if fast_file_path.nil? || !File.exist?(fast_file_path)
         logger.info("unable to start fastlane run lane: #{self.lane} platform: #{self.platform}, params: #{self.parameters}, no Fastfile for commit")
+        self.current_build.status = :failure
         save_build_status!(extra_status_context: "No Fastfile in this commit")
+        # Switch it back to other so we don't send status again
         self.current_build.status = :other
         self.current_build.message = "We're nable to start fastlane run lane: #{self.lane} platform: #{self.platform}, params: #{self.parameters}, because no Fastfile existed at the time the commit was made"
         completion_block.call([])
@@ -121,8 +123,6 @@ module FastlaneCI
         # artifact_paths.concat(constants_with_path)
       end
     end
-
-    private
 
     def convert_raw_row_to_object(raw_row)
       # Additionally to transfering the original metadata of this message
