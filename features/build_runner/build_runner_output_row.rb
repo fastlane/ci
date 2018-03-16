@@ -38,7 +38,7 @@ module FastlaneCI
         message: self.message,
         time: self.time,
         html: self.html
-      }
+      }.to_json
     end
   end
 end
