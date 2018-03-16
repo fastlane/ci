@@ -106,6 +106,10 @@ module FastlaneCI
       state = state.to_s
 
       # Available states https://developer.github.com/v3/repos/statuses/
+      if state == "missing_fastfile"
+        state = "failure"
+      end
+
       available_states = ["error", "failure", "pending", "success"]
       raise "Invalid state '#{state}'" unless available_states.include?(state)
 

@@ -57,6 +57,14 @@ module FastlaneCI
       Fastlane.load_actions
 
       fast_file_path = self.project.local_fastfile_path
+      if fast_file_path.nil? || !File.exist?(fast_file_path)
+        logger.info("unable to start fastlane run lane: #{self.lane} platform: #{self.platform}, params: #{self.parameters}, no Fastfile for commit")
+        self.current_build.status = :missing_fastfile
+        self.current_build.description = "We're nable to start fastlane run lane: #{self.lane} platform: #{self.platform}, params: #{self.parameters}, because no Fastfile existed at the time the commit was made"
+        completion_block.call([])
+        return
+      end
+
       fast_file = Fastlane::FastFile.new(fast_file_path)
       FastlaneCore::Globals.verbose = true
 
@@ -93,12 +101,12 @@ module FastlaneCI
         artifacts = []
         completion_block.call(artifacts)
       rescue StandardError => ex
-        # TODO: Exception handling here
+        logger.debug("Setting build status to failure due to exception")
+        self.current_build.status = :failure
+
         logger.error(ex)
         logger.error(ex.backtrace)
 
-        # TODO: need real artifacts here, are they artifacts or artifact paths?
-        # TODO: Update build_runner.rb `complete_run(artifact_paths: [])` if they are artifact objects
         artifacts = []
         completion_block.call(artifacts)
         # ensure
