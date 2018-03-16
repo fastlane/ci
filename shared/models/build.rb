@@ -4,10 +4,7 @@ module FastlaneCI
   class Build
     # Note, BUILD_STATUSES determine how a build is persisted and how the information is pushed to remote.
     # Example: on success/failure/pending, we automatically update status local + remote
-    # SPECIAL NOTE: on `other` the build runner subclass is expected to handle finalization and calling of
-    # complete_run(start_time:, artifact_paths: []) in `build_runner.rb`
-    # This is confusing, and annoying, but there are weird errors that happen and we need to persist them
-    # somehow.
+    # With missing_fastfile, we ultimately set a `:failure` when we send a status update to github
     BUILD_STATUSES = [
       :success,
       :pending,
