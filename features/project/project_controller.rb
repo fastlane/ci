@@ -1,4 +1,6 @@
 require_relative "../../shared/authenticated_controller_base"
+require_relative "../../shared/models/git_repo"
+
 require "pathname"
 
 module FastlaneCI
@@ -15,6 +17,7 @@ module FastlaneCI
       project = self.user_project_with_id(project_id: project_id)
       current_github_provider_credential = self.check_and_get_provider_credential
 
+      # TODO: This should be hidden in a service
       repo = FastlaneCI::GitRepo.new(git_config: project.repo_config, provider_credential: current_github_provider_credential)
       current_sha = repo.most_recent_commit.sha
       manual_triggers_allowed = project.job_triggers.any? { |trigger| trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual] }
@@ -25,10 +28,12 @@ module FastlaneCI
         return
       end
 
+      # TODO: This should be hidden in a service
       build_runner = FastlaneBuildRunner.new(
         project: project,
         sha: current_sha,
-        github_service: FastlaneCI::GitHubService.new(provider_credential: current_github_provider_credential)
+        github_service: FastlaneCI::GitHubService.new(provider_credential: current_github_provider_credential),
+        work_queue: FastlaneCI::GitRepo.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
       )
       build_runner.setup(parameters: nil)
       Services.build_runner_service.add_build_runner(build_runner: build_runner)

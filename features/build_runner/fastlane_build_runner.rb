@@ -33,8 +33,10 @@ module FastlaneCI
       @parameters = parameters
     end
 
-    def run
+    # completion_block is called with an array of artifacts
+    def run(completion_block: nil, &block)
       raise "No block provided for `run` method" unless block_given?
+      raise "No completion_block provided for `run` method" if completion_block.nil?
       require "fastlane"
 
       ci_output = FastlaneCI::FastlaneCIOutput.new(
@@ -86,12 +88,19 @@ module FastlaneCI
         logger.info("fastlane run complete")
         logger.debug(build_output.join("\n").to_s)
 
-        return [] # TODO: return artifacts here
+        # TODO: need real artifacts here, are they artifacts or artifact paths?
+        # TODO: Update build_runner.rb `complete_run(artifact_paths: [])` if they are artifact objects
+        artifacts = []
+        completion_block.call(artifacts)
       rescue StandardError => ex
         # TODO: Exception handling here
         logger.error(ex)
         logger.error(ex.backtrace)
-        return [] # TODO: return artifacts here (if any)
+
+        # TODO: need real artifacts here, are they artifacts or artifact paths?
+        # TODO: Update build_runner.rb `complete_run(artifact_paths: [])` if they are artifact objects
+        artifacts = []
+        completion_block.call(artifacts)
         # ensure
         # Either the build was successfull or not, we have to ensure the artifacts for the execution.
         # artifact_paths = []
