@@ -115,7 +115,7 @@ module FastlaneCI
 
     # Handle a new incoming row, and alert every stakeholder who is interested
     def new_row(row)
-      logger.debug(row["message"]) if row["message"].to_s.length > 0
+      logger.debug(row.message) if row.message.to_s.length > 0
 
       # Report back the row
       # 1) Store it in the history of logs (used to access half-built builds)
