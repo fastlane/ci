@@ -40,19 +40,8 @@ module FastlaneCI
       require "fastlane"
 
       ci_output = FastlaneCI::FastlaneCIOutput.new(
-        each_line_block: proc do |row|
-          # Additionally to transfering the original metadata of this message
-          # that look like this:
-          #
-          #   {:type=>:success, :message=>"Everything worked", :time=>...}
-          #
-          # we append the HTML code that should be used in the `html` key
-          # the result looks like this
-          #
-          #   {"type":"success","message":"Driving the lane 'ios beta'","html":"<p class=\"success\">Driving the lane 'ios beta'</p>","time"=>...}
-          #
-          row[:html] = FastlaneOutputToHtml.convert_row(row)
-          block.call(row)
+        each_line_block: proc do |raw_row|
+          yield(self.convert_raw_row_to_object(convert_raw_row_to_object))
         end
       )
 
@@ -79,13 +68,13 @@ module FastlaneCI
         build_success = true
         # Attach a listener to the output to see if we have a failure. If so, this build failed
         self.add_listener(proc do |row|
-          build_success = false if row[:type] == :error
+          build_success = false if row.did_fail_build?
         end)
 
         build_output = ["#{fast_file_path}, #{self.lane} platform: #{self.platform}, params: #{self.parameters} from output"]
         # Attach a listener so we can collect the build output and display it all at once
         self.add_listener(proc do |row|
-          build_output << "#{row[:time]}: #{row[:message]}"
+          build_output << "#{row.time}: #{row.message}"
         end)
 
         fast_file.runner.execute(self.lane, self.platform, self.parameters)
@@ -122,6 +111,29 @@ module FastlaneCI
         #                                                      .map { |value| { type: value.to_s, path: Fastlane::Actions.lane_context[value] } }
         # artifact_paths.concat(constants_with_path)
       end
+    end
+
+    private
+
+    def convert_raw_row_to_object(raw_row)
+      # Additionally to transfering the original metadata of this message
+      # that look like this:
+      #
+      #   {:type=>:success, :message=>"Everything worked", :time=>...}
+      #
+      # we append the HTML code that should be used in the `html` key
+      # the result looks like this
+      #
+      #   {"type":"success","message":"Driving the lane 'ios beta'","html":"<p class=\"success\">Driving the lane 'ios beta'</p>","time"=>...}
+      #
+      # Also we use our custom BuildRunnerOutputRow class to represent the current row
+      current_row = FastlaneCI::BuildRunnerOutputRow.new(
+        type: raw_row[:type],
+        message: raw_row[:message],
+        time: raw_row[:time]
+      )
+      current_row.html = FastlaneOutputToHtml.convert_row(current_row)
+      return current_row
     end
   end
 end

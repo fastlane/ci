@@ -12,15 +12,15 @@ module FastlaneCI
   #
   # It does so for each row
   #
-  # TODO: we decided to move this away long term, into the brower using JavaScript
+  # TODO: we decided to move this away long term, into the browser using JavaScript
   #
   class FastlaneOutputToHtml
     class << self
       def convert_row(row)
         wrapping_type = "p"
-        wrapping_class = type_to_class(row[:type])
+        wrapping_class = type_to_class(row.type)
 
-        return "<#{wrapping_type} class=\"#{wrapping_class}\">#{format_string(row[:time])}#{row[:message]}</#{wrapping_type}>"
+        return "<#{wrapping_type} class=\"#{wrapping_class}\">#{format_string(row.time)}#{row.message}</#{wrapping_type}>"
       end
 
       def type_to_class(type)

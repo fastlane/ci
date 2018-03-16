@@ -62,7 +62,9 @@ module FastlaneCI
         #       Also how does the "offboarding" of runners work once the tests are finished
         current_build_runner.add_listener(proc do |row|
           # TODO: Add auth check here, so a user isn't able to get the log from another build
-          ws.send(row.to_json)
+          unless ws.send(row.to_json)
+            logger.error("Something failed when sending the current row via a web socket connection")
+          end
         end)
       end
 
