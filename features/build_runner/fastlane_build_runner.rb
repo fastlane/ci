@@ -41,7 +41,7 @@ module FastlaneCI
 
       ci_output = FastlaneCI::FastlaneCIOutput.new(
         each_line_block: proc do |raw_row|
-          yield(self.convert_raw_row_to_object(convert_raw_row_to_object))
+          block.call(self.convert_raw_row_to_object(raw_row))
         end
       )
 
@@ -112,8 +112,6 @@ module FastlaneCI
         # artifact_paths.concat(constants_with_path)
       end
     end
-
-    private
 
     def convert_raw_row_to_object(raw_row)
       # Additionally to transfering the original metadata of this message
