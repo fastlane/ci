@@ -233,7 +233,7 @@ module FastlaneCI
 
       # @return [Array<String>]
       def branch_names(provider_credential: nil, repo_full_name: nil)
-        self.client(provider_credential.api_token).branch_names(repo_full_name).map(&:name)
+        self.client(provider_credential.api_token).branches(repo_full_name).map(&:name)
       end
 
       def repo_from_url(repo_url)
@@ -241,7 +241,7 @@ module FastlaneCI
       end
 
       def url_from_repo(repo)
-        return "https://github.com/" + repo unless repo.include?("https://github.com/")
+        return repo.include?("https://github.com/") ? repo : "https://github.com/" + repo
       end
     end
 
@@ -413,11 +413,11 @@ module FastlaneCI
     protected
 
     def repo_from_url(repo_url)
-      return repo_url.sub("https://github.com/", "")
+      return self.class.repo_from_url(repo_url)
     end
 
     def url_from_repo(repo)
-      return repo.include?("https://github.com/") ? repo : "https://github.com/" + repo
+      return self.class.url_from_url(repo)
     end
   end
 end

@@ -1,4 +1,5 @@
 require "json"
+require "pathname"
 
 module FastlaneCI
   # Provides operations to create and mutate the FastlaneCI configuration
@@ -35,18 +36,20 @@ module FastlaneCI
     end
 
     def clone(path: self.ci_repo_root_path)
-      git_path = File.join(path, self.repo_name)
       # This triggers the check of an existing repo in the given path,
       # we recover from the error making the clone and checkout
-      begin
-        return Git.open(git_path)
-      rescue ArgumentError
-        return @code_hosting_service_class.clone(
-          repo_url: FastlaneCI.env.repo_url,
-          provider_credential: self.provider_credential,
-          path: self.ci_repo_root_path
-        )
-      end
+
+      git = Git.open(path)
+      self.watch_for_changes(git, path) if File.directory?(path)
+      return git
+    rescue ArgumentError
+      git = @code_hosting_service_class.clone(
+        repo_url: FastlaneCI.env.repo_url,
+        provider_credential: self.provider_credential,
+        path: self.ci_repo_root_path
+      )
+      self.watch_for_changes(git, path) if File.directory?(path)
+      return git
     end
 
     protected
@@ -109,16 +112,15 @@ module FastlaneCI
       not_implemented(__method__)
     end
 
-    def watch_for_changes(path: self.ci_repo_root_path)
+    def watch_for_changes(path)
       require "ruby-watchman"
       require "socket"
-      require "pathname"
       sockname = RubyWatchman.load(
         `watchman --output-encoding=bser get-sockname`
       )["sockname"]
       raise unless $?.exitstatus.zero?
 
-      UNIXSocket.open(sockname) do |socket|
+      @socket = UNIXSocket.open(sockname) do |socket|
         root = Pathname.new(path).realpath.to_s
         roots = RubyWatchman.query(["watch-list"], socket)["roots"]
         unless roots.include?(root)
@@ -138,8 +140,12 @@ module FastlaneCI
         # could return error if watch is removed
         raise if paths.key?("error")
 
-        p paths["files"]
+        handle_repo_changes(paths["files"])
       end
+    end
+
+    def unwatch_changes
+      @socket.close
     end
 
     def commit_file!
@@ -164,9 +170,26 @@ module FastlaneCI
     end
 
     def ci_repo_root_path
-      path = File.expand_path(File.join("~/.fastlane", "ci"))
+      path = File.expand_path(File.join("~/.fastlane", "ci", "fastlane-ci-config"))
       FileUtils.mkdir_p(path) unless File.directory?(path)
       return path
+    end
+
+    protected
+
+    def handle_repo_changes(git, files)
+      @code_hosting_service_class.setup_auth(
+        repo_url: FastlaneCI.env.repo_url,
+        provider_credential: self.provider_credential,
+        path: @code_hosting_service_class.temp_path
+      )
+      files.map { |file| Pathname.new(file) }.reject { |path| path.dirname.to_s == ".git" }.each do |file|
+        path = Pathname.new(file)
+        git.add(path.to_s)
+        git.commit("Changes on #{path.basename}")
+      end
+      git.push("origin", "master", { force: true })
+      @code_hosting_service_class.unset_auth
     end
   end
 end

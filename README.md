@@ -63,6 +63,11 @@ Requires Ruby 2.3.3 or higher. macOS and Xcode are required when building iOS pr
 bundle install
 git submodule init
 git submodule update
+brew update && brew upgrade
+brew uninstall watchman
+brew link pcre
+brew install
+brew install --HEAD watchman
 ```
 
 ## Environment variables for first run
