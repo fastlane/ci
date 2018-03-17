@@ -40,7 +40,7 @@ module FastlaneCI
       # we recover from the error making the clone and checkout
 
       git = Git.open(path)
-      self.watch_for_changes(git, path) if File.directory?(path)
+      self.watch_for_changes!(git, path) if File.directory?(path)
       return git
     rescue ArgumentError
       git = @code_hosting_service_class.clone(
@@ -48,7 +48,7 @@ module FastlaneCI
         provider_credential: self.provider_credential,
         path: self.ci_repo_root_path
       )
-      self.watch_for_changes(git, path) if File.directory?(path)
+      self.watch_for_changes!(git, path) if File.directory?(path)
       return git
     end
 
@@ -116,7 +116,7 @@ module FastlaneCI
     # so we can report every file being changed in a real-time basis.
     # @param [Git::Base] git
     # @param [String] path, the path of the repo which changes are being watched.
-    def watch_for_changes(git, path)
+    def watch_for_changes!(git, path)
       require "ruby-watchman"
       require "socket"
       sockname = RubyWatchman.load(
@@ -151,7 +151,7 @@ module FastlaneCI
     end
 
     def unwatch_changes
-      @socket.close
+      @socket&.close
     end
 
     def commit_file!

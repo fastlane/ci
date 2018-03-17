@@ -24,8 +24,8 @@ module FastlaneCI
 
     def initialize(provider_credential: nil, project: nil)
       self.provider_credential = provider_credential
-      self.github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
       self.project = project
+      self.github_service = git_repo_service
 
       self.target_branches_set = Set.new
       project.job_triggers.each do |trigger|
@@ -73,7 +73,7 @@ module FastlaneCI
     end
 
     def target_branches(&block)
-      repo = self.git_repo
+      repo = self.git_repo_service.git
 
       # is needed to see if there are new branches (called async)
       repo.fetch
