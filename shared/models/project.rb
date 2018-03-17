@@ -84,7 +84,7 @@ module FastlaneCI
       return fastfile_path
     end
 
-    def local_repo_path(branch = self.job_triggers&.first.branch)
+    def local_repo_path(branch = self.job_triggers&.first&.branch)
       return @local_repo_path ||= File.join(File.expand_path("~/.fastlane/ci/"), self.id, self.repo_config.full_name, branch, self.repo_config.name)
     end
   end

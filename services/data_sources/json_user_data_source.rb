@@ -1,5 +1,6 @@
 require "bcrypt"
 require "securerandom"
+require_relative "../configuration_repository/configuration_repository_decorator"
 require_relative "json_data_source"
 require_relative "user_data_source"
 require_relative "../../shared/logging_module"
@@ -39,6 +40,7 @@ module FastlaneCI
   class JSONUserDataSource < UserDataSource
     include FastlaneCI::JSONDataSource
     include FastlaneCI::Logging
+    extend FastlaneCI::ConfigurationRepositoryUpdater
 
     class << self
       attr_accessor :file_semaphore
@@ -82,6 +84,7 @@ module FastlaneCI
       # Reload the users to sync them up with the persisted file store
       reload_users
     end
+    pull_before(:users=)
 
     def reload_users
       JSONUserDataSource.file_semaphore.synchronize do
@@ -100,6 +103,7 @@ module FastlaneCI
         end
       end
     end
+    pull_before(:reload_users)
 
     def login(email: nil, password: nil)
       user = self.users.select { |existing_user| existing_user.email.casecmp(email.downcase).zero? }.first

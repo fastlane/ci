@@ -182,12 +182,6 @@ module FastlaneCI
         project: self.project,
         build: self.current_build
       )
-
-      # Commit & Push the changes to git remote
-      FastlaneCI::Services.project_service.git_repo.commit_changes!
-
-      # TODO: disabled for now so that while we developer we don't keep pushing to remote ci-config repo
-      # FastlaneCI::Services.project_service.push_configuration_repo_changes!
     rescue StandardError => ex
       logger.error("Error setting the build status as part of the config repo")
       logger.error(ex)

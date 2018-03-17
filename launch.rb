@@ -1,7 +1,7 @@
 require "set"
 require_relative "./shared/logging_module"
 require_relative "./shared/models/job_trigger"
-require_relative "./shared/models/git_repo" # for GitRepo.git_action_queue
+require_relative "./services/code_hosting/git_hub_service" # for CodeHostingService.git_action_queue
 require_relative "./taskqueue/task_queue"
 
 module FastlaneCI
@@ -171,7 +171,7 @@ module FastlaneCI
             project: project,
             sha: sha,
             github_service: github_service,
-            work_queue: FastlaneCI::GitRepo.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
+            work_queue: FastlaneCI::CodeHostingService.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
           )
           build_runner.setup(parameters: nil)
           Services.build_runner_service.add_build_runner(build_runner: build_runner)
@@ -216,7 +216,7 @@ module FastlaneCI
             project: project,
             sha: current_sha,
             github_service: github_service,
-            work_queue: FastlaneCI::GitRepo.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
+            work_queue: FastlaneCI::CodeHostingService.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
           )
           build_runner.setup(parameters: nil)
           Services.build_runner_service.add_build_runner(build_runner: build_runner)

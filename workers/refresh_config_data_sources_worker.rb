@@ -12,7 +12,6 @@ module FastlaneCI
     end
 
     def work
-      FastlaneCI::Services.project_service.refresh_repo
     end
   end
 end

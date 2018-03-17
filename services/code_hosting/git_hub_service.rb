@@ -23,6 +23,8 @@ module FastlaneCI
 
       attr_writer :cache
 
+      attr_accessor :git_action_queue
+
       def cache
         @cache ||= {}
         return @cache

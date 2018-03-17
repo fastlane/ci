@@ -2,7 +2,6 @@ require_relative "config_data_sources/json_project_data_source"
 require_relative "../shared/models/repo_config"
 require_relative "../shared/models/local_artifact_provider"
 require_relative "../shared/models/gcp_artifact_provider"
-require_relative "../shared/models/git_repo"
 require_relative "../shared/logging_module"
 require_relative "./user_service"
 require_relative "./services"
@@ -73,11 +72,6 @@ module FastlaneCI
       return self.project_data_source.git_repo
     end
 
-    def refresh_repo
-      self.git_repo.pull
-    end
-
-    # @return [Array[Project]]
     def projects
       return self.project_data_source.projects
     end

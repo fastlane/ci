@@ -1,9 +1,8 @@
 require_relative "worker_base"
 require_relative "../shared/models/provider_credential"
 require_relative "../shared/logging_module"
-require_relative "../shared/models/git_repo"
 require_relative "../services/build_runner_service"
-require_relative "../services/code_hosting/git_hub_service"
+require_relative "../services/code_hosting/code_hosting_service"
 
 module FastlaneCI
   # Base class for GitHub workers
@@ -100,7 +99,7 @@ module FastlaneCI
         project: current_project,
         sha: current_sha,
         github_service: self.github_service,
-        work_queue: FastlaneCI::GitRepo.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
+        work_queue: FastlaneCI::CodeHostingService.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
       )
       build_runner.setup(parameters: nil)
       build_task = Services.build_runner_service.add_build_runner(build_runner: build_runner)

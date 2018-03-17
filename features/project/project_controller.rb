@@ -1,5 +1,6 @@
 require_relative "../../shared/authenticated_controller_base"
 require_relative "../../shared/models/job_trigger"
+require_relative "../../services/code_hosting/code_hosting_service"
 require "pathname"
 require "json"
 
@@ -33,7 +34,7 @@ module FastlaneCI
       build_runner = FastlaneBuildRunner.new(
         sha: current_sha,
         github_service: service,
-        work_queue: FastlaneCI::GitRepo.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
+        work_queue: FastlaneCI::CodeHostingService.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
       )
       build_runner.setup(parameters: nil)
       Services.build_runner_service.add_build_runner(build_runner: build_runner)
@@ -138,7 +139,7 @@ module FastlaneCI
         parser = Fastlane::FastfileParser.new(path: absolute_fastfile_path)
         available_lanes = parser.available_lanes
 
-        project_path = project.repo_config.local_repo_path
+        project_path = project.local_repo_path
         relative_fastfile_path = Pathname.new(absolute_fastfile_path).relative_path_from(Pathname.new(project_path))
       end
 

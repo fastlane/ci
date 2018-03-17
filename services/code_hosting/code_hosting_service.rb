@@ -1,7 +1,15 @@
 require_relative "../../shared/models/provider_credential"
+require_relative "../../taskqueue/task_queue"
+
 module FastlaneCI
   # Abstract base class for all code hosting data services
   class CodeHostingService
+    class << self
+      attr_accessor :git_action_queue
+    end
+
+    CodeHostingService.git_action_queue = TaskQueue::TaskQueue.new(name: "GitRepo task queue")
+
     def initialize(provider_credential: nil)
       not_implemented(__method__)
     end

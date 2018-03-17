@@ -52,6 +52,22 @@ module FastlaneCI
       return git
     end
 
+    def pull(path: self.ci_repo_root_path)
+      git = Git.open(path)
+      git.fetch
+      # Are we behind remote? If so, pull.
+      return if git.log.between(git.branch.name, git.remote.branch.name).size.zero?
+      git.pull
+    rescue ArgumentError
+      git = self.clone(path: path)
+      return if git.log.between(git.branch.name, git.remote.branch.name).size.zero?
+      git.pull
+    end
+
+    def file_path(file_path)
+      File.join(self.ci_repo_root_path, file_path)
+    end
+
     protected
 
     # Serializes CI user and its provider credentials to a JSON format.
@@ -123,9 +139,9 @@ module FastlaneCI
         `watchman --output-encoding=bser get-sockname`
       )["sockname"]
       raise unless $?.exitstatus.zero?
-      
+
       unwatch_changes unless @socket.nil?
-      
+
       @socket = UNIXSocket.open(sockname) do |socket|
         root = Pathname.new(path).realpath.to_s
         roots = RubyWatchman.query(["watch-list"], socket)["roots"]
@@ -152,9 +168,6 @@ module FastlaneCI
 
     def unwatch_changes
       @socket&.close
-    end
-
-    def commit_file!
     end
 
     ####################################################
@@ -190,21 +203,29 @@ module FastlaneCI
     # @param [Git::Base] git, the ci-config repo.
     # @param [Array<String>] files, directories for files being changed.
     def handle_repo_changes(git, files)
+      # For every file change, we make a different commit, in order to make a fine grained commit history.
+      # Obviously, all files in .git path are rejected by default.
+      return if files.empty?
+
+      files.map { |file| Pathname.new(file) }.reject { |path| path.dirname.to_s == ".git" }.each do |file|
+        path = Pathname.new(file)
+        next unless git.status.deleted.assoc(path.basename)&.count.try(:>, 0) || git.status.added.assoc(path.basename)&.count.try(:>, 0) || git.status.changed.assoc(path.basename)&.count.try(:>, 0) || git.status.untracked.assoc(path.basename)&.count.try(:>, 0)
+        begin
+          git.add(path.to_s)
+          git.commit("Changes on #{path.basename}")
+        rescue Git::GitExecuteError
+          # This is caused when the file is already added and/or commited.
+          # So we gracefully continue with the execution
+        end
+      end
+      return if git.log.between(git.remote.branch.name, git.branch.name).size.zero?
       @code_hosting_service_class.setup_auth(
         repo_url: FastlaneCI.env.repo_url,
         provider_credential: self.provider_credential,
         path: @code_hosting_service_class.temp_path
       )
-      # For every file change, we make a different commit, in order to make a fine grained commit history.
-      # Obviously, all files in .git path are rejected by default.
-      files.map { |file| Pathname.new(file) }.reject { |path| path.dirname.to_s == ".git" }.each do |file|
-        path = Pathname.new(file)
-        git.add(path.to_s)
-        git.commit("Changes on #{path.basename}")
-      end
-      # TODO: This shouldn't be needed when we decide which is source of truth.
-      # Again, https://github.com/fastlane/ci/pull/311 for discussion details.
-      git.push("origin", "master", { force: true })
+      git.push
+      logger.info("Pushed changes to ci-config repo")
       @code_hosting_service_class.unset_auth
     end
   end
