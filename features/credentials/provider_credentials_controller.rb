@@ -65,7 +65,7 @@ module FastlaneCI
     #
     # @return [GitHubProviderCredential]
     def blank_credential_for_create_action_form
-      @new_credential ||= GitHubProviderCredential.new
+      @new_credential ||= GitHubProviderCredential.new(id: "")
     end
 
     #####################################################
@@ -74,7 +74,7 @@ module FastlaneCI
 
     # @return [Set[Symbol]]
     def post_parameter_list_for_validation
-      Set.new(%w(user_id id email api_token full_name))
+      Set.new(%w(user_id email api_token full_name))
     end
 
     #####################################################

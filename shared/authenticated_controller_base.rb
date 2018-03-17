@@ -12,6 +12,11 @@ module FastlaneCI
     register AuthenticatedRequestChecker
     include FastlaneCI::Logging
 
+    # A message to be displayed in a pop-up after POST requests
+    #
+    # @return [String]
+    attr_reader :message
+
     def initialize(app)
       super(app)
 
