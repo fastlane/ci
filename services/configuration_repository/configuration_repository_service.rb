@@ -112,6 +112,10 @@ module FastlaneCI
       not_implemented(__method__)
     end
 
+    # This method starts the watching of the ci-config repo folder changes
+    # so we can report every file being changed in a real-time basis.
+    # @param [Git::Base] git
+    # @param [String] path, the path of the repo which changes are being watched.
     def watch_for_changes(git, path)
       require "ruby-watchman"
       require "socket"
@@ -119,7 +123,9 @@ module FastlaneCI
         `watchman --output-encoding=bser get-sockname`
       )["sockname"]
       raise unless $?.exitstatus.zero?
-
+      
+      unwatch_changes unless @socket.nil?
+      
       @socket = UNIXSocket.open(sockname) do |socket|
         root = Pathname.new(path).realpath.to_s
         roots = RubyWatchman.query(["watch-list"], socket)["roots"]
@@ -169,23 +175,35 @@ module FastlaneCI
       FastlaneCI.env.repo_url.split("/").last(2).join("/")
     end
 
+    # The containing path of the ci-config repository.
+    # @return [String]
     def ci_repo_root_path
       path = File.expand_path(File.join("~/.fastlane", "ci", "fastlane-ci-config"))
       FileUtils.mkdir_p(path) unless File.directory?(path)
       return path
     end
 
+    # The method that makes the necessary changes over the files being watched in a given repo.
+    # TODO: For now, until https://github.com/fastlane/ci/pull/311 is solved, we take the local
+    # changes as source of truth by force pushing changes made. Ideally, this shouldn't be needed
+    # if we never encounter a situation where there are conflicts with the remote.
+    # @param [Git::Base] git, the ci-config repo.
+    # @param [Array<String>] files, directories for files being changed.
     def handle_repo_changes(git, files)
       @code_hosting_service_class.setup_auth(
         repo_url: FastlaneCI.env.repo_url,
         provider_credential: self.provider_credential,
         path: @code_hosting_service_class.temp_path
       )
+      # For every file change, we make a different commit, in order to make a fine grained commit history.
+      # Obviously, all files in .git path are rejected by default.
       files.map { |file| Pathname.new(file) }.reject { |path| path.dirname.to_s == ".git" }.each do |file|
         path = Pathname.new(file)
         git.add(path.to_s)
         git.commit("Changes on #{path.basename}")
       end
+      # TODO: This shouldn't be needed when we decide which is source of truth.
+      # Again, https://github.com/fastlane/ci/pull/311 for discussion details.
       git.push("origin", "master", { force: true })
       @code_hosting_service_class.unset_auth
     end
