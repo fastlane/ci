@@ -405,6 +405,7 @@ module FastlaneCI
 
       self.temporary_storage_path = self.setup_auth(repo_auth: repo_auth)
       logger.debug("[#{self.git_config.id}]: Cloning git repo #{self.git_config.git_url}")
+
       Git.clone(self.git_config.git_url, self.git_config.id,
                 path: self.git_config.containing_path,
                 recursive: true)

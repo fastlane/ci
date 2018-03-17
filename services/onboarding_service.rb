@@ -7,18 +7,32 @@ module FastlaneCI
   class OnboardingService
     include FastlaneCI::Logging
 
+    # @return [GitRepoConfig]
+    attr_reader :ci_config_repo
+
+    # @return [GitHubProviderCredential]
+    attr_reader :clone_user_provider_credential
+
+    def initialize(ci_config_repo:, clone_user_provider_credential:)
+      @ci_config_repo = ci_config_repo
+      @clone_user_provider_credential = clone_user_provider_credential
+    end
+
     # Verify that fastlane.ci is already set up on this machine.
     # If that's not the case, we have to make sure to trigger the initial clone
     def trigger_initial_ci_setup
       logger.info("No config repo cloned yet, doing that now")
 
       # Trigger the initial clone
+      # TODO: remote this in favour of a different approach
       FastlaneCI::ProjectService.new(
         project_data_source: FastlaneCI::JSONProjectDataSource.create(
-          Services.ci_config_repo,
-          git_repo_config: Services.ci_config_repo,
-          provider_credential: Services.provider_credential
-        )
+          ci_config_repo,
+          git_repo_config: ci_config_repo,
+          provider_credential: clone_user_provider_credential
+        ),
+        clone_user_provider_credential: clone_user_provider_credential,
+        configuration_git_repo: ci_config_repo
       )
       logger.info("Successfully did the initial clone on this machine")
     rescue StandardError => ex
@@ -57,7 +71,7 @@ module FastlaneCI
 
     # @return [Boolean]
     def local_configuration_repo_exists?
-      Services.ci_config_repo.exists?
+      ci_config_repo.exists?
     end
 
     # @return [Boolean]

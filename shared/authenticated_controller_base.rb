@@ -25,7 +25,7 @@ module FastlaneCI
     def current_user_config_service
       if @user_config_service.nil?
         logger.debug("No user_config_service for #{self.user.email}, creating one")
-        @user_config_service = FastlaneCI::ConfigService.new(ci_user: self.user)
+        @user_config_service = FastlaneCI::ConfigService.new(ci_user: self.user, clone_user_provider_credential: check_and_get_provider_credential)
       end
       return @user_config_service
     end

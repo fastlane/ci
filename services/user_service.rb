@@ -8,8 +8,9 @@ module FastlaneCI
   class UserService
     include FastlaneCI::Logging
     attr_accessor :user_data_source
+    attr_accessor :configuration_git_repo
 
-    def initialize(user_data_source: nil)
+    def initialize(user_data_source: nil, configuration_git_repo:)
       unless user_data_source.nil?
         raise "user_data_source must be descendant of #{UserDataSource.name}" unless user_data_source.class <= UserDataSource
       end
@@ -22,6 +23,7 @@ module FastlaneCI
         user_data_source = JSONUserDataSource.create(json_folder_path: data_store_folder)
       end
 
+      @configuration_git_repo = configuration_git_repo
       self.user_data_source = user_data_source
     end
 
@@ -122,8 +124,7 @@ module FastlaneCI
 
     # Not sure if this must be here or not, but we can open a discussion on this.
     def commit_repo_changes!(message: nil, file_to_commit: nil)
-      Services.configuration_git_repo.commit_changes!(commit_message: message,
-                                                        file_to_commit: file_to_commit)
+      configuration_git_repo.commit_changes!(commit_message: message, file_to_commit: file_to_commit)
     end
   end
 end

@@ -36,13 +36,16 @@ module StubHelpers
       FastlaneCI::ProjectService.new(
         project_data_source: FastlaneCI::JSONProjectDataSource.create(
           git_repo, user: ci_user
-        )
+        ),
+        clone_user_provider_credential: provider_credential,
+        configuration_git_repo: git_repo
       )
     )
 
     FastlaneCI::Services.stub(:user_service).and_return(
       FastlaneCI::UserService.new(
-        user_data_source: FastlaneCI::JSONUserDataSource.create(git_repo_path)
+        user_data_source: FastlaneCI::JSONUserDataSource.create(git_repo_path),
+        configuration_git_repo: git_repo
       )
     )
 

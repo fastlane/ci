@@ -10,8 +10,12 @@ module FastlaneCI
     include FastlaneCI::Logging
 
     attr_accessor :project_to_workers_dictionary
+    attr_accessor :ci_user
+    attr_accessor :provider_credential
 
-    def initialize
+    def initialize(ci_user:, provider_credential:)
+      @ci_user = ci_user
+      @provider_credential = provider_credential
       self.project_to_workers_dictionary = {}
     end
 
@@ -45,6 +49,32 @@ module FastlaneCI
       end
 
       self.project_to_workers_dictionary[workers_key] = new_workers
+    end
+
+    def start_github_workers
+      return unless Services.onboarding_service.correct_setup?
+      launch_workers unless ENV["FASTLANE_CI_SKIP_WORKER_LAUNCH"]
+    end
+
+    def launch_workers
+      logger.debug("Starting workers to monitor projects")
+      # Iterate through all provider credentials and their projects and start a worker for each project
+      ci_user.provider_credentials.each do |provider_credential|
+        projects = Services.config_service.projects(provider_credential: provider_credential)
+        projects.each do |project|
+          start_workers_for_project_and_credential(
+            project: project,
+            provider_credential: provider_credential
+          )
+        end
+      end
+
+      logger.info("Seems like no workers were started to monitor your projects") if num_workers == 0
+
+      # Initialize the workers
+      # For now, we're not using a fancy framework that adds multiple heavy dependencies
+      # including a database, etc.
+      FastlaneCI::RefreshConfigDataSourcesWorker.new
     end
 
     def stop_workers(project: nil, user_responsible: nil)
