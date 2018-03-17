@@ -190,7 +190,7 @@ module FastlaneCI
 
     # @return [Hash]
     def keys
-      FastlaneCI.env.all
+      return FastlaneCI.env.all
     end
 
     #####################################################
@@ -199,28 +199,30 @@ module FastlaneCI
 
     # @return [Boolean]
     def has_encryption_key?
-      not_nil_and_not_empty?(FastlaneCI.env.encryption_key)
+      return not_nil_and_not_empty?(FastlaneCI.env.encryption_key)
     end
 
     # @return [Boolean]
     def has_ci_user?
-      not_nil_and_not_empty?(FastlaneCI.env.ci_user_email) &&
-        not_nil_and_not_empty?(FastlaneCI.env.ci_user_password)
+      return not_nil_and_not_empty?(FastlaneCI.env.ci_user_email) &&
+             not_nil_and_not_empty?(FastlaneCI.env.ci_user_password)
     end
 
     # @return [Boolean]
     def has_clone_user?
-      not_nil_and_not_empty?(FastlaneCI.env.initial_clone_email) &&
-        not_nil_and_not_empty?(FastlaneCI.env.clone_user_api_token)
+      return not_nil_and_not_empty?(FastlaneCI.env.initial_clone_email) &&
+             not_nil_and_not_empty?(FastlaneCI.env.clone_user_api_token)
     end
 
     # @return [Boolean]
     def has_remote_github_repo?
-      # Need the encryption key for the configuration_repository_service
-      return false unless not_nil_and_not_empty?(FastlaneCI.env.encryption_key)
-
-      not_nil_and_not_empty?(FastlaneCI.env.repo_url) &&
-        Services.onboarding_service.correct_setup?
+      if not_nil_and_not_empty?(FastlaneCI.env.encryption_key)
+        return not_nil_and_not_empty?(FastlaneCI.env.repo_url) &&
+               Services.onboarding_service.correct_setup?
+      else
+        # Need the encryption key for the configuration_repository_service
+        return false
+      end
     end
 
     #####################################################
@@ -229,22 +231,22 @@ module FastlaneCI
 
     # @return [Set[String]]
     def post_parameter_list_for_encryption_key_validation
-      Set.new(%w(encryption_key))
+      return Set.new(%w(encryption_key))
     end
 
     # @return [Set[String]]
     def post_parameter_list_for_ci_bot_user_validation
-      Set.new(%w(ci_user_email ci_user_password))
+      return Set.new(%w(ci_user_email ci_user_password))
     end
 
     # @return [Set[String]]
     def post_parameter_list_for_clone_user_validation
-      Set.new(%w(clone_user_email clone_user_api_token))
+      return Set.new(%w(clone_user_email clone_user_api_token))
     end
 
     # @return [Set[String]]
     def post_parameter_list_for_git_repo_validation
-      Set.new(%w(repo_url))
+      return Set.new(%w(repo_url))
     end
 
     #####################################################
@@ -256,7 +258,7 @@ module FastlaneCI
     # @param  [String] value
     # @return [Boolean]
     def not_nil_and_not_empty?(value)
-      !value.nil? && !value.empty?
+      return !value.nil? && !value.empty?
     end
   end
 end

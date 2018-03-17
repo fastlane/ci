@@ -44,8 +44,8 @@ module FastlaneCI
     # @param  [Sinatra::Request] request
     # @return [Hash]
     def notification_params(request)
-      parse_request_body(request)
-        .select { |k, _v| %i(id priority type user_id name message).include?(k) }
+      return parse_request_body(request)
+             .select { |k, _v| %i(id priority type user_id name message).include?(k) }
     end
   end
 end

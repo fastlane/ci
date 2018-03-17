@@ -51,7 +51,7 @@ module FastlaneCI
 
     # @return [Array[User]]
     def users
-      Services.user_service.users
+      return Services.user_service.users
     end
 
     # Empty user object for `/create` action form. The forms/_users.erb
@@ -70,7 +70,7 @@ module FastlaneCI
 
     # @return [Set[Symbol]]
     def post_parameter_list_for_validation
-      Set.new(%w(id email password_hash))
+      return Set.new(%w(id email password_hash))
     end
   end
 end

@@ -40,14 +40,14 @@ module FastlaneCI
     #
     # @return [Boolean]
     def all_env_variables_non_nil?
-      FastlaneCI.env.all.none? { |_k, v| v.nil? || v.empty? }
+      return FastlaneCI.env.all.none? { |_k, v| v.nil? || v.empty? }
     end
 
     # The path to the environment variables file
     #
     # @return [String]
     def keys_file_path
-      File.join(Dir.home, ".fastlane/ci/.keys")
+      return File.join(Dir.home, ".fastlane/ci/.keys")
     end
   end
 end
