@@ -167,7 +167,7 @@ module FastlaneCI
           )
         )
         Services.configuration_repository_service.create_private_remote_configuration_repo
-        Services.onboarding_service.trigger_initial_ci_setup
+        Services.onboarding_service.clone_remote_repository_locally
         Launch.start_github_workers
 
         session[:message] = <<~HTML

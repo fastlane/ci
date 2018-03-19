@@ -7,9 +7,11 @@ module FastlaneCI
   class OnboardingService
     include FastlaneCI::Logging
 
-    # Verify that fastlane.ci is already set up on this machine.
-    # If that's not the case, we have to make sure to trigger the initial clone
-    def trigger_initial_ci_setup
+    # Triggers the initial clone of the remote configuration repository, to the
+    # local fastlane configuration repository in `~/.fastlane/ci`
+    #
+    # @raise [StandardError] if the repository is not cloned successfully
+    def clone_remote_repository_locally
       logger.info("No config repo cloned yet, doing that now")
 
       # Trigger the initial clone
@@ -37,13 +39,20 @@ module FastlaneCI
     #
     # @return [Boolean]
     def correct_setup?
+      return required_keys_and_proper_remote_configuration_repo? &&
+             local_configuration_repo_exists?
+    end
+
+    # If the user has all the required environment variables, and a valid
+    # remote configuration repository, then the only thing preventing their setup
+    # from being correct is cloning the repository locally. This helper function
+    # is used to determine if the remote configuration repository should be
+    # cloned locally on startup
+    #
+    # @return [Boolean]
+    def required_keys_and_proper_remote_configuration_repo?
       unless no_missing_keys?
         logger.debug("Missing environment variables.")
-        return false
-      end
-
-      unless local_configuration_repo_exists?
-        logger.debug("local configuration repo doesn't exist")
         return false
       end
 
@@ -55,17 +64,24 @@ module FastlaneCI
       return true
     end
 
+    # Returns `true` if the local configuration repository exists
+    #
     # @return [Boolean]
     def local_configuration_repo_exists?
-      return Services.ci_config_repo.exists?
+      unless Services.ci_config_repo.exists?
+        logger.debug("local configuration repo doesn't exist")
+        return false
+      end
+
+      return true
     end
+
+    private
 
     # @return [Boolean]
     def remote_configuration_repository_valid?
       return Services.configuration_repository_service.configuration_repository_valid?
     end
-
-    private
 
     # @return [Boolean]
     def no_missing_keys?
