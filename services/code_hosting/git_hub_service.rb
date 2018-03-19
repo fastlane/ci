@@ -124,7 +124,7 @@ module FastlaneCI
           fastfile_json_path = File.join(path, "fastfile.json")
           FileUtils.touch(fastfile_json_path) unless File.exist?(fastfile_json_path) && !File.zero?(fastfile_json_path)
           File.write(fastfile_json_path, JSON.pretty_generate(fastfile_config))
-          self.cache[[repo, branch].join("/")] = fastfile_config
+          self.cache[[repo, branch].join("/")] = fastfile, fastfile_config
           return fastfile, fastfile_config
         rescue ArgumentError
           self.clone(

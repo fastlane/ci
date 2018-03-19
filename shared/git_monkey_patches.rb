@@ -33,21 +33,4 @@ module Git
       return hsh
     end
   end
-
-  # def clone(repository, name, opts = {})
-  #   @path = opts[:path] || "."
-  #   clone_dir = opts[:path] ? File.join([@path, name].reject { |i| i.nil? || i.empty? }) : name
-  #   arr_opts = []
-  #   arr_opts << "--bare" if opts[:bare]
-  #   arr_opts << "--branch" << opts[:branch] if opts[:branch]
-  #   arr_opts << "--depth" << opts[:depth].to_i if opts[:depth] && opts[:depth].to_i > 0
-  #   arr_opts << "--config" << opts[:config] if opts[:config]
-  #   arr_opts << "--origin" << opts[:remote] || opts[:origin] if opts[:remote] || opts[:origin]
-  #   arr_opts << "--recursive" if opts[:recursive]
-  #   arr_opts << "--"
-  #   arr_opts << repository
-  #   arr_opts << clone_dir
-  #   command("clone", arr_opts)
-  #   opts[:bare] ? { repository: clone_dir } : { working_directory: clone_dir }
-  # end
 end

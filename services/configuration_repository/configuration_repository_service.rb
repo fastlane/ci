@@ -1,3 +1,4 @@
+require_relative "../../taskqueue/task_queue"
 require "json"
 require "pathname"
 
@@ -13,11 +14,15 @@ module FastlaneCI
     def self.mutex
       return @@mutex
     end
-    # rubocop:enable Style/ClassVars
 
     def self.fastlane_ci_config
       return "fastlane-ci-config"
     end
+
+    def self.task_queue
+      @@task_queue ||= TaskQueue::TaskQueue.new(name: "ConfigurationRepositoryService")
+    end
+    # rubocop:enable Style/ClassVars
 
     attr_reader :client
 
@@ -178,7 +183,8 @@ module FastlaneCI
 
         unless ConfigurationRepositoryService.mutex.locked?
           ConfigurationRepositoryService.mutex.synchronize do
-            handle_repo_changes(git, paths["files"])
+            repo_changes_task = TaskQueue::Task.new(work_block: proc { handle_repo_changes(git, paths["files"]) })
+            ConfigurationRepositoryService.task_queue.add_task_async(task: repo_changes_task)
           end
         end
       end

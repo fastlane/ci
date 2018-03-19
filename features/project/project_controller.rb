@@ -46,7 +46,8 @@ module FastlaneCI
     post "#{HOME}/:project_id/save" do
       project_id = params[:project_id]
       project = self.user_project_with_id(project_id: project_id)
-      project.lane = params["selected_lane"]
+      project.platform = params["selected_lane"]&.split(" ")&.first || "no_platform"
+      project.lane = params["selected_lane"].split(" ").last
       project.project_name = params["project_name"]
 
       # TODO: what's the best way to store that project in the config?
