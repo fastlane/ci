@@ -16,13 +16,6 @@ module FastlaneCI
       logger.info("No config repo cloned yet, doing that now")
 
       # Trigger the initial clone
-      # FastlaneCI::ProjectService.new(
-      #   project_data_source: FastlaneCI::JSONProjectDataSource.create(
-      #     Services.ci_config_repo,
-      #     git_repo_config: Services.ci_config_repo,
-      #     provider_credential: Services.provider_credential
-      #   )
-      # )
       case Services.provider_credential.type
       when FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
         FastlaneCI::GitHubService.clone(
