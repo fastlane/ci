@@ -125,7 +125,7 @@ module FastlaneCI
           FileUtils.touch(fastfile_json_path) unless File.exist?(fastfile_json_path) && !File.zero?(fastfile_json_path)
           File.write(fastfile_json_path, JSON.pretty_generate(fastfile_config))
           self.cache[[repo, branch].join("/")] = fastfile_config
-          return fastfile_config
+          return fastfile, fastfile_config
         rescue ArgumentError
           self.clone(
             repo_url: repo_url,
@@ -133,14 +133,14 @@ module FastlaneCI
             provider_credential: provider_credential,
             path: path
           )
-          fastfile_config = self.peek_fastfile_configuration(
+          fastfile, fastfile_config = self.peek_fastfile_configuration(
             repo_url: repo_url,
             branch: branch,
             provider_credential: provider_credential,
             path: path,
             cache: cache
           )
-          return fastfile_config
+          return fastfile, fastfile_config
         rescue RuntimeError
           # This is because no Fastfile config was found, so we cannot go further.
           return {}

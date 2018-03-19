@@ -85,7 +85,7 @@ module FastlaneCI
     end
 
     def local_repo_path(sha: nil)
-      return File.join(File.expand_path("~/.fastlane/ci/"), self.id, self.repo_config.full_name, sha, self.repo_config.name)
+      return File.join([File.expand_path("~/.fastlane/ci/"), self.id, self.repo_config.full_name, sha, self.repo_config.name].reject { |i| i.nil? || i.empty? })
     end
   end
 end

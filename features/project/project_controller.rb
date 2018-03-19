@@ -82,7 +82,7 @@ module FastlaneCI
 
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
-      fastfile_config = FastlaneCI::GitHubService.peek_fastfile_configuration(
+      _, fastfile_config = FastlaneCI::GitHubService.peek_fastfile_configuration(
         repo_url: "#{org}/#{repo_name}",
         branch: branch,
         provider_credential: provider_credential
@@ -132,23 +132,18 @@ module FastlaneCI
       # Long term, the best appraoch would probably to have the FastfileParser be
       # its own Ruby gem, or even part of the fastlane/fastlane main repo
       # For now, this is good enough, as we'll be moving so fast with this one
+      provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
-      relative_fastfile_path = nil
-      available_lanes = []
-      absolute_fastfile_path = project.local_fastfile_path
-      unless absolute_fastfile_path.nil?
-        parser = Fastlane::FastfileParser.new(path: absolute_fastfile_path)
-        available_lanes = parser.available_lanes
-
-        project_path = project.local_repo_path
-        relative_fastfile_path = Pathname.new(absolute_fastfile_path).relative_path_from(Pathname.new(project_path))
-      end
+      fastfile, = FastlaneCI::GitHubService.peek_fastfile_configuration(
+        repo_url: project.repo_config.full_name,
+        branch: project.job_triggers&.first&.branch || "master",
+        provider_credential: provider_credential
+      )
 
       locals = {
         project: project,
         title: "Project #{project.project_name}",
-        available_lanes: available_lanes,
-        fastfile_path: relative_fastfile_path # TODO: rename param `fastfile_path` to `relative_fastfile_path`
+        available_lanes: fastfile.available_lanes
       }
 
       erb(:project, locals: locals, layout: FastlaneCI.default_layout)
