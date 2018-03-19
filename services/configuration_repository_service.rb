@@ -52,7 +52,7 @@ module FastlaneCI
     #
     # @return [Boolean]
     def configuration_repository_exists?
-      client.repository?(repo_shortform)
+      return client.repository?(repo_shortform)
     end
 
     private
@@ -133,20 +133,20 @@ module FastlaneCI
       contents_json = contents_map[:encoding] == "base64" ? Base64.decode64(contents_map[:content]) : contents_map[:content]
       contents = JSON.parse(contents_json)
 
-      contents.kind_of?(Array)
+      return contents.kind_of?(Array)
     rescue TypeError
       if contents.nil?
         logger.debug("#{repo_shortform}/#{file_path} has no content")
       else
         logger.debug("#{repo_shortform}/#{file_path} is type #{contents.type}, should be Array")
       end
-      false
+      return false
     rescue Octokit::NotFound
       logger.debug("#{repo_shortform}/#{file_path} couldn't be found")
-      false
+      return false
     rescue JSON::ParserError
       logger.debug("#{repo_shortform}/#{file_path} couldn't be json-parsed, object type: #{contents.type}")
-      false
+      return false
     end
 
     ####################################################
@@ -158,7 +158,7 @@ module FastlaneCI
     # @return [String]
     def repo_name
       return "" unless FastlaneCI.env.repo_url
-      FastlaneCI.env.repo_url.split("/").last
+      return FastlaneCI.env.repo_url.split("/").last
     end
 
     # The short-form of the configuration repository URL `ueser/repo`
@@ -166,7 +166,7 @@ module FastlaneCI
     # @return [String]
     def repo_shortform
       return "" unless FastlaneCI.env.repo_url
-      FastlaneCI.env.repo_url.split("/").last(2).join("/")
+      return FastlaneCI.env.repo_url.split("/").last(2).join("/")
     end
   end
 end

@@ -46,7 +46,7 @@ module FastlaneCI
 
     # @return [Array[User]]
     def users
-      Services.user_service.users
+      return Services.user_service.users
     end
 
     # Maps users and credentials hash:
@@ -54,9 +54,9 @@ module FastlaneCI
     #
     # @return [Hash]
     def user_credentials
-      users
-        .map { |user| [user.id, user.provider_credentials] }
-        .to_h
+      return users
+             .map { |user| [user.id, user.provider_credentials] }
+             .to_h
     end
 
     # Empty provider credential for use in `/create` action form. The
@@ -74,7 +74,7 @@ module FastlaneCI
 
     # @return [Set[Symbol]]
     def post_parameter_list_for_validation
-      Set.new(%w(user_id id email api_token full_name))
+      return Set.new(%w(user_id id email api_token full_name))
     end
 
     #####################################################
@@ -84,7 +84,7 @@ module FastlaneCI
     # @param  [String] user_id
     # @return [Boolean]
     def user_exists_with_id?(user_id)
-      users.map(&:id).include?(user_id)
+      return users.map(&:id).include?(user_id)
     end
   end
 end

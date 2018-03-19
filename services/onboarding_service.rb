@@ -80,12 +80,12 @@ module FastlaneCI
 
     # @return [Boolean]
     def remote_configuration_repository_valid?
-      Services.configuration_repository_service.configuration_repository_valid?
+      return Services.configuration_repository_service.configuration_repository_valid?
     end
 
     # @return [Boolean]
     def no_missing_keys?
-      Services.environment_variable_service.all_env_variables_non_nil?
+      return Services.environment_variable_service.all_env_variables_non_nil?
     end
   end
 end
