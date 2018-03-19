@@ -197,13 +197,9 @@ module FastlaneCI
     # Using a `rescue` block here is important
     # As the build is still green, even though we couldn't set the GH status
     def save_build_status_source!
-      status_context = self.project.project_name
-
       self.code_hosting_service.set_build_status!(
-        repo: self.project.repo_config.git_url,
         sha: self.sha,
         state: self.current_build.status,
-        status_context: status_context,
         description: self.current_build.description
       )
     rescue StandardError => ex

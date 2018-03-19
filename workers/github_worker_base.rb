@@ -93,7 +93,6 @@ module FastlaneCI
 
     def create_and_queue_build_task(sha:)
       credential = self.provider_credential
-      current_project = self.project
       current_sha = sha
       build_runner = FastlaneBuildRunner.new(
         sha: current_sha,

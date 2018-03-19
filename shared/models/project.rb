@@ -64,7 +64,7 @@ module FastlaneCI
       fastfile_path = nil
 
       # First assume the fastlane directory and its file is in the root of the project
-      fastfiles = Dir[File.join(local_repo_path(sha: sha), "fastlane/Fastfile")]
+      fastfiles = Dir[File.join(local_repo_path(sha: sha), "**/*", "fastlane/Fastfile")]
       # If not, it might be in a subfolder
       fastfiles = Dir[File.join(local_repo_path(sha: sha), "**/fastlane/Fastfile")] if fastfiles.count == 0
 
@@ -74,18 +74,18 @@ module FastlaneCI
       end
 
       if fastfiles.count == 0
-        logger.error("No Fastfile found at #{local_repo_path(sha: sha)}/fastlane/Fastfile, or any descendants")
+        logger.error("No Fastfile found at #{local_repo_path(sha: sha)}, or any descendants")
       else
         fastfile_path = fastfiles.first
         if relative
-          fastfile_path = Pathname.new(fastfile_path).relative_path_from(Pathname.new(local_repo_path))
+          fastfile_path = Pathname.new(fastfile_path).relative_path_from(Pathname.new(local_repo_path(sha: sha)))
         end
       end
       return fastfile_path
     end
 
     def local_repo_path(sha: nil)
-      return @local_repo_path ||= File.join(File.expand_path("~/.fastlane/ci/"), self.id, self.repo_config.full_name, sha, self.repo_config.name)
+      return File.join(File.expand_path("~/.fastlane/ci/"), self.id, self.repo_config.full_name, sha, self.repo_config.name)
     end
   end
 end
