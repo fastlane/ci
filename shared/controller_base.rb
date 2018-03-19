@@ -114,15 +114,15 @@ module FastlaneCI
         .each_with_object({}) { |(k, v), hash| hash[k.to_sym] = v }
     end
 
-    # Validates all the required keys are present, and that no values are nil
+    # Validates all the required keys are present, and that none of the required
+    # key values are nil
     #
     # @param  [Hash]       actuals
     # @param  [Set[Symbol] expected_keys
     # @return [Boolean]
     def valid_params?(actuals, expected_keys)
-      actuals = actuals.delete_if { |k, _v| k == "captures" }
-      expected_keys == actuals.keys.to_set &&
-        actuals.values.none? { |v| v.nil? || v.empty? }
+      expected_keys.subset?(actuals.keys.to_set) &&
+        actuals.none? { |k, v| expected_keys.include?(k) ? v.nil? || v.empty? : false }
     end
   end
 end

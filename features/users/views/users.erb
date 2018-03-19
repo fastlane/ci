@@ -17,7 +17,7 @@
           <tr>
             <th>id</th>
             <th>Email</th>
-            <th>Password Hash</th>
+            <th>Password</th>
             <th>Provider Credentials</th>
             <th></th>
           </tr>
@@ -40,7 +40,11 @@
       <table class="table-mc-light-blue mdl-data-table mdl-js-data-table mdl-shadow--2dp">
         <thead>
           <tr>
-            <%= erb :"./forms/_users", locals: { user: user, action: "update" } %>
+            <th>id</th>
+            <th>Email</th>
+            <th>Password</th>
+            <th>Provider Credentials</th>
+            <th></th>
           </tr>
         </thead>
 

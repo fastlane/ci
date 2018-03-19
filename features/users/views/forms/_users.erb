@@ -1,7 +1,6 @@
 <form method="POST" action="users/<%= action %>">
   <td>
-    <code>id=<%= user.id %></code>
-    <input type="hidden" name="id" value=<%= user.id %>>
+    <code><%= user.id %></code>
     <input
       id="id"
       class="mdl-textfield__input"
@@ -24,12 +23,16 @@
 
   <td>
     <input
-      id="password_hash"
+      id="password"
       class="mdl-textfield__input"
-      type="text"
-      name="password_hash"
-      value="<%= user.password_hash %>"
-      placeholder="User's password hash"
+      type="password"
+      name="password"
+      value=""
+      <% if action == "update" %>
+        placeholder="Reset password"
+      <% else %>
+        placeholder="User's password"
+      <% end %>
     />
   </td>
 
