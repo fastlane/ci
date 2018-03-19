@@ -52,7 +52,7 @@ module FastlaneCI
       # this only takes a few ms the first time being called
       Fastlane.load_actions
 
-      fast_file_path = File.join(self.project.local_fastfile_path, self.sha)
+      fast_file_path = File.join(self.project.local_fastfile_path(sha: self.sha))
       if fast_file_path.nil? || !File.exist?(fast_file_path)
         logger.info("unable to start fastlane run lane: #{self.lane} platform: #{self.platform}, params: #{self.parameters}, no Fastfile for commit")
         self.current_build.status = :missing_fastfile

@@ -434,7 +434,7 @@ module FastlaneCI
           self.project.repo_config.containing_path,
           self.project.id,
           self.project.repo_config.full_name,
-          sha || branch
+          sha
         )
       )
       return git
