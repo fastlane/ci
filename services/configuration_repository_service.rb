@@ -157,6 +157,7 @@ module FastlaneCI
     #
     # @return [String]
     def repo_name
+      return "" unless FastlaneCI.env.repo_url
       FastlaneCI.env.repo_url.split("/").last
     end
 
@@ -164,6 +165,7 @@ module FastlaneCI
     #
     # @return [String]
     def repo_shortform
+      return "" unless FastlaneCI.env.repo_url
       FastlaneCI.env.repo_url.split("/").last(2).join("/")
     end
   end
