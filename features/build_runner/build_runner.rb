@@ -50,6 +50,7 @@ module FastlaneCI
       # TODO: provider credential should determine what exact CodeHostingService gets instantiated
       @code_hosting_service = github_service
 
+      @code_hosting_service.clone(sha: sha)
       self.work_queue = work_queue
 
       self.prepare_build_object

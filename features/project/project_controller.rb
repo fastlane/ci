@@ -28,8 +28,9 @@ module FastlaneCI
       end
 
       branch_to_build = project.job_triggers.select { |trigger| trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual] }.first.branch
-      service.shallow_clone(branch: branch_to_build)
       current_sha = service.all_commits_sha_for_branch.last
+      # TODO: This should be delegated to the `build_runner` to free up the thread.
+      service.clone(branch: branch_to_build, sha: current_sha)
 
       build_runner = FastlaneBuildRunner.new(
         sha: current_sha,
@@ -115,7 +116,7 @@ module FastlaneCI
           provider_credential: provider_credential,
           project: project
         )
-        github_service.shallow_clone(branch: branch)
+        github_service.clone(branch: branch)
         redirect("#{HOME}/#{project.id}")
       else
         raise "Project couldn't be created"

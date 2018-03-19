@@ -10,6 +10,7 @@ require "addressable/uri"
 require "tty-command"
 require "securerandom"
 require "digest"
+require "pathname"
 
 module FastlaneCI
   # Data source that interacts with GitHub
@@ -96,7 +97,7 @@ module FastlaneCI
       # @param path [String]
       # @param provider_credential [GithubProviderCredential]
       # @return [Hash<String, Hash>] being the key the name of the platform (:ios, :android, :no_platform) and the Hash the underlying lane (name, actions).
-      def peek_fastfile_configuration(repo_url: nil, branch: "master", provider_credential: nil, path: self.temp_path, cache: true)
+      def peek_fastfile_configuration(repo_url: nil, branch: nil, provider_credential: nil, path: self.temp_path, cache: true)
         repo = repo_from_url(repo_url)
         return self.cache[[repo, branch].join("/")] if cache && self.cache && !self.cache[[repo, branch].join("/")].nil? && self.cache[[repo, branch].join("/")].kind_of?(Hash)
         path = File.join(path, repo, branch)
@@ -151,20 +152,34 @@ module FastlaneCI
       # @param [String] branch
       # @param [GithubProviderCredential] provider_credential
       # @return [Git::Base]
-      def clone(repo_url: nil, branch: "master", provider_credential: nil, path: self.temp_path)
+      def clone(repo_url: nil, name: nil, branch: nil, sha: nil, provider_credential: nil, path: nil)
         repo = self.repo_from_url(repo_url)
-        path = File.join(path, repo, branch)
-        FileUtils.rm_rf(path) if File.directory?(path)
-        FileUtils.mkdir_p(path)
-        self.setup_auth(repo_url: repo_url, provider_credential: provider_credential, path: path)
-        Git.clone(url_from_repo(repo_url), repo.split("/").last,
-                  path: path,
-                  recursive: true,
-                  depth: 1)
-        git = Git.open(File.join(path, repo.split("/").last))
-        git.fetch
-        git.branch(branch).checkout
+
+        folder_name = name || repo.split("/").last
+        clone_path = path || self.temp_path
+
+        FileUtils.rm_rf(File.join(clone_path, folder_name)) if File.directory?(File.join(clone_path, folder_name))
+        FileUtils.mkdir_p(clone_path) unless File.directory?(clone_path)
+
+        self.setup_auth(repo_url: repo_url, provider_credential: provider_credential, path: clone_path)
+
+        if sha.nil?
+          Git.clone(url_from_repo(repo_url), folder_name,
+                    path: clone_path,
+                    recursive: true,
+                    depth: 1)
+        else
+          Git.clone(url_from_repo(repo_url), folder_name,
+                    path: clone_path,
+                    recursive: true)
+        end
+
+        git = Git.open(File.join(clone_path, folder_name))
+        git.branch(branch).checkout if sha.nil? && !branch.nil?
+        git.reset_hard(git.gcommit(sha)) unless sha.nil?
+
         self.unset_auth
+
         return git
       end
 
@@ -407,13 +422,20 @@ module FastlaneCI
     # This method shallow clones the project's repo given a branch,
     # returns the Fastfile configuration. Always forces the clone.
     # @param [String] branch
+    # @param [String] sha
     # @return [Git::Base]
-    def shallow_clone(branch: nil)
+    def clone(branch: nil, sha: nil)
       @_git = self.class.clone(
         repo_url: self.project.repo_config.git_url,
         branch: branch,
         provider_credential: self.provider_credential,
-        path: File.join(self.project.repo_config.containing_path, self.project.id)
+        sha: sha,
+        path: File.join(
+          self.project.repo_config.containing_path,
+          self.project.id,
+          self.project.repo_config.full_name,
+          sha || branch
+        )
       )
       return git
     end

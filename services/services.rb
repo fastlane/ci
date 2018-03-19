@@ -12,6 +12,9 @@ require_relative "./notification_service"
 require_relative "./user_service"
 require_relative "./worker_service"
 
+require "openssl"
+require "securerandom"
+
 module FastlaneCI
   # A class that stores the singletones for each
   # service we provide
@@ -69,12 +72,19 @@ module FastlaneCI
     #
     # @return [Git::Base]
     def self.configuration_repository_service
-      @_configuration_git_repo ||= begin
+      @_configuration_git_repo ||= {}
+
+      digest_key = Digest::SHA256.digest(provider_credential.type.to_s + provider_credential.api_token)
+
+      if !@_configuration_git_repo[digest_key].nil?
+        return @_configuration_git_repo[digest_key]
+      else
         case provider_credential.type
         when FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
           service = FastlaneCI::GitHubConfigurationRepositoryService.new(provider_credential: provider_credential)
           service.clone
-          return service
+          @_configuration_git_repo[digest_key] = service
+          return @_configuration_git_repo[digest_key]
         else
           return nil
         end
@@ -151,9 +161,7 @@ module FastlaneCI
 
     # @return [GithubService]
     def self.github_service
-      @_github_service ||= FastlaneCI::GitHubService.new(
-        provider_credential: provider_credential
-      )
+      @_github_service ||= FastlaneCI::GitHubService
     end
 
     # Grab a config service that is configured for the CI user

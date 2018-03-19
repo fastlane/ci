@@ -7,6 +7,18 @@ module FastlaneCI
   module ConfigurationRepositoryService
     include FastlaneCI::Logging
 
+    # rubocop:disable Style/ClassVars
+    @@mutex = Mutex.new
+
+    def self.mutex
+      return @@mutex
+    end
+    # rubocop:enable Style/ClassVars
+
+    def self.fastlane_ci_config
+      return "fastlane-ci-config"
+    end
+
     attr_reader :client
 
     attr_accessor :provider_credential
@@ -35,37 +47,38 @@ module FastlaneCI
       not_implemented(__method__)
     end
 
-    def clone(path: self.ci_repo_root_path)
+    def clone(path: self.ci_repo_root_path, branch: nil)
       # This triggers the check of an existing repo in the given path,
       # we recover from the error making the clone and checkout
-
-      git = Git.open(path)
+      git = Git.open(File.join(path, ConfigurationRepositoryService.fastlane_ci_config))
       self.watch_for_changes!(git, path) if File.directory?(path)
       return git
     rescue ArgumentError
       git = @code_hosting_service_class.clone(
         repo_url: FastlaneCI.env.repo_url,
         provider_credential: self.provider_credential,
-        path: self.ci_repo_root_path
+        path: path,
+        branch: branch,
+        name: "fastlane-ci-config"
       )
       self.watch_for_changes!(git, path) if File.directory?(path)
       return git
     end
 
-    def pull(path: self.ci_repo_root_path)
-      git = Git.open(path)
+    def pull(path: self.ci_repo_root_path, branch: nil)
+      git = Git.open(File.join(path, ConfigurationRepositoryService.fastlane_ci_config))
       git.fetch
       # Are we behind remote? If so, pull.
       return if git.log.between(git.branch.name, git.remote.branch.name).size.zero?
       git.pull
     rescue ArgumentError
-      git = self.clone(path: path)
+      git = self.clone(path: path, branch: branch)
       return if git.log.between(git.branch.name, git.remote.branch.name).size.zero?
       git.pull
     end
 
     def file_path(file_path)
-      File.join(self.ci_repo_root_path, file_path)
+      File.join(self.ci_repo_root_path, ConfigurationRepositoryService.fastlane_ci_config, file_path)
     end
 
     protected
@@ -154,7 +167,8 @@ module FastlaneCI
         end
 
         query = ["query", root, {
-        "expression" => ["type", "f"],
+        "expression" => ["anyof",
+                         ["match", "**/*.json", "wholename", { "includedotfiles" => false }]],
           "fields" => ["name"]
         }]
         paths = RubyWatchman.query(query, socket)
@@ -162,11 +176,16 @@ module FastlaneCI
         # could return error if watch is removed
         raise if paths.key?("error")
 
-        handle_repo_changes(git, paths["files"])
+        unless ConfigurationRepositoryService.mutex.locked?
+          ConfigurationRepositoryService.mutex.synchronize do
+            handle_repo_changes(git, paths["files"])
+          end
+        end
       end
     end
 
     def unwatch_changes
+      `watchman shutdown-server`
       @socket&.close
     end
 
@@ -191,7 +210,7 @@ module FastlaneCI
     # The containing path of the ci-config repository.
     # @return [String]
     def ci_repo_root_path
-      path = File.expand_path(File.join("~/.fastlane", "ci", "fastlane-ci-config"))
+      path = File.expand_path(File.join("~/.fastlane", "ci"))
       FileUtils.mkdir_p(path) unless File.directory?(path)
       return path
     end
@@ -207,7 +226,7 @@ module FastlaneCI
       # Obviously, all files in .git path are rejected by default.
       return if files.empty?
 
-      files.map { |file| Pathname.new(file) }.reject { |path| path.dirname.to_s == ".git" }.each do |file|
+      files.map { |file| Pathname.new(file) }.each do |file|
         path = Pathname.new(file)
         next unless git.status.deleted.assoc(path.basename)&.count.try(:>, 0) || git.status.added.assoc(path.basename)&.count.try(:>, 0) || git.status.changed.assoc(path.basename)&.count.try(:>, 0) || git.status.untracked.assoc(path.basename)&.count.try(:>, 0)
         begin

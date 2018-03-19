@@ -96,7 +96,6 @@ module FastlaneCI
       current_project = self.project
       current_sha = sha
       build_runner = FastlaneBuildRunner.new(
-        project: current_project,
         sha: current_sha,
         github_service: self.github_service,
         work_queue: FastlaneCI::CodeHostingService.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355

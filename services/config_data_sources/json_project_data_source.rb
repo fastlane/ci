@@ -87,16 +87,7 @@ module FastlaneCI
     attr_accessor :git_repo
 
     def after_creation(**params)
-      if params.nil?
-        raise "Either user or a provider credential is mandatory."
-      else
-        if !params[:user] && !params[:provider_credential]
-          raise "Either user or a provider credential is mandatory."
-        else
-          params[:provider_credential] ||= params[:user].provider_credential(type: ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
-          self.git_repo = FastlaneCI::Services.configuration_repository_service
-        end
-      end
+      self.git_repo = FastlaneCI::Services.configuration_repository_service
     end
 
     # Access configuration
