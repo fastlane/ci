@@ -9,7 +9,6 @@ module FastlaneCI
     include FastlaneCI::Logging
 
     class << self
-
       attr_writer :watchman_mutex
 
       def watchman_mutex

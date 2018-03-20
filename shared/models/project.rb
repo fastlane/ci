@@ -85,7 +85,7 @@ module FastlaneCI
     end
 
     # Local repository path for a given project and an optional sha.
-    # @param [String, nil] sha, the sha of the project repository's path we want to have (Defaults to nil). 
+    # @param [String, nil] sha, the sha of the project repository's path we want to have (Defaults to nil).
     # @return [String] path of the repository for a given sha.
     def local_repo_path(sha: nil)
       base_ci_path = File.expand_path("~/.fastlane/ci/")
