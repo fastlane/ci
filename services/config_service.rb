@@ -14,7 +14,7 @@ module FastlaneCI
     attr_accessor :clone_user_provider_credential
 
     def initialize(project_service: FastlaneCI::Services.project_service, ci_user: nil, clone_user_provider_credential:)
-      @clone_user_provider_credential = clone_user_provider_credential
+      self.clone_user_provider_credential = clone_user_provider_credential
       self.project_service = project_service
       self.ci_user = ci_user
       self.active_code_hosting_services = {}

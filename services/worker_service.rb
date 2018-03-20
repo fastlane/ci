@@ -14,8 +14,8 @@ module FastlaneCI
     attr_accessor :provider_credential
 
     def initialize(ci_user:, provider_credential:)
-      @ci_user = ci_user
-      @provider_credential = provider_credential
+      self.ci_user = ci_user
+      self.provider_credential = provider_credential
       self.project_to_workers_dictionary = {}
     end
 

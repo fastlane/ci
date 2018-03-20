@@ -14,8 +14,8 @@ module FastlaneCI
     attr_reader :clone_user_provider_credential
 
     def initialize(ci_config_repo:, clone_user_provider_credential:)
-      @ci_config_repo = ci_config_repo
-      @clone_user_provider_credential = clone_user_provider_credential
+      self.ci_config_repo = ci_config_repo
+      self.clone_user_provider_credential = clone_user_provider_credential
     end
 
     # Triggers the initial clone of the remote configuration repository, to the
@@ -26,7 +26,7 @@ module FastlaneCI
       logger.info("No config repo cloned yet, doing that now")
 
       # Trigger the initial clone
-      # TODO: remote this in favour of a different approach
+      # TODO: remove this in favour of a different approach
       FastlaneCI::ProjectService.new(
         project_data_source: FastlaneCI::JSONProjectDataSource.create(
           ci_config_repo,

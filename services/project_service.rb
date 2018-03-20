@@ -20,7 +20,7 @@ module FastlaneCI
         raise "project_data_source must be descendant of #{ProjectDataSource.name}" unless project_data_source.class <= ProjectDataSource
       end
 
-      @clone_user_provider_credential = clone_user_provider_credential
+      self.clone_user_provider_credential = clone_user_provider_credential
       self.project_data_source = project_data_source
     end
 
