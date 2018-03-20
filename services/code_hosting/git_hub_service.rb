@@ -12,11 +12,12 @@ require "securerandom"
 require "digest"
 require "pathname"
 require "faraday-http-cache"
+require "continuation"
 
 module FastlaneCI
   # Data source that interacts with GitHub
   class GitHubService < CodeHostingService
-    include FastlaneCI::Logging
+    extend FastlaneCI::Logging
 
     class << self
       attr_writer :temporary_git_storage
@@ -110,6 +111,7 @@ module FastlaneCI
       # @param provider_credential [GithubProviderCredential]
       # @return [(Fastlane::FastfileParser, Hash<String, Hash>)] the FastlaneParser instance used for the parsing and a hash, being the key the name of the platform (:ios, :android, :no_platform) and the Hash the underlying lane (name, actions).
       def peek_fastfile_configuration(repo_url: nil, branch: nil, provider_credential: nil, path: self.temp_path, cache: true)
+        retry_count ||= 0
         repo = repo_from_url(repo_url)
         # We use a "reponame/branch" keyform to store the information in our cache.
         cache_key = [repo, branch].join("/")
@@ -151,18 +153,12 @@ module FastlaneCI
             provider_credential: provider_credential,
             path: path
           )
-          fastfile, fastfile_config = self.peek_fastfile_configuration(
-            repo_url: repo_url,
-            branch: branch,
-            provider_credential: provider_credential,
-            path: path,
-            cache: cache
-          )
-          return fastfile, fastfile_config
+          retry if (retry_count += 1) < 5
+          raise "Exceeded retry count for #{__method__}."
         rescue RuntimeError
           # This is because no Fastfile config was found, so we cannot go further.
           logger.error("Fastfile configuration was not found on #{repo}" + (branch.nil? ? "" : " and branch #{branch}"))
-          return {}
+          return nil, {}
         end
       end
 
