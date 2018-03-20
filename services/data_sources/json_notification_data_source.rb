@@ -133,7 +133,7 @@ module FastlaneCI
     # @param  [String] path
     # @return [String]
     def notifications_file_path(path: "notifications/notifications.json")
-      File.join(json_folder_path, path)
+      return File.join(json_folder_path, path)
     end
 
     # Reloads the notifications from the data source

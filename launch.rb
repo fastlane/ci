@@ -66,8 +66,8 @@ module FastlaneCI
     # to a valid remote configuration repository
     def self.clone_repo_if_no_local_repo_and_remote_repo_exists
       if !Services.onboarding_service.local_configuration_repo_exists? &&
-         Services.onboarding_service.remote_configuration_repository_valid?
-        Services.onboarding_service.trigger_initial_ci_setup
+         Services.onboarding_service.required_keys_and_proper_remote_configuration_repo?
+        Services.onboarding_service.clone_remote_repository_locally
       end
     end
 

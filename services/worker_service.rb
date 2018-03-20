@@ -87,14 +87,16 @@ module FastlaneCI
       self.project_to_workers_dictionary[workers_key] = nil
     end
 
+    # @return [Integer]
     def num_workers
-      self.project_to_workers_dictionary.values.reduce(0) do |sum, workers|
+      return self.project_to_workers_dictionary.values.reduce(0) do |sum, workers|
         sum + workers.length
       end
     end
 
+    # @return [Boolean]
     def project_has_trigger_type?(project:, trigger_type:)
-      project.job_triggers.any? { |trigger| trigger.type == trigger_type }
+      return project.job_triggers.any? { |trigger| trigger.type == trigger_type }
     end
   end
 end

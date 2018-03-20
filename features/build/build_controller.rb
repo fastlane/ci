@@ -21,7 +21,11 @@ module FastlaneCI
         build_number: build_number
       )
 
-      raise "Couldn't find build runner for project #{project_id} with build_number #{build_number}" if current_build_runner.nil?
+      if current_build_runner.nil?
+        # Loading the output of a finished build after a server restart isn't finished yet
+        # see https://github.com/fastlane/ci/issues/312 for more information
+        raise "Couldn't find build runner for project #{project_id} with build_number #{build_number}"
+      end
 
       locals = {
         project: project,

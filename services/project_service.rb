@@ -51,27 +51,34 @@ module FastlaneCI
       self.commit_repo_changes!(message: "Updated project #{project.project_name}.")
     end
 
+    # @return [Project]
     def project(name: nil)
       if self.project_data_source.project_exist?(name)
-        self.project_data_source.projects.select { |existing_project| existing_project.project_name == name }.first
+        return self.project_data_source
+                   .projects
+                   .select { |existing_project| existing_project.project_name == name }
+                   .first
       end
     end
 
+    # @return [Project]
     def project_by_id(id)
-      self.project_data_source.projects.select { |project| project.id == id }.first
+      return self.project_data_source.projects.select { |project| project.id == id }.first
     end
 
     # TODO: remove this, we shouldn't be exposing implicitly private variables here
+    # @return [GitRepo]
     def git_repo
-      self.project_data_source.git_repo
+      return self.project_data_source.git_repo
     end
 
     def refresh_repo
       self.git_repo.pull
     end
 
+    # @return [Array[Project]]
     def projects
-      self.project_data_source.projects
+      return self.project_data_source.projects
     end
 
     def delete_project!(project: nil)
@@ -89,16 +96,16 @@ module FastlaneCI
       configuration_git_repo.push
     end
 
+    # @return [GitRepo]
     def git_repo_for_project(project:)
       # TODO: For now we'll clone the project synchronously,
       # we may revisit this later to handle async operations
       # between Service <-> WebServer <-> Client.
-      repo = GitRepo.new(
+      return GitRepo.new(
         git_config: project.repo_config,
         provider_credential: clone_user_provider_credential,
         async_start: false
       )
-      repo
     end
   end
 end

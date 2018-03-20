@@ -8,7 +8,7 @@ module FastlaneCI
   class KeysWriter < FileWriter
     # @return [String]
     def file_template
-      <<~FILE
+      return <<~FILE
         # Randomly generated key, that's used to encrypt the user passwords
         FASTLANE_CI_ENCRYPTION_KEY='#{locals[:encryption_key]}'
 

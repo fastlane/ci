@@ -30,6 +30,13 @@ module FastlaneCI
       @task_queue = TaskQueue::TaskQueue.new(name: "notifications")
     end
 
+    # The list of persisted notifications
+    #
+    # @return Array[Notification]
+    def notifications
+      return notification_data_source.notifications
+    end
+
     # Creates and returns a new Notification
     #
     # @param  [String] id

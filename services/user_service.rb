@@ -62,7 +62,7 @@ module FastlaneCI
       return self.user_data_source.find_user(id: id)
     end
 
-    def login(email: nil, password: nil, ci_config_repo: nil)
+    def login(email:, password:)
       email = email.strip
 
       logger.debug("Attempting to login user with email #{email}")
