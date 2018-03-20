@@ -22,7 +22,7 @@ module FastlaneCI
       Services.environment_variable_service.reload_dot_env!
       clone_repo_if_no_local_repo_and_remote_repo_exists
 
-      # # done making sure our env is sane, let's move on to the next step
+      # done making sure our env is sane, let's move on to the next step
       write_configuration_directories
       configure_thread_abort
       Services.reset_services!
