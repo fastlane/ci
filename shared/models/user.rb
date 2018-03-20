@@ -20,7 +20,7 @@ module FastlaneCI
 
     # return the provider_credential specified, right now it assumes type is unique
     def provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
-      return self.provider_credentials.select { |provider_credential| provider_credential.type == type }.first
+      return self.provider_credentials.detect { |provider_credential| provider_credential.type == type }
     end
   end
 end

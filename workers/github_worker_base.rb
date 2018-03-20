@@ -87,7 +87,7 @@ module FastlaneCI
         # Check out the specific branch, this will detach our current head
         branch.checkout
 
-        block.call(git, branch)
+        yield(git, branch)
       end
     end
 

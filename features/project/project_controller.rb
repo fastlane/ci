@@ -27,7 +27,7 @@ module FastlaneCI
         return
       end
 
-      branch_to_build = project.job_triggers.select { |trigger| trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual] }.first.branch
+      branch_to_build = project.job_triggers.detect { |trigger| trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual] }.branch
       current_sha = service.all_commits_sha_for_branch.last
       # TODO: This should be delegated to the `build_runner` to free up the thread.
       service.clone(branch: branch_to_build, sha: current_sha)
@@ -95,7 +95,7 @@ module FastlaneCI
     post "#{HOME}/add/*/*" do |org, repo_name|
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
-      repo_config = FastlaneCI::GitHubService.repos(provider_credential: provider_credential).select { |repo| repo.full_name == org + "/" + repo_name }.first
+      repo_config = FastlaneCI::GitHubService.repos(provider_credential: provider_credential).detect { |repo| repo.full_name == org + "/" + repo_name }
 
       lane = params["selected_lane"]
       project_name = params["project_name"]

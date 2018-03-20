@@ -19,8 +19,6 @@ module FastlaneCI
   module ConfigurationRepositoryUpdater
     # This decorator method is responsible of pulling changes from the ci-config repo.
     class << self
-      attr_writer :pull_operation_mutex
-
       def pull_operation_mutex
         @pull_operation_mutex ||= Mutex.new
       end

@@ -56,14 +56,13 @@ module FastlaneCI
       if self.project_data_source.project_exist?(name)
         return self.project_data_source
                    .projects
-                   .select { |existing_project| existing_project.project_name == name }
-                   .first
+                   .detect { |existing_project| existing_project.project_name == name }
       end
     end
 
     # @return [Project]
     def project_by_id(id)
-      return self.project_data_source.projects.select { |project| project.id == id }.first
+      return self.project_data_source.projects.detect { |project| project.id == id }
     end
 
     # TODO: remove this, we shouldn't be exposing implicitly private variables here

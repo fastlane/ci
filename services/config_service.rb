@@ -68,7 +68,7 @@ module FastlaneCI
 
     def project(id: nil, provider_credential: nil)
       current_ci_user_projects = self.projects(provider_credential: provider_credential)
-      current_project = current_ci_user_projects.select { |project| project.id == id }.first
+      current_project = current_ci_user_projects.detect { |project| project.id == id }
       return current_project
     end
 
