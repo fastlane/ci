@@ -11,6 +11,7 @@ require "tty-command"
 require "securerandom"
 require "digest"
 require "pathname"
+require "faraday-http-cache"
 
 module FastlaneCI
   # Data source that interacts with GitHub
@@ -33,16 +34,24 @@ module FastlaneCI
 
       protected :cache
 
-      # Client for GitHub related operations, uses an in-memory cache
-      # to fast things, as each client logs in using netrc.
-      # https://github.com/octokit/octokit.rb/blob/a06d16359ca3b529aea42ca4d84f9a4fc99de0dd/lib/octokit/client.rb#L123
+      # Loads the octokit cache stack for speed-up calls to github service.
+      # As explained in: https://github.com/octokit/octokit.rb#caching
+      def load_octokit_cache_stack
+        @stack ||= Faraday::RackBuilder.new do |builder|
+          builder.use(Faraday::HttpCache, serializer: Marshal, shared_cache: false)
+          builder.use(Octokit::Response::RaiseError)
+          builder.adapter(Faraday.default_adapter)
+        end
+        return if Octokit.middleware.handlers.include?(Faraday::HttpCache)
+        Octokit.middleware = @stack
+      end
+
+      # Client for GitHub related operations
       # @param [String] api_token
+      # @return [Octokit::Client]
       def client(api_token)
-        @client_cache ||= {}
-        return @client_cache[api_token] unless @client_cache[api_token].nil?
-        client = Octokit::Client.new(access_token: api_token)
-        @client_cache[api_token]
-        return client
+        load_octokit_cache_stack
+        return Octokit::Client.new(access_token: api_token)
       end
 
       def temp_path(root_path = Dir.tmpdir)
