@@ -12,7 +12,6 @@ require "securerandom"
 require "digest"
 require "pathname"
 require "faraday-http-cache"
-require "continuation"
 
 module FastlaneCI
   # Data source that interacts with GitHub
