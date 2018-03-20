@@ -34,10 +34,15 @@ module FastlaneCI
     set(:server, "thin")
 
     get "/" do
-      if session[:user]
-        redirect("/dashboard")
+      if ENV["WEB_APP"]
+        # Use Angular Web App instead
+        send_file File.join('public', '.dist', 'index.html')
       else
-        redirect("/login")
+        if session[:user]
+          redirect("/dashboard")
+        else
+          redirect("/login")
+        end
       end
     end
 

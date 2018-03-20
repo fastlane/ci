@@ -16,6 +16,7 @@ module FastlaneCI
 
     def self.take_off
       require_fastlane_ci
+      verify_app_built
       verify_dependencies
       verify_system_requirements
       Services.environment_variable_service.reload_dot_env!
@@ -37,6 +38,13 @@ module FastlaneCI
 
       # allow use of `require` for all things under `shared`, helps with some cycle issues
       $LOAD_PATH << "shared"
+    end
+
+    def self.verify_app_built
+      if ENV["WEB_APP"]
+        app_exists = File.file?(File.join('public', '.dist', 'index.html'))
+        raise "The web application is not built. Please build with the Angular CLI and Try Again.\nEx. ng build --deploy-url=\"/.dist\"" unless app_exists
+      end
     end
 
     def self.verify_dependencies
