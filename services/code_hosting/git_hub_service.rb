@@ -111,9 +111,11 @@ module FastlaneCI
       # @return [(Fastlane::FastfileParser, Hash<String, Hash>)] the FastlaneParser instance used for the parsing and a hash, being the key the name of the platform (:ios, :android, :no_platform) and the Hash the underlying lane (name, actions).
       def peek_fastfile_configuration(repo_url: nil, branch: nil, provider_credential: nil, path: self.temp_path, cache: true)
         repo = repo_from_url(repo_url)
+        # We use a "reponame/branch" keyform to store the information in our cache.
+        cache_key = [repo, branch].join("/")
         # If cache is allowed for this call, and there's a Hash under the key, use the cache.
-        if cache && self.cache&.[]([repo, branch].join("/"))&.kind_of?(Hash)
-          return self.cache[[repo, branch].join("/")]
+        if cache && self.cache[cache_key].kind_of?(Hash)
+          return self.cache[cache_key]
         end
         path = File.join(path, repo, branch)
         begin
