@@ -84,8 +84,19 @@ module FastlaneCI
       return fastfile_path
     end
 
+    # Local repository path for a given project and an optional sha.
+    # @param [String, nil] sha, the sha of the project repository's path we want to have (Defaults to nil). 
+    # @return [String] path of the repository for a given sha.
     def local_repo_path(sha: nil)
-      return File.join([File.expand_path("~/.fastlane/ci/"), self.id, self.repo_config.full_name, sha, self.repo_config.name].reject { |i| i.nil? || i.empty? })
+      base_ci_path = File.expand_path("~/.fastlane/ci/")
+      path_components = [
+        base_ci_path,
+        self.id,
+        self.repo_config.full_name,
+        sha,
+        self.repo_config.name
+      ].reject { |i| i.nil? || i.empty? }
+      return File.join(path_components)
     end
   end
 end

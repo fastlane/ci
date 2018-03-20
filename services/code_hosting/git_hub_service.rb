@@ -31,8 +31,11 @@ module FastlaneCI
         return @cache
       end
 
-      # Client for GitHub-related operations, uses an in-memory cache
-      # to fast things.
+      protected :cache
+
+      # Client for GitHub related operations, uses an in-memory cache
+      # to fast things, as each client logs in using netrc.
+      # https://github.com/octokit/octokit.rb/blob/a06d16359ca3b529aea42ca4d84f9a4fc99de0dd/lib/octokit/client.rb#L123
       # @param [String] api_token
       def client(api_token)
         @client_cache ||= {}
@@ -96,24 +99,24 @@ module FastlaneCI
       # @param branch [String]
       # @param path [String]
       # @param provider_credential [GithubProviderCredential]
-      # @return [Hash<String, Hash>] being the key the name of the platform (:ios, :android, :no_platform) and the Hash the underlying lane (name, actions).
+      # @return [(Fastlane::FastfileParser, Hash<String, Hash>)] the FastlaneParser instance used for the parsing and a hash, being the key the name of the platform (:ios, :android, :no_platform) and the Hash the underlying lane (name, actions).
       def peek_fastfile_configuration(repo_url: nil, branch: nil, provider_credential: nil, path: self.temp_path, cache: true)
         repo = repo_from_url(repo_url)
-        return self.cache[[repo, branch].join("/")] if cache && self.cache && !self.cache[[repo, branch].join("/")].nil? && self.cache[[repo, branch].join("/")].kind_of?(Hash)
+        # If cache is allowed for this call, and there's a Hash under the key, use the cache.
+        if cache && self.cache&.[]([repo, branch].join("/"))&.kind_of?(Hash)
+          return self.cache[[repo, branch].join("/")]
+        end
         path = File.join(path, repo, branch)
         begin
           git_path = File.join(path, repo.split("/").last)
           # This triggers the check of an existing repo in the given path,
           # we recover from the error making the clone and checkout
+          # Raises Argument error when `git_path` is not a valid git path.
           Git.open(git_path)
           fastfile_path = self.fastfile_path(root_path: git_path)
           fastfile = Fastlane::FastfileParser.new(path: fastfile_path)
           fastfile_config = {}
-          # TODO: FastfileParser provides a nice and clean tree of the Fastfile given,
-          # but there's a specific case when there might be lanes or actions out of
-          # a platform scope, in those cases the key is nil. We sanitize that so the user
-          # still can select lanes without platform. But this should be done from the
-          # FastfileParser side.
+          # TODO: https://github.com/fastlane/fastfile-parser/issues/8
           fastfile.tree.each_key do |key|
             if key.nil?
               fastfile_config[:no_platform] = fastfile.tree[key]
@@ -127,6 +130,10 @@ module FastlaneCI
           self.cache[[repo, branch].join("/")] = fastfile, fastfile_config
           return fastfile, fastfile_config
         rescue ArgumentError
+          # Recover from the failed try of opening the existing repo.
+          # 1) Clone the repo.
+          # 2) Retry the current operation.
+          logger.error("Git repository not found at #{git_path}, cloning the repo.")
           self.clone(
             repo_url: repo_url,
             branch: branch,
@@ -143,14 +150,17 @@ module FastlaneCI
           return fastfile, fastfile_config
         rescue RuntimeError
           # This is because no Fastfile config was found, so we cannot go further.
+          logger.error("Fastfile configuration was not found on #{repo}" + (branch.nil? ? "" : " and branch #{branch}"))
           return {}
         end
       end
 
-      # Class method that shallow clones the repo on the target branch.
+      # Class method that clones a repo.
       # @param [String] repo_url
-      # @param [String] branch
+      # @param [String, nil] branch, the branch to checkout after the clone (Defaults to nil)
+      # @param [String, nil] sha, the sha to hard reset from after the clone (Defaults to nil)
       # @param [GithubProviderCredential] provider_credential
+      # @param [String, nil] path, root path where the clone will be made
       # @return [Git::Base]
       def clone(repo_url: nil, name: nil, branch: nil, sha: nil, provider_credential: nil, path: nil)
         repo = self.repo_from_url(repo_url)
@@ -158,7 +168,9 @@ module FastlaneCI
         folder_name = name || repo.split("/").last
         clone_path = path || self.temp_path
 
-        FileUtils.rm_rf(File.join(clone_path, folder_name)) if File.directory?(File.join(clone_path, folder_name))
+        full_clone_path = File.join(clone_path, folder_name)
+
+        FileUtils.rm_rf(full_clone_path) if File.directory?(full_clone_path)
         FileUtils.mkdir_p(clone_path) unless File.directory?(clone_path)
 
         self.setup_auth(repo_url: repo_url, provider_credential: provider_credential, path: clone_path)
@@ -174,7 +186,7 @@ module FastlaneCI
                     recursive: true)
         end
 
-        git = Git.open(File.join(clone_path, folder_name))
+        git = Git.open(full_clone_path)
         git.branch(branch).checkout if sha.nil? && !branch.nil?
         git.reset_hard(git.gcommit(sha)) unless sha.nil?
 
@@ -189,7 +201,7 @@ module FastlaneCI
       def fastfile_path(root_path: nil)
         fastfiles = Dir[File.join(root_path, "fastlane/Fastfile")]
         fastfiles = Dir[File.join(root_path, "**/fastlane/Fastfile")] if fastfiles.count == 0
-        fastfile_path = fastfiles&.first
+        fastfile_path = fastfiles.first
         return fastfile_path
       end
 
@@ -305,16 +317,16 @@ module FastlaneCI
     # @param [String] state, Either open, closed, or all to filter by state. Default: open.
     # @return [String] HTML URL for the given pull request query.
     def pull_requests(branches: nil, state: "open")
-      all_open_pull_requests = client.pull_requests(self.project.repo_config.full_name, state: state)
+      all_pull_requests_with_state = client.pull_requests(self.project.repo_config.full_name, state: state)
 
       # if no specific branch, return all open prs
       if branches&.empty?
-        return all_open_pull_requests.map(&:html_url)
+        return all_pull_requests_with_state.map(&:html_url)
       end
 
-      pull_requests_on_branch = all_open_pull_requests.select { |pull_request| branches.include?(pull_request.base.ref) }
+      pull_requests_on_branch = all_pull_requests_with_state.select { |pull_request| branches.include?(pull_request.base.ref) }
       # we want only the PRs whose latest commit was to one of the branches passed in
-      logger.debug("Returning all open prs from: #{self.project.repo_config.full_name}, branches: #{branches}, pr count: #{pull_requests_on_branch.count}")
+      logger.debug("Returning all prs with state: #{state}, from: #{self.project.repo_config.full_name}, branches: #{branches}, pr count: #{pull_requests_on_branch.count}")
       return pull_requests_on_branch.map(&:html_url)
     end
 

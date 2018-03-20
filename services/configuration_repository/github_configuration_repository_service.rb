@@ -22,6 +22,8 @@ module FastlaneCI
       @code_hosting_service_class = FastlaneCI::GitHubService
       @client = @code_hosting_service_class.client(provider_credential.api_token)
 
+      # We define a finalizer in order to clean up resources retained by the class and need to
+      # be disposed manually for safety purposes.
       ObjectSpace.define_finalizer(self, self.class.finalizer)
     end
 

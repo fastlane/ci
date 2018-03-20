@@ -8,16 +8,17 @@ module FastlaneCI
   module ConfigurationRepositoryService
     include FastlaneCI::Logging
 
-    # rubocop:disable Style/ClassVars
-    @@mutex = Mutex.new
+    class << self
 
-    def self.mutex
-      return @@mutex
-    end
-    # rubocop:enable Style/ClassVars
+      attr_writer :watchman_mutex
 
-    def self.fastlane_ci_config
-      return "fastlane-ci-config"
+      def watchman_mutex
+        @watchman_mutex ||= Mutex.new
+      end
+
+      def fastlane_ci_config
+        return "fastlane-ci-config"
+      end
     end
 
     attr_reader :client
@@ -142,7 +143,7 @@ module FastlaneCI
       not_implemented(__method__)
     end
 
-    # This method starts the watching of the ci-config repo folder changes
+    # Start the watch of the ci-config repo folder changes
     # so we can report every file being changed in a real-time basis.
     # @param [Git::Base] git
     # @param [String] path, the path of the repo which changes are being watched.
@@ -177,14 +178,17 @@ module FastlaneCI
         # could return error if watch is removed
         raise if paths.key?("error")
 
-        unless ConfigurationRepositoryService.mutex.locked?
-          ConfigurationRepositoryService.mutex.synchronize do
+        unless ConfigurationRepositoryService.watchman_mutex.locked?
+          # Here we use the mutex as a throttling tool. While a repo changes operation is
+          # being made, we drop changes made from other sources on the watch list.
+          ConfigurationRepositoryService.watchman_mutex.synchronize do
             handle_repo_changes(git, paths["files"])
           end
         end
       end
     end
 
+    # Closes the watchman server and the socket attached to it.
     def unwatch_changes
       `watchman shutdown-server`
       @socket&.close
