@@ -81,7 +81,7 @@ module FastlaneCI
         password: FastlaneCI.env.ci_user_password
       )
       if @_ci_user.nil?
-        raise "Could not find ci_user for current setup, please make sure a user with the email #{FastlaneCI.env.ci_user_email} exists in your users.json"
+        raise "Could not find ci_user for current setup, or the provided ci_user_password is incorrect, please make sure a user with the email #{FastlaneCI.env.ci_user_email} exists in your users.json"
       end
       return @_ci_user
     end
