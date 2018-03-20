@@ -78,8 +78,7 @@ module FastlaneCI
       # Find our fastlane.ci system user
       @_ci_user ||= Services.user_service.login(
         email: FastlaneCI.env.ci_user_email,
-        password: FastlaneCI.env.ci_user_password,
-        ci_config_repo: self.ci_config_repo
+        password: FastlaneCI.env.ci_user_password
       )
       if @_ci_user.nil?
         raise "Could not find ci_user for current setup, please make sure a user with the email #{FastlaneCI.env.ci_user_email} exists in your users.json"
