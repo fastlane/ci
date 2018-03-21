@@ -18,3 +18,5 @@
   <br />
   <input class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" type="submit" title="Save">
 </form>
+
+  <%= erb(:"../../fastfile_editor/views/fastfile", locals: { fastfile_parser: fastfile_parser, fastfile_path: fastfile_path }) %>

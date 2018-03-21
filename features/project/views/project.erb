@@ -21,6 +21,7 @@
     </section>
     <section class="mdl-layout__tab-panel" id="scroll-tab-settings">
       <%= erb(:project_settings, locals: { project: project , available_lanes: available_lanes, fastfile_path: fastfile_path }) %>
+      <%= erb(:project_settings, locals: { project: project , available_lanes: available_lanes, fastfile_path: fastfile_path, fastfile_parser: fastfile_parser }) %>
     </section>
   </main>
 </div>
