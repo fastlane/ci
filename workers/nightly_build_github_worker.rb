@@ -23,7 +23,7 @@ module FastlaneCI
 
       self.target_branches do |git, branch|
         current_sha = self.git_repo_service.all_commits_sha_for_branch(branch: branch).last
-        logger.debug("Running Nightly build on branch #{branch.name} with sha #{current_sha}")
+        logger.debug("Running Nightly build on branch #{branch} with sha #{current_sha}")
 
         self.create_and_queue_build_task(sha: current_sha)
       end

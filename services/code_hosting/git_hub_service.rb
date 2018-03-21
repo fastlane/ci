@@ -171,8 +171,8 @@ module FastlaneCI
       def clone(repo_url: nil, name: nil, branch: nil, sha: nil, provider_credential: nil, path: nil)
         repo = self.repo_from_url(repo_url)
 
-        folder_name = name || repo.split("/").last
-        clone_path = path || self.temp_path
+        folder_name = (name.nil? || name.empty?) ? repo.split("/").last : name
+        clone_path = (path.nil? || path.empty?) ? self.temp_path : path
 
         full_clone_path = File.join(clone_path, folder_name)
 

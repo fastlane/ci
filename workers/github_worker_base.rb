@@ -59,20 +59,16 @@ module FastlaneCI
     # since it will be run on the "main" thread if it were
     # part of the #initialize method
     def git_repo_service
-      @git_repo ||= begin
-        case self.provider_credential.type
-        when FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
-          service = FastlaneCI::GitHubService.new(provider_credential: self.provider_credential, project: self.project)
-          return service
-        else
-          return nil
-        end
+      case self.provider_credential.type
+      when FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
+        return FastlaneCI::GitHubService.new(provider_credential: self.provider_credential, project: self.project)
+      else
+        return nil
       end
     end
 
     def target_branches(&block)
-      self.git_repo_service.branch_names do |branch|
-        next unless self.target_branches_set.include?(branch)
+      self.git_repo_service.branch_names.select { |branch| self.target_branches_set.include?(branch) }.each do |branch|
         git = self.git_repo_service.clone(branch: branch)
 
         yield(git, branch)
@@ -84,7 +80,7 @@ module FastlaneCI
       current_sha = sha
       build_runner = FastlaneBuildRunner.new(
         sha: current_sha,
-        github_service: self.github_service,
+        github_service: FastlaneCI::GitHubService.new(provider_credential: self.provider_credential, project: self.project),
         work_queue: FastlaneCI::CodeHostingService.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
       )
       build_runner.setup(parameters: nil)

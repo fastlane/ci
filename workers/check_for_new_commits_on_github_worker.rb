@@ -29,16 +29,14 @@ module FastlaneCI
       # TODO: ensure BuildService subclasses are thread-safe
       build_service = FastlaneCI::Services.build_service
 
+      builds = build_service.list_builds(project: self.project)
+
       self.target_branches do |git, branch|
-        current_sha = repo.all_commits_sha_for_branch(branch: branch).last
-
-        # Skips branches that have previously been built
-        builds = build_service.list_builds(project: self.project)
-        next if builds.map(&:sha).include?(current_sha)
-
-        logger.debug("Detected new commit in #{self.project.project_name} on branch #{branch.name} with sha #{current_sha}")
-        # This never stops because with each commit, it creates a new commit and then we think it's new, LOL
-        self.create_and_queue_build_task(sha: current_sha)
+        repo.all_commits_sha_for_branch(branch: branch).reject { |sha| builds.map(&:sha).include?(sha) }.each do |current_sha|
+          logger.debug("Detected new commit in #{self.project.project_name} on branch #{branch} with sha #{current_sha}")
+          # This never stops because with each commit, it creates a new commit and then we think it's new, LOL
+          self.create_and_queue_build_task(sha: current_sha)
+        end
       end
     end
   end
