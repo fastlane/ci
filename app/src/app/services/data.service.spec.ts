@@ -17,7 +17,7 @@ describe('DataService', () => {
   });
 
   describe('#getProjects', () => {
-    it('should return ', () => {
+    it('should return response mapped to Project model', () => {
       let projects;
       dataService.getProjects().subscribe((projectsRespone) => {
         projects = projectsRespone;

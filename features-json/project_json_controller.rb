@@ -2,7 +2,7 @@ require_relative "../shared/authenticated_controller_base"
 
 module FastlaneCI
   # Controller for providing all data relating to projects
-  class ProjectJsonController < AuthenticatedControllerBase
+  class ProjectJSONController < AuthenticatedControllerBase
     HOME = "/projects"
 
     get "#{HOME}" do
