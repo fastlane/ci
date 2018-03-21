@@ -21,7 +21,7 @@ module FastlaneCI
       # Cool, we're logged in, but have we setup a provider?
       if user_has_valid_github_token?(provider_credentials: user.provider_credentials)
         # Yup, we setup a provider, so let's go to the dashboard
-        redirect("/dashboard")
+        redirect("/dashboard_erb")
       end
 
       # Oh, no valid github provider? That's ok, let's add a github credential
@@ -60,7 +60,7 @@ module FastlaneCI
       else
         session[:user] = user
         if user_has_valid_github_token?(provider_credentials: user.provider_credentials)
-          redirect("/dashboard")
+          redirect("/dashboard_erb")
         else
           redirect("/login")
         end
@@ -130,7 +130,7 @@ module FastlaneCI
       git_hub_service = FastlaneCI::GitHubService.new(provider_credential: github_provider_credential)
 
       if git_hub_service.session_valid?
-        redirect("/dashboard")
+        redirect("/dashboard_erb")
       else
         # TODO: show error to user
         redirect("/login")

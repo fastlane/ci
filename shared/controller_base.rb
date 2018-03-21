@@ -62,7 +62,7 @@ module FastlaneCI
       logger.debug("Setting erb root to #{erb_root}")
       self.class.set(:root, erb_root)
 
-      # /dashboard and /dashboard/ should route the same
+      # /dashboard_erb and /dashboard_erb/ should route the same
       logger.debug("Turning off strict paths")
       self.class.set(:strict_paths, false)
 
