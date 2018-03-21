@@ -40,8 +40,6 @@ gem "rufus-scheduler"
 # Access to Google Cloud Platform Storage API.
 gem "google-cloud-storage", "~> 1.5.0"
 
-gem "ruby-watchman"
-
 # fastlane dependencies
 # TODO: point to minimum release instead of GitHub once
 # 	we shipped a new release
