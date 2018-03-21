@@ -45,7 +45,7 @@ module FastlaneCI
         # This never stops because with each commit, it creates a new commit and then we think it's new, LOL
         # repo.
 
-        # When we're done, clean up by going back to master
+        # When we're done, clean up by resetting
         reset_block = proc {
           repo.reset_hard!(use_global_git_mutex: false)
         }
