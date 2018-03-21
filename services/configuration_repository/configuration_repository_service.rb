@@ -83,6 +83,7 @@ module FastlaneCI
       git.add(path.to_s)
       git.commit("Changes on #{path.basename}")
     rescue Git::GitExecuteError => ex
+      # This happens when you've already added or committed the selected change.
       logger.error(ex)
     end
 
