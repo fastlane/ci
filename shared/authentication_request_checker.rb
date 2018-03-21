@@ -34,12 +34,12 @@ module FastlaneCI
         user = session[:user]
         if user.nil?
           logger.debug("No fastlane.ci account found, redirecting to login")
-          redirect("/login/ci_login")
+          redirect("/login_erb/ci_login")
         end
 
         if user.provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]).nil?
           logger.debug("No provider credentials found, redirecting to GitHub provider page")
-          redirect("/login")
+          redirect("/login_erb")
         else
           logger.debug("User is authenticated, accessing #{route}")
         end

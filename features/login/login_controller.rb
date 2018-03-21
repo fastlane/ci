@@ -6,7 +6,7 @@ require_relative "../../shared/models/github_provider_credential"
 module FastlaneCI
   # Displays CI login, user creation, as well as linking github api tokens, and logging out
   class LoginController < ControllerBase
-    HOME = "/login"
+    HOME = "/login_erb"
 
     get HOME do
       user = session[:user]
@@ -15,7 +15,7 @@ module FastlaneCI
       if user.nil?
         # nope, redirect to login to fastlane.com
         logger.debug("No fastlane.ci account found, redirecting to login")
-        redirect("/login/ci_login")
+        redirect("/login_erb/ci_login")
       end
 
       # Cool, we're logged in, but have we setup a provider?
@@ -51,7 +51,7 @@ module FastlaneCI
     end
 
     # CI login
-    post "/login" do
+    post "/login_erb" do
       email = params[:email]
       password = params[:password]
       user = Services.user_service.login(email: email, password: password)
@@ -62,7 +62,7 @@ module FastlaneCI
         if user_has_valid_github_token?(provider_credentials: user.provider_credentials)
           redirect("/dashboard_erb")
         else
-          redirect("/login")
+          redirect("/login_erb")
         end
       end
     end
@@ -81,11 +81,11 @@ module FastlaneCI
         erb(:create_account, locals: locals, layout: FastlaneCI.default_layout)
       end
       session[:user] = user
-      redirect("/login")
+      redirect("/login_erb")
     end
 
     # Submit an email and api token
-    post "/login/submit" do
+    post "/login_erb/submit" do
       # check if we already have an account like this, if we do we might need to clean out their old :personal_access_token
       email = params[:email]
       personal_access_token = params[:personal_access_token]
@@ -133,7 +133,7 @@ module FastlaneCI
         redirect("/dashboard_erb")
       else
         # TODO: show error to user
-        redirect("/login")
+        redirect("/login_erb")
       end
     end
 
