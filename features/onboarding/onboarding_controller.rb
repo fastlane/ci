@@ -67,12 +67,12 @@ module FastlaneCI
         )
 
         session[:message] = <<~HTML
-          ~/.fastlane/ci/keys file written with the configuration values:<br />
+          #{Services.environment_variable_service.keys_file_path} file written with the configuration values:<br />
             FASTLANE_CI_ENCRYPTION_KEY=#{params[:encryption_key]}
         HTML
       else
         session[:message] = <<~HTML
-          ERROR: ~/.fastlane/ci/keys file not written.
+          ERROR: #{Services.environment_variable_service.keys_file_path} file not written.
         HTML
       end
 
@@ -98,7 +98,7 @@ module FastlaneCI
         )
 
         session[:message] = <<~HTML
-          ~/.fastlane/ci/keys file written with the configuration values:<br />
+          #{Services.environment_variable_service.keys_file_path} file written with the configuration values:<br />
 
           <ul>
             <li>FASTLANE_CI_USER=#{params[:ci_user_email]}</li>
@@ -107,7 +107,7 @@ module FastlaneCI
         HTML
       else
         session[:message] = <<~HTML
-          ERROR: ~/.fastlane/ci/keys file not written.
+          ERROR: #{Services.environment_variable_service.keys_file_path} file not written.
         HTML
       end
 
@@ -133,7 +133,7 @@ module FastlaneCI
         )
 
         session[:message] = <<~HTML
-          ~/.fastlane/ci/keys file written with the configuration values:
+          #{Services.environment_variable_service.keys_file_path} file written with the configuration values:
 
           <ul>
             <li>FASTLANE_CI_INITIAL_CLONE_EMAIL='#{params[:clone_user_email]}'</li>
@@ -142,7 +142,7 @@ module FastlaneCI
         HTML
       else
         session[:message] = <<~HTML
-          ERROR: ~/.fastlane/ci/keys file not written.
+          ERROR: #{Services.environment_variable_service.keys_file_path} file not written.
         HTML
       end
 
