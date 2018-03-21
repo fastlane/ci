@@ -72,7 +72,7 @@ module FastlaneCI
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
       github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
-      selected_repo = github_service.repos.select { |repo| owner_login == repo.owner.login and repo_name == repo.name }.first
+      selected_repo = github_service.repos.select { |repo| owner_login == repo.owner.login && repo_name == repo.name }.first
 
       # We need to check whether we can checkout the project without issues.
       # So a new project is created with default settings so we can fetch it.
@@ -123,7 +123,7 @@ module FastlaneCI
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
       github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
-      selected_repo = github_service.repos.select { |repo| owner_login == repo.owner.login and repo_name == repo.name }.first
+      selected_repo = github_service.repos.select { |repo| owner_login == repo.owner.login && repo_name == repo.name }.first
 
       repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
 
