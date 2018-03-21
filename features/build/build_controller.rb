@@ -5,7 +5,7 @@ require "pathname"
 module FastlaneCI
   # Controller for a single project view. Responsible for updates, triggering builds, and displaying project info
   class BuildController < AuthenticatedControllerBase
-    HOME = "/projects/*/builds"
+    HOME = "/projects_erb/*/builds"
 
     use(FastlaneCI::BuildWebsocketBackend)
 
