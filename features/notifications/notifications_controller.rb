@@ -5,7 +5,7 @@ require "pathname"
 module FastlaneCI
   # CRUD controller for handling and displaying notifications to user
   class NotificationsController < AuthenticatedControllerBase
-    HOME = "/notifications"
+    HOME = "/notifications_erb"
 
     # Renders the notifications dashboard, displaying a table of notifications
     # scoped to the user

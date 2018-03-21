@@ -10,7 +10,7 @@ module FastlaneCI
   # to run the server
   #
   class ConfigurationController < AuthenticatedControllerBase
-    HOME = "/configuration"
+    HOME = "/configuration_erb"
 
     get HOME do
       locals = { title: "Configuration", variables: {} }
