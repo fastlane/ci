@@ -106,11 +106,11 @@ module FastlaneCI
       state = state.to_s
 
       # Available states https://developer.github.com/v3/repos/statuses/
-      if state == "missing_fastfile"
+      if state == "missing_fastfile" || state == "ci_problem"
         state = "failure"
       end
 
-      available_states = ["error", "failure", "pending", "success"]
+      available_states = ["error", "failure", "pending", "success", "ci_problem"]
       raise "Invalid state '#{state}'" unless available_states.include?(state)
 
       # We auto receive the SLUG, so that the user of this class can pass a full URL also
@@ -121,13 +121,13 @@ module FastlaneCI
         description = "Still running" if state == "pending"
 
         # TODO: what's the difference?
-        description = "Something went wrong" if state == "failure"
-        description = "Something went wrong" if state == "error"
+        description = "Build encountered a failure" if state == "failure"
+        description = "Build encountered an error " if state == "error"
       end
 
       # this needs to be synchronous because we're doing it during initialization of our build runner
       state_details = target_url.nil? ? "#{repo}, sha #{sha}" : target_url
-      logger.debug("Setting status #{state} on #{state_details}")
+      logger.debug("Setting status #{state} -> #{status_context} on #{state_details}")
       client.create_status(repo, sha, state, {
         target_url: target_url,
         description: description,

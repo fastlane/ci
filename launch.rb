@@ -42,7 +42,7 @@ module FastlaneCI
 
     def self.verify_app_built
       if ENV["WEB_APP"]
-        app_exists = File.file?(File.join('public', '.dist', 'index.html'))
+        app_exists = File.file?(File.join("public", ".dist", "index.html"))
         raise "The web application is not built. Please build with the Angular CLI and Try Again.\nEx. ng build --deploy-url=\"/.dist\"" unless app_exists
       end
     end
