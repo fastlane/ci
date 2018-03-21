@@ -8,7 +8,7 @@
   </thead>
   <tbody>
     <% project.builds.each do |build| %>
-      <% url = "/projects/#{project.id}/builds/#{build.number}" %>
+      <% url = "/projects_erb/#{project.id}/builds/#{build.number}" %>
       <tr style="cursor: pointer;" onclick="location.href='<%= url %>'">
         <td>
           <% if build.status == "success" %>

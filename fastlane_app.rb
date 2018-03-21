@@ -39,9 +39,9 @@ module FastlaneCI
         send_file File.join('public', '.dist', 'index.html')
       else
         if session[:user]
-          redirect("/dashboard")
+          redirect("/dashboard_erb")
         else
-          redirect("/login")
+          redirect("/login_erb")
         end
       end
     end

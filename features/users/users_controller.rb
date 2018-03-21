@@ -6,7 +6,7 @@ require_relative "../../services/services"
 module FastlaneCI
   # A CRUD controller to manage users
   class UsersController < AuthenticatedControllerBase
-    HOME = "/users"
+    HOME = "/users_erb"
 
     get HOME do
       locals = { title: "Users" }
