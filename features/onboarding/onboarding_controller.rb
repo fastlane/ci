@@ -6,7 +6,7 @@ require_relative "../../services/services"
 module FastlaneCI
   # Controller to help with onboarding a first-time user to fastlane.ci
   class OnboardingController < ControllerBase
-    HOME = "/onboarding"
+    HOME = "/onboarding_erb"
 
     # After a POST request where a status is set, clear the session[:method]
     # variable to avoid displaying the same message multiple times

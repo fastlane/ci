@@ -14,10 +14,10 @@ module FastlaneCI
       route = "#{self::HOME}*" if route.nil?
 
       before(route) do
-        if !route.start_with?("/onboarding") && !Services.onboarding_service.correct_setup?
+        if !route.start_with?("/onboarding_erb") && !Services.onboarding_service.correct_setup?
           logger.debug("User is not yet onboarded. Directing them to `/onboarding`")
-          redirect("/onboarding")
-        elsif route.start_with?("/onboarding") && Services.onboarding_service.correct_setup?
+          redirect("/onboarding_erb")
+        elsif route.start_with?("/onboarding_erb") && Services.onboarding_service.correct_setup?
           redirect("/")
         else
           logger.debug("User is onboarded, accessing #{route}")
