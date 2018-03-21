@@ -21,10 +21,6 @@ module FastlaneCI
       self.provider_credential = provider_credential
       @code_hosting_service_class = FastlaneCI::GitHubService
       @client = @code_hosting_service_class.client(provider_credential.api_token)
-
-      # We define a finalizer in order to clean up resources retained by the class and need to
-      # be disposed manually for safety purposes.
-      ObjectSpace.define_finalizer(self, self.class.finalizer)
     end
 
     # Creates a remote repository if it does not already exist, complete with
@@ -64,12 +60,6 @@ module FastlaneCI
     # @return [Boolean]
     def configuration_repository_exists?
       return client.repository?(repo_shortform)
-    end
-
-    def self.finalizer
-      proc {
-        unwatch_changes
-      }
     end
 
     protected

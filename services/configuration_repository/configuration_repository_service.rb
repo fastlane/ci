@@ -9,12 +9,6 @@ module FastlaneCI
     include FastlaneCI::Logging
 
     class << self
-      attr_writer :watchman_mutex
-
-      def watchman_mutex
-        @watchman_mutex ||= Mutex.new
-      end
-
       def fastlane_ci_config
         return "fastlane-ci-config"
       end
@@ -23,6 +17,10 @@ module FastlaneCI
     attr_reader :client
 
     attr_accessor :provider_credential
+
+    def git
+      @git ||= clone
+    end
 
     # Creates a remote repository if it does not already exist, complete with
     # the expected remote files `user.json` and `projects.json`
@@ -52,7 +50,6 @@ module FastlaneCI
       # This triggers the check of an existing repo in the given path,
       # we recover from the error making the clone and checkout
       git = Git.open(File.join(path, ConfigurationRepositoryService.fastlane_ci_config))
-      self.watch_for_changes!(git, path) if File.directory?(path)
       return git
     rescue ArgumentError
       git = @code_hosting_service_class.clone(
@@ -62,7 +59,6 @@ module FastlaneCI
         branch: branch,
         name: "fastlane-ci-config"
       )
-      self.watch_for_changes!(git, path) if File.directory?(path)
       return git
     end
 
@@ -76,6 +72,32 @@ module FastlaneCI
       git = self.clone(path: path, branch: branch)
       return if git.log.between(git.branch.name, git.remote.branch.name).size.zero?
       git.pull
+    end
+
+    # Adds (if needed) and commits a single file of the ci-config repository.
+    # @params [Base::Git] git
+    # @params [String] file_path
+    def commit(git: self.git, file_path: nil)
+      raise "file_path is mandatory" if file_path.nil?
+      path = Pathname.new(file_path)
+      git.add(path.to_s)
+      git.commit("Changes on #{path.basename}")
+    rescue Git::GitExecuteError => ex
+      logger.error(ex)
+    end
+
+    # Pushes the changes (if any) of the ci-config repository.
+    # @params [Base::Git] git
+    def push(git: self.git)
+      return if git.log.between(git.remote.branch.name, git.branch.name).size.zero?
+      @code_hosting_service_class.setup_auth(
+        repo_url: FastlaneCI.env.repo_url,
+        provider_credential: self.provider_credential,
+        path: @code_hosting_service_class.temp_path
+      )
+      git.push
+      logger.info("Pushed changes to ci-config repo")
+      @code_hosting_service_class.unset_auth
     end
 
     def file_path(file_path)
@@ -142,57 +164,6 @@ module FastlaneCI
       not_implemented(__method__)
     end
 
-    # Start the watch of the ci-config repo folder changes
-    # so we can report every file being changed in a real-time basis.
-    # @param [Git::Base] git
-    # @param [String] path, the path of the repo which changes are being watched.
-    def watch_for_changes!(git, path)
-      require "ruby-watchman"
-      require "socket"
-      sockname = RubyWatchman.load(
-        `watchman --output-encoding=bser get-sockname`
-      )["sockname"]
-      raise unless $?.exitstatus.zero?
-
-      unwatch_changes unless @socket.nil?
-
-      @socket = UNIXSocket.open(sockname) do |socket|
-        root = Pathname.new(path).realpath.to_s
-        roots = RubyWatchman.query(["watch-list"], socket)["roots"]
-        unless roots.include?(root)
-          # this path isn't being watched yet; try to set up watch
-          result = RubyWatchman.query(["watch", root], socket)
-
-          # root_restrict_files setting may prevent Watchman from working
-          raise if result.key?("error")
-        end
-
-        query = ["query", root, {
-        "expression" => ["anyof",
-                         ["match", "**/*.json", "wholename", { "includedotfiles" => false }]],
-          "fields" => ["name"]
-        }]
-        paths = RubyWatchman.query(query, socket)
-
-        # could return error if watch is removed
-        raise if paths.key?("error")
-
-        unless ConfigurationRepositoryService.watchman_mutex.locked?
-          # Here we use the mutex as a throttling tool. While a repo changes operation is
-          # being made, we drop changes made from other sources on the watch list.
-          ConfigurationRepositoryService.watchman_mutex.synchronize do
-            handle_repo_changes(git, paths["files"])
-          end
-        end
-      end
-    end
-
-    # Closes the watchman server and the socket attached to it.
-    def unwatch_changes
-      `watchman shutdown-server`
-      @socket&.close
-    end
-
     ####################################################
     # @!group String Helpers
     #####################################################
@@ -217,39 +188,6 @@ module FastlaneCI
       path = File.expand_path(File.join("~/.fastlane", "ci"))
       FileUtils.mkdir_p(path) unless File.directory?(path)
       return path
-    end
-
-    # The method that makes the necessary changes over the files being watched in a given repo.
-    # TODO: For now, until https://github.com/fastlane/ci/pull/311 is solved, we take the local
-    # changes as source of truth by force pushing changes made. Ideally, this shouldn't be needed
-    # if we never encounter a situation where there are conflicts with the remote.
-    # @param [Git::Base] git, the ci-config repo.
-    # @param [Array<String>] files, directories for files being changed.
-    def handle_repo_changes(git, files)
-      # For every file change, we make a different commit, in order to make a fine grained commit history.
-      # Obviously, all files in .git path are rejected by default.
-      return if files.empty?
-
-      files.map { |file| Pathname.new(file) }.each do |file|
-        path = Pathname.new(file)
-        next unless git.status.deleted.assoc(path.basename)&.count.try(:>, 0) || git.status.added.assoc(path.basename)&.count.try(:>, 0) || git.status.changed.assoc(path.basename)&.count.try(:>, 0) || git.status.untracked.assoc(path.basename)&.count.try(:>, 0)
-        begin
-          git.add(path.to_s)
-          git.commit("Changes on #{path.basename}")
-        rescue Git::GitExecuteError
-          # This is caused when the file is already added and/or commited.
-          # So we gracefully continue with the execution
-        end
-      end
-      return if git.log.between(git.remote.branch.name, git.branch.name).size.zero?
-      @code_hosting_service_class.setup_auth(
-        repo_url: FastlaneCI.env.repo_url,
-        provider_credential: self.provider_credential,
-        path: @code_hosting_service_class.temp_path
-      )
-      git.push
-      logger.info("Pushed changes to ci-config repo")
-      @code_hosting_service_class.unset_auth
     end
   end
 end
