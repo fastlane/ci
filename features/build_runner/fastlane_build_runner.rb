@@ -31,6 +31,7 @@ module FastlaneCI
       @platform = lane_pieces.count > 1 ? lane_pieces.first : nil
       @lane = lane_pieces.last
       @parameters = parameters
+      @encountered_failure_output = false # Did we encounter a row that signaled failure?
     end
 
     # completion_block is called with an array of artifacts
@@ -73,10 +74,9 @@ module FastlaneCI
         # Execute the Fastfile here
         logger.info("starting fastlane run lane: #{self.lane} platform: #{self.platform}, params: #{self.parameters} from #{fast_file_path}")
 
-        build_success = true
         # Attach a listener to the output to see if we have a failure. If so, this build failed
         self.add_listener(proc do |row|
-          build_success = false if row.did_fail_build?
+          @encountered_failure_output = true if row.did_fail_build?
         end)
 
         build_output = ["#{fast_file_path}, #{self.lane} platform: #{self.platform}, params: #{self.parameters} from output"]
@@ -87,10 +87,10 @@ module FastlaneCI
 
         fast_file.runner.execute(self.lane, self.platform, self.parameters)
 
-        if build_success
-          self.current_build.status = :success
-        else
+        if @encountered_failure_output
           self.current_build.status = :failure
+        else
+          self.current_build.status = :success
         end
 
         logger.info("fastlane run complete")
@@ -102,7 +102,8 @@ module FastlaneCI
         completion_block.call(artifacts)
       rescue StandardError => ex
         logger.debug("Setting build status to failure due to exception")
-        self.current_build.status = :failure
+        self.current_build.status = :ci_problem
+        self.current_build.description = "fastlane.ci encountered an error, check fastlane.ci logs for more information"
 
         logger.error(ex)
         logger.error(ex.backtrace)

@@ -9,7 +9,8 @@ module FastlaneCI
       :success,
       :pending,
       :missing_fastfile,
-      :failure
+      :failure,
+      :ci_problem
     ]
 
     # A reference to the project this build is associated with
