@@ -16,11 +16,13 @@
         </tr>
       </thead>
       <tbody>
-        <% repos.each do |repo| %>
+        <% hosting_providers.each do |hosting_provider| %>
+        <% hosting_provider[:repos].each do |repo| %>
           <tr style="cursor: pointer;">
             <td>💚</td>
-            <td onclick="document.location = '/projects_erb/add/<%= repo[:name] %>';"><%= repo[:name] %></td>
+            <td onclick="document.location = '/projects_erb/add/<%= hosting_provider[:name] %>/<%= repo[:owner][:login] %>/<%= repo[:name] %>';"><%= repo[:name] %></td>
           </tr>
+        <% end %>
         <% end %>
       </tbody>
     </table>
