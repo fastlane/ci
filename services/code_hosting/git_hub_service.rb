@@ -22,13 +22,11 @@ module FastlaneCI
 
     def initialize(provider_credential: nil)
       self.provider_credential = provider_credential
-
-      @_client = Octokit::Client.new(access_token: provider_credential.api_token)
       Octokit.auto_paginate = true # TODO: just for now, we probably should do smart pagination in the future
     end
 
     def client
-      @_client
+      @_client ||= Octokit::Client.new(access_token: provider_credential.api_token)
     end
 
     def session_valid?

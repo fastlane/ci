@@ -27,10 +27,10 @@ module FastlaneCI
     # Did this particular message fail the build? (e.g. `user_error` or `build_error`)
     def did_fail_build?
       # The first time this method is called, we check if this row failed the build
-      if @_did_fail_build.nil?
-        @_did_fail_build = BUILD_FAIL_TYPES.include?(self.type)
+      if self._did_fail_build.nil?
+        self._did_fail_build = BUILD_FAIL_TYPES.include?(self.type)
       end
-      return @_did_fail_build
+      return self._did_fail_build
     end
 
     def to_json

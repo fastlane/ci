@@ -11,10 +11,10 @@ module FastlaneCI
     # After a POST request where a status is set, clear the session[:method]
     # variable to avoid displaying the same message multiple times
     before do
-      @progress = false
+      self.progress = false
 
       if !session[:message].nil? && request.get?
-        @message = session[:message]
+        self.message = session[:message]
         session[:message] = nil
       end
     end
@@ -25,25 +25,25 @@ module FastlaneCI
     end
 
     get "#{HOME}/encryption_key" do
-      @progress = true if has_encryption_key?
+      self.progress = true if has_encryption_key?
       locals = { title: "Onboarding", variables: {} }
       erb(:encryption_key, locals: locals, layout: FastlaneCI.default_layout)
     end
 
     get "#{HOME}/ci_bot_account" do
-      @progress = true if has_ci_user?
+      self.progress = true if has_ci_user?
       locals = { title: "Onboarding", variables: {} }
       erb(:ci_bot_account, locals: locals, layout: FastlaneCI.default_layout)
     end
 
     get "#{HOME}/initial_clone_user" do
-      @progress = true if has_clone_user?
+      self.progress = true if has_clone_user?
       locals = { title: "Onboarding", variables: {} }
       erb(:initial_clone_user, locals: locals, layout: FastlaneCI.default_layout)
     end
 
     get "#{HOME}/git_repo" do
-      @progress = true if has_remote_github_repo?
+      self.progress = true if has_remote_github_repo?
       locals = { title: "Onboarding", variables: {} }
       erb(:git_repo, locals: locals, layout: FastlaneCI.default_layout)
     end

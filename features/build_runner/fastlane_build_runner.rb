@@ -28,9 +28,9 @@ module FastlaneCI
 
       # Setting the variables directly (only having `attr_reader`) as they're immutable
       # Once you define a FastlaneBuildRunner, you shouldn't be able to modify them
-      @platform = lane_pieces.count > 1 ? lane_pieces.first : nil
-      @lane = lane_pieces.last
-      @parameters = parameters
+      self.platform = lane_pieces.count > 1 ? lane_pieces.first : nil
+      self.lane = lane_pieces.last
+      self.parameters = parameters
     end
 
     # completion_block is called with an array of artifacts

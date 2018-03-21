@@ -29,7 +29,7 @@ module FastlaneCI
     end
 
     def local_repo_path
-      File.join(self.containing_path, @id)
+      File.join(self.containing_path, self.id)
     end
 
     # This is where we store the local git repo
@@ -37,7 +37,7 @@ module FastlaneCI
     # and just re-clones. So make sure it's fine if it gets deleted
     # TODO: Switch to something else if we don't have write permission to this directory
     def containing_path
-      @containing_path || File.expand_path("~/.fastlane/ci/")
+      @containing_path ||= File.expand_path("~/.fastlane/ci/")
     end
 
     # Is the repo already cloned on the local machine?
