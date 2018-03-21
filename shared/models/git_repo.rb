@@ -287,12 +287,49 @@ module FastlaneCI
       FileUtils.rm(self.temporary_storage_path) if File.exist?(self.temporary_storage_path)
     end
 
-    def pull(repo_auth: self.repo_auth)
-      git_action_with_queue(ensure_block: proc { unset_auth }) do
+    def perform_block(use_global_git_mutex: true, &block)
+      if use_global_git_mutex
+        git_action_with_queue(ensure_block: proc { unset_auth }) { block.call }
+      else
+        block.call # Assuming all things in the block are synchronous
+        self.unset_auth
+      end
+    end
+
+    def pull(repo_auth: self.repo_auth, use_global_git_mutex: true)
+      self.perform_block(use_global_git_mutex: use_global_git_mutex) do
         logger.info("Starting pull #{self.git_config.git_url}")
         self.setup_auth(repo_auth: repo_auth)
         git.pull
         logger.debug("Done pulling #{self.git_config.git_url}")
+      end
+    end
+
+    def checkout_branch(branch: nil, repo_auth: self.repo_auth, use_global_git_mutex: true)
+      self.perform_block(use_global_git_mutex: use_global_git_mutex) do
+        logger.info("Checking out branch: #{branch} from #{self.git_config.git_url}")
+        self.setup_auth(repo_auth: repo_auth)
+        git.checkout(branch)
+        logger.debug("Done checking out branch: #{branch} from #{self.git_config.git_url}")
+      end
+    end
+
+    def checkout_commit(sha: nil, repo_auth: self.repo_auth, use_global_git_mutex: true)
+      self.perform_block(use_global_git_mutex: use_global_git_mutex) do
+        logger.info("Checking out sha: #{sha} from #{self.git_config.git_url}")
+        self.setup_auth(repo_auth: repo_auth)
+        git.checkout(sha)
+        logger.debug("Done checking out sha: #{sha} from #{self.git_config.git_url}")
+      end
+    end
+
+    # Discard any changes
+    def reset_hard!(use_global_git_mutex: true)
+      self.perform_block(use_global_git_mutex: use_global_git_mutex) do
+        logger.debug("Starting reset_hard! #{self.git.branch.name} in #{self.git_config.git_url}".freeze)
+        self.git.reset_hard
+        self.git.clean(force: true, d: true)
+        logger.debug("Done reset_hard! #{self.git.branch.name} in #{self.git_config.git_url}".freeze)
       end
     end
 
@@ -341,16 +378,6 @@ module FastlaneCI
       git_task = TaskQueue::Task.new(work_block: block, ensure_block: ensure_block)
       GitRepo.git_action_queue.add_task_async(task: git_task)
       return git_task
-    end
-
-    # Discard any changes
-    def reset_hard!
-      git_action_with_queue do
-        logger.debug("Starting reset_hard! #{self.git_config.git_url}".freeze)
-        self.git.reset_hard
-        self.git.clean(force: true, d: true)
-        logger.debug("Done reset_hard! #{self.git_config.git_url}".freeze)
-      end
     end
 
     def fetch

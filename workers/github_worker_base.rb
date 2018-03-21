@@ -86,7 +86,7 @@ module FastlaneCI
       end
     end
 
-    def create_and_queue_build_task(sha:)
+    def create_and_queue_build_task(sha:, task_ensure_block: nil)
       credential = self.provider_credential
       current_project = self.project
       current_sha = sha
@@ -98,6 +98,9 @@ module FastlaneCI
       )
       build_runner.setup(parameters: nil)
       build_task = Services.build_runner_service.add_build_runner(build_runner: build_runner)
+
+      raise "build_task already has an ensure block, this is a bug" unless build_task.ensure_block.nil?
+      build_task.ensure_block = task_ensure_block
 
       logger.debug("Adding task for #{self.project_full_name}: #{credential.ci_user.email}: #{current_sha[-6..-1]}")
       return build_task
