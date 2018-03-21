@@ -16,7 +16,7 @@ require "faraday-http-cache"
 module FastlaneCI
   # Data source that interacts with GitHub
   class GitHubService < CodeHostingService
-    extend FastlaneCI::Logging
+    prepend FastlaneCI::Logging
 
     class << self
       attr_writer :temporary_git_storage
@@ -449,10 +449,12 @@ module FastlaneCI
         provider_credential: self.provider_credential,
         sha: sha,
         path: File.join(
-          self.project.repo_config.containing_path,
-          self.project.id,
-          self.project.repo_config.full_name,
-          sha
+          [
+            self.project.repo_config.containing_path,
+            self.project.id,
+            self.project.repo_config.full_name,
+            sha
+          ].reject { |i| i.nil? || i.empty? }
         )
       )
       return git

@@ -24,13 +24,13 @@ module FastlaneCI
 
     def work
       logger.debug("Checking for new commits in #{self.project.project_name}")
-      repo = self.git_repo
+      repo = self.git_repo_service
 
       # TODO: ensure BuildService subclasses are thread-safe
       build_service = FastlaneCI::Services.build_service
 
       self.target_branches do |git, branch|
-        current_sha = repo.most_recent_commit.sha
+        current_sha = repo.all_commits_sha_for_branch(branch: branch).last
 
         # Skips branches that have previously been built
         builds = build_service.list_builds(project: self.project)

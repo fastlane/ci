@@ -24,7 +24,7 @@ module FastlaneCI
     def initialize(provider_credential: nil, project: nil)
       self.provider_credential = provider_credential
       self.project = project
-      self.github_service = git_repo_service
+      self.github_service = self.git_repo_service
 
       self.target_branches_set = Set.new
       project.job_triggers.each do |trigger|
@@ -62,8 +62,7 @@ module FastlaneCI
       @git_repo ||= begin
         case self.provider_credential.type
         when FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
-          service = FastlaneCI::GitHubService.new(provider_credential: provider_credential, project: project)
-          service.clone
+          service = FastlaneCI::GitHubService.new(provider_credential: self.provider_credential, project: self.project)
           return service
         else
           return nil
@@ -72,20 +71,9 @@ module FastlaneCI
     end
 
     def target_branches(&block)
-      repo = self.git_repo_service.git
-
-      # is needed to see if there are new branches (called async)
-      repo.fetch
-
-      repo.git_and_remote_branches_each do |git, branch|
-        next if branch.name.include?("HEAD ->")
-        # next unless self.target_branches_set.include?(branch.name)
-
-        # There might be un-committed changes in there, so ignore
-        git.reset_hard
-
-        # Check out the specific branch, this will detach our current head
-        branch.checkout
+      self.git_repo_service.branch_names do |branch|
+        next unless self.target_branches_set.include?(branch)
+        git = self.git_repo_service.clone(branch: branch)
 
         yield(git, branch)
       end
