@@ -9,7 +9,7 @@ module FastlaneCI
   # provider. For instance, the `GitHubProviderCredential` allows FastlaneCI users
   # to interact with the GitHub API
   class ProviderCredentialsController < AuthenticatedControllerBase
-    HOME = "/provider_credentials"
+    HOME = "/provider_credentials_erb"
 
     get HOME do
       locals = { title: "Provider Credentials" }
