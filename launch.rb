@@ -110,6 +110,11 @@ module FastlaneCI
       FastlaneCI::FastlaneApp.use(FastlaneCI::ProviderCredentialsController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::UsersController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::BuildController)
+
+      # Load JSON controllers
+      require_relative "features-json/project_json_controller"
+
+      FastlaneCI::FastlaneApp.use(FastlaneCI::ProjectJsonController)
     end
 
     def self.start_github_workers
