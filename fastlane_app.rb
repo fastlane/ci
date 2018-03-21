@@ -41,7 +41,7 @@ module FastlaneCI
         if session[:user]
           redirect("/dashboard")
         else
-          redirect("/login")
+          redirect("/login_erb")
         end
       end
     end
