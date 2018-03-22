@@ -23,7 +23,8 @@ describe FastlaneCI::UserService do
 
   subject do
     FastlaneCI::UserService.new(
-      user_data_source: FastlaneCI::JSONUserDataSource.create(git_repo_path)
+      user_data_source: FastlaneCI::JSONUserDataSource.create(git_repo_path),
+      configuration_git_repo: git_repo
     )
   end
 

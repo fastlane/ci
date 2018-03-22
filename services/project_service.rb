@@ -12,12 +12,15 @@ module FastlaneCI
   class ProjectService
     include FastlaneCI::Logging
     attr_accessor :project_data_source
+    attr_accessor :clone_user_provider_credential
+    attr_accessor :configuration_git_repo
 
-    def initialize(project_data_source: nil)
+    def initialize(project_data_source: nil, clone_user_provider_credential:, configuration_git_repo:)
       unless project_data_source.nil?
         raise "project_data_source must be descendant of #{ProjectDataSource.name}" unless project_data_source.class <= ProjectDataSource
       end
 
+      self.clone_user_provider_credential = clone_user_provider_credential
       self.project_data_source = project_data_source
     end
 
@@ -85,12 +88,12 @@ module FastlaneCI
 
     # Not sure if this must be here or not, but we can open a discussion on this.
     def commit_repo_changes!(message: nil, file_to_commit: nil)
-      Services.configuration_git_repo.commit_changes!(commit_message: message,
+      configuration_git_repo.commit_changes!(commit_message: message,
                                                         file_to_commit: file_to_commit)
     end
 
     def push_configuration_repo_changes!
-      Services.configuration_git_repo.push
+      configuration_git_repo.push
     end
 
     # @return [GitRepo]
@@ -100,7 +103,7 @@ module FastlaneCI
       # between Service <-> WebServer <-> Client.
       return GitRepo.new(
         git_config: project.repo_config,
-        provider_credential: Services.provider_credential,
+        provider_credential: clone_user_provider_credential,
         async_start: false
       )
     end

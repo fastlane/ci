@@ -29,7 +29,7 @@ module FastlaneCI
       @_ci_config_repo = nil
       @_configuration_git_repo = nil
       @_ci_user = nil
-      @_provider_credential = nil
+      @_clone_user_provider_credential = nil
 
       # Reset services
       @_project_service = nil
@@ -43,12 +43,12 @@ module FastlaneCI
     end
 
     ########################################################
-    # Service helpers
+    # Private Service helpers
     ########################################################
 
     # Get the path to where we store fastlane.ci configuration
     def self.ci_config_git_repo_path
-      self.ci_config_repo.local_repo_path
+      ci_config_repo.local_repo_path
     end
 
     # Setup the fastlane.ci GitRepoConfig
@@ -70,7 +70,7 @@ module FastlaneCI
     def self.configuration_git_repo
       @_configuration_git_repo ||= FastlaneCI::GitRepo.new(
         git_config: ci_config_repo,
-        provider_credential: provider_credential
+        provider_credential: clone_user_provider_credential
       )
     end
 
@@ -86,22 +86,22 @@ module FastlaneCI
       return @_ci_user
     end
 
-    # This happens on the first launch of CI
-    # We don't have access to the config directory yet
-    # So we'll use ENV variables that are used for the initial clone only
-    #
-    # Long term, we'll have a nice onboarding flow, where you can enter those credentials
-    # as part of a web UI. But for containers (e.g. Google Cloud App Engine)
-    # we'll have to support ENV variables also, for the initial clone, so that's the code below
-    # Clone the repo, and login the user
+    # The initial clone user's provider credential
     #
     # @return [GitHubProviderCredential]
-    def self.provider_credential
-      @_provider_credential ||= GitHubProviderCredential.new(
+    def self.clone_user_provider_credential
+      @_clone_user_provider_credential ||= GitHubProviderCredential.new(
         email: FastlaneCI.env.initial_clone_email,
         api_token: FastlaneCI.env.clone_user_api_token
       )
     end
+
+    # These service helper methods should not be exposed, since they become
+    # global static methods, which when referenced in arbitrary classes, becomes
+    # a code smell
+    private_class_method :ci_config_git_repo_path, :ci_config_repo,
+                         :configuration_git_repo, :ci_user,
+                         :clone_user_provider_credential
 
     ########################################################
     # Services that we provide
@@ -110,14 +110,17 @@ module FastlaneCI
     # Start up a ProjectService from our JSONProjectDataSource
     def self.project_service
       @_project_service ||= FastlaneCI::ProjectService.new(
-        project_data_source: FastlaneCI::JSONProjectDataSource.create(ci_config_repo, user: ci_user)
+        project_data_source: FastlaneCI::JSONProjectDataSource.create(ci_config_repo, user: ci_user),
+        clone_user_provider_credential: clone_user_provider_credential,
+        configuration_git_repo: configuration_git_repo
       )
     end
 
     # Start up a UserService from our JSONUserDataSource
     def self.user_service
       @_user_service ||= FastlaneCI::UserService.new(
-        user_data_source: FastlaneCI::JSONUserDataSource.create(ci_config_git_repo_path)
+        user_data_source: FastlaneCI::JSONUserDataSource.create(ci_config_git_repo_path),
+        configuration_git_repo: configuration_git_repo
       )
     end
 
@@ -145,23 +148,29 @@ module FastlaneCI
     # @return [GithubService]
     def self.github_service
       @_github_service ||= FastlaneCI::GitHubService.new(
-        provider_credential: provider_credential
+        provider_credential: clone_user_provider_credential
       )
     end
 
     # Grab a config service that is configured for the CI user
     def self.config_service
-      @_config_service ||= FastlaneCI::ConfigService.new(ci_user: ci_user)
+      @_config_service ||= FastlaneCI::ConfigService.new(
+        ci_user: ci_user,
+        clone_user_provider_credential: clone_user_provider_credential
+      )
     end
 
     def self.worker_service
-      @_worker_service ||= FastlaneCI::WorkerService.new
+      @_worker_service ||= FastlaneCI::WorkerService.new(
+        ci_user: ci_user,
+        provider_credential: clone_user_provider_credential
+      )
     end
 
     # @return [ConfigurationRepositoryService]
     def self.configuration_repository_service
       @_configuration_repository_service ||= FastlaneCI::ConfigurationRepositoryService.new(
-        provider_credential: provider_credential
+        provider_credential: clone_user_provider_credential
       )
     end
 
@@ -174,7 +183,10 @@ module FastlaneCI
     end
 
     def self.onboarding_service
-      @_onboarding_service ||= FastlaneCI::OnboardingService.new
+      @_onboarding_service ||= FastlaneCI::OnboardingService.new(
+        ci_config_repo: ci_config_repo,
+        clone_user_provider_credential: clone_user_provider_credential
+      )
     end
   end
 end
