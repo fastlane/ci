@@ -1,19 +1,19 @@
 #!/usr/bin/env ruby
 
-ADDED_OR_MODIFIED = /A|AM|M|^M/.freeze
-OTHER_RUBY_FILES  = %w(Rakefile Gemfile)
-changed_files = `git status --porcelain`.split(/\n/).
-    select { |file_name_with_status|
-      file_name_with_status =~ ADDED_OR_MODIFIED
-    }.
-    map { |file_name_with_status|
-      file_name_with_status.split(' ')[1]
-    }.
-    select { |file_name|
-      File.extname(file_name) == '.rb' or
-        OTHER_RUBY_FILES.include?(file_name)
-    }.join(' ')
+ADDED_OR_MODIFIED = /A|AM|M|^M/
+OTHER_RUBY_FILES  = %w(Rakefile Gemfile .pre-commit)
 
-system("rubocop #{changed_files}") unless changed_files.empty?
+changed_files = `git status --porcelain`
+                .split(/\n/)
+                .select { |file_name_with_status| file_name_with_status =~ ADDED_OR_MODIFIED }
+                .map { |file_name_with_status| file_name_with_status.split(" ")[1] }
+                .select { |file_name| File.extname(file_name) == ".rb" or OTHER_RUBY_FILES.include?(file_name) }
+                .join(" ")
 
-exit $?.existstatus
+exit(0) if changed_files.empty?
+
+exit(0) if system("rubocop #{changed_files}")
+
+puts("\n\n💥 Fix linting errors with `rubocop -a` and stage changed, or bypass hook with `git commit --no-verify`")
+
+exit($?.exitstatus)
