@@ -38,7 +38,7 @@ gem "google-cloud-storage", "~> 1.5.0"
 # 	we shipped a new release
 gem "fastlane", git: "https://github.com/fastlane/fastlane"
 
-gem "fastfile-parser", path: './vendor/fastfile-parser', require: false
+gem "fastfile-parser", path: "./vendor/fastfile-parser", require: false
 gem "taskqueue", path: "./vendor/taskqueue", require: false
 
 group :test, :development do

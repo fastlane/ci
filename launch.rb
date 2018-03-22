@@ -4,7 +4,6 @@ require_relative "app/shared/logging_module"
 require_relative "app/shared/models/job_trigger"
 require_relative "app/shared/models/git_repo" # for GitRepo.git_action_queue
 
-
 module FastlaneCI
   # Launch is responsible for spawning up the whole
   # fastlane.ci server, this includes all needed classes
