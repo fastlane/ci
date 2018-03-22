@@ -51,6 +51,10 @@ module FastlaneCI
       return builds.sort_by(&:number).reverse
     end
 
+    def local_repo_path
+      return self.repo_config.local_repo_path
+    end
+
     # if you're using this with the fastfile parser, you need to use `relative: false`
     def local_fastfile_path(relative: false)
       fastfile_path = nil

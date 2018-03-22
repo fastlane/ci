@@ -48,6 +48,7 @@ module FastlaneCI
 
       verbose_log = FastlaneCI::FastlaneLog.new(file_path: "fastlane.verbose.log", severity: Logger::DEBUG)
       info_log = FastlaneCI::FastlaneLog.new(file_path: "fastlane.log")
+      artifacts = []
 
       ci_output.add_output_listener!(verbose_log)
       ci_output.add_output_listener!(info_log)
@@ -66,6 +67,7 @@ module FastlaneCI
         return
       end
 
+      ci_directory = Dir.pwd
       fast_file = Fastlane::FastFile.new(fast_file_path)
       FastlaneCore::Globals.verbose = true
 
@@ -85,6 +87,12 @@ module FastlaneCI
           build_output << "#{row.time}: #{row.message}"
         end)
 
+        # TODO: the fast_file.runner should probably handle this
+        logger.debug("Switching to #{project.local_repo_path} to run `fastlane`")
+        # Change over to the repo
+        Dir.chdir(project.local_repo_path)
+
+        # Run fastlane now
         fast_file.runner.execute(self.lane, self.platform, self.parameters)
 
         if @encountered_failure_output
@@ -98,8 +106,7 @@ module FastlaneCI
 
         # TODO: need real artifacts here, are they artifacts or artifact paths?
         # TODO: Update build_runner.rb `complete_run(artifact_paths: [])` if they are artifact objects
-        artifacts = []
-        completion_block.call(artifacts)
+        # artifacts = ?
       rescue StandardError => ex
         logger.debug("Setting build status to failure due to exception")
         self.current_build.status = :ci_problem
@@ -108,8 +115,6 @@ module FastlaneCI
         logger.error(ex)
         logger.error(ex.backtrace)
 
-        artifacts = []
-        completion_block.call(artifacts)
         # ensure
         # Either the build was successfull or not, we have to ensure the artifacts for the execution.
         # artifact_paths = []
@@ -119,6 +124,11 @@ module FastlaneCI
         #                                                      .select { |value| !Fastlane::Actions.lane_context[value].nil? && !Fastlane::Actions.lane_context[value].empty? }
         #                                                      .map { |value| { type: value.to_s, path: Fastlane::Actions.lane_context[value] } }
         # artifact_paths.concat(constants_with_path)
+      ensure
+        # Fastlane is done, change back to ci directory
+        logger.debug("Switching back to to #{ci_directory} from #{project.local_repo_path} now that we're done")
+        Dir.chdir(ci_directory)
+        completion_block.call(artifacts)
       end
     end
 
