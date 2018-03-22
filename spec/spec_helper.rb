@@ -1,5 +1,4 @@
 $LOAD_PATH << File.dirname(File.expand_path("../", __FILE__))
-puts $LOAD_PATH.last
 
 require "rack/test"
 require "rspec"
