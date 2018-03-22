@@ -469,8 +469,6 @@ module FastlaneCI
     end
 
     def cleanup(git)
-      require "pry"
-      binding.pry
       FileUtils.rm_rf(git.dir) if File.directory?(git.dir) 
     end
 
