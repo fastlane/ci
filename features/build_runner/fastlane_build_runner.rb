@@ -15,9 +15,10 @@ module FastlaneCI
     include FastlaneCI::Logging
 
     # Parameters for running fastlane
-    attr_reader :platform
-    attr_reader :lane
-    attr_reader :parameters
+    attr_accessor :platform
+    attr_accessor :lane
+    attr_accessor :parameters
+    attr_accessor :encountered_failure_output
 
     # Set additional values specific to the fastlane build runner
     def setup(parameters: nil)

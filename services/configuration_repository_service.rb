@@ -7,7 +7,7 @@ module FastlaneCI
     include FastlaneCI::Logging
 
     # @return [Octokit::Client]
-    attr_reader :client
+    attr_accessor :client
 
     # Instantiates new `ConfigurationRepositoryService` class
     #

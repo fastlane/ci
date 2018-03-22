@@ -17,16 +17,16 @@ module FastlaneCI
     include FastlaneCI::Logging
 
     # Reference to the FastlaneCI::Project of this particular build run
-    attr_reader :project
+    attr_accessor :project
 
     # The code hosting service we want to report the status back to
-    attr_reader :code_hosting_service
+    attr_accessor :code_hosting_service
 
     # A reference to FastlaneCI::Build
-    attr_reader :current_build
+    attr_accessor :current_build
 
     # The commit sha we want to run the build for
-    attr_reader :sha
+    attr_accessor :sha
 
     # All lines that were generated so far, this might not be a complete run
     # This is an array of hashes
