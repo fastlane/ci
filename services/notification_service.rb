@@ -1,6 +1,7 @@
+require "task_queue"
 require_relative "data_sources/json_notification_data_source"
 require_relative "../shared/logging_module"
-require_relative "../taskqueue/task_queue"
+
 
 module FastlaneCI
   # Provides access to notification related logic

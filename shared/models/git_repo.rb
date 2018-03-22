@@ -4,8 +4,10 @@ require "git"
 require "tty-command"
 require "securerandom"
 require "digest"
+require "task_queue"
+
 require_relative "../logging_module"
-require_relative "../../taskqueue/task_queue"
+
 require_relative "../git_monkey_patches"
 
 module FastlaneCI

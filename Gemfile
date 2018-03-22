@@ -22,10 +22,6 @@ gem "git", ">= 1.3.0", "< 2.0.0"
 
 gem "dotenv", ">= 2.2.1", "< 3.0.0"
 
-# Related to fastfile-parser project, Ruby language parsing
-gem "parser", ">= 2.4.0.2", "< 2.5.0.0"
-gem "unparser", ">= 0.2.6", "< 1.0.0"
-
 # We have rubocop as runtime dependency for now
 # as we run code style verification for fastlane.ci
 # TODO: We should remove this before the public release
@@ -41,6 +37,9 @@ gem "google-cloud-storage", "~> 1.5.0"
 # TODO: point to minimum release instead of GitHub once
 # 	we shipped a new release
 gem "fastlane", git: "https://github.com/fastlane/fastlane"
+
+gem "fastfile-parser", path: './vendor/fastfile-parser', require: false
+gem "taskqueue", path: "./vendor/taskqueue", require: false
 
 group :test, :development do
   gem "pry"
