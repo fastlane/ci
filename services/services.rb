@@ -63,7 +63,7 @@ module FastlaneCI
         id: "fastlane-ci-config",
         git_url: FastlaneCI.env.repo_url,
         description: "Contains the fastlane.ci configuration",
-        name: "fastlane ci",
+        name: "fastlane-ci-config",
         hidden: true
       )
     end

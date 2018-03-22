@@ -60,13 +60,13 @@ module FastlaneCI
     end
 
     # if you're using this with the fastfile parser, you need to use `relative: false`
-    def local_fastfile_path(relative: false, sha: nil)
+    def local_fastfile_path(relative: false, sha: nil, branch: nil)
       fastfile_path = nil
 
       # First assume the fastlane directory and its file is in the root of the project
-      fastfiles = Dir[File.join(local_repo_path(sha: sha), "**/*", "fastlane/Fastfile")]
+      fastfiles = Dir[File.join(local_repo_path(sha: sha, branch: branch), "**/*", "fastlane/Fastfile")]
       # If not, it might be in a subfolder
-      fastfiles = Dir[File.join(local_repo_path(sha: sha), "**/fastlane/Fastfile")] if fastfiles.count == 0
+      fastfiles = Dir[File.join(local_repo_path(sha: sha, branch: branch), "**/fastlane/Fastfile")] if fastfiles.count == 0
 
       if fastfiles.count > 1
         logger.error("Ugh, multiple Fastfiles found, we're gonna have to build a selection in the future")
@@ -74,11 +74,11 @@ module FastlaneCI
       end
 
       if fastfiles.count == 0
-        logger.error("No Fastfile found at #{local_repo_path(sha: sha)}, or any descendants")
+        logger.error("No Fastfile found at #{local_repo_path(sha: sha, branch: branch)}, or any descendants")
       else
         fastfile_path = fastfiles.first
         if relative
-          fastfile_path = Pathname.new(fastfile_path).relative_path_from(Pathname.new(local_repo_path(sha: sha)))
+          fastfile_path = Pathname.new(fastfile_path).relative_path_from(Pathname.new(local_repo_path(sha: sha, branch: branch)))
         end
       end
       return fastfile_path
@@ -87,12 +87,13 @@ module FastlaneCI
     # Local repository path for a given project and an optional sha.
     # @param [String, nil] sha, the sha of the project repository's path we want to have (Defaults to nil).
     # @return [String] path of the repository for a given sha.
-    def local_repo_path(sha: nil)
+    def local_repo_path(sha: nil, branch: nil)
       base_ci_path = File.expand_path("~/.fastlane/ci/")
       path_components = [
         base_ci_path,
         self.id,
         self.repo_config.full_name,
+        branch,
         sha,
         self.repo_config.name
       ].reject { |i| i.nil? || i.empty? }

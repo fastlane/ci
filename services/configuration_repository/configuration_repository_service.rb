@@ -63,7 +63,7 @@ module FastlaneCI
     end
 
     def pull(path: self.ci_repo_root_path, branch: nil)
-      auth_key = @code_hosting_service_class.setup_auth(
+      @code_hosting_service_class.setup_auth(
         repo_url: FastlaneCI.env.repo_url,
         provider_credential: self.provider_credential,
         path: @code_hosting_service_class.temp_path
@@ -78,7 +78,7 @@ module FastlaneCI
       return if git.log.between(git.branch.name, git.remote.branch.name).size.zero?
       git.pull
     ensure
-      @code_hosting_service_class.unset_auth(auth_key)
+      @code_hosting_service_class.unset_auth
     end
 
     # Adds (if needed) and commits a single file of the ci-config repository.
@@ -98,14 +98,14 @@ module FastlaneCI
     # @params [Base::Git] git
     def push(git: self.git)
       return if git.log.between(git.remote.branch.name, git.branch.name).size.zero?
-      auth_key = @code_hosting_service_class.setup_auth(
+      @code_hosting_service_class.setup_auth(
         repo_url: FastlaneCI.env.repo_url,
         provider_credential: self.provider_credential,
         path: @code_hosting_service_class.temp_path
       )
       git.push
       logger.info("Pushed changes to ci-config repo")
-      @code_hosting_service_class.unset_auth(auth_key)
+      @code_hosting_service_class.unset_auth
     end
 
     def file_path(file_path)
