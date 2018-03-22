@@ -1,4 +1,5 @@
-require_relative "../../shared/git_transactor"
+require "spec_helper"
+require "app/shared/git_transactor"
 
 module FastlaneCI
   describe GitTransactor do
