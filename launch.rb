@@ -4,7 +4,6 @@ require_relative "app/shared/logging_module"
 require_relative "app/shared/models/job_trigger"
 require_relative "app/shared/models/git_repo" # for GitRepo.git_action_queue
 
-
 module FastlaneCI
   # Launch is responsible for spawning up the whole
   # fastlane.ci server, this includes all needed classes
@@ -43,7 +42,7 @@ module FastlaneCI
 
     def self.verify_app_built
       if ENV["WEB_APP"]
-        app_exists = File.file?(File.join('public', '.dist', 'index.html'))
+        app_exists = File.file?(File.join("public", ".dist", "index.html"))
         raise "The web application is not built. Please build with the Angular CLI and Try Again.\nEx. ng build --deploy-url=\"/.dist\"" unless app_exists
       end
     end
