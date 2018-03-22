@@ -12,10 +12,13 @@ module FastlaneCI
     include FastlaneCI::Logging
 
     # @return [GitRepoConfig] URL to the Git repo
-    attr_accessor :repo_config
+    attr_reader :repo_config
 
     # @return [String] Name of the project, also shows up in status as "fastlane.ci: #{project_name}"
     attr_accessor :project_name
+
+    # @return [String] platform name
+    attr_accessor :platform
 
     # @return [String] lane name to run
     attr_accessor :lane
@@ -32,17 +35,22 @@ module FastlaneCI
     # @return [ArtifactProvider]
     attr_accessor :artifact_provider
 
-    def initialize(repo_config: nil, enabled: nil, project_name: nil, lane: nil, id: nil, artifact_provider: LocalArtifactProvider.new)
+    def initialize(repo_config: nil, enabled: nil, project_name: nil, platform: nil, lane: nil, id: nil, job_triggers: [], artifact_provider: LocalArtifactProvider.new)
       self.repo_config = repo_config
       self.enabled = enabled
       self.project_name = project_name
       self.id = id || SecureRandom.uuid
+      self.platform = platform
       self.lane = lane
       self.artifact_provider = artifact_provider
-      # TODO: This is fine for now to avoid runtime fails due to lack of triggers.
-      # In the future, the Add Project workflow, should provide the enough interface
-      # in order to add as many JobTriggers as the user wants.
-      self.job_triggers = [ManualJobTrigger.new(branch: "master")]
+      self.job_triggers = job_triggers
+    end
+
+    def repo_config=(repo_config)
+      unless repo_config.nil?
+        repo_config.id = self.id
+      end
+      @repo_config = repo_config
     end
 
     def builds
@@ -52,14 +60,13 @@ module FastlaneCI
     end
 
     # if you're using this with the fastfile parser, you need to use `relative: false`
-    def local_fastfile_path(relative: false)
+    def local_fastfile_path(relative: false, sha: nil, branch: nil)
       fastfile_path = nil
-      project_path = self.repo_config.local_repo_path
 
       # First assume the fastlane directory and its file is in the root of the project
-      fastfiles = Dir[File.join(project_path, "fastlane/Fastfile")]
+      fastfiles = Dir[File.join(local_repo_path(sha: sha, branch: branch), "**/*", "fastlane/Fastfile")]
       # If not, it might be in a subfolder
-      fastfiles = Dir[File.join(project_path, "**/fastlane/Fastfile")] if fastfiles.count == 0
+      fastfiles = Dir[File.join(local_repo_path(sha: sha, branch: branch), "**/fastlane/Fastfile")] if fastfiles.count == 0
 
       if fastfiles.count > 1
         logger.error("Ugh, multiple Fastfiles found, we're gonna have to build a selection in the future")
@@ -67,14 +74,30 @@ module FastlaneCI
       end
 
       if fastfiles.count == 0
-        logger.error("No Fastfile found at #{project_path}/fastlane/Fastfile, or any descendants")
+        logger.error("No Fastfile found at #{local_repo_path(sha: sha, branch: branch)}, or any descendants")
       else
         fastfile_path = fastfiles.first
         if relative
-          fastfile_path = Pathname.new(fastfile_path).relative_path_from(Pathname.new(project_path))
+          fastfile_path = Pathname.new(fastfile_path).relative_path_from(Pathname.new(local_repo_path(sha: sha, branch: branch)))
         end
       end
       return fastfile_path
+    end
+
+    # Local repository path for a given project and an optional sha.
+    # @param [String, nil] sha, the sha of the project repository's path we want to have (Defaults to nil).
+    # @return [String] path of the repository for a given sha.
+    def local_repo_path(sha: nil, branch: nil)
+      base_ci_path = File.expand_path("~/.fastlane/ci/")
+      path_components = [
+        base_ci_path,
+        self.id,
+        self.repo_config.full_name,
+        branch,
+        sha,
+        self.repo_config.name
+      ].reject { |i| i.nil? || i.empty? }
+      return File.join(path_components)
     end
   end
 end

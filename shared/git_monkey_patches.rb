@@ -1,3 +1,4 @@
+# Monkey patches for ruby-git gem.
 module Git
   # Lib class from https://github.com/voxpupuli/modulesync/pull/144/files
   #

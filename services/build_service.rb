@@ -52,8 +52,6 @@ module FastlaneCI
 
     def add_build!(project: nil, build: nil)
       self.build_data_source.add_build!(project: project, build: build)
-
-      # TODO: commit changes here
     end
   end
 end

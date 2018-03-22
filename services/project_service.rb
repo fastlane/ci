@@ -2,7 +2,6 @@ require_relative "config_data_sources/json_project_data_source"
 require_relative "../shared/models/repo_config"
 require_relative "../shared/models/local_artifact_provider"
 require_relative "../shared/models/gcp_artifact_provider"
-require_relative "../shared/models/git_repo"
 require_relative "../shared/logging_module"
 require_relative "./user_service"
 require_relative "./services"
@@ -21,7 +20,7 @@ module FastlaneCI
       self.project_data_source = project_data_source
     end
 
-    def create_project!(name: nil, repo_config: nil, enabled: nil, lane: nil, artifact_provider: nil)
+    def create_project!(name: nil, repo_config: nil, enabled: nil, platform: nil, lane: nil, job_triggers: [], artifact_provider: nil)
       unless repo_config.nil?
         raise "repo_config must be configured with an instance of #{RepoConfig.name}" unless repo_config.class <= RepoConfig
       end
@@ -35,17 +34,21 @@ module FastlaneCI
       enabled ||= true
       # we use LocalArtifactProvider by default
       artifact_provider ||= LocalArtifactProvider.new
-      project = self.project_data_source.create_project!(name: name, repo_config: repo_config, enabled: enabled, lane: lane, artifact_provider: artifact_provider)
+      project = self.project_data_source.create_project!(
+        name: name,
+        repo_config: repo_config,
+        enabled: enabled,
+        platform: platform,
+        lane: lane,
+        job_triggers: job_triggers,
+        artifact_provider: artifact_provider
+      )
       raise "Project couldn't be created" if project.nil?
-      self.commit_repo_changes!(message: "Created project #{project.project_name}.")
-      # We shallow clone the repo to have the information needed for retrieving lanes.
-      _ = self.git_repo_for_project(project: project)
       return project
     end
 
     def update_project!(project: nil)
       self.project_data_source.update_project!(project: project)
-      self.commit_repo_changes!(message: "Updated project #{project.project_name}.")
     end
 
     # @return [Project]
@@ -53,14 +56,13 @@ module FastlaneCI
       if self.project_data_source.project_exist?(name)
         return self.project_data_source
                    .projects
-                   .select { |existing_project| existing_project.project_name == name }
-                   .first
+                   .detect { |existing_project| existing_project.project_name == name }
       end
     end
 
     # @return [Project]
     def project_by_id(id)
-      return self.project_data_source.projects.select { |project| project.id == id }.first
+      return self.project_data_source.projects.detect { |project| project.id == id }
     end
 
     # TODO: remove this, we shouldn't be exposing implicitly private variables here
@@ -69,40 +71,12 @@ module FastlaneCI
       return self.project_data_source.git_repo
     end
 
-    def refresh_repo
-      self.git_repo.pull
-    end
-
-    # @return [Array[Project]]
     def projects
       return self.project_data_source.projects
     end
 
     def delete_project!(project: nil)
       self.project_data_source.delete_project!(project: project)
-      self.commit_repo_changes!(message: "Deleted project #{project.project_name}.")
-    end
-
-    # Not sure if this must be here or not, but we can open a discussion on this.
-    def commit_repo_changes!(message: nil, file_to_commit: nil)
-      Services.configuration_git_repo.commit_changes!(commit_message: message,
-                                                        file_to_commit: file_to_commit)
-    end
-
-    def push_configuration_repo_changes!
-      Services.configuration_git_repo.push
-    end
-
-    # @return [GitRepo]
-    def git_repo_for_project(project:)
-      # TODO: For now we'll clone the project synchronously,
-      # we may revisit this later to handle async operations
-      # between Service <-> WebServer <-> Client.
-      return GitRepo.new(
-        git_config: project.repo_config,
-        provider_credential: Services.provider_credential,
-        async_start: false
-      )
     end
   end
 end

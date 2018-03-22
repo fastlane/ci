@@ -1,13 +1,14 @@
 require_relative "project_data_source"
+require_relative "../configuration_repository/configuration_repository_decorator"
 require_relative "../data_sources/json_data_source"
 require_relative "../../shared/json_convertible"
-require_relative "../../shared/models/git_repo"
 require_relative "../../shared/models/git_repo_config"
 require_relative "../../shared/models/job_trigger"
 require_relative "../../shared/models/project"
 require_relative "../../shared/models/user"
 require_relative "../../shared/models/provider_credential"
 require_relative "../../shared/logging_module"
+require_relative "../services"
 
 module FastlaneCI
   # Mixin for JobTrigger which is in an Array on Project
@@ -72,6 +73,7 @@ module FastlaneCI
   class JSONProjectDataSource < ProjectDataSource
     include FastlaneCI::JSONDataSource
     include FastlaneCI::Logging
+    extend FastlaneCI::ConfigurationRepositoryUpdater
 
     class << self
       attr_accessor :projects_file_semaphore
@@ -85,20 +87,7 @@ module FastlaneCI
     attr_accessor :git_repo
 
     def after_creation(**params)
-      if params.nil?
-        raise "Either user or a provider credential is mandatory."
-      else
-        if !params[:user] && !params[:provider_credential]
-          raise "Either user or a provider credential is mandatory."
-        else
-          params[:provider_credential] ||= params[:user].provider_credential(type: ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
-          @git_repo = FastlaneCI::GitRepo.new(git_config: self.json_folder_path, provider_credential: params[:provider_credential])
-        end
-      end
-    end
-
-    def refresh_repo
-      self.git_repo.pull
+      self.git_repo = FastlaneCI::Services.configuration_repository_service
     end
 
     # Access configuration
@@ -114,6 +103,7 @@ module FastlaneCI
         return saved_projects
       end
     end
+    pull_before(:projects)
 
     def job_triggers_from_hash_array(job_trigger_array: nil)
       return job_trigger_array.map do |job_trigger_hash|
@@ -139,6 +129,7 @@ module FastlaneCI
         File.write(self.git_repo.file_path("projects.json"), JSON.pretty_generate(projects.map(&:to_object_dictionary)))
       end
     end
+    pull_before(:projects=)
 
     def git_repos
       JSONProjectDataSource.repos_file_semaphore.synchronize do
@@ -149,6 +140,7 @@ module FastlaneCI
         return saved_git_repos
       end
     end
+    pull_before(:git_repos)
 
     def save_git_repo_configs!(git_repo_configs: nil)
       JSONProjectDataSource.repos_file_semaphore.synchronize do
@@ -156,13 +148,16 @@ module FastlaneCI
         File.write(path, JSON.pretty_generate(git_repo_configs.map(&:to_object_dictionary)))
       end
     end
+    pull_before(:save_git_repo_configs!)
 
-    def create_project!(name: nil, repo_config: nil, enabled: nil, lane: nil, artifact_provider: nil)
+    def create_project!(name: nil, repo_config: nil, enabled: nil, platform: nil, lane: nil, job_triggers: [], artifact_provider: nil)
       projects = self.projects.clone
       new_project = Project.new(repo_config: repo_config,
                                 enabled: enabled,
                                 project_name: name,
+                                platform: platform,
                                 lane: lane,
+                                job_triggers: job_triggers,
                                 artifact_provider: artifact_provider)
       if !self.project_exist?(new_project.project_name)
         projects << new_project

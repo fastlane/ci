@@ -19,7 +19,7 @@
         <% repos.each do |repo| %>
           <tr style="cursor: pointer;">
             <td>💚</td>
-            <td onclick="document.location = '/projects_erb/add/<%= repo[:name] %>';"><%= repo[:name] %></td>
+            <td onclick="document.location = '/projects_erb/add/<%= CGI.escape(repo.full_name) %>';"><%= repo.full_name %></td>
           </tr>
         <% end %>
       </tbody>

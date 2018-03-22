@@ -7,6 +7,7 @@ require_relative "../../shared/models/artifact"
 require_relative "../../shared/models/artifact_provider.rb"
 require_relative "../../shared/models/local_artifact_provider.rb"
 require_relative "../../shared/models/gcp_artifact_provider"
+require_relative "../configuration_repository/configuration_repository_decorator"
 
 module FastlaneCI
   # Mixin the JSONConvertible class for Build
@@ -77,6 +78,7 @@ module FastlaneCI
   class JSONBuildDataSource < BuildDataSource
     include FastlaneCI::JSONDataSource
     include FastlaneCI::Logging
+    extend FastlaneCI::ConfigurationRepositoryUpdater
 
     attr_accessor :json_folder_path
 
@@ -102,6 +104,7 @@ module FastlaneCI
 
       return most_recent_builds
     end
+    pull_before(:list_builds)
 
     def pending_builds(project: nil)
       return list_builds(project: project).select { |build| build.status == "pending" }
@@ -117,6 +120,7 @@ module FastlaneCI
       FileUtils.mkdir_p(containing_path)
       File.write(full_path, JSON.pretty_generate(hash_to_store))
     end
+    pull_before(:add_build!)
 
     private
 

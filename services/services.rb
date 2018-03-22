@@ -1,7 +1,8 @@
 require_relative "./code_hosting/git_hub_service"
 require_relative "./config_data_sources/json_project_data_source"
 require_relative "./config_service"
-require_relative "./configuration_repository_service"
+require_relative "./configuration_repository/configuration_repository_service"
+require_relative "./configuration_repository/github_configuration_repository_service"
 require_relative "./data_sources/json_build_data_source"
 require_relative "./data_sources/json_user_data_source"
 require_relative "./environment_variable_service"
@@ -10,6 +11,9 @@ require_relative "./project_service"
 require_relative "./notification_service"
 require_relative "./user_service"
 require_relative "./worker_service"
+
+require "openssl"
+require "securerandom"
 
 module FastlaneCI
   # A class that stores the singletones for each
@@ -59,19 +63,32 @@ module FastlaneCI
         id: "fastlane-ci-config",
         git_url: FastlaneCI.env.repo_url,
         description: "Contains the fastlane.ci configuration",
-        name: "fastlane ci",
+        name: "fastlane-ci-config",
         hidden: true
       )
     end
 
     # Configuration GitRepo
     #
-    # @return [GitRepo]
-    def self.configuration_git_repo
-      @_configuration_git_repo ||= FastlaneCI::GitRepo.new(
-        git_config: ci_config_repo,
-        provider_credential: provider_credential
-      )
+    # @return [Git::Base]
+    def self.configuration_repository_service
+      @_configuration_git_repo ||= {}
+
+      digest_key = Digest::SHA256.digest(provider_credential.type.to_s + provider_credential.api_token)
+
+      if !@_configuration_git_repo[digest_key].nil?
+        return @_configuration_git_repo[digest_key]
+      else
+        case provider_credential.type
+        when FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
+          service = FastlaneCI::GitHubConfigurationRepositoryService.new(provider_credential: provider_credential)
+          service.clone
+          @_configuration_git_repo[digest_key] = service
+          return @_configuration_git_repo[digest_key]
+        else
+          return nil
+        end
+      end
     end
 
     def self.ci_user
@@ -144,9 +161,7 @@ module FastlaneCI
 
     # @return [GithubService]
     def self.github_service
-      @_github_service ||= FastlaneCI::GitHubService.new(
-        provider_credential: provider_credential
-      )
+      @_github_service ||= FastlaneCI::GitHubService
     end
 
     # Grab a config service that is configured for the CI user
@@ -156,13 +171,6 @@ module FastlaneCI
 
     def self.worker_service
       @_worker_service ||= FastlaneCI::WorkerService.new
-    end
-
-    # @return [ConfigurationRepositoryService]
-    def self.configuration_repository_service
-      @_configuration_repository_service ||= FastlaneCI::ConfigurationRepositoryService.new(
-        provider_credential: provider_credential
-      )
     end
 
     def self.environment_variable_service

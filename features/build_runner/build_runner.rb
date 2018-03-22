@@ -38,10 +38,10 @@ module FastlaneCI
     # Work queue where builds should be run
     attr_accessor :work_queue
 
-    def initialize(project:, sha:, github_service:, work_queue: nil)
+    def initialize(sha:, github_service:, work_queue: nil)
       # Setting the variables directly (only having `attr_reader`) as they're immutable
       # Once you define a FastlaneBuildRunner, you shouldn't be able to modify them
-      @project = project
+      @project = github_service.project
       @sha = sha
 
       self.all_build_output_log_rows = []
@@ -50,7 +50,8 @@ module FastlaneCI
       # TODO: provider credential should determine what exact CodeHostingService gets instantiated
       @code_hosting_service = github_service
 
-      @work_queue = work_queue
+      @code_hosting_service.clone(sha: sha)
+      self.work_queue = work_queue
 
       self.prepare_build_object
     end
@@ -85,6 +86,7 @@ module FastlaneCI
 
       # Status is set on the `current_build` object by the subclass
       self.save_build_status!
+      @code_hosting_service.cleanup(sha: sha)
     rescue StandardError => ex
       # TODO: better error handling, don't catch all Exception
       logger.error(ex)
@@ -92,6 +94,7 @@ module FastlaneCI
       current_build.duration = duration
       current_build.status = :failure # TODO: also handle failure
       self.save_build_status!
+      @code_hosting_service.cleanup(sha: sha)
     end
 
     # Starts the build, incrementing the build number from the number of builds
@@ -182,12 +185,6 @@ module FastlaneCI
         project: self.project,
         build: self.current_build
       )
-
-      # Commit & Push the changes to git remote
-      FastlaneCI::Services.project_service.git_repo.commit_changes!
-
-      # TODO: disabled for now so that while we developer we don't keep pushing to remote ci-config repo
-      # FastlaneCI::Services.project_service.push_configuration_repo_changes!
     rescue StandardError => ex
       logger.error("Error setting the build status as part of the config repo")
       logger.error(ex)
@@ -202,13 +199,9 @@ module FastlaneCI
     # Using a `rescue` block here is important
     # As the build is still green, even though we couldn't set the GH status
     def save_build_status_source!
-      status_context = self.project.project_name
-
       self.code_hosting_service.set_build_status!(
-        repo: self.project.repo_config.git_url,
         sha: self.sha,
         state: self.current_build.status,
-        status_context: status_context,
         description: self.current_build.description
       )
     rescue StandardError => ex

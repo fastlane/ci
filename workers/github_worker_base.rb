@@ -1,9 +1,8 @@
 require_relative "worker_base"
 require_relative "../shared/models/provider_credential"
 require_relative "../shared/logging_module"
-require_relative "../shared/models/git_repo"
 require_relative "../services/build_runner_service"
-require_relative "../services/code_hosting/git_hub_service"
+require_relative "../services/code_hosting/code_hosting_service"
 
 module FastlaneCI
   # Base class for GitHub workers
@@ -24,8 +23,8 @@ module FastlaneCI
 
     def initialize(provider_credential: nil, project: nil)
       self.provider_credential = provider_credential
-      self.github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
       self.project = project
+      self.github_service = self.git_repo_service
 
       self.target_branches_set = Set.new
       project.job_triggers.each do |trigger|
@@ -59,42 +58,30 @@ module FastlaneCI
     # This is a separate method, so it's lazy loaded
     # since it will be run on the "main" thread if it were
     # part of the #initialize method
-    def git_repo
-      @git_repo ||= GitRepo.new(
-        git_config: project.repo_config,
-        provider_credential: provider_credential
-      )
+    def git_repo_service
+      case self.provider_credential.type
+      when FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
+        return FastlaneCI::GitHubService.new(provider_credential: self.provider_credential, project: self.project)
+      else
+        return nil
+      end
     end
 
     def target_branches(&block)
-      repo = self.git_repo
+      self.git_repo_service.branch_names.select { |branch| self.target_branches_set.include?(branch) }.each do |branch|
+        git = self.git_repo_service.clone(branch: branch)
 
-      # is needed to see if there are new branches (called async)
-      repo.fetch
-
-      repo.git_and_remote_branches_each do |git, branch|
-        next if branch.name.include?("HEAD ->")
-        # next unless self.target_branches_set.include?(branch.name)
-
-        # There might be un-committed changes in there, so ignore
-        git.reset_hard
-
-        # Check out the specific branch, this will detach our current head
-        branch.checkout
-
-        block.call(git, branch)
+        yield(git, branch)
       end
     end
 
     def create_and_queue_build_task(sha:)
       credential = self.provider_credential
-      current_project = self.project
       current_sha = sha
       build_runner = FastlaneBuildRunner.new(
-        project: current_project,
         sha: current_sha,
-        github_service: self.github_service,
-        work_queue: FastlaneCI::GitRepo.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
+        github_service: FastlaneCI::GitHubService.new(provider_credential: self.provider_credential, project: self.project),
+        work_queue: FastlaneCI::CodeHostingService.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
       )
       build_runner.setup(parameters: nil)
       build_task = Services.build_runner_service.add_build_runner(build_runner: build_runner)

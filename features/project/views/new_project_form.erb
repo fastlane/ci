@@ -4,27 +4,78 @@
       <span class="mdl-layout__title"><%= title %></span>
     </div>
   </header>
-
+  <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll("#submit_form")[0].disabled = true;
+    document.querySelectorAll("#selected_lane")[0].style.display = "none";
+    document.querySelectorAll("#lane_to_run")[0].style.display = "none";
+  });
+  function string_to_node(string) {
+    var d = document.createElement('div');
+    d.innerHTML = string;
+    return d.firstChild;
+  }
+  function check_branch(el) {
+    document.querySelectorAll("#submit_form")[0].disabled = true;
+    document.querySelectorAll("#selected_lane")[0].style.display = "none";
+    document.querySelectorAll("#selected_lane")[0].innerHTML = "";
+    var request = new XMLHttpRequest();
+    request.responseType = 'json';
+    request.open('GET', "/projects_erb/lanes/<%= CGI.escape(repo) %>/" + el.value, true);
+    request.onload = function() {
+      if (request.status >= 200 && request.status < 400) {
+        var data = request.response;
+        
+        document.querySelectorAll("#selected_lane")[0].appendChild(string_to_node("<option disabled selected value>Select a lane</option>"));
+        for (var platform in data) {
+          for (var lane in data[platform]) {
+            if (lane && platform) {
+              document.querySelectorAll("#selected_lane")[0].append(string_to_node('<option value="'+ platform + " " + lane +'">'+ platform + " " + lane +'</option>'));
+            } else if (lane && platform === "no_platform") {
+              document.querySelectorAll("#selected_lane")[0].append(string_to_node('<option value="no_platform '+ lane +'">no_platform ' + lane +'</option>'));
+            }
+          }
+        }
+        document.querySelectorAll("#selected_lane")[0].style.display = "";
+        document.querySelectorAll("#lane_to_run")[0].style.display = "";
+      } else {
+        // We reached our target server, but it returned an error
+      }
+    };
+    request.onerror = function() {
+      // There was a connection error of some sort
+    };
+    request.send();
+  }
+  function check_lane() {
+    document.querySelectorAll("#submit_form")[0].disabled = false;
+  }
+  </script>
+  
   <%= erb :"../../partials/navigation" %>
 
   <main class="mdl-layout__content" style="padding: 40px">
-    <form method="POST" action="/projects_erb/add/<%= repo.git_config.name %>">
-      <h5>Adding <%= repo.git_config.full_name %></h5>
+    <form method="POST" action="/projects_erb/add/<%= CGI.escape(repo) %>">
+      <h5>Adding <%= repo %></h5>
       <div class="mdl-textfield mdl-js-textfield">
-        <input class="mdl-textfield__input" type="text" name="project_name" value="<%= repo.git_config.full_name %>">
+        <input class="mdl-textfield__input" type="text" name="project_name" value="<%= repo %>">
         <label class="mdl-textfield__label" for="project_name">Project Name</label>
       </div>
       <br />
-      <h5>Lane to run</h5>
-      <p><code>Fastfile</code> located at path <code><%= fastfile_path.split("/").last(2).join("/") %></code></p>
-      <select name="selected_lane">
-        <% lanes.each do |current_lane| %>
-          <option value="<%= current_lane %>"><%= current_lane %></option>
+      <h5>Select a branch</h5>
+      <select name="branch" id="branch" onchange="check_branch(this)">
+        <option disabled selected value>Select a branch</option>
+        <% branches.each do |branch| %>
+          <option value="<%= branch %>"><%= branch %></option>
         <% end %>
       </select>
       <br />
+      <h5 id="lane_to_run">Lane to run</h5>
+      <select name="selected_lane", id="selected_lane" onchange="check_lane()">
+      </select>
       <br />
-      <input class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" type="submit" title="Save">
+      <br />
+      <input id="submit_form" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" type="submit" title="Save">
     </form>
   </main>
 </div>

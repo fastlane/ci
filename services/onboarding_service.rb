@@ -1,5 +1,6 @@
 require "json"
 require_relative "../shared/logging_module"
+require_relative "../services/code_hosting/git_hub_service"
 
 module FastlaneCI
   # Provides operations to create and mutate the FastlaneCI configuration
@@ -15,13 +16,15 @@ module FastlaneCI
       logger.info("No config repo cloned yet, doing that now")
 
       # Trigger the initial clone
-      FastlaneCI::ProjectService.new(
-        project_data_source: FastlaneCI::JSONProjectDataSource.create(
-          Services.ci_config_repo,
-          git_repo_config: Services.ci_config_repo,
-          provider_credential: Services.provider_credential
+      case Services.provider_credential.type
+      when FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
+        FastlaneCI::GitHubService.clone(
+          repo_url: Services.ci_config_repo.git_url,
+          provider_credential: Services.provider_credential,
+          path: Services.ci_config_git_repo_path,
+          name: "fastlane-ci-config"
         )
-      )
+      end
       logger.info("Successfully did the initial clone on this machine")
     rescue StandardError => ex
       logger.error("Something went wrong on the initial clone")
@@ -68,19 +71,22 @@ module FastlaneCI
     #
     # @return [Boolean]
     def local_configuration_repo_exists?
-      unless Services.ci_config_repo.exists?
-        logger.debug("local configuration repo doesn't exist")
+      if Services.configuration_repository_service.respond_to?(:configuration_repository_exists?)
+        return Services.configuration_repository_service.configuration_repository_exists?
+      else
         return false
       end
-
-      return true
     end
 
     private
 
     # @return [Boolean]
     def remote_configuration_repository_valid?
-      return Services.configuration_repository_service.configuration_repository_valid?
+      if Services.configuration_repository_service.respond_to?(:configuration_repository_valid?)
+        return Services.configuration_repository_service.configuration_repository_valid?
+      else
+        return false
+      end
     end
 
     # @return [Boolean]

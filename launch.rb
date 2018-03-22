@@ -1,7 +1,7 @@
 require "set"
 require_relative "./shared/logging_module"
 require_relative "./shared/models/job_trigger"
-require_relative "./shared/models/git_repo" # for GitRepo.git_action_queue
+require_relative "./services/code_hosting/git_hub_service" # for CodeHostingService.git_action_queue
 require_relative "./taskqueue/task_queue"
 
 module FastlaneCI
@@ -125,11 +125,10 @@ module FastlaneCI
       # in the future we should allow this to be configurable behavior
       return if ENV["FASTLANE_CI_SKIP_RESTARTING_PENDING_WORK"]
 
-      github_projects = Services.config_service.projects(provider_credential: Services.provider_credential)
-      github_service = FastlaneCI::GitHubService.new(provider_credential: Services.provider_credential)
+      projects = Services.config_service.projects(provider_credential: Services.provider_credential)
 
-      run_pending_github_builds(projects: github_projects, github_service: github_service)
-      enqueue_builds_for_open_github_prs_with_no_status(projects: github_projects, github_service: github_service)
+      run_pending_builds(projects: projects, provider_credential: Services.provider_credential)
+      enqueue_builds_for_open_prs_with_no_status(projects: projects, provider_credential: Services.provider_credential)
     end
 
     def self.launch_workers
@@ -157,7 +156,7 @@ module FastlaneCI
     # initialization for all projects for the provider credentials
     #
     # @return [nil]
-    def self.run_pending_github_builds(projects: nil, github_service: nil)
+    def self.run_pending_builds(projects: nil, provider_credential: nil)
       logger.debug("Searching all projects for commits with pending status that need a new build")
       # For each project, rerun all builds with the status of "pending"
       projects.each do |project|
@@ -168,10 +167,9 @@ module FastlaneCI
         pending_build_shas_needing_rebuilds.each do |sha|
           logger.debug("Found sha #{sha} that needs a rebuild for #{project.project_name}")
           build_runner = FastlaneBuildRunner.new(
-            project: project,
             sha: sha,
-            github_service: github_service,
-            work_queue: FastlaneCI::GitRepo.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
+            github_service: FastlaneCI::GitHubService.new(provider_credential: provider_credential, project: project),
+            work_queue: FastlaneCI::CodeHostingService.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
           )
           build_runner.setup(parameters: nil)
           Services.build_runner_service.add_build_runner(build_runner: build_runner)
@@ -181,7 +179,7 @@ module FastlaneCI
 
     # We might be in a situation where we have an open pr, but no status yet
     # if that's the case, we should enqueue a build for it
-    def self.enqueue_builds_for_open_github_prs_with_no_status(projects: nil, github_service: nil)
+    def self.enqueue_builds_for_open_prs_with_no_status(projects: nil, provider_credential: nil)
       logger.debug("Searching for open PRs with no status and starting a build for them")
       projects.each do |project|
         # TODO: generalize this sort of thing
@@ -189,7 +187,7 @@ module FastlaneCI
 
         # we don't support anything other than GitHub right now
         next unless credential_type == FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
-
+        service = FastlaneCI::GitHubService.new(project: project, provider_credential: provider_credential)
         # Collect all the branches from the triggers on this project that are commit-based
         branches_to_check = project.job_triggers
                                    .select { |trigger| trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit] }
@@ -198,14 +196,14 @@ module FastlaneCI
 
         repo_full_name = project.repo_config.full_name
         # let's get all commit shas that need a build (no status yet)
-        commit_shas = github_service.last_commit_sha_for_all_open_pull_requests(repo_full_name: repo_full_name, branches: branches_to_check)
+        commit_shas = service.last_commit_sha_for_pull_requests(branches: branches_to_check)
 
         # no commit shas need to be switched to `pending` state
         next unless commit_shas.count > 0
 
         commit_shas.each do |current_sha|
           logger.debug("Checking #{repo_full_name} sha: #{current_sha} for missing status")
-          statuses = github_service.statuses_for_commit_sha(repo_full_name: repo_full_name, sha: current_sha)
+          statuses = service.statuses_for_commit_sha(sha: current_sha)
 
           # if we have a status, skip it!
           next if statuses.count > 0
@@ -213,10 +211,9 @@ module FastlaneCI
           logger.debug("Found sha: #{current_sha} in #{repo_full_name} missing status, adding build.")
 
           build_runner = FastlaneBuildRunner.new(
-            project: project,
             sha: current_sha,
-            github_service: github_service,
-            work_queue: FastlaneCI::GitRepo.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
+            github_service: service,
+            work_queue: FastlaneCI::CodeHostingService.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
           )
           build_runner.setup(parameters: nil)
           Services.build_runner_service.add_build_runner(build_runner: build_runner)

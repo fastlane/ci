@@ -1,7 +1,8 @@
 require_relative "../../shared/authenticated_controller_base"
-require_relative "../../shared/models/git_repo"
-
+require_relative "../../shared/models/job_trigger"
+require_relative "../../services/code_hosting/code_hosting_service"
 require "pathname"
+require "json"
 
 module FastlaneCI
   # Controller for a single project view. Responsible for updates, triggering builds, and displaying project info
@@ -15,11 +16,9 @@ module FastlaneCI
     get "#{HOME}/:project_id/trigger" do
       project_id = params[:project_id]
       project = self.user_project_with_id(project_id: project_id)
-      current_github_provider_credential = self.check_and_get_provider_credential
+      provider_credential = self.check_and_get_provider_credential
 
-      # TODO: This should be hidden in a service
-      repo = FastlaneCI::GitRepo.new(git_config: project.repo_config, provider_credential: current_github_provider_credential)
-      current_sha = repo.most_recent_commit.sha
+      service = FastlaneCI::GitHubService.new(provider_credential: provider_credential, project: project)
       manual_triggers_allowed = project.job_triggers.any? { |trigger| trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual] }
 
       unless manual_triggers_allowed
@@ -28,12 +27,15 @@ module FastlaneCI
         return
       end
 
-      # TODO: This should be hidden in a service
+      branch_to_build = project.job_triggers.detect { |trigger| trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual] }.branch
+      current_sha = service.all_commits_sha_for_branch.last
+      # TODO: This should be delegated to the `build_runner` to free up the thread.
+      service.clone(branch: branch_to_build, sha: current_sha)
+
       build_runner = FastlaneBuildRunner.new(
-        project: project,
         sha: current_sha,
-        github_service: FastlaneCI::GitHubService.new(provider_credential: current_github_provider_credential),
-        work_queue: FastlaneCI::GitRepo.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
+        github_service: service,
+        work_queue: FastlaneCI::CodeHostingService.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
       )
       build_runner.setup(parameters: nil)
       Services.build_runner_service.add_build_runner(build_runner: build_runner)
@@ -44,7 +46,8 @@ module FastlaneCI
     post "#{HOME}/:project_id/save" do
       project_id = params[:project_id]
       project = self.user_project_with_id(project_id: project_id)
-      project.lane = params["selected_lane"]
+      project.platform = params["selected_lane"]&.split(" ")&.first || "no_platform"
+      project.lane = params["selected_lane"].split(" ").last
       project.project_name = params["project_name"]
 
       # TODO: what's the best way to store that project in the config?
@@ -58,7 +61,7 @@ module FastlaneCI
 
       locals = {
           title: "Add new project",
-          repos: FastlaneCI::GitHubService.new(provider_credential: provider_credential).repos
+          repos: FastlaneCI::GitHubService.repos(provider_credential: provider_credential)
       }
       erb(:new_project, locals: locals, layout: FastlaneCI.default_layout)
     end
@@ -66,82 +69,55 @@ module FastlaneCI
     get "#{HOME}/add/*" do |repo_name|
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
-      github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
-      selected_repo = github_service.repos.select { |repo| repo_name == repo.name }.first
-
-      # We need to check whether we can checkout the project without issues.
-      # So a new project is created with default settings so we can fetch it.
-      repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
-
-      repo = GitRepo.new(
-        git_config: repo_config,
-        provider_credential: provider_credential,
-        async_start: false
-      )
-
-      # TODO: This should be refactored in some kind of FastlaneUtils` class.`
-      # We have synchronously cloned the repo, now we need to get the lanes.
-      repo_path = repo.git_config.local_repo_path
-      # First assume the fastlane directory and its file is in the root of the project
-      fastfiles = Dir[File.join(repo_path, "fastlane/Fastfile")]
-      # If not, it might be in a subfolder
-      fastfiles = Dir[File.join(repo_path, "**/fastlane/Fastfile")] if fastfiles.count == 0
-
-      if fastfiles.count > 1
-        logger.error("Ugh, multiple Fastfiles found, we're gonna have to build a selection in the future")
-        # for now, just take the first one
-      end
-
-      fastfile_path = fastfiles.first
-
-      parser = Fastlane::FastfileParser.new(path: fastfile_path)
-      available_lanes = parser.available_lanes
-
       locals = {
           title: "Add new project",
-          repo: repo,
-          lanes: available_lanes,
-          fastfile_path: fastfile_path
+          repo: repo_name,
+          branches: FastlaneCI::GitHubService.branch_names(provider_credential: provider_credential, repo_full_name: repo_name)
       }
-
-      # Delete the project
-      FileUtils.rm_rf(repo_path) if File.directory?(File.join(repo_path, ".git"))
 
       erb(:new_project_form, locals: locals, layout: FastlaneCI.default_layout)
     end
 
-    post "#{HOME}/add/*" do |repo_name|
+    get "#{HOME}/lanes/*/*/*" do |org, repo_name, branch|
+      content_type :json
+
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
-      github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
-      selected_repo = github_service.repos.select { |repo| repo_name == repo.name }.first
+      _, fastfile_config = FastlaneCI::GitHubService.peek_fastfile_configuration(
+        repo_url: "#{org}/#{repo_name}",
+        branch: branch,
+        provider_credential: provider_credential
+      )
 
-      repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
+      fastfile_config.to_json
+    end
+
+    post "#{HOME}/add/*/*" do |org, repo_name|
+      provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
+
+      repo_config = FastlaneCI::GitHubService.repos(provider_credential: provider_credential).detect { |repo| repo.full_name == org + "/" + repo_name }
 
       lane = params["selected_lane"]
       project_name = params["project_name"]
-
-      # Do this so we trigger the clone of the repo.
-      # TODO: Do this wherever it should be done, as we must redirect
-      # to the project details only when this task is finished.
-      _ = GitRepo.new(
-        git_config: repo_config,
-        provider_credential: provider_credential,
-        async_start: false
-      )
+      branch = params["branch"]
 
       # We now have enough information to create the new project.
-      # TODO: add job_triggers here
-      # We shouldn't be blocking manual trigger builds
-      # if we do not provide an interface to add them.
       project = Services.project_service.create_project!(
         name: project_name,
         repo_config: repo_config,
         enabled: true,
-        lane: lane
+        platform: lane.split(" ").first,
+        lane: lane.split(" ").last,
+        # TODO: Until we make a proper interface to attach JobTriggers to a Project, let's add a manual one for the selected branch.
+        job_triggers: [FastlaneCI::ManualJobTrigger.new(branch: branch)]
       )
 
       if !project.nil?
+        github_service = FastlaneCI::GitHubService.new(
+          provider_credential: provider_credential,
+          project: project
+        )
+        github_service.clone(branch: branch)
         redirect("#{HOME}/#{project.id}")
       else
         raise "Project couldn't be created"
@@ -157,23 +133,18 @@ module FastlaneCI
       # Long term, the best appraoch would probably to have the FastfileParser be
       # its own Ruby gem, or even part of the fastlane/fastlane main repo
       # For now, this is good enough, as we'll be moving so fast with this one
+      provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
-      relative_fastfile_path = nil
-      available_lanes = []
-      absolute_fastfile_path = project.local_fastfile_path
-      unless absolute_fastfile_path.nil?
-        parser = Fastlane::FastfileParser.new(path: absolute_fastfile_path)
-        available_lanes = parser.available_lanes
-
-        project_path = project.repo_config.local_repo_path
-        relative_fastfile_path = Pathname.new(absolute_fastfile_path).relative_path_from(Pathname.new(project_path))
-      end
+      fastfile, = FastlaneCI::GitHubService.peek_fastfile_configuration(
+        repo_url: project.repo_config.full_name,
+        branch: project.job_triggers&.first&.branch || "master",
+        provider_credential: provider_credential
+      )
 
       locals = {
         project: project,
         title: "Project #{project.project_name}",
-        available_lanes: available_lanes,
-        fastfile_path: relative_fastfile_path # TODO: rename param `fastfile_path` to `relative_fastfile_path`
+        available_lanes: fastfile.available_lanes
       }
 
       erb(:project, locals: locals, layout: FastlaneCI.default_layout)
