@@ -38,6 +38,9 @@ module FastlaneCI
     # Work queue where builds should be run
     attr_accessor :work_queue
 
+    # The code hosting service for the given build
+    attr_accessor :code_hosting_service
+
     def initialize(sha:, github_service:, work_queue: nil)
       # Setting the variables directly (only having `attr_reader`) as they're immutable
       # Once you define a FastlaneBuildRunner, you shouldn't be able to modify them
@@ -48,9 +51,7 @@ module FastlaneCI
       self.build_change_observer_blocks = []
 
       # TODO: provider credential should determine what exact CodeHostingService gets instantiated
-      @code_hosting_service = github_service
-
-      @git = @code_hosting_service.clone(sha: sha)
+      self.code_hosting_service = github_service
       self.work_queue = work_queue
 
       self.prepare_build_object
@@ -86,7 +87,6 @@ module FastlaneCI
 
       # Status is set on the `current_build` object by the subclass
       self.save_build_status!
-      @code_hosting_service.cleanup(@git)
     rescue StandardError => ex
       # TODO: better error handling, don't catch all Exception
       logger.error(ex)
@@ -94,7 +94,6 @@ module FastlaneCI
       current_build.duration = duration
       current_build.status = :failure # TODO: also handle failure
       self.save_build_status!
-      @code_hosting_service.cleanup(@git)
     end
 
     # Starts the build, incrementing the build number from the number of builds

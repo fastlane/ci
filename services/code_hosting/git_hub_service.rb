@@ -34,6 +34,11 @@ module FastlaneCI
         return @cache
       end
 
+      def clone_mutex
+        @mutex ||= Mutex.new
+        return @mutex
+      end
+
       protected :cache
 
       # Loads the octokit cache stack for speed-up calls to github service.
@@ -176,36 +181,38 @@ module FastlaneCI
       # @param [String, nil] path, root path where the clone will be made
       # @return [Git::Base]
       def clone(repo_url: nil, name: nil, branch: nil, sha: nil, provider_credential: nil, path: nil)
-        repo = self.repo_from_url(repo_url)
+        GitHubService.clone_mutex.synchronize do
+          repo = self.repo_from_url(repo_url)
 
-        folder_name = (name.nil? || name.empty?) ? repo.split("/").last : name
-        clone_path = (path.nil? || path.empty?) ? self.temp_path : path
+          folder_name = (name.nil? || name.empty?) ? repo.split("/").last : name
+          clone_path = (path.nil? || path.empty?) ? self.temp_path : path
 
-        full_clone_path = File.join(clone_path, folder_name)
+          full_clone_path = File.join(clone_path, folder_name)
 
-        FileUtils.rm_rf(full_clone_path) if File.directory?(full_clone_path)
-        FileUtils.mkdir_p(clone_path) unless File.directory?(clone_path)
+          FileUtils.rm_rf(full_clone_path) if File.directory?(full_clone_path)
+          FileUtils.mkdir_p(clone_path) unless File.directory?(clone_path)
 
-        auth_key = self.setup_auth(repo_url: repo_url, key: (sha || path || "master"), provider_credential: provider_credential, path: clone_path)
+          auth_key = self.setup_auth(repo_url: repo_url, key: (sha || path || "master"), provider_credential: provider_credential, path: clone_path)
 
-        if sha.nil?
-          Git.clone(url_from_repo(repo_url), folder_name,
-                    path: clone_path,
-                    recursive: true,
-                    depth: 1)
-        else
-          Git.clone(url_from_repo(repo_url), folder_name,
-                    path: clone_path,
-                    recursive: true)
+          if sha.nil?
+            Git.clone(url_from_repo(repo_url), folder_name,
+                      path: clone_path,
+                      recursive: true,
+                      depth: 1)
+          else
+            Git.clone(url_from_repo(repo_url), folder_name,
+                      path: clone_path,
+                      recursive: true)
+          end
+
+          git = Git.open(full_clone_path)
+          git.branch(branch).checkout if sha.nil? && !branch.nil?
+          git.reset_hard(git.gcommit(sha)) unless sha.nil?
+
+          self.unset_auth(auth_key)
+
+          return git
         end
-
-        git = Git.open(full_clone_path)
-        git.branch(branch).checkout if sha.nil? && !branch.nil?
-        git.reset_hard(git.gcommit(sha)) unless sha.nil?
-
-        self.unset_auth(auth_key)
-
-        return git
       end
 
       # Class method that finds the directory for the first Fastfile found given a root_path
@@ -451,6 +458,7 @@ module FastlaneCI
     # @param [String] sha
     # @return [Git::Base]
     def clone(branch: nil, sha: nil)
+      logger.debug("Cloning #{project.project_name}, on #{(branch || sha)}") 
       self.class.clone(
         repo_url: self.project.repo_config.git_url,
         branch: branch,

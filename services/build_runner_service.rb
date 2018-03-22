@@ -19,8 +19,9 @@ module FastlaneCI
     # @return TaskQueue::Task
     def add_build_runner(build_runner: nil)
       raise "No build runner provided" unless build_runner.kind_of?(BuildRunner)
-
       self.build_runners << build_runner
+
+      build_runner.code_hosting_service.clone(sha: build_runner.sha)
 
       task = TaskQueue::Task.new(work_block: proc { build_runner.start })
       self.build_runner_task_queue.add_task_async(task: task)
@@ -33,9 +34,9 @@ module FastlaneCI
     end
 
     # Fetch all the active runners, and see if there is one WIP
-    def find_build_runner(project_id:, build_number:)
-      return self.build_runners.find do |build_runner|
-        build_runner.project.id == project_id && build_runner.current_build.number == build_number
+    def find_build_runner(project_id: nil, sha: nil, build_number: nil)
+      return self.build_runners.select do |build_runner|
+        build_runner.project.id == project_id && (build_runner.sha == sha || build_runner.current_build.number == build_number)
       end
     end
   end

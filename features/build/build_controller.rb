@@ -19,7 +19,7 @@ module FastlaneCI
       current_build_runner = Services.build_runner_service.find_build_runner(
         project_id: project_id,
         build_number: build_number
-      )
+      ).first
 
       if current_build_runner.nil?
         # Loading the output of a finished build after a server restart isn't finished yet

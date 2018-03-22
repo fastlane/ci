@@ -76,6 +76,7 @@ module FastlaneCI
     def create_and_queue_build_task(sha:)
       credential = self.provider_credential
       current_sha = sha
+      return if Services.build_runner_service.find_build_runner(project_id: self.project.id, sha: current_sha).count > 0
       build_runner = FastlaneBuildRunner.new(
         sha: current_sha,
         github_service: FastlaneCI::GitHubService.new(provider_credential: self.provider_credential, project: self.project),

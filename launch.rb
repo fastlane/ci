@@ -164,7 +164,7 @@ module FastlaneCI
         logger.debug("No pending work to reschedule for #{project.project_name}") if pending_build_shas_needing_rebuilds.count == 0
 
         # Enqueue each pending build rerun in an asynchronous task queue
-        pending_build_shas_needing_rebuilds.each do |sha|
+        pending_build_shas_needing_rebuilds.reject { |sha| Services.build_runner_service.find_build_runner(project_id: project.id, sha: sha).count > 0 }.each do |sha|
           logger.debug("Found sha #{sha} that needs a rebuild for #{project.project_name}")
           build_runner = FastlaneBuildRunner.new(
             sha: sha,
@@ -172,6 +172,8 @@ module FastlaneCI
             work_queue: FastlaneCI::CodeHostingService.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
           )
           build_runner.setup(parameters: nil)
+          # Don't add the runner if there's already a runner performing the same operation on the queue.
+          logger.debug("Adding build runner for sha #{build_runner.sha} and project named #{project.project_name}.")
           Services.build_runner_service.add_build_runner(build_runner: build_runner)
         end
       end
