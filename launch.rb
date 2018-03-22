@@ -1,8 +1,9 @@
 require "set"
+require "task_queue"
 require_relative "./shared/logging_module"
 require_relative "./shared/models/job_trigger"
 require_relative "./shared/models/git_repo" # for GitRepo.git_action_queue
-require_relative "./taskqueue/task_queue"
+
 
 module FastlaneCI
   # Launch is responsible for spawning up the whole

@@ -1,7 +1,6 @@
 # External
 require "sinatra/base"
-
-require_relative "./fastfile-parser/fastfile_parser"
+require "fastfile_parser"
 
 # Internal
 require_relative "services/services"
