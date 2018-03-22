@@ -69,9 +69,7 @@ module FastlaneCI
 
     def target_branches(&block)
       self.git_repo_service.branch_names.select { |branch| self.target_branches_set.include?(branch) }.each do |branch|
-        git = self.git_repo_service.clone(branch: branch)
-
-        yield(git, branch)
+        yield(branch)
       end
     end
 

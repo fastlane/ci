@@ -21,7 +21,8 @@ module FastlaneCI
         FastlaneCI::GitHubService.clone(
           repo_url: Services.ci_config_repo.git_url,
           provider_credential: Services.provider_credential,
-          path: Services.ci_config_git_repo_path
+          path: Services.ci_config_git_repo_path,
+          name: "fastlane-ci-config"
         )
       end
       logger.info("Successfully did the initial clone on this machine")
@@ -70,21 +71,22 @@ module FastlaneCI
     #
     # @return [Boolean]
     def local_configuration_repo_exists?
-      unless Services.ci_config_repo.exists?
-        logger.debug("local configuration repo doesn't exist")
+      if Services.configuration_repository_service.respond_to?(:configuration_repository_exists?)
+        return Services.configuration_repository_service.configuration_repository_exists?
+      else
         return false
       end
-
-      return true
     end
 
     private
 
     # @return [Boolean]
     def remote_configuration_repository_valid?
-      return Services.configuration_repository_service.configuration_repository_valid?
-    rescue NoMethodError
-      return false
+      if Services.configuration_repository_service.respond_to?(:configuration_repository_valid?)
+        return Services.configuration_repository_service.configuration_repository_valid?
+      else
+        return false
+      end
     end
 
     # @return [Boolean]

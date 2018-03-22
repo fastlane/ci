@@ -21,7 +21,7 @@ module FastlaneCI
     def work
       logger.debug("Running nightly builds on GitHub")
 
-      self.target_branches do |git, branch|
+      self.target_branches do |branch|
         current_sha = self.git_repo_service.all_commits_sha_for_branch(branch: branch).last
         logger.debug("Running Nightly build on branch #{branch} with sha #{current_sha}")
 

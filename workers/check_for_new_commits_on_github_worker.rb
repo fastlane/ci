@@ -31,7 +31,9 @@ module FastlaneCI
 
       builds = build_service.list_builds(project: self.project)
 
-      self.target_branches do |git, branch|
+      require "pry"
+      binding.pry
+      self.target_branches do |branch|
         repo.all_commits_sha_for_branch(branch: branch).reject { |sha| builds.map(&:sha).include?(sha) }.each do |current_sha|
           logger.debug("Detected new commit in #{self.project.project_name} on branch #{branch} with sha #{current_sha}")
           # This never stops because with each commit, it creates a new commit and then we think it's new, LOL

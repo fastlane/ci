@@ -50,7 +50,7 @@ module FastlaneCI
       # TODO: provider credential should determine what exact CodeHostingService gets instantiated
       @code_hosting_service = github_service
 
-      @code_hosting_service.clone(sha: sha)
+      @git = @code_hosting_service.clone(sha: sha)
       self.work_queue = work_queue
 
       self.prepare_build_object
@@ -86,6 +86,7 @@ module FastlaneCI
 
       # Status is set on the `current_build` object by the subclass
       self.save_build_status!
+      @code_hosting_service.cleanup(@git)
     rescue StandardError => ex
       # TODO: better error handling, don't catch all Exception
       logger.error(ex)
@@ -93,6 +94,7 @@ module FastlaneCI
       current_build.duration = duration
       current_build.status = :failure # TODO: also handle failure
       self.save_build_status!
+      @code_hosting_service.cleanup(@git)
     end
 
     # Starts the build, incrementing the build number from the number of builds

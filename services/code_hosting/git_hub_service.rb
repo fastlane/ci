@@ -451,7 +451,7 @@ module FastlaneCI
     # @param [String] sha
     # @return [Git::Base]
     def clone(branch: nil, sha: nil)
-      @_git = self.class.clone(
+      self.class.clone(
         repo_url: self.project.repo_config.git_url,
         branch: branch,
         provider_credential: self.provider_credential,
@@ -466,6 +466,12 @@ module FastlaneCI
         )
       )
       return git
+    end
+
+    def cleanup(git)
+      require "pry"
+      binding.pry
+      FileUtils.rm_rf(git.dir) if File.directory?(git.dir) 
     end
 
     protected
