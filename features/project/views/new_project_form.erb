@@ -21,7 +21,7 @@
     document.querySelectorAll("#selected_lane")[0].innerHTML = "";
     var request = new XMLHttpRequest();
     request.responseType = 'json';
-    request.open('GET', "/projects/lanes/<%= CGI.escape(repo) %>/" + el.value, true);
+    request.open('GET', "/projects_erb/lanes/<%= CGI.escape(repo) %>/" + el.value, true);
     request.onload = function() {
       if (request.status >= 200 && request.status < 400) {
         var data = request.response;
@@ -55,7 +55,7 @@
   <%= erb :"../../partials/navigation" %>
 
   <main class="mdl-layout__content" style="padding: 40px">
-    <form method="POST" action="/projects_erb/add/<%= repo.git_config.name %>">
+    <form method="POST" action="/projects_erb/add/<%= CGI.escape(repo) %>">
       <h5>Adding <%= repo %></h5>
       <div class="mdl-textfield mdl-js-textfield">
         <input class="mdl-textfield__input" type="text" name="project_name" value="<%= repo %>">

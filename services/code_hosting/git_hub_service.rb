@@ -21,8 +21,6 @@ module FastlaneCI
     class << self
       attr_writer :temporary_git_storage
 
-      attr_accessor :temporary_storage_path
-
       attr_writer :cache
 
       attr_accessor :git_action_queue
@@ -179,7 +177,7 @@ module FastlaneCI
         FileUtils.rm_rf(full_clone_path) if File.directory?(full_clone_path)
         FileUtils.mkdir_p(clone_path) unless File.directory?(clone_path)
 
-        self.setup_auth(repo_url: repo_url, provider_credential: provider_credential, path: clone_path)
+        auth_path = self.setup_auth(repo_url: repo_url, provider_credential: provider_credential, path: clone_path)
 
         if sha.nil?
           Git.clone(url_from_repo(repo_url), folder_name,
@@ -196,7 +194,7 @@ module FastlaneCI
         git.branch(branch).checkout if sha.nil? && !branch.nil?
         git.reset_hard(git.gcommit(sha)) unless sha.nil?
 
-        self.unset_auth
+        self.unset_auth(auth_path)
 
         return git
       end
@@ -220,7 +218,6 @@ module FastlaneCI
         repo = repo_from_url(repo_url)
         git_auth_key = Digest::SHA2.hexdigest(repo_url)
         temporary_storage_path = File.join(self.temporary_git_storage, "git-auth-#{git_auth_key}")
-        self.temporary_storage_path = temporary_storage_path
         # More details: https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
 
         FileUtils.mkdir_p(path) unless File.directory?(path)
@@ -241,7 +238,7 @@ module FastlaneCI
           # TODO: check if we find a better way for the initial clone to work without setting system global state
           scope = "global"
         end
-        use_credentials_command = "git config --#{scope} credential.helper 'store --file #{self.temporary_storage_path.shellescape}' #{File.join(path, repo.split('/').last)}"
+        use_credentials_command = "git config --#{scope} credential.helper 'store --file #{temporary_storage_path.shellescape}' #{File.join(path, repo.split('/').last)}"
 
         cmd = TTY::Command.new(printer: :quiet)
         cmd.run(store_credentials_command, input: content)
@@ -250,10 +247,10 @@ module FastlaneCI
       end
 
       # Class method that removes the authentication stored for git operations.
-      def unset_auth
-        return unless self.temporary_storage_path.kind_of?(String)
+      def unset_auth(path)
+        return unless path.kind_of?(String)
         # TODO: Also auto-clean those files from time to time, on server re-launch maybe, or background worker
-        FileUtils.rm(self.temporary_storage_path) if File.exist?(self.temporary_storage_path)
+        FileUtils.rm(path) if File.exist?(path)
       end
 
       # @param [GithubProviderCredential] provider_credential
