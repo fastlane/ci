@@ -1,5 +1,5 @@
-require_relative "../spec_helper"
-require "string_encrypter"
+require "spec_helper"
+require "app/shared/string_encrypter"
 
 module FastlaneCI
   describe StringEncrypter do

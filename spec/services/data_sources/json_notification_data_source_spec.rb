@@ -1,6 +1,6 @@
-require File.expand_path("../../../spec_helper.rb", __FILE__)
-require File.expand_path("../../../../shared/models/notification.rb", __FILE__)
-require File.expand_path("../../../../services/data_sources/json_notification_data_source.rb", __FILE__)
+require "spec_helper"
+require "app/shared/models/notification"
+require "app/services/data_sources/json_notification_data_source"
 
 describe FastlaneCI::JSONNotificationDataSource do
   before(:each) do

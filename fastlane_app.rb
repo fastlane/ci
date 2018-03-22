@@ -3,12 +3,12 @@ require "sinatra/base"
 require "fastfile_parser"
 
 # Internal
-require_relative "services/services"
-require_relative "workers/refresh_config_data_sources_worker"
-require_relative "shared/logging_module"
-require_relative "shared/environment_variables"
-require_relative "shared/fastlane_ci_error" # TODO: move somewhere else
-require_relative "features/build_runner/build_runner"
+require_relative "app/services/services"
+require_relative "app/workers/refresh_config_data_sources_worker"
+require_relative "app/shared/logging_module"
+require_relative "app/shared/environment_variables"
+require_relative "app/shared/fastlane_ci_error" # TODO: move somewhere else
+require_relative "app/features/build_runner/build_runner"
 
 # All things fastlane ci related go in this module
 module FastlaneCI

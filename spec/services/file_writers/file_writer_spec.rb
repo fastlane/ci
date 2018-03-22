@@ -1,5 +1,5 @@
-require File.expand_path("../../../spec_helper.rb", __FILE__)
-require File.expand_path("../../../../services/file_writers/file_writer.rb", __FILE__)
+require "spec_helper"
+require "app/services/file_writers/file_writer"
 
 describe FastlaneCI::FileWriter do
   before(:each) do

@@ -1,5 +1,5 @@
-require File.expand_path("../../spec_helper.rb", __FILE__)
-require File.expand_path("../../../services/user_service.rb", __FILE__)
+require "spec_helper"
+require "app/services/user_service"
 
 describe FastlaneCI::UserService do
   let(:user_id) { "user_id" }
