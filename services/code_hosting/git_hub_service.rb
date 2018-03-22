@@ -21,7 +21,7 @@ module FastlaneCI
     class << self
       attr_writer :temporary_git_storage
 
-      attr_accessor :temporary_storage_path
+      attr_writer :temporary_storage_path
 
       attr_writer :cache
 
@@ -65,6 +65,11 @@ module FastlaneCI
         @temporary_git_storage ||= temp_storage
         FileUtils.mkdir_p(@temporary_git_storage) unless File.directory?(@temporary_git_storage)
         return @temporary_git_storage
+      end
+
+      def temporary_storage_path
+        @temporary_storage_path ||= {}
+        return @temporary_storage_path
       end
 
       # This method shallow clones the repo using the provider credential and looks for a valid _fastlane_
@@ -179,7 +184,7 @@ module FastlaneCI
         FileUtils.rm_rf(full_clone_path) if File.directory?(full_clone_path)
         FileUtils.mkdir_p(clone_path) unless File.directory?(clone_path)
 
-        self.setup_auth(repo_url: repo_url, provider_credential: provider_credential, path: clone_path)
+        auth_key = self.setup_auth(repo_url: repo_url, key: (sha || path || "master"), provider_credential: provider_credential, path: clone_path)
 
         if sha.nil?
           Git.clone(url_from_repo(repo_url), folder_name,
@@ -196,7 +201,7 @@ module FastlaneCI
         git.branch(branch).checkout if sha.nil? && !branch.nil?
         git.reset_hard(git.gcommit(sha)) unless sha.nil?
 
-        self.unset_auth
+        self.unset_auth(auth_key)
 
         return git
       end
@@ -216,11 +221,11 @@ module FastlaneCI
       # @param [GithubProviderCredential] provider_credential
       # @param [String] path
       # @return [String] temporary storage path of the credential-store file.
-      def setup_auth(repo_url: nil, provider_credential: nil, path: nil)
+      def setup_auth(repo_url: nil, key: nil, provider_credential: nil, path: nil)
         repo = repo_from_url(repo_url)
-        git_auth_key = Digest::SHA2.hexdigest(repo_url)
+        git_auth_key = Digest::SHA2.hexdigest([repo_url, key].reject { |i| i.nil? || i.empty? }.join)
         temporary_storage_path = File.join(self.temporary_git_storage, "git-auth-#{git_auth_key}")
-        self.temporary_storage_path = temporary_storage_path
+        self.temporary_storage_path[git_auth_key] = temporary_storage_path
         # More details: https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
 
         FileUtils.mkdir_p(path) unless File.directory?(path)
@@ -241,19 +246,20 @@ module FastlaneCI
           # TODO: check if we find a better way for the initial clone to work without setting system global state
           scope = "global"
         end
-        use_credentials_command = "git config --#{scope} credential.helper 'store --file #{self.temporary_storage_path.shellescape}' #{File.join(path, repo.split('/').last)}"
+        use_credentials_command = "git config --#{scope} credential.helper 'store --file #{self.temporary_storage_path[git_auth_key].shellescape}' #{File.join(path, repo.split('/').last)}"
 
         cmd = TTY::Command.new(printer: :quiet)
         cmd.run(store_credentials_command, input: content)
         cmd.run(use_credentials_command)
-        return temporary_storage_path
+        return git_auth_key
       end
 
       # Class method that removes the authentication stored for git operations.
-      def unset_auth
-        return unless self.temporary_storage_path.kind_of?(String)
+      def unset_auth(git_auth_key)
+        return unless self.temporary_storage_path[git_auth_key].kind_of?(String)
         # TODO: Also auto-clean those files from time to time, on server re-launch maybe, or background worker
-        FileUtils.rm(self.temporary_storage_path) if File.exist?(self.temporary_storage_path)
+        FileUtils.rm(self.temporary_storage_path[git_auth_key]) if File.exist?(self.temporary_storage_path[git_auth_key])
+        self.temporary_storage_path.delete(git_auth_key)
       end
 
       # @param [GithubProviderCredential] provider_credential
