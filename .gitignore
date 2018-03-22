@@ -1,6 +1,10 @@
 # Added by fastlane.ci team
 .keys
 fastlane.log
+fastlane.verbose.log
+public/.dist/*
+**/node_modules/*
+package-lock.json
 
 # from https://github.com/github/gitignore/blob/master/Ruby.gitignore
 

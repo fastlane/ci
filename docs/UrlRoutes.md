@@ -17,36 +17,36 @@ This comes with its own up- and downsides.
 
 #### Listing global resources
 
-- `/projects`
+- `/projects_erb`
 - `/users`
 - `/settings`
 
 #### Accessing a resource
 
-- `/projects/[project_id]`: Show project details and allow settings to be configured
-- `/projects/[project_id]/builds/[build_id]`: Show build details - even though `[build_id]` might be unique, we want to have its parent in the URL also
+- `/projects_erb/[project_id]`: Show project details and allow settings to be configured
+- `/projects_erb/[project_id]/builds/[build_id]`: Show build details - even though `[build_id]` might be unique, we want to have its parent in the URL also
 
 **More depth**
 
 Sometimes a resource has a view with more details, so we can append `/details` to the URL. We should use the following pattern (to e.g. show more build details)
 
-- `/projects/[project_id]/builds/[build_id]/details`
+- `/projects_erb/[project_id]/builds/[build_id]/details`
 
 #### Editing a resource
 
 Basically the same URL as accessing a resource, but with an appended `/edit`
 
-- `/projects/[project_id]/builds/[build_id]/edit`
+- `/projects_erb/[project_id]/builds/[build_id]/edit`
 
 #### POST URLs
 
 `POST` requests should always be sent to a `/save` endpoint
 
-- `/projects/[project_id]/save`
-- `/projects/[project_id]/builds/[build_id]/save`
+- `/projects_erb/[project_id]/save`
+- `/projects_erb/[project_id]/builds/[build_id]/save`
 
 #### DELETE URLs
 
 `DELETE` requests should always be sent to a `/delete` endpoint
 
-- `/projects/[project_id]/delete`
+- `/projects_erb/[project_id]/delete`

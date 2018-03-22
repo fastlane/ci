@@ -6,7 +6,7 @@ require "pathname"
 module FastlaneCI
   # Controller for a single project view. Responsible for updates, triggering builds, and displaying project info
   class ProjectController < AuthenticatedControllerBase
-    HOME = "/projects"
+    HOME = "/projects_erb"
 
     # Note: The order IS important for Sinatra, so this has to be
     # above the other URL
