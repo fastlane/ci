@@ -16,9 +16,11 @@ require "faraday-http-cache"
 module FastlaneCI
   # Data source that interacts with GitHub
   class GitHubService < CodeHostingService
-    prepend FastlaneCI::Logging
+    include FastlaneCI::Logging
 
     class << self
+      include FastlaneCI::Logging
+
       attr_writer :temporary_git_storage
 
       attr_writer :temporary_storage_path
