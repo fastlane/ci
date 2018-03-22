@@ -8,6 +8,9 @@ module FastlaneCI
   class OnboardingController < ControllerBase
     HOME = "/onboarding_erb"
 
+    # @return [Boolean]
+    attr_accessor :progress
+
     # After a POST request where a status is set, clear the session[:method]
     # variable to avoid displaying the same message multiple times
     before do

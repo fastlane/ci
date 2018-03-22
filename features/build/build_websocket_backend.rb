@@ -14,6 +14,8 @@ module FastlaneCI
 
     KEEPALIVE_TIME = 30 # in seconds
 
+    attr_accessor :app
+
     # A hash of connected web sockets, the key being the project ID, and then the build number
     attr_accessor :websocket_clients
 
