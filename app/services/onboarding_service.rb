@@ -75,11 +75,7 @@ module FastlaneCI
 
     # @return [Boolean]
     def remote_configuration_repository_valid?
-      if Services.configuration_repository_service.respond_to?(:configuration_repository_valid?)
-        return Services.configuration_repository_service.configuration_repository_valid?
-      else
-        return false
-      end
+      return Services.configuration_repository_service.configuration_repository_valid?
     end
 
     # @return [Boolean]
