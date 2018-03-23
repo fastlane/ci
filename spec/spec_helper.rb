@@ -1,4 +1,6 @@
-$LOAD_PATH << "shared"
+require "bundler/setup"
+$LOAD_PATH << File.dirname(File.expand_path("../", __FILE__))
+
 require "rack/test"
 require "rspec"
 require "stub_helpers"

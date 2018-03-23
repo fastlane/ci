@@ -1,8 +1,8 @@
 require "set"
-require_relative "./shared/logging_module"
-require_relative "./shared/models/job_trigger"
-require_relative "./shared/models/git_repo" # for GitRepo.git_action_queue
-require_relative "./taskqueue/task_queue"
+require "task_queue"
+require_relative "app/shared/logging_module"
+require_relative "app/shared/models/job_trigger"
+require_relative "app/shared/models/git_repo" # for GitRepo.git_action_queue
 
 module FastlaneCI
   # Launch is responsible for spawning up the whole
@@ -39,7 +39,7 @@ module FastlaneCI
       require "./fastlane_app"
 
       # allow use of `require` for all things under `shared`, helps with some cycle issues
-      $LOAD_PATH << "shared"
+      $LOAD_PATH << "app/shared"
     end
 
     def self.verify_app_built
@@ -92,15 +92,7 @@ module FastlaneCI
     # as it seems like it has to happen in `config.ru`
     def self.register_available_controllers
       # require all controllers
-      require_relative "features/configuration/configuration_controller"
-      require_relative "features/dashboard/dashboard_controller"
-      require_relative "features/login/login_controller"
-      require_relative "features/notifications/notifications_controller"
-      require_relative "features/onboarding/onboarding_controller"
-      require_relative "features/project/project_controller"
-      require_relative "features/credentials/provider_credentials_controller"
-      require_relative "features/users/users_controller"
-      require_relative "features/build/build_controller"
+      require_relative "app/features/all"
 
       # Load up all the available controllers
       FastlaneCI::FastlaneApp.use(FastlaneCI::ConfigurationController)

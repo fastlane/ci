@@ -1,6 +1,22 @@
 GIT
+  remote: https://github.com/fastlane/TaskQueue
+  revision: 5b3f459be5c451cc9ab25f6819d2eeb67be5e56d
+  ref: 5b3f459
+  specs:
+    taskqueue (0.0.0)
+
+GIT
+  remote: https://github.com/fastlane/fastfile-parser
+  revision: 122825dfb9370a6a2008e2e5ca8613dc6602b45d
+  ref: 122825d
+  specs:
+    fastfile-parser (0.0.0)
+      parser (>= 2.4.0.2, < 2.5.0.0)
+      unparser (>= 0.2.6, < 1.0.0)
+
+GIT
   remote: https://github.com/fastlane/fastlane
-  revision: 77d293eddd318430db5e74c75c4f4260a039d6eb
+  revision: 6707de9e3bd9c35e4673324eb565777c0798bd97
   specs:
     fastlane (2.86.2)
       CFPropertyList (>= 2.3, < 4.0.0)
@@ -34,7 +50,7 @@ GIT
       tty-screen (>= 0.6.3, < 1.0.0)
       tty-spinner (>= 0.8.0, < 1.0.0)
       word_wrap (~> 1.0.0)
-      xcodeproj (>= 1.5.2, < 2.0.0)
+      xcodeproj (>= 1.5.7, < 2.0.0)
       xcpretty (>= 0.2.4, < 1.0.0)
       xcpretty-travis-formatter (>= 0.0.3)
 
@@ -271,12 +287,12 @@ PLATFORMS
 DEPENDENCIES
   bcrypt (>= 3.1.11, < 4.0.0)
   dotenv (>= 2.2.1, < 3.0.0)
+  fastfile-parser!
   fastlane!
   faye-websocket (>= 0.10.7, < 1.0.0)
   git (>= 1.3.0, < 2.0.0)
   google-cloud-storage (~> 1.5.0)
   octokit (>= 4.8.0, < 5.0.0)
-  parser (>= 2.4.0.2, < 2.5.0.0)
   pry
   pry-byebug
   rack-test
@@ -286,9 +302,9 @@ DEPENDENCIES
   rufus-scheduler
   sinatra (>= 2.0.1, < 3.0.0)
   sinatra-contrib (>= 2.0.0, < 3.0.0)
+  taskqueue!
   thin (>= 1.7.2, < 2.0.0)
   tty-command (>= 0.7.0, < 1.0.0)
-  unparser (>= 0.2.6, < 1.0.0)
 
 BUNDLED WITH
    1.16.1

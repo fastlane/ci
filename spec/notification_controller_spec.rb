@@ -1,5 +1,5 @@
-require_relative "spec_helper.rb"
-require File.expand_path("../../features/notifications/notifications_controller.rb", __FILE__)
+require "spec_helper"
+require "app/features/notifications/notifications_controller"
 
 describe FastlaneCI::NotificationsController do
 end

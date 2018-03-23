@@ -1,4 +1,5 @@
-require_relative "../../shared/transactor"
+require "spec_helper"
+require "app/shared/transactor"
 
 module FastlaneCI
   describe Transactor do

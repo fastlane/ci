@@ -1,5 +1,5 @@
-require_relative "../../shared/json_convertible"
-require "json"
+require "spec_helper"
+require "app/shared/json_convertible"
 
 class MockJSONConvertible
   include FastlaneCI::JSONConvertible
