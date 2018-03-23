@@ -1,0 +1,9 @@
+<% if status.nil? %>
+  <%= "⚪️" %>
+<% elsif status == "success" %>
+  <%= "✅" %>
+<% elsif status == "pending" %>
+  <%= "🌕" %>
+<% else %>
+  <%= "🚫" %>
+<% end %>

@@ -20,7 +20,9 @@
       <tbody>
         <% projects_with_access.each do |project| %>
           <tr style="cursor: pointer;" onclick="location.href='/projects_erb/<%= project.id %>'">
-            <td>💚</td>
+            <td>
+              <%= erb(:"../../build/views/build_status", locals: { status: project.builds.first&.status }) %>
+            </td>
             <td style="text-align: center;"><%= project.project_name %></td>
             <td><%= project.enabled ? "✅" : "🚫" %></td>
           </tr>
