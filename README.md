@@ -57,13 +57,9 @@ Requires Ruby 2.3.3 or higher. macOS and Xcode are required when building iOS pr
 
 ## Development installation
 
-**Note:** We have a couple dependencies that aren't standalone gems yet, so we included them as git submodules for now
-
-```
-bundle install
-git submodule init
-git submodule update
-```
+Run the rake task: `rake devboostrap`.
+1. Install all dependencies (ruby, javascript)
+2. Add a pre-commit hook
 
 ## Environment variables for first run
 

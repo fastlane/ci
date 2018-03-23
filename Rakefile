@@ -4,7 +4,7 @@ end
 
 task :devbootstrap do
   sh "bundle install"
-  sh "git submodule update --init --recursive"
+  sh "npm install"
   sh "ln -sf ../../.pre-commit .git/hooks/pre-commit"
 end
 
