@@ -28,6 +28,9 @@ module FastlaneCI
     # The commit sha we want to run the build for
     attr_reader :sha
 
+    # The local GitRepo we will be using
+    attr_reader :repo
+
     # All lines that were generated so far, this might not be a complete run
     # This is an array of hashes
     attr_accessor :all_build_output_log_rows
@@ -38,11 +41,12 @@ module FastlaneCI
     # Work queue where builds should be run
     attr_accessor :work_queue
 
-    def initialize(project:, sha:, github_service:, work_queue: nil)
+    def initialize(project:, sha:, github_service:, work_queue: nil, repo:)
       # Setting the variables directly (only having `attr_reader`) as they're immutable
       # Once you define a FastlaneBuildRunner, you shouldn't be able to modify them
       @project = project
       @sha = sha
+      @repo = repo
 
       self.all_build_output_log_rows = []
       self.build_change_observer_blocks = []
@@ -86,12 +90,36 @@ module FastlaneCI
       # Status is set on the `current_build` object by the subclass
       self.save_build_status!
     rescue StandardError => ex
-      # TODO: better error handling, don't catch all Exception
       logger.error(ex)
       duration = Time.now - start_time
       current_build.duration = duration
       current_build.status = :failure # TODO: also handle failure
       self.save_build_status!
+    end
+
+    def checkout_sha
+      use_global_mutex = self.work_queue.nil?
+
+      repo.reset_hard!(use_global_git_mutex: use_global_mutex)
+      repo.pull(use_global_git_mutex: use_global_mutex)
+
+      logger.debug("Checking out commit #{self.sha} from #{self.project.project_name}")
+      repo.checkout_commit(sha: self.sha, use_global_git_mutex: use_global_mutex)
+    end
+
+    def pre_run_action
+      self.checkout_sha
+    end
+
+    def reset_repo_state
+      use_global_mutex = self.work_queue.nil?
+      # When we're done, clean up by resetting
+      repo.reset_hard!(use_global_git_mutex: use_global_mutex)
+    end
+
+    def post_run_action
+      logger.debug("Finished running #{self.project.project_name} for #{self.sha}")
+      self.reset_repo_state
     end
 
     # Starts the build, incrementing the build number from the number of builds
@@ -104,19 +132,25 @@ module FastlaneCI
       artifact_handler_block = proc { |artifact_paths| complete_run(start_time: start_time, artifact_paths: artifact_paths) }
 
       work_block = proc {
+        self.pre_run_action
         self.run(completion_block: artifact_handler_block) do |current_row|
           new_row(current_row)
         end
       }
 
+      post_run_block = proc {
+        self.post_run_action
+      }
+
       # If we have a work_queue, execute on that
       if self.work_queue
-        runner_task = TaskQueue::Task.new(work_block: work_block)
+        runner_task = TaskQueue::Task.new(work_block: work_block, ensure_block: post_run_block)
         self.work_queue.add_task_async(task: runner_task)
       else
         # No work queue? Just call the block then
         logger.debug("Not using a workqueue for build runner #{self.class}, this is probably a bug")
         work_block.call
+        post_run_block.call
       end
     end
 

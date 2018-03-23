@@ -9,7 +9,12 @@ module FastlaneCI
 
     attr_accessor :full_name # GitHub full_name, like fastlane/ci (vs just `ci`)
 
-    def initialize(id: nil, git_url: nil, description: nil, name: nil, full_name: nil, hidden: false)
+    def initialize(id: nil,
+                   git_url: nil,
+                   description: nil,
+                   name: nil,
+                   full_name: nil,
+                   hidden: false)
       super(
         id: id,
         git_url: git_url,

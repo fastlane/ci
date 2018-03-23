@@ -68,7 +68,7 @@ module FastlaneCI
     #
     # @return [Boolean]
     def local_configuration_repo_exists?
-      unless Services.ci_config_repo.exists?
+      unless Dir.exist?(Services.ci_config_git_repo_path)
         logger.debug("local configuration repo doesn't exist")
         return false
       end

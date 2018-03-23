@@ -26,6 +26,8 @@ module FastlaneCI
       write_configuration_directories
       configure_thread_abort
       Services.reset_services!
+      clone_project_repos
+
       register_available_controllers
       start_github_workers
       restart_any_pending_work
@@ -115,6 +117,10 @@ module FastlaneCI
       require_relative "features-json/project_json_controller"
 
       FastlaneCI::FastlaneApp.use(FastlaneCI::ProjectJSONController)
+    end
+
+    def self.clone_project_repos
+      FastlaneCI::Services.project_service.update_project_repos(provider_credential: Services.provider_credential)
     end
 
     def self.start_github_workers
