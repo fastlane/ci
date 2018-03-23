@@ -102,7 +102,7 @@ module FastlaneCI
     end
 
     def login(email: nil, password: nil)
-      user = self.users.select { |existing_user| existing_user.email.casecmp(email.downcase).zero? }.first
+      user = self.users.detect { |existing_user| existing_user.email.casecmp(email.downcase).zero? }
 
       if user.nil?
         logger.debug("Couldn't find user with email #{email} in list of available accounts")
@@ -178,7 +178,7 @@ module FastlaneCI
     #
     # @return [User]
     def find_user(id: nil)
-      return self.users.select { |user| user.id == id }.first
+      return self.users.detect { |user| user.id == id }
     end
   end
 end
