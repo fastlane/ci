@@ -172,6 +172,8 @@ module FastlaneCI
 
       relative_fastfile_path = nil
       available_lanes = []
+      # TODO: Follow up in another PR
+
       # absolute_fastfile_path = project.local_fastfile_path
       # unless absolute_fastfile_path.nil?
       #   parser = Fastlane::FastfileParser.new(path: absolute_fastfile_path)
