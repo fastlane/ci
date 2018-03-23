@@ -106,7 +106,7 @@ module FastlaneCI
       FastlaneCI::FastlaneApp.use(FastlaneCI::BuildController)
 
       # Load JSON controllers
-      require_relative "features-json/project_json_controller"
+      require_relative "app/features-json/project_json_controller"
 
       FastlaneCI::FastlaneApp.use(FastlaneCI::ProjectJSONController)
     end
