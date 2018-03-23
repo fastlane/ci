@@ -5,8 +5,8 @@ lane :rspec_me do
 
   # test our path
   sh("pwd")
-  sh("bundle update")
-  sh("bundle exec rspec")
+  sh("cd ..;bundle update")
+  sh("cd ..;bundle exec rspec")
 end
 
 lane :rubocop do
@@ -14,6 +14,6 @@ lane :rubocop do
 
   # test our pathing
   sh("pwd")
-  sh("bundle update")
-  sh("bundle exec rubocop")
+  sh("cd ..;bundle update")
+  sh("cd ..;bundle exec rubocop")
 end
