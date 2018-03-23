@@ -118,20 +118,17 @@ module FastlaneCI
       logger.debug("Done starting up repo: #{self.git_config.git_url}")
     end
 
-    def setup_repo(tries: 0)
-      # rubocop:disable Metrics/BlockNesting
+    def setup_repo
+      retry_count ||= 0
       if File.directory?(self.local_folder)
         # TODO: test if this crashes if it's not a git directory
         begin
           @_git = Git.open(self.local_folder)
         rescue ArgumentError => aex
-          if tries >= 1
-            raise aex
-          end
-
           logger.debug("Path #{self.local_folder} is not a git directory, deleting and trying again")
           self.clear_directory
-          return self.setup_repo(tries: tries + 1)
+          retry if (retry_count += 1) < 5
+          raise "Exceeded retry count for #{__method__}. Exception: #{aex}"
         end
         repo = self.git
         if repo.index.writable?
@@ -143,6 +140,7 @@ module FastlaneCI
             # other actions, to prevent local changes to be lost.
             # This is a common issue, ci_config repo gets recreated several times trough the Services.configuration_git_repo
             # and if some changes in the local repo (added projects, etc.) have been added, they're destroyed.
+            # rubocop:disable Metrics/BlockNesting
             if self.local_folder == File.expand_path("~/.fastlane/ci/fastlane-ci-config")
               # TODO: In case there are conflicts with remote, we want to decide which way we take.
               # For now, we merge using the 'recursive' strategy.
