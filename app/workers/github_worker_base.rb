@@ -92,6 +92,7 @@ module FastlaneCI
       credential = self.provider_credential
       current_project = self.project
       current_sha = sha
+      return unless Services.build_runner_service.find_build_runner(project_id: current_project.id, sha: current_sha).nil?
       build_runner = FastlaneBuildRunner.new(
         project: current_project,
         sha: current_sha,
