@@ -1,0 +1,35 @@
+$GRID_WIDE_COLUMNS: 12;
+$GRID_MEDIUM_COLUMNS: 8;
+$GRID_NARROW_COLUMNS: 4;
+$GRID_COLUMN_WIDTH: 56px;
+$GRID_GUTTER: 24px; // gutters are space between columns
+$GRID_MARGIN: 24px; // margins are to the left and right of the grid
+$GRID_MARGIN_NARROW: 16px; // narrower margins for narrow canvases
+// Calculates the width of a fixed grid cell spanning the given number of
+// columns (or an entire grid with the given number of columns, not including
+// margins)
+@function gridCellWidth($columnSpan) {
+    @return $columnSpan * $GRID_COLUMN_WIDTH+($columnSpan - 1) * $GRID_GUTTER;
+}
+
+// canvas width breakpoints
+$MEDIUM_CANVAS_BREAKPOINT: gridCellWidth($GRID_MEDIUM_COLUMNS)+$GRID_MARGIN * 2; // 664px
+$WIDE_CANVAS_BREAKPOINT: gridCellWidth($GRID_WIDE_COLUMNS)+$GRID_MARGIN * 2; // 984px
+// Standard breakpoints for canvas widths.
+@mixin narrowCanvas {
+    @media only screen and (max-width: $MEDIUM_CANVAS_BREAKPOINT) {
+        @content;
+    }
+}
+
+@mixin mediumCanvas {
+    @media only screen and (min-width: $MEDIUM_CANVAS_BREAKPOINT) and (max-width: ($WIDE_CANVAS_BREAKPOINT - 1)) {
+        @content;
+    }
+}
+
+@mixin wideCanvas {
+    @media only screen and (min-width: $WIDE_CANVAS_BREAKPOINT) {
+        @content;
+    }
+}
