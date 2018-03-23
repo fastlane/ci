@@ -70,11 +70,32 @@ module FastlaneCI
       erb(:new_project, locals: locals, layout: FastlaneCI.default_layout)
     end
 
+    get "#{HOME}/lanes/*/*/*" do |org, repo_name, branch|
+      content_type :json
+
+      provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
+
+      selected_repo = github_service.repos.detect { |repo| repo_name == repo.name }
+      repo_config = GitRepoConfig.from_octokit_repo!(repo: org + "/" + repo_name)
+
+      git_repo = GitRepo.new(
+        git_config: repo_config,
+        provider_credential: provider_credential,
+        local_folder: dir,
+        async_start: false
+      )
+      git_repo.checkout_branch(branch)
+
+      fastfile = FastlaneCI::FastfilePeeker.peek(git_repo: git_repo)
+
+      fastfile.all_lanes_flat.to_json
+    end
+
     get "#{HOME}/add/*" do |repo_name|
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
       github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
-      selected_repo = github_service.repos.select { |repo| repo_name == repo.name }.first
+      selected_repo = github_service.repos.detect { |repo| repo_name == repo.name }
 
       # We need to check whether we can checkout the project without issues.
       # So a new project is created with default settings so we can fetch it.
@@ -119,11 +140,11 @@ module FastlaneCI
       erb(:new_project_form, locals: locals, layout: FastlaneCI.default_layout)
     end
 
-    post "#{HOME}/add/*" do |repo_name|
+    post "#{HOME}/add/*/*" do |org, repo_name|
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
       github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
-      selected_repo = github_service.repos.select { |repo| repo_name == repo.name }.first
+      selected_repo = github_service.repos.detect { |repo| repo.full_name == org + "/" + repo_name }
 
       repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
 
