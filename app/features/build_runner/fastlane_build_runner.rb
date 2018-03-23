@@ -105,9 +105,9 @@ module FastlaneCI
         logger.info("fastlane run complete")
         logger.debug(build_output.join("\n").to_s)
 
-        # TODO: need real artifacts here, are they artifacts or artifact paths?
-        # TODO: Update build_runner.rb `complete_run(artifact_paths: [])` if they are artifact objects
-        # artifacts = ?
+        verbose_log_path = File.expand_path("fastlane.verbose.log") if File.exist?("fastlane.verbose.log")
+
+        artifacts_paths = gather_build_artifact_paths
       rescue StandardError => ex
         logger.debug("Setting build status to failure due to exception")
         self.current_build.status = :ci_problem
@@ -116,20 +116,18 @@ module FastlaneCI
         logger.error(ex)
         logger.error(ex.backtrace)
 
-        # ensure
-        # Either the build was successfull or not, we have to ensure the artifacts for the execution.
-        # artifact_paths = []
-        # artifact_paths << { type: "log", path: "fastlane.log" }
-        # constants_with_path = Fastlane::Actions::SharedValues.constants
-        #                                                      .select { |value| value.to_s.include?("PATH") } # Far from ideal, but meanwhile...
-        #                                                      .select { |value| !Fastlane::Actions.lane_context[value].nil? && !Fastlane::Actions.lane_context[value].empty? }
-        #                                                      .map { |value| { type: value.to_s, path: Fastlane::Actions.lane_context[value] } }
-        # artifact_paths.concat(constants_with_path)
+        artifacts_paths = gather_build_artifact_paths(true)
       ensure
+        # Store fastlane.verbose.log, for debugging purposes
+        unless verbose_log_path.nil?
+          destination_path = File.expand_path(File.join("~/.fastlane/ci/logs", self.project.id, self.current_build.number))
+          FileUtils.mkdir_p(destination_path)
+          FileUtils.mv(verbose_log_path, destination_path)
+        end
         # Fastlane is done, change back to ci directory
         logger.debug("Switching back to to #{ci_directory} from #{project.local_repo_path} now that we're done")
         Dir.chdir(ci_directory)
-        completion_block.call(artifacts)
+        completion_block.call(artifacts_paths)
       end
     end
 
@@ -152,6 +150,19 @@ module FastlaneCI
       )
       current_row.html = FastlaneOutputToHtml.convert_row(current_row)
       return current_row
+    end
+
+    protected
+
+    def gather_build_artifact_paths(verbose)
+      artifact_paths = []
+      artifact_paths << { type: "log", path: "fastlane.log" }
+      artifact_paths << { type: "log", path: "fastlane.verbose.log" } if verbose
+      constants_with_path = Fastlane::Actions::SharedValues.constants
+                                                           .select { |value| value.to_s.include?("PATH") } # Far from ideal, but meanwhile...
+                                                           .select { |value| !Fastlane::Actions.lane_context[value].nil? && !Fastlane::Actions.lane_context[value].empty? }
+                                                           .map { |value| { type: value.to_s, path: Fastlane::Actions.lane_context[value] } }
+      return artifact_paths.concat(constants_with_path)
     end
   end
 end
