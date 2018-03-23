@@ -105,8 +105,7 @@ module FastlaneCI
         logger.info("fastlane run complete")
         logger.debug(build_output.join("\n").to_s)
 
-        # We remove the verbose log because the run ended successfully.
-        FileUtils.rm("fastlane.verbose.log") if File.exist?("fastlane.verbose.log")
+        verbose_log_path = File.expand_path("fastlane.verbose.log") if File.exist?("fastlane.verbose.log")
 
         artifacts_paths = gather_build_artifact_paths
       rescue StandardError => ex
@@ -119,6 +118,12 @@ module FastlaneCI
 
         artifacts_paths = gather_build_artifact_paths(true)
       ensure
+        # Store fastlane.verbose.log, for debugging purposes
+        unless verbose_log_path.nil?
+          destination_path = File.expand_path(File.join("~/.fastlane/ci/logs", self.project.id, self.current_build.number))
+          FileUtils.mkdir_p(destination_path)
+          FileUtils.mv(verbose_log_path, destination_path)
+        end
         # Fastlane is done, change back to ci directory
         logger.debug("Switching back to to #{ci_directory} from #{project.local_repo_path} now that we're done")
         Dir.chdir(ci_directory)
