@@ -27,10 +27,12 @@ module FastlaneCI
       # @param [String, nil] branch
       # @param [String, nil] sha
       # @return [Fastlane::FastfileParser]
-      def peek(git_repo: nil, branch: nil, sha: nil)
+      def peek(git_repo: nil, branch: nil, sha: nil, cache: true)
         cache_key = git_repo.git_config.git_url + (branch || sha)
         hash = Digest::SHA2.hexdigest(cache_key)
-        return self.cache[hash] if self.cache[hash].kind_of?(Fastlane::FastfileParser)
+        if cache
+          return self.cache[hash] if self.cache[hash].kind_of?(Fastlane::FastfileParser)
+        end
         git_repo.fetch
         if !branch.nil? || !branch.empty?
           # This perform the checkout of the latest commit in the branch.
