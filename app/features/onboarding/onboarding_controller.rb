@@ -126,20 +126,27 @@ module FastlaneCI
     # 3) If the data is not valid, display an error message
     post "#{HOME}/initial_clone_user" do
       if valid_params?(params, post_parameter_list_for_clone_user_validation)
-        Services.environment_variable_service.write_keys_file!(
-          locals: format_params(
-            params, post_parameter_list_for_clone_user_validation
+        if FastlaneCI::GitHubService.token_in_correct_scope?(params[:clone_user_api_token])
+          Services.environment_variable_service.write_keys_file!(
+            locals: format_params(
+              params, post_parameter_list_for_clone_user_validation
+            )
           )
-        )
 
-        session[:message] = <<~HTML
-          ~/.fastlane/ci/keys file written with the configuration values:
+          session[:message] = <<~HTML
+            ~/.fastlane/ci/keys file written with the configuration values:
 
-          <ul>
-            <li>FASTLANE_CI_INITIAL_CLONE_EMAIL='#{params[:clone_user_email]}'</li>
-            <li>FASTLANE_CI_INITIAL_CLONE_API_TOKEN='#{params[:clone_user_api_token]}'</li>
-          </ul>
-        HTML
+            <ul>
+              <li>FASTLANE_CI_INITIAL_CLONE_EMAIL='#{params[:clone_user_email]}'</li>
+              <li>FASTLANE_CI_INITIAL_CLONE_API_TOKEN='#{params[:clone_user_api_token]}'</li>
+            </ul>
+          HTML
+        else
+          session[:message] = <<~HTML
+            ERROR: Token is not in correct scope.
+          HTML
+          logger.error("Token is not in correct scope")
+        end
       else
         session[:message] = <<~HTML
           ERROR: ~/.fastlane/ci/keys file not written.

@@ -28,6 +28,10 @@ module FastlaneCI
       Octokit.auto_paginate = true # TODO: just for now, we probably should do smart pagination in the future
     end
 
+    def self.token_in_correct_scope?(token)
+      return Octokit::Client.new.scopes(token).include?("repo")
+    end
+
     def client
       @_client
     end
