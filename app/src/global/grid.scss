@@ -1,0 +1,70 @@
+@import '../shared/layout';
+// Most grid constants are in _layout.scss because a lot of core breakpoints
+// are based on the grid metrics
+// Styles applying to both fixed and single grids
+fci-grid,
+[fci-grid] {
+    display: flex;
+    flex-direction: row;
+    margin: 0 auto;
+    flex-wrap: wrap;
+    [fci-cell] {
+        box-sizing: border-box;
+    }
+}
+
+// Layout for fixed grids
+fci-grid,
+[fci-grid] {
+    // Narrow canvases (full-width grid cells)
+    @include narrowCanvas {
+        width: 100%;
+        padding: 0 ($GRID_MARGIN_NARROW / 2);
+        box-sizing: border-box; // At 100%, include the padding in our size calc
+        [fci-cell] {
+            margin: 0 ($GRID_MARGIN_NARROW / 2) ($GRID_MARGIN_NARROW) ($GRID_MARGIN_NARROW / 2);
+            width: 100%;
+        } // Define partial sizes for columnNumber < totalColumns.
+        @for $i from 1 through ($GRID_NARROW_COLUMNS - 1) {
+            [fci-cell="#{$i}"] {
+                width: 100%;
+            }
+        } // Define 100% for everything else.
+        @for $i from $GRID_NARROW_COLUMNS through $GRID_WIDE_COLUMNS {
+            [fci-cell="#{$i}"] {
+                width: 100%;
+            }
+        }
+    } // Medium canvases (~8 cols)
+    @include mediumCanvas {
+        width: gridCellWidth($GRID_MEDIUM_COLUMNS) + $GRID_MARGIN;
+        padding: 0 ($GRID_MARGIN / 2);
+        [fci-cell] {
+            margin: 0 ($GRID_GUTTER / 2) ($GRID_GUTTER) ($GRID_GUTTER / 2);
+            width: gridCellWidth($GRID_MEDIUM_COLUMNS);
+        } // Define partial sizes for columnNumber < totalColumns.
+        @for $i from 1 through ($GRID_MEDIUM_COLUMNS - 1) {
+            [fci-cell="#{$i}"] {
+                width: gridCellWidth($i);
+            }
+        } // Define 100% for everything else.
+        @for $i from $GRID_MEDIUM_COLUMNS through $GRID_WIDE_COLUMNS {
+            [fci-cell="#{$i}"] {
+                width: gridCellWidth($GRID_MEDIUM_COLUMNS);
+            }
+        }
+    } // Wide canvases (~12 cols)
+    @include wideCanvas {
+        width: gridCellWidth($GRID_WIDE_COLUMNS) + $GRID_MARGIN;
+        padding: 0 ($GRID_MARGIN / 2);
+        [fci-cell] {
+            margin: 0 ($GRID_GUTTER / 2) ($GRID_GUTTER) ($GRID_GUTTER / 2);
+            width: gridCellWidth($GRID_WIDE_COLUMNS);
+        } // Define partial sizes for all numbers of columns.
+        @for $i from 1 through $GRID_WIDE_COLUMNS {
+            [fci-cell="#{$i}"] {
+                width: gridCellWidth($i);
+            }
+        }
+    }
+}
