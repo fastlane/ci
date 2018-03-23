@@ -94,8 +94,13 @@ module FastlaneCI
       end
 
       most_recent_builds = build_files.map do |build_path|
-        build_object_hash = JSON.parse(File.read(build_path))
-        build = Build.from_json!(build_object_hash)
+        begin
+          build_object_hash = JSON.parse(File.read(build_path))
+          build = Build.from_json!(build_object_hash)
+        rescue => ex
+          logger.debug(ex.to_s)
+          raise "Error parsing build information on path '#{File.expand_path(build_path)}'"
+        end
         build.project = project # this is not part of the x.json file
         build
       end
