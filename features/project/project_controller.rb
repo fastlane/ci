@@ -65,16 +65,21 @@ module FastlaneCI
 
       locals = {
           title: "Add new project",
-          repos: FastlaneCI::GitHubService.new(provider_credential: provider_credential).repos
+          hosting_providers: [{
+            name: provider_credential.type,
+            repos: FastlaneCI::GitHubService.new(provider_credential: provider_credential).repos
+          }]
       }
       erb(:new_project, locals: locals, layout: FastlaneCI.default_layout)
     end
 
-    get "#{HOME}/add/*" do |repo_name|
+    get "#{HOME}/add/*/*/*" do |hosting_provider, owner_login, repo_name|
+      # When other than GitHub service is supported hosting_provider param
+      # will have to be taken into account
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
       github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
-      selected_repo = github_service.repos.select { |repo| repo_name == repo.name }.first
+      selected_repo = github_service.repos.select { |repo| owner_login == repo.owner.login && repo_name == repo.name }.first
 
       # We need to check whether we can checkout the project without issues.
       # So a new project is created with default settings so we can fetch it.
@@ -110,7 +115,9 @@ module FastlaneCI
           title: "Add new project",
           repo: repo,
           lanes: available_lanes,
-          fastfile_path: fastfile_path
+          fastfile_path: fastfile_path,
+          provider_name: hosting_provider,
+          owner_login: owner_login
       }
 
       # Delete the project
@@ -119,11 +126,13 @@ module FastlaneCI
       erb(:new_project_form, locals: locals, layout: FastlaneCI.default_layout)
     end
 
-    post "#{HOME}/add/*" do |repo_name|
+    post "#{HOME}/add/*/*/*" do |hosting_provider, owner_login, repo_name|
+      # When other than GitHub service is supported hosting_provider param
+      # will have to be taken into account
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
       github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
-      selected_repo = github_service.repos.select { |repo| repo_name == repo.name }.first
+      selected_repo = github_service.repos.select { |repo| owner_login == repo.owner.login && repo_name == repo.name }.first
 
       repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
 
