@@ -77,8 +77,6 @@ module FastlaneCI
     end
 
     def self.ci_user
-      require "pry"
-      binding.pry
       # Find our fastlane.ci system user
       @_ci_user ||= Services.user_service.login(
         email: FastlaneCI.env.ci_user_email,
