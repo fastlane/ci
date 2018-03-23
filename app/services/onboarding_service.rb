@@ -1,5 +1,6 @@
 require "json"
 require_relative "../shared/logging_module"
+require_relative "../services/services"
 
 module FastlaneCI
   # Provides operations to create and mutate the FastlaneCI configuration
@@ -15,13 +16,7 @@ module FastlaneCI
       logger.info("No config repo cloned yet, doing that now")
 
       # Trigger the initial clone
-      FastlaneCI::ProjectService.new(
-        project_data_source: FastlaneCI::JSONProjectDataSource.create(
-          Services.ci_config_repo,
-          git_repo_config: Services.ci_config_repo,
-          provider_credential: Services.provider_credential
-        )
-      )
+      Services.configuration_git_repo
       logger.info("Successfully did the initial clone on this machine")
     rescue StandardError => ex
       logger.error("Something went wrong on the initial clone")
@@ -80,7 +75,11 @@ module FastlaneCI
 
     # @return [Boolean]
     def remote_configuration_repository_valid?
-      return Services.configuration_repository_service.configuration_repository_valid?
+      if Services.configuration_repository_service.respond_to?(:configuration_repository_valid?)
+        return Services.configuration_repository_service.configuration_repository_valid?
+      else
+        return false
+      end
     end
 
     # @return [Boolean]
