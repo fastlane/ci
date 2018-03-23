@@ -64,7 +64,6 @@ module FastlaneCI
         hidden: true
       )
     end
-    #        containing_path: File.expand_path("~/.fastlane/ci/"),
 
     # Configuration GitRepo
     #

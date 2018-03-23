@@ -3,6 +3,7 @@ require_relative "../../shared/models/git_repo"
 
 require "pathname"
 require "securerandom"
+require "tmpdir"
 
 module FastlaneCI
   # Controller for a single project view. Responsible for updates, triggering builds, and displaying project info
@@ -79,7 +80,6 @@ module FastlaneCI
       # So a new project is created with default settings so we can fetch it.
       repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
 
-      require "tmpdir"
       dir = Dir.mktmpdir
       repo = GitRepo.new(
         git_config: repo_config,
@@ -130,7 +130,6 @@ module FastlaneCI
       lane = params["selected_lane"]
       project_name = params["project_name"]
 
-      require "tmpdir"
       dir = Dir.mktmpdir
       # Do this so we trigger the clone of the repo.
       # TODO: Do this wherever it should be done, as we must redirect
