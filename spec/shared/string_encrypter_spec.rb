@@ -16,10 +16,6 @@ module FastlaneCI
         expect(StringEncrypter.decode(hi_string, key: "ThisIsAPassword")).to eq("hi")
       end
 
-      it "should fail" do
-        expect(false).to eq(true)
-      end
-
       # we use a randomized iv so each encoded string output should be different
       it "should encode same string differently each time" do
         hi_string1 = StringEncrypter.encode("hi", key: "password")
