@@ -22,6 +22,9 @@ gem "git", ">= 1.3.0", "< 2.0.0"
 
 gem "dotenv", ">= 2.2.1", "< 3.0.0"
 
+# Caching for octokit operations
+gem "faraday-http-cache"
+
 # We have rubocop as runtime dependency for now
 # as we run code style verification for fastlane.ci
 # TODO: We should remove this before the public release

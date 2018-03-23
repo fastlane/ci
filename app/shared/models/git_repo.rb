@@ -5,6 +5,7 @@ require "tty-command"
 require "securerandom"
 require "digest"
 require "task_queue"
+require "faraday-http-cache"
 
 require_relative "../logging_module"
 
@@ -60,6 +61,18 @@ module FastlaneCI
 
     class << self
       attr_accessor :git_action_queue
+
+      # Loads the octokit cache stack for speed-up calls to github service.
+      # As explained in: https://github.com/octokit/octokit.rb#caching
+      def load_octokit_cache_stack
+        @stack ||= Faraday::RackBuilder.new do |builder|
+          builder.use(Faraday::HttpCache, serializer: Marshal, shared_cache: false)
+          builder.use(Octokit::Response::RaiseError)
+          builder.adapter(Faraday.default_adapter)
+        end
+        return if Octokit.middleware.handlers.include?(Faraday::HttpCache)
+        Octokit.middleware = @stack
+      end
     end
 
     GitRepo.git_action_queue = TaskQueue::TaskQueue.new(name: "GitRepo task queue")
@@ -71,6 +84,7 @@ module FastlaneCI
     # @param sync_setup_timeout_seconds [Integer] When in sync setup mode, how many seconds to wait until raise an exception. (Defaults to 300)
     # @param callback [proc(GitRepo)] When in async setup mode, the proc to be called with the final GitRepo setup.
     def initialize(git_config: nil, local_folder: nil, provider_credential: nil, async_start: false, sync_setup_timeout_seconds: 300, callback: nil)
+      GitRepo.load_octokit_cache_stack
       logger.debug("Creating repo in #{local_folder} for a copy of #{git_config.git_url}")
       self.validate_initialization_params!(git_config: git_config, local_folder: local_folder, provider_credential: provider_credential, async_start: async_start, callback: callback)
       @git_config = git_config
