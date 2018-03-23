@@ -26,8 +26,8 @@ module FastlaneCI
         notification_data_source = JSONNotificationDataSource.new(json_folder_path: data_store_folder)
       end
 
-      @notification_data_source = notification_data_source
-      @task_queue = TaskQueue::TaskQueue.new(name: "notifications")
+      self.notification_data_source = notification_data_source
+      self.task_queue = TaskQueue::TaskQueue.new(name: "notifications")
     end
 
     # The list of persisted notifications
@@ -84,7 +84,7 @@ module FastlaneCI
     # @param  [Proc] block
     def add_to_task_queue(&block)
       task = TaskQueue::Task.new(work_block: proc { yield })
-      @task_queue.add_task_async(task: task)
+      self.task_queue.add_task_async(task: task)
     end
   end
 end

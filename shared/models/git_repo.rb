@@ -21,11 +21,12 @@ module FastlaneCI
     attr_accessor :username    # whatever the git repo needs for a username, usually just an email, usually CI
     attr_accessor :full_name   # whatever the git repo needs for a username, usually just an email, usually fastlane.CI
     attr_accessor :auth_token  # usually an API key, but could be a password, usually fastlane.CI's auth_token
+
     def initialize(remote_host: nil, username: nil, full_name: nil, auth_token: nil)
-      @remote_host = remote_host
-      @username = username
-      @full_name = full_name
-      @auth_token = auth_token
+      self.remote_host = remote_host
+      self.username = username
+      self.full_name = full_name
+      self.auth_token = auth_token
     end
   end
 
@@ -41,6 +42,7 @@ module FastlaneCI
 
     # @return [GitRepoConfig]
     attr_accessor :git_config
+
     # @return [GitRepoAuth]
     attr_accessor :repo_auth # whatever pieces of information that can change between git users
 
@@ -68,15 +70,14 @@ module FastlaneCI
     # @param callback [proc(GitRepo)] When in async setup mode, the proc to be called with the final GitRepo setup.
     def initialize(git_config: nil, provider_credential: nil, async_start: false, sync_setup_timeout_seconds: 300, callback: nil)
       self.validate_initialization_params!(git_config: git_config, provider_credential: provider_credential, async_start: async_start, callback: callback)
-      @git_config = git_config
-
-      @callback = callback
+      self.git_config = git_config
+      self.callback = callback
 
       # Ok, so now we need to pull the bit of information from the credentials that we know we need for git repos
       case provider_credential.type
       when FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
         # Package up the authentication parts that are required
-        @repo_auth = GitRepoAuth.new(
+        self.repo_auth = GitRepoAuth.new(
           remote_host: provider_credential.remote_host,
           username: provider_credential.email,
           full_name: provider_credential.full_name,

@@ -6,7 +6,23 @@ require_relative "../string_encrypter"
 module FastlaneCI
   # GitHub ProviderCredential class
   class GitHubProviderCredential < ProviderCredential
+    # @return [String]
     attr_accessor :encrypted_api_token
+
+    # @return [String]
+    attr_accessor :email
+
+    # @return [PROVIDER_CREDENTIAL_TYPES]
+    attr_accessor :type
+
+    # @return [String]
+    attr_accessor :provider_name
+
+    # @return [String]
+    attr_accessor :full_name
+
+    # @return [String]
+    attr_accessor :remote_host
 
     def initialize(id: nil, email: nil, full_name: nil, api_token: nil)
       self.id = id || SecureRandom.uuid
@@ -20,36 +36,16 @@ module FastlaneCI
 
     def api_token=(value)
       if value.nil?
-        @encrypted_api_token = nil
+        self.encrypted_api_token = nil
       else
         new_encrypted_api_token = StringEncrypter.encode(value)
-        @encrypted_api_token = Base64.encode64(new_encrypted_api_token)
+        self.encrypted_api_token = Base64.encode64(new_encrypted_api_token)
       end
     end
 
     def api_token
-      return nil if @encrypted_api_token.nil?
-      return StringEncrypter.decode(Base64.decode64(@encrypted_api_token))
-    end
-
-    def email
-      return @email
-    end
-
-    def type
-      return @type
-    end
-
-    def provider_name
-      return @provider_name
-    end
-
-    def full_name
-      return @full_name
-    end
-
-    def remote_host
-      return @remote_host
+      return nil if self.encrypted_api_token.nil?
+      return StringEncrypter.decode(Base64.decode64(self.encrypted_api_token))
     end
   end
 end

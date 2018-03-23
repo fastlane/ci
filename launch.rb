@@ -160,8 +160,6 @@ module FastlaneCI
 
     # In the event of a server crash, we want to run pending builds on server
     # initialization for all projects for the provider credentials
-    #
-    # @return [nil]
     def self.run_pending_github_builds(projects: nil, github_service: nil)
       logger.debug("Searching all projects for commits with pending status that need a new build")
       # For each project, rerun all builds with the status of "pending"

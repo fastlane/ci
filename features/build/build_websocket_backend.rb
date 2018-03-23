@@ -14,12 +14,14 @@ module FastlaneCI
 
     KEEPALIVE_TIME = 30 # in seconds
 
+    attr_accessor :app
+
     # A hash of connected web sockets, the key being the project ID, and then the build number
     attr_accessor :websocket_clients
 
     def initialize(app)
       logger.debug("Setting up new BuildWebsocketBackend")
-      @app = app
+      self.app = app
 
       self.websocket_clients = {}
     end
@@ -38,7 +40,7 @@ module FastlaneCI
       unless Faye::WebSocket.websocket?(env)
         # This is a regular HTTP call (no socket connection)
         # so just redirect to the user's app
-        return @app.call(env)
+        return self.app.call(env)
       end
 
       ws = Faye::WebSocket.new(env, nil, { ping: KEEPALIVE_TIME })

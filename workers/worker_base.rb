@@ -9,15 +9,15 @@ module FastlaneCI
     attr_accessor :worker_id
 
     def thread_id=(new_value)
-      @thread[:thread_id] = new_value
+      self.thread[:thread_id] = new_value
     end
 
     def thread_id
-      return @thread[:thread_id]
+      return self.thread[:thread_id]
     end
 
     def initialize
-      @thread = Thread.new do
+      self.thread = Thread.new do
         begin
           # We have the `work` inside a `begin rescue`
           # so that if something fails, the thread still is alive

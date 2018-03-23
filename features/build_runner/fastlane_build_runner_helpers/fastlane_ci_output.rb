@@ -1,3 +1,4 @@
+# coding: utf-8
 require_relative "./fastlane_log"
 require "fastlane"
 
@@ -12,13 +13,13 @@ module FastlaneCI
     def initialize(each_line_block: nil)
       raise "No each_line_block provided" if each_line_block.nil?
       self.each_line_block = each_line_block
-      @output_listeners = []
+      self.output_listeners = []
     end
 
     def add_output_listener!(listener)
       raise "Invalid listener provider, expected #{FastlaneLog.class.name} got #{listener.class.name}" \
         unless listener.kind_of?(FastlaneLog)
-      @output_listeners << listener
+      self.output_listeners << listener
     end
 
     #####################################################
@@ -26,7 +27,7 @@ module FastlaneCI
     #####################################################
 
     def error(message)
-      @output_listeners.each { |listener| listener.error(message) }
+      self.output_listeners.each { |listener| listener.error(message) }
       self.each_line_block.call(
         type: :error,
         message: message,
@@ -35,7 +36,7 @@ module FastlaneCI
     end
 
     def important(message)
-      @output_listeners.each { |listener| listener.important(message) }
+      self.output_listeners.each { |listener| listener.important(message) }
       self.each_line_block.call(
         type: :important,
         message: message,
@@ -44,7 +45,7 @@ module FastlaneCI
     end
 
     def success(message)
-      @output_listeners.each { |listener| listener.success(message) }
+      self.output_listeners.each { |listener| listener.success(message) }
       self.each_line_block.call(
         type: :success,
         message: message,
@@ -55,7 +56,7 @@ module FastlaneCI
     # If you're here because you saw the exception: `wrong number of arguments (given 0, expected 1)`
     # that means you're accidentally calling this method instead of a local variable on the stack frame before this
     def message(message)
-      @output_listeners.each { |listener| listener.message(message) }
+      self.output_listeners.each { |listener| listener.message(message) }
       self.each_line_block.call(
         type: :message,
         message: message,
@@ -64,7 +65,7 @@ module FastlaneCI
     end
 
     def deprecated(message)
-      @output_listeners.each { |listener| listener.deprecated(message) }
+      self.output_listeners.each { |listener| listener.deprecated(message) }
       self.each_line_block.call(
         type: :error,
         message: message,
@@ -73,7 +74,7 @@ module FastlaneCI
     end
 
     def command(message)
-      @output_listeners.each { |listener| listener.command(message) }
+      self.output_listeners.each { |listener| listener.command(message) }
       self.each_line_block.call(
         type: :command,
         message: message,
@@ -94,11 +95,11 @@ module FastlaneCI
     end
 
     def verbose(message)
-      @output_listeners.each { |listener| listener.verbose(message) }
+      self.output_listeners.each { |listener| listener.verbose(message) }
     end
 
     def header(message)
-      @output_listeners.each { |listener| listener.header(message) }
+      self.output_listeners.each { |listener| listener.header(message) }
       self.each_line_block.call(
         type: :header,
         message: message,

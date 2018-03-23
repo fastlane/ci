@@ -15,9 +15,10 @@ module FastlaneCI
     include FastlaneCI::Logging
 
     # Parameters for running fastlane
-    attr_reader :platform
-    attr_reader :lane
-    attr_reader :parameters
+    attr_accessor :platform
+    attr_accessor :lane
+    attr_accessor :parameters
+    attr_accessor :encountered_failure_output
 
     # Set additional values specific to the fastlane build runner
     def setup(parameters: nil)
@@ -28,10 +29,10 @@ module FastlaneCI
 
       # Setting the variables directly (only having `attr_reader`) as they're immutable
       # Once you define a FastlaneBuildRunner, you shouldn't be able to modify them
-      @platform = lane_pieces.count > 1 ? lane_pieces.first : nil
-      @lane = lane_pieces.last
-      @parameters = parameters
-      @encountered_failure_output = false # Did we encounter a row that signaled failure?
+      self.platform = lane_pieces.count > 1 ? lane_pieces.first : nil
+      self.lane = lane_pieces.last
+      self.parameters = parameters
+      self.encountered_failure_output = false # Did we encounter a row that signaled failure?
     end
 
     # completion_block is called with an array of artifacts
@@ -78,7 +79,7 @@ module FastlaneCI
 
         # Attach a listener to the output to see if we have a failure. If so, this build failed
         self.add_listener(proc do |row|
-          @encountered_failure_output = true if row.did_fail_build?
+          self.encountered_failure_output = true if row.did_fail_build?
         end)
 
         build_output = ["#{fast_file_path}, #{self.lane} platform: #{self.platform}, params: #{self.parameters} from output"]
@@ -95,7 +96,7 @@ module FastlaneCI
         # Run fastlane now
         fast_file.runner.execute(self.lane, self.platform, self.parameters)
 
-        if @encountered_failure_output
+        if self.encountered_failure_output
           self.current_build.status = :failure
         else
           self.current_build.status = :success

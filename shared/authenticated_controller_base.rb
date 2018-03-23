@@ -23,11 +23,11 @@ module FastlaneCI
     end
 
     def current_user_config_service
-      if @user_config_service.nil?
+      if self.user_config_service.nil?
         logger.debug("No user_config_service for #{self.user.email}, creating one")
-        @user_config_service = FastlaneCI::ConfigService.new(ci_user: self.user)
+        self.user_config_service = FastlaneCI::ConfigService.new(ci_user: self.user)
       end
-      return @user_config_service
+      return self.user_config_service
     end
 
     # assume we need a user's provider credential for GitHub, realy though, a provider credential type should come from the controller

@@ -17,16 +17,16 @@ module FastlaneCI
     include FastlaneCI::Logging
 
     # Reference to the FastlaneCI::Project of this particular build run
-    attr_reader :project
+    attr_accessor :project
 
     # The code hosting service we want to report the status back to
-    attr_reader :code_hosting_service
+    attr_accessor :code_hosting_service
 
     # A reference to FastlaneCI::Build
-    attr_reader :current_build
+    attr_accessor :current_build
 
     # The commit sha we want to run the build for
-    attr_reader :sha
+    attr_accessor :sha
 
     # All lines that were generated so far, this might not be a complete run
     # This is an array of hashes
@@ -41,16 +41,16 @@ module FastlaneCI
     def initialize(project:, sha:, github_service:, work_queue: nil)
       # Setting the variables directly (only having `attr_reader`) as they're immutable
       # Once you define a FastlaneBuildRunner, you shouldn't be able to modify them
-      @project = project
-      @sha = sha
+      self.project = project
+      self.sha = sha
 
       self.all_build_output_log_rows = []
       self.build_change_observer_blocks = []
 
       # TODO: provider credential should determine what exact CodeHostingService gets instantiated
-      @code_hosting_service = github_service
+      self.code_hosting_service = github_service
 
-      @work_queue = work_queue
+      self.work_queue = work_queue
 
       self.prepare_build_object
     end
@@ -163,7 +163,7 @@ module FastlaneCI
         new_build_number = 1 # We start with build number 1
       end
 
-      @current_build = FastlaneCI::Build.new(
+      self.current_build = FastlaneCI::Build.new(
         project: self.project,
         number: new_build_number,
         status: :pending,

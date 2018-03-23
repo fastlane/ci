@@ -7,13 +7,13 @@ module FastlaneCI
     include FastlaneCI::Logging
 
     # @return [Octokit::Client]
-    attr_reader :client
+    attr_accessor :client
 
     # Instantiates new `ConfigurationRepositoryService` class
     #
     # @param  [ProviderCredential] provider_credential
     def initialize(provider_credential: nil)
-      @client = Octokit::Client.new(access_token: provider_credential.api_token)
+      self.client = Octokit::Client.new(access_token: provider_credential.api_token)
     end
 
     # Creates a remote repository if it does not already exist, complete with
