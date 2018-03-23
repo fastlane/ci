@@ -37,20 +37,8 @@ module FastlaneCI
         next if builds.map(&:sha).include?(current_sha)
 
         logger.debug("Detected new commit in #{self.project.project_name} on branch #{branch.name} with sha #{current_sha}")
-        # Pull to make sure we have the current contents
-        repo.pull(use_global_git_mutex: false) # We are already protected by self.target_branches which uses the mutex
 
-        logger.debug("Checking out commit #{current_sha} from on branch #{branch.name} in #{self.project.project_name}")
-        repo.checkout_commit(sha: current_sha, use_global_git_mutex: false) # We are already protected by self.target_branches which uses the mutex
-        # This never stops because with each commit, it creates a new commit and then we think it's new, LOL
-        # repo.
-
-        # When we're done, clean up by resetting
-        reset_block = proc {
-          repo.reset_hard!(use_global_git_mutex: false)
-        }
-
-        self.create_and_queue_build_task(sha: current_sha, task_ensure_block: reset_block)
+        self.create_and_queue_build_task(sha: current_sha, repo: repo)
       end
     end
   end

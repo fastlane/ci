@@ -2,6 +2,8 @@ require_relative "../../shared/authenticated_controller_base"
 require_relative "../../shared/models/git_repo"
 
 require "pathname"
+require "securerandom"
+require "tmpdir"
 
 module FastlaneCI
   # Controller for a single project view. Responsible for updates, triggering builds, and displaying project info
@@ -17,8 +19,12 @@ module FastlaneCI
       project = self.user_project_with_id(project_id: project_id)
       current_github_provider_credential = self.check_and_get_provider_credential
 
+      # Create random folder for checkout, prefixed with `manual_build`
+      checkout_folder = File.join(File.expand_path(project.local_repo_path), "manual_build_#{SecureRandom.uuid}")
       # TODO: This should be hidden in a service
-      repo = FastlaneCI::GitRepo.new(git_config: project.repo_config, provider_credential: current_github_provider_credential)
+      repo = FastlaneCI::GitRepo.new(git_config: project.repo_config,
+                                   local_folder: checkout_folder,
+                            provider_credential: current_github_provider_credential)
       current_sha = repo.most_recent_commit.sha
       manual_triggers_allowed = project.job_triggers.any? { |trigger| trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual] }
 
@@ -33,7 +39,8 @@ module FastlaneCI
         project: project,
         sha: current_sha,
         github_service: FastlaneCI::GitHubService.new(provider_credential: current_github_provider_credential),
-        work_queue: FastlaneCI::GitRepo.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
+        work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
+        repo: repo
       )
       build_runner.setup(parameters: nil)
       Services.build_runner_service.add_build_runner(build_runner: build_runner)
@@ -73,15 +80,17 @@ module FastlaneCI
       # So a new project is created with default settings so we can fetch it.
       repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
 
+      dir = Dir.mktmpdir
       repo = GitRepo.new(
         git_config: repo_config,
         provider_credential: provider_credential,
+        local_folder: dir,
         async_start: false
       )
 
       # TODO: This should be refactored in some kind of FastlaneUtils` class.`
       # We have synchronously cloned the repo, now we need to get the lanes.
-      repo_path = repo.git_config.local_repo_path
+      repo_path = repo.local_folder
       # First assume the fastlane directory and its file is in the root of the project
       fastfiles = Dir[File.join(repo_path, "fastlane/Fastfile")]
       # If not, it might be in a subfolder
@@ -121,12 +130,14 @@ module FastlaneCI
       lane = params["selected_lane"]
       project_name = params["project_name"]
 
+      dir = Dir.mktmpdir
       # Do this so we trigger the clone of the repo.
       # TODO: Do this wherever it should be done, as we must redirect
       # to the project details only when this task is finished.
       _ = GitRepo.new(
         git_config: repo_config,
         provider_credential: provider_credential,
+        local_folder: dir,
         async_start: false
       )
 
@@ -160,14 +171,16 @@ module FastlaneCI
 
       relative_fastfile_path = nil
       available_lanes = []
-      absolute_fastfile_path = project.local_fastfile_path
-      unless absolute_fastfile_path.nil?
-        parser = Fastlane::FastfileParser.new(path: absolute_fastfile_path)
-        available_lanes = parser.available_lanes
+      # TODO: Follow up in another PR
 
-        project_path = project.repo_config.local_repo_path
-        relative_fastfile_path = Pathname.new(absolute_fastfile_path).relative_path_from(Pathname.new(project_path))
-      end
+      # absolute_fastfile_path = project.local_fastfile_path
+      # unless absolute_fastfile_path.nil?
+      #   parser = Fastlane::FastfileParser.new(path: absolute_fastfile_path)
+      #   available_lanes = parser.available_lanes
+
+      #   project_path = project.local_repo_path
+      #   relative_fastfile_path = Pathname.new(absolute_fastfile_path).relative_path_from(Pathname.new(project_path))
+      # end
 
       locals = {
         project: project,

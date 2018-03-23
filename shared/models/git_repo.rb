@@ -46,6 +46,8 @@ module FastlaneCI
 
     attr_accessor :temporary_storage_path
 
+    attr_reader :local_folder # where we are keeping the local repo checkout
+
     # This callback is used when the instance is initialized in async mode, so you can define a proc
     # with the final GitRepo configured.
     #   @example
@@ -66,10 +68,11 @@ module FastlaneCI
     # @param async_start [Bool] Whether the repo should be setup async or not. (Defaults to `true`)
     # @param sync_setup_timeout_seconds [Integer] When in sync setup mode, how many seconds to wait until raise an exception. (Defaults to 300)
     # @param callback [proc(GitRepo)] When in async setup mode, the proc to be called with the final GitRepo setup.
-    def initialize(git_config: nil, provider_credential: nil, async_start: false, sync_setup_timeout_seconds: 300, callback: nil)
-      self.validate_initialization_params!(git_config: git_config, provider_credential: provider_credential, async_start: async_start, callback: callback)
+    def initialize(git_config: nil, local_folder: nil, provider_credential: nil, async_start: false, sync_setup_timeout_seconds: 300, callback: nil)
+      logger.debug("Creating repo in #{local_folder} for a copy of #{git_config.git_url}")
+      self.validate_initialization_params!(git_config: git_config, local_folder: local_folder, provider_credential: provider_credential, async_start: async_start, callback: callback)
       @git_config = git_config
-
+      @local_folder = local_folder
       @callback = callback
 
       # Ok, so now we need to pull the bit of information from the credentials that we know we need for git repos
@@ -87,7 +90,7 @@ module FastlaneCI
         raise "unsupported credential type: #{provider_credential.type}"
       end
 
-      logger.debug("Adding task to setup repo #{self.git_config.git_url} at: #{self.git_config.local_repo_path}")
+      logger.debug("Adding task to setup repo #{self.git_config.git_url} at: #{local_folder}")
 
       setup_task = git_action_with_queue(ensure_block: proc { callback_block(async_start) }) do
         logger.debug("Starting setup_repo #{self.git_config.git_url}".freeze)
@@ -115,11 +118,21 @@ module FastlaneCI
       logger.debug("Done starting up repo: #{self.git_config.git_url}")
     end
 
-    def setup_repo
+    def setup_repo(tries: 0)
       # rubocop:disable Metrics/BlockNesting
-      if File.directory?(self.git_config.local_repo_path)
+      if File.directory?(self.local_folder)
         # TODO: test if this crashes if it's not a git directory
-        @_git = Git.open(self.git_config.local_repo_path)
+        begin
+          @_git = Git.open(self.local_folder)
+        rescue ArgumentError => aex
+          if tries >= 1
+            raise aex
+          end
+
+          logger.debug("Path #{self.local_folder} is not a git directory, deleting and trying again")
+          self.clear_directory
+          return self.setup_repo(tries: tries + 1)
+        end
         repo = self.git
         if repo.index.writable?
           # Things are looking legit so far
@@ -130,7 +143,7 @@ module FastlaneCI
             # other actions, to prevent local changes to be lost.
             # This is a common issue, ci_config repo gets recreated several times trough the Services.configuration_git_repo
             # and if some changes in the local repo (added projects, etc.) have been added, they're destroyed.
-            if self.git_config.local_repo_path == File.expand_path("~/.fastlane/ci/fastlane-ci-config")
+            if self.local_folder == File.expand_path("~/.fastlane/ci/fastlane-ci-config")
               # TODO: In case there are conflicts with remote, we want to decide which way we take.
               # For now, we merge using the 'recursive' strategy.
               if !repo.status.changed == 0 && !repo.status.added == 0 && !repo.status.deleted == 0 && !repo.status.untracked == 0
@@ -157,22 +170,23 @@ module FastlaneCI
           end
         else
           self.clear_directory
-          logger.debug("Cloning #{self.git_config.git_url} into #{self.git_config.local_repo_path} after clearing directory")
+          logger.debug("Cloning #{self.git_config.git_url} into #{self.local_folder} after clearing directory")
           self.clone
         end
       else
-        logger.debug("Cloning #{self.git_config.git_url} into #{self.git_config.local_repo_path}")
+        logger.debug("Cloning #{self.git_config.git_url} into #{self.local_folder}")
         self.clone
 
         # now that we've cloned, we can setup the @_git variable
-        @_git = Git.open(self.git_config.local_repo_path)
+        @_git = Git.open(self.local_folder)
       end
-      logger.debug("Done, now using #{self.git_config.local_repo_path} for #{self.git_config.git_url}")
+      logger.debug("Done, now using #{self.local_folder} for #{self.git_config.git_url}")
       # rubocop:enable Metrics/BlockNesting
     end
 
-    def validate_initialization_params!(git_config: nil, provider_credential: nil, async_start: nil, callback: nil)
+    def validate_initialization_params!(git_config: nil, local_folder: nil, provider_credential: nil, async_start: nil, callback: nil)
       raise "No git config provided" if git_config.nil?
+      raise "No local_folder provided" if local_folder.nil?
       raise "No provider_credential provided" if provider_credential.nil?
       raise "Callback provided but not initialized in async mode" if !callback.nil? && !async_start
 
@@ -184,13 +198,13 @@ module FastlaneCI
     end
 
     def clear_directory
-      logger.debug("Deleting #{self.git_config.local_repo_path}")
-      FileUtils.rm_rf(self.git_config.local_repo_path)
+      logger.debug("Deleting #{self.local_folder}")
+      FileUtils.rm_rf(self.local_folder)
     end
 
     # Returns the absolute path to a file from inside the git repo
     def file_path(file_path)
-      File.join(self.git_config.local_repo_path, file_path)
+      File.join(self.local_folder, file_path)
     end
 
     def git
@@ -249,12 +263,8 @@ module FastlaneCI
       self.temporary_storage_path = temporary_storage_path
 
       # More details: https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
-      local_repo_path = self.git_config.local_repo_path
-
-      # Creates the `local_repo_path` directory and `notifications/` directory
-      # if they do not exist
-      FileUtils.mkdir_p(local_repo_path) unless File.directory?(local_repo_path)
-
+      # Creates the `local_folder` directory if it does not exist
+      FileUtils.mkdir_p(self.local_folder) unless File.directory?(self.local_folder)
       store_credentials_command = "git credential-store --file #{temporary_storage_path.shellescape} store"
       content = [
         "protocol=https",
@@ -266,12 +276,12 @@ module FastlaneCI
 
       scope = "local"
 
-      unless File.directory?(File.join(local_repo_path, ".git"))
+      unless File.directory?(File.join(self.local_folder, ".git"))
         # we don't have a git repo yet, we have no choice
         # TODO: check if we find a better way for the initial clone to work without setting system global state
         scope = "global"
       end
-      use_credentials_command = "git config --#{scope} credential.helper 'store --file #{temporary_storage_path.shellescape}' #{local_repo_path}"
+      use_credentials_command = "git config --#{scope} credential.helper 'store --file #{temporary_storage_path.shellescape}' #{self.local_folder}"
 
       # Uncomment if you want to debug git credential stuff, keeping it commented out because it's very noisey
       # logger.debug("Setting credentials for #{self.git_config.git_url} with command: #{use_credentials_command}")
@@ -401,6 +411,7 @@ module FastlaneCI
         logger.debug("Synchronously cloning #{self.git_config.git_url}".freeze)
         clone_synchronously(repo_auth: repo_auth)
         logger.debug("Done synchronously cloning of #{self.git_config.git_url}".freeze)
+        unset_auth
       end
     end
 
@@ -415,13 +426,13 @@ module FastlaneCI
     private
 
     def clone_synchronously(repo_auth: self.repo_auth)
-      # `self.git_config.containing_path` is where we store the local git repo
+      # `@local_folder` is where we store the local git repo
       # fastlane.ci will also delete this directory if it breaks
       # and just re-clones. So make sure it's fine if it gets deleted
-      raise "No containing path available" unless self.git_config.containing_path
+      raise "No local folder path available" unless self.local_folder
       logger.debug("Cloning git repo #{self.git_config.git_url}....")
 
-      existing_repo_for_project = File.join(self.git_config.containing_path, self.git_config.id)
+      existing_repo_for_project = File.join(self.local_folder, self.git_config.id)
       # self.git_config.id.length > 1 to ensure we're not empty or a space
       if self.git_config.id.length > 1 && Dir.exist?(existing_repo_for_project)
         logger.debug("Removing existing repo at: #{existing_repo_for_project}")
@@ -431,9 +442,10 @@ module FastlaneCI
       end
 
       self.temporary_storage_path = self.setup_auth(repo_auth: repo_auth)
-      logger.debug("[#{self.git_config.id}]: Cloning git repo #{self.git_config.git_url}")
-      Git.clone(self.git_config.git_url, self.git_config.id,
-                path: self.git_config.containing_path,
+      logger.debug("[#{self.git_config.id}]: Cloning git repo #{self.git_config.git_url} to #{@local_folder}")
+      Git.clone(self.git_config.git_url,
+                "", # checkout into the self.local_folder
+                path: self.local_folder,
                 recursive: true)
     end
   end

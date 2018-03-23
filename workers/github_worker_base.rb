@@ -62,7 +62,8 @@ module FastlaneCI
     def git_repo
       @git_repo ||= GitRepo.new(
         git_config: project.repo_config,
-        provider_credential: provider_credential
+        provider_credential: provider_credential,
+        local_folder: File.join(project.local_repo_path, "worker_checkout")
       )
     end
 
@@ -86,7 +87,7 @@ module FastlaneCI
       end
     end
 
-    def create_and_queue_build_task(sha:, task_ensure_block: nil)
+    def create_and_queue_build_task(sha:, repo:)
       credential = self.provider_credential
       current_project = self.project
       current_sha = sha
@@ -94,13 +95,11 @@ module FastlaneCI
         project: current_project,
         sha: current_sha,
         github_service: self.github_service,
-        work_queue: FastlaneCI::GitRepo.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
+        work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
+        repo: repo
       )
       build_runner.setup(parameters: nil)
       build_task = Services.build_runner_service.add_build_runner(build_runner: build_runner)
-
-      raise "build_task already has an ensure block, this is a bug" unless build_task.ensure_block.nil?
-      build_task.ensure_block = task_ensure_block
 
       logger.debug("Adding task for #{self.project_full_name}: #{credential.ci_user.email}: #{current_sha[-6..-1]}")
       return build_task

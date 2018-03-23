@@ -92,7 +92,11 @@ module FastlaneCI
           raise "Either user or a provider credential is mandatory."
         else
           params[:provider_credential] ||= params[:user].provider_credential(type: ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
-          @git_repo = FastlaneCI::GitRepo.new(git_config: self.json_folder_path, provider_credential: params[:provider_credential])
+          git_config = params[:git_config]
+
+          @git_repo = FastlaneCI::GitRepo.new(git_config: git_config,
+                                            local_folder: json_folder_path,
+                                     provider_credential: params[:provider_credential])
         end
       end
     end
@@ -167,7 +171,7 @@ module FastlaneCI
       if !self.project_exist?(new_project.project_name)
         projects << new_project
         self.projects = projects
-        logger.debug("Added project #{new_project.project_name} to projets.json in #{self.json_folder_path}")
+        logger.debug("Added project #{new_project.project_name} to projects.json in #{self.json_folder_path}")
         return new_project
       else
         logger.debug("Couldn't add project #{new_project.project_name} because it already exists")

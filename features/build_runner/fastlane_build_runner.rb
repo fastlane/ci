@@ -2,6 +2,7 @@ require_relative "./fastlane_build_runner_helpers/fastlane_ci_output"
 require_relative "./fastlane_build_runner_helpers/fastlane_log"
 require_relative "./fastlane_build_runner_helpers/fastlane_output_to_html"
 require_relative "./build_runner"
+require_relative "../../shared/fastfile_finder"
 
 module FastlaneCI
   # Represents the build runner responsible for loading and running
@@ -58,7 +59,7 @@ module FastlaneCI
       # this only takes a few ms the first time being called
       Fastlane.load_actions
 
-      fast_file_path = self.project.local_fastfile_path
+      fast_file_path = FastlaneCI::FastfileFinder.find_fastfile_in_repo(repo: self.repo)
       if fast_file_path.nil? || !File.exist?(fast_file_path)
         logger.info("unable to start fastlane run lane: #{self.lane} platform: #{self.platform}, params: #{self.parameters}, no Fastfile for commit")
         self.current_build.status = :missing_fastfile
@@ -88,9 +89,9 @@ module FastlaneCI
         end)
 
         # TODO: the fast_file.runner should probably handle this
-        logger.debug("Switching to #{project.local_repo_path} to run `fastlane`")
+        logger.debug("Switching to #{self.repo.local_folder} to run `fastlane`")
         # Change over to the repo
-        Dir.chdir(project.local_repo_path)
+        Dir.chdir(self.repo.local_folder)
 
         # Run fastlane now
         fast_file.runner.execute(self.lane, self.platform, self.parameters)

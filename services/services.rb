@@ -48,7 +48,8 @@ module FastlaneCI
 
     # Get the path to where we store fastlane.ci configuration
     def self.ci_config_git_repo_path
-      self.ci_config_repo.local_repo_path
+      # TODO: Probably shouldn't hardcode this?
+      return File.expand_path("~/.fastlane/ci/fastlane-ci-config")
     end
 
     # Setup the fastlane.ci GitRepoConfig
@@ -70,7 +71,8 @@ module FastlaneCI
     def self.configuration_git_repo
       @_configuration_git_repo ||= FastlaneCI::GitRepo.new(
         git_config: ci_config_repo,
-        provider_credential: provider_credential
+        provider_credential: provider_credential,
+        local_folder: self.ci_config_git_repo_path
       )
     end
 
@@ -110,7 +112,7 @@ module FastlaneCI
     # Start up a ProjectService from our JSONProjectDataSource
     def self.project_service
       @_project_service ||= FastlaneCI::ProjectService.new(
-        project_data_source: FastlaneCI::JSONProjectDataSource.create(ci_config_repo, user: ci_user)
+        project_data_source: FastlaneCI::JSONProjectDataSource.create(ci_config_git_repo_path, git_config: ci_config_repo, user: ci_user)
       )
     end
 

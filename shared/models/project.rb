@@ -52,33 +52,7 @@ module FastlaneCI
     end
 
     def local_repo_path
-      return self.repo_config.local_repo_path
-    end
-
-    # if you're using this with the fastfile parser, you need to use `relative: false`
-    def local_fastfile_path(relative: false)
-      fastfile_path = nil
-      project_path = self.repo_config.local_repo_path
-
-      # First assume the fastlane directory and its file is in the root of the project
-      fastfiles = Dir[File.join(project_path, "fastlane/Fastfile")]
-      # If not, it might be in a subfolder
-      fastfiles = Dir[File.join(project_path, "**/fastlane/Fastfile")] if fastfiles.count == 0
-
-      if fastfiles.count > 1
-        logger.error("Ugh, multiple Fastfiles found, we're gonna have to build a selection in the future")
-        # for now, just take the first one
-      end
-
-      if fastfiles.count == 0
-        logger.error("No Fastfile found at #{project_path}/fastlane/Fastfile, or any descendants")
-      else
-        fastfile_path = fastfiles.first
-        if relative
-          fastfile_path = Pathname.new(fastfile_path).relative_path_from(Pathname.new(project_path))
-        end
-      end
-      return fastfile_path
+      return File.join(File.expand_path("~/.fastlane/ci/"), self.id)
     end
   end
 end

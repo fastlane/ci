@@ -39,7 +39,6 @@ module FastlaneCI
       raise "Project couldn't be created" if project.nil?
       self.commit_repo_changes!(message: "Created project #{project.project_name}.")
       # We shallow clone the repo to have the information needed for retrieving lanes.
-      _ = self.git_repo_for_project(project: project)
       return project
     end
 
@@ -78,6 +77,27 @@ module FastlaneCI
       return self.project_data_source.projects
     end
 
+    # Ensure we have the projects checked out that we need
+    # Returns all repos setup
+    def update_project_repos(provider_credential: nil)
+      configured_repos = []
+      self.projects.each do |project|
+        branches = project.job_triggers
+                          .map(&:branch)
+                          .uniq
+        branches.each do |branch|
+          logger.debug("Ensuring #{project.repo_config.git_url} (branch: #{branch}) is checked out")
+          repo = GitRepo.new(
+            git_config: project.repo_config,
+            provider_credential: provider_credential,
+            local_folder: File.join(project.local_repo_path, branch),
+            async_start: false
+          )
+          configured_repos << repo
+        end
+      end
+    end
+
     def delete_project!(project: nil)
       self.project_data_source.delete_project!(project: project)
       self.commit_repo_changes!(message: "Deleted project #{project.project_name}.")
@@ -91,18 +111,6 @@ module FastlaneCI
 
     def push_configuration_repo_changes!
       Services.configuration_git_repo.push
-    end
-
-    # @return [GitRepo]
-    def git_repo_for_project(project:)
-      # TODO: For now we'll clone the project synchronously,
-      # we may revisit this later to handle async operations
-      # between Service <-> WebServer <-> Client.
-      return GitRepo.new(
-        git_config: project.repo_config,
-        provider_credential: Services.provider_credential,
-        async_start: false
-      )
     end
   end
 end

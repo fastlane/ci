@@ -14,7 +14,7 @@ module HelperFunctions
   end
 
   def git_repo_path
-    git_repo.local_repo_path
+    "fake_repo_path"
   end
 
   def ci_user
