@@ -3,7 +3,7 @@ require_relative "../shared/authenticated_controller_base"
 module FastlaneCI
   # Controller for providing all data relating to projects
   class ProjectJSONController < AuthenticatedControllerBase
-    HOME = "/projects"
+    HOME = "/data/projects"
 
     get HOME do
       current_provider_credential = self.check_and_get_provider_credential

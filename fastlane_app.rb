@@ -31,22 +31,24 @@ module FastlaneCI
     # which is required to support web socket streams for the
     # display of real-time output
     set(:server, "thin")
-
-    get "/" do
-      if ENV["WEB_APP"]
+    if ENV["WEB_APP"]
+      # Anything except a data route
+      get /\/(?!data.*).*/ do
         # Use Angular Web App instead
         send_file(File.join("public", ".dist", "index.html"))
-      else
+      end
+    else
+      get "/" do
         if session[:user]
           redirect("/dashboard_erb")
         else
           redirect("/login_erb")
         end
       end
-    end
 
-    get "/favico.ico" do
-      "nope" # TODO: Add favicon once we have it
+      get "/favico.ico" do
+        "nope" # TODO: Add favicon once we have it
+      end
     end
   end
 end
