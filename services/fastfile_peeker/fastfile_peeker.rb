@@ -32,12 +32,11 @@ module FastlaneCI
         hash = Digest::SHA2.hexdigest(cache_key)
         return self.cache[hash] if self.cache[hash].kind_of?(Fastlane::FastfileParser)
         git_repo.fetch
-        git = git_repo.git
         if !branch.nil? || !branch.empty?
           # This perform the checkout of the latest commit in the branch.
           git_repo.checkout_branch(branch)
         elsif !sha.nil? || !sha.empty?
-          git.chekout_commit(sha)
+          git_repo.chekout_commit(sha)
         else
           raise "Invalid branch or sha where provided"
         end
