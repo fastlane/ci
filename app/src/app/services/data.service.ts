@@ -6,7 +6,7 @@ import {map} from 'rxjs/operators';
 import {Project, ProjectResponse} from '../models/project';
 
 // Data server is currently locally hosted.
-const HOSTNAME = '';
+const HOSTNAME = '/data';
 
 @Injectable()
 export class DataService {

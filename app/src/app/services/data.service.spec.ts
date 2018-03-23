@@ -23,7 +23,7 @@ describe('DataService', () => {
         projects = projectsRespone;
       });
 
-      const projectsRequest = mockHttp.expectOne('/projects');
+      const projectsRequest = mockHttp.expectOne('/data/projects');
       projectsRequest.flush(mockProjectListResponse);
 
       expect(projects.length).toBe(3);
