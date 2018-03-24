@@ -1,4 +1,5 @@
 require_relative "code_hosting_service"
+require_relative "github_open_pr"
 require_relative "../../shared/logging_module"
 
 require "set"
@@ -44,23 +45,22 @@ module FastlaneCI
     # returns all open pull requests on given repo
     # branches should be nil if you want all branches to be considered
     def open_pull_requests(repo_full_name: nil, branches: nil)
-      all_open_pull_requests = client.pull_requests(repo_full_name, state: "open")
+      all_open_pull_requests = client.pull_requests(repo_full_name, state: "open").map do |pr|
+        GitHubOpenPR.new(current_sha: pr.head.sha,
+                              branch: pr.head.ref,
+                      repo_full_name: pr.head.repo.full_name,
+                           clone_url: pr.head.repo.clone_url)
+      end
 
       # if no specific branch, return all open prs
       return all_open_pull_requests if branches.nil? || branches.count == 0
 
       branch_set = branches.to_set
-      all_open_pull_requests_on_branch = all_open_pull_requests.select { |pull_request| branch_set.include?(pull_request.head.ref) }
+      all_open_pull_requests_on_branch = all_open_pull_requests.select { |pull_request| branch_set.include?(pull_request.branch) }
 
       # we want only the PRs whose latest commit was to one of the branches passed in
       logger.debug("Returning all open prs from: #{repo_full_name}, branches: #{branches}, pr count: #{all_open_pull_requests.count}")
       return all_open_pull_requests_on_branch
-    end
-
-    # returns only the most recent commit_sha for every open pr
-    # branches should be nil if you want all branches to be considered
-    def last_commit_sha_for_all_open_pull_requests(repo_full_name: nil, branches: nil)
-      return self.open_pull_requests(repo_full_name: repo_full_name, branches: branches).map { |pull_request| pull_request.head.sha }
     end
 
     # returns the statused of a given commit sha for a given repo specifically for fastlane.ci
@@ -76,14 +76,16 @@ module FastlaneCI
     # updates the most current commit to "pending" on all open prs if they don't have a status.
     # returns a list of commits that have been updated to `pending` status
     def update_all_open_prs_without_status_to_pending_status!(repo_full_name: nil, status_context: nil)
-      open_pr_commits = self.last_commit_sha_for_all_open_pull_requests(repo_full_name: repo_full_name)
+      open_pr_commits = self.open_pull_requests(repo_full_name: repo_full_name)
       updated_commits = []
-      open_pr_commits.each do |sha|
-        statuses = self.statuses_for_commit_sha(repo_full_name: repo_full_name, sha: sha)
-        if statuses.count == 0
-          self.set_build_status!(repo: repo_full_name, sha: sha, state: "pending", status_context: status_context)
-          updated_commits << sha
-        end
+      open_pr_commits.each do |open_pull_request|
+        statuses = self.statuses_for_commit_sha(repo_full_name: open_pull_request.repo_full_name, sha: open_pull_request.current_sha)
+        next unless statuses.count == 0
+        self.set_build_status!(repo: open_pull_request.repo_full_name,
+                                sha: open_pull_request.current_sha,
+                              state: "pending",
+                     status_context: status_context)
+        updated_commits << open_pull_request.current_sha
       end
       return updated_commits
     end
