@@ -126,7 +126,8 @@ module FastlaneCI
     # 3) If the data is not valid, display an error message
     post "#{HOME}/initial_clone_user" do
       if valid_params?(params, post_parameter_list_for_clone_user_validation)
-        if FastlaneCI::GitHubService.token_in_correct_scope?(params[:clone_user_api_token])
+        scope_validation_error = FastlaneCI::GitHubService.token_scope_validation_error(params[:clone_user_api_token])
+        if scope_validation_error.nil?
           Services.environment_variable_service.write_keys_file!(
             locals: format_params(
               params, post_parameter_list_for_clone_user_validation
@@ -142,10 +143,14 @@ module FastlaneCI
             </ul>
           HTML
         else
+          scopes, required = scope_validation_error
+          scopes_list_wording = scopes.count > 0 ? scopes.map { |scope| "\"#{scope}\"" }.join(",") : "empty"
+          scopes_wording = scopes.count > 1 ? "scopes" : "scope"
+          error_message = "Token should be in \"#{required}\" scope, currently it's in #{scopes_list_wording} #{scopes_wording}."
           session[:message] = <<~HTML
-            ERROR: Token is not in correct scope.
+            ERROR: #{error_message} See the image below.
           HTML
-          logger.error("Token is not in correct scope")
+          logger.error(error_message)
         end
       else
         session[:message] = <<~HTML
