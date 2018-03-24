@@ -180,6 +180,7 @@ module FastlaneCI
         # Enqueue each pending build rerun in an asynchronous task queue
         pending_build_shas_needing_rebuilds.each do |sha|
           logger.debug("Found sha #{sha} that needs a rebuild for #{project.project_name}")
+          next unless Services.build_runner_service.find_build_runner(project_id: project.id, sha: sha).nil?
 
           # Did we match a commit sha with an open pull request?
           matching_open_pr = open_pull_requests.detect { |open_pr| open_pr.current_sha == sha }
