@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="fastlane.lanes">
+    
+    
+    
+      
+      <testcase classname="fastlane.lanes" name="0: cd ..;bundle install" time="0.568535">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="1: cd ..;bundle update" time="5.444905">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="2: cd ..;bundle exec rubocop" time="1.197039">
+        
+      </testcase>
+    
+  </testsuite>
+</testsuites>
