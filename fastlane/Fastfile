@@ -1,12 +1,14 @@
 
 lane :rspec_me do
   desc "Run all the rspec tests"
+  sh("cd ..;bundle install")
   sh("cd ..;bundle update")
   sh("cd ..;bundle exec rspec")
 end
 
 lane :rubocop do
   desc "Rubocop the whole project to ensure no style violations"
+  sh("cd ..;bundle install")
   sh("cd ..;bundle update")
-  sh("bundle exec rubocop ../")
+  sh("cd ..;bundle exec rubocop")
 end
