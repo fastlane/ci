@@ -63,7 +63,8 @@ module FastlaneCI
       @git_repo ||= GitRepo.new(
         git_config: project.repo_config,
         provider_credential: provider_credential,
-        local_folder: File.join(project.local_repo_path, "worker_checkout")
+        local_folder: File.join(project.local_repo_path, "worker_checkout"),
+        async_start: false
       )
     end
 

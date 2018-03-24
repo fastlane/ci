@@ -49,7 +49,6 @@ module FastlaneCI
 
       verbose_log = FastlaneCI::FastlaneLog.new(file_path: "fastlane.verbose.log", severity: Logger::DEBUG)
       info_log = FastlaneCI::FastlaneLog.new(file_path: "fastlane.log")
-      artifacts = []
 
       ci_output.add_output_listener!(verbose_log)
       ci_output.add_output_listener!(info_log)
@@ -116,11 +115,11 @@ module FastlaneCI
         logger.error(ex)
         logger.error(ex.backtrace)
 
-        artifacts_paths = gather_build_artifact_paths(true)
+        artifacts_paths = gather_build_artifact_paths(verbose: true)
       ensure
         # Store fastlane.verbose.log, for debugging purposes
         unless verbose_log_path.nil?
-          destination_path = File.expand_path(File.join("~/.fastlane/ci/logs", self.project.id, self.current_build.number))
+          destination_path = File.expand_path(File.join("~/.fastlane/ci/logs", self.project.id, self.current_build.number.to_s))
           FileUtils.mkdir_p(destination_path)
           FileUtils.mv(verbose_log_path, destination_path)
         end
@@ -154,7 +153,7 @@ module FastlaneCI
 
     protected
 
-    def gather_build_artifact_paths(verbose)
+    def gather_build_artifact_paths(verbose: false)
       artifact_paths = []
       artifact_paths << { type: "log", path: "fastlane.log" }
       artifact_paths << { type: "log", path: "fastlane.verbose.log" } if verbose

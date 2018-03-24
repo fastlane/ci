@@ -33,7 +33,7 @@ module FastlaneCI
     set(:server, "thin")
     if ENV["WEB_APP"]
       # Anything except a data route
-      get /\/(?!data.*).*/ do
+      get %r{/(?!data.*).*} do
         # Use Angular Web App instead
         send_file(File.join("public", ".dist", "index.html"))
       end

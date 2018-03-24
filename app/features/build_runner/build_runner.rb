@@ -31,6 +31,9 @@ module FastlaneCI
     # The local GitRepo we will be using
     attr_reader :repo
 
+    # In case we need to fork, we can configure the git repo
+    attr_reader :git_fork_config
+
     # All lines that were generated so far, this might not be a complete run
     # This is an array of hashes
     attr_accessor :all_build_output_log_rows
@@ -41,12 +44,13 @@ module FastlaneCI
     # Work queue where builds should be run
     attr_accessor :work_queue
 
-    def initialize(project:, sha:, github_service:, work_queue: nil, repo:)
+    def initialize(project:, sha:, github_service:, work_queue: nil, repo:, git_fork_config: nil)
       # Setting the variables directly (only having `attr_reader`) as they're immutable
       # Once you define a FastlaneBuildRunner, you shouldn't be able to modify them
       @project = project
       @sha = sha
       @repo = repo
+      @git_fork_config = git_fork_config
 
       self.all_build_output_log_rows = []
       self.build_change_observer_blocks = []
@@ -72,17 +76,19 @@ module FastlaneCI
     end
 
     def complete_run(start_time:, artifact_paths: [])
-      artifacts = artifact_paths.map do |artifact|
-        Artifact.new(
-          type: artifact[:type],
-          reference: artifact[:path],
-          provider: self.project.artifact_provider
-        )
-      end.map do |artifact|
-        self.project.artifact_provider.store!(artifact: artifact, build: self.current_build, project: self.project)
-      end
+      # Disable due to https://github.com/fastlane/ci/issues/380
+      # artifacts = artifact_paths.map do |artifact|
+      #   Artifact.new(
+      #     type: artifact[:type],
+      #     reference: artifact[:path],
+      #     provider: self.project.artifact_provider
+      #   )
+      # end.map do |artifact|
+      #   self.project.artifact_provider.store!(artifact: artifact, build: self.current_build, project: self.project)
+      # end
 
-      self.current_build.artifacts = artifacts
+      # self.current_build.artifacts = artifacts
+      self.current_build.artifacts = []
 
       duration = Time.now - start_time
       current_build.duration = duration
@@ -100,8 +106,16 @@ module FastlaneCI
     def checkout_sha
       use_global_mutex = self.work_queue.nil?
 
-      repo.reset_hard!(use_global_git_mutex: use_global_mutex)
-      repo.pull(use_global_git_mutex: use_global_mutex)
+      if git_fork_config
+        repo.switch_to_fork(clone_url: git_fork_config.clone_url,
+                               branch: git_fork_config.branch,
+                                  sha: git_fork_config.current_sha,
+                    local_branch_name: "#{git_fork_config.branch}_local_fork",
+                 use_global_git_mutex: false)
+      else
+        repo.reset_hard!(use_global_git_mutex: use_global_mutex)
+        repo.pull(use_global_git_mutex: use_global_mutex)
+      end
 
       logger.debug("Checking out commit #{self.sha} from #{self.project.project_name}")
       repo.checkout_commit(sha: self.sha, use_global_git_mutex: use_global_mutex)

@@ -413,6 +413,17 @@ module FastlaneCI
       end
     end
 
+    def switch_to_fork(clone_url:, branch:, sha: nil, local_branch_name:, use_global_git_mutex: false)
+      self.perform_block(use_global_git_mutex: use_global_git_mutex) do
+        logger.debug("Switching to branch #{branch} from forked repo: #{clone_url} (pulling into #{local_branch_name})")
+        reset_hard!(use_global_git_mutex: false)
+        # TODO: make sure it doesn't exist yet
+        git.branch(local_branch_name)
+        reset_hard!(use_global_git_mutex: false)
+        git.pull("git@github.com:taquitosorg/trigger_test.git", branch)
+      end
+    end
+
     def clone(repo_auth: self.repo_auth, async: false)
       if async
         logger.debug("Asynchronously cloning #{self.git_config.git_url}".freeze)
