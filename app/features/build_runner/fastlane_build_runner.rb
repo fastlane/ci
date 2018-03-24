@@ -157,8 +157,6 @@ module FastlaneCI
     protected
 
     def gather_build_artifact_paths(log_path:, verbose_log_path: nil)
-      require "pry"
-      binding.pry
       artifact_paths = []
       artifact_paths << { type: "log", path: log_path }
       artifact_paths << { type: "log", path: verbose_log_path } if verbose_log_path
