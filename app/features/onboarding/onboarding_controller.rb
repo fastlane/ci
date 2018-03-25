@@ -126,20 +126,32 @@ module FastlaneCI
     # 3) If the data is not valid, display an error message
     post "#{HOME}/initial_clone_user" do
       if valid_params?(params, post_parameter_list_for_clone_user_validation)
-        Services.environment_variable_service.write_keys_file!(
-          locals: format_params(
-            params, post_parameter_list_for_clone_user_validation
+        scope_validation_error = FastlaneCI::GitHubService.token_scope_validation_error(params[:clone_user_api_token])
+        if scope_validation_error.nil?
+          Services.environment_variable_service.write_keys_file!(
+            locals: format_params(
+              params, post_parameter_list_for_clone_user_validation
+            )
           )
-        )
 
-        session[:message] = <<~HTML
-          ~/.fastlane/ci/keys file written with the configuration values:
+          session[:message] = <<~HTML
+            ~/.fastlane/ci/keys file written with the configuration values:
 
-          <ul>
-            <li>FASTLANE_CI_INITIAL_CLONE_EMAIL='#{params[:clone_user_email]}'</li>
-            <li>FASTLANE_CI_INITIAL_CLONE_API_TOKEN='#{params[:clone_user_api_token]}'</li>
-          </ul>
-        HTML
+            <ul>
+              <li>FASTLANE_CI_INITIAL_CLONE_EMAIL='#{params[:clone_user_email]}'</li>
+              <li>FASTLANE_CI_INITIAL_CLONE_API_TOKEN='#{params[:clone_user_api_token]}'</li>
+            </ul>
+          HTML
+        else
+          scopes, required = scope_validation_error
+          scopes_list_wording = scopes.count > 0 ? scopes.map { |scope| "\"#{scope}\"" }.join(",") : "empty"
+          scopes_wording = scopes.count > 1 ? "scopes" : "scope"
+          error_message = "Token should be in \"#{required}\" scope, currently it's in #{scopes_list_wording} #{scopes_wording}."
+          session[:message] = <<~HTML
+            ERROR: #{error_message} See the image below.
+          HTML
+          logger.error(error_message)
+        end
       else
         session[:message] = <<~HTML
           ERROR: ~/.fastlane/ci/keys file not written.
