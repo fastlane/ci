@@ -333,7 +333,7 @@ module FastlaneCI
       self.perform_block(use_global_git_mutex: use_global_git_mutex) do
         logger.info("Checking out branch: #{branch} from #{self.git_config.git_url}")
         self.setup_auth(repo_auth: repo_auth)
-        git.checkout(branch)
+        git.branch(branch).checkout
         logger.debug("Done checking out branch: #{branch} from #{self.git_config.git_url}")
       end
     end
@@ -342,7 +342,7 @@ module FastlaneCI
       self.perform_block(use_global_git_mutex: use_global_git_mutex) do
         logger.info("Checking out sha: #{sha} from #{self.git_config.git_url}")
         self.setup_auth(repo_auth: repo_auth)
-        git.checkout(sha)
+        git.reset_hard(git.gcommit(sha))
         logger.debug("Done checking out sha: #{sha} from #{self.git_config.git_url}")
       end
     end
