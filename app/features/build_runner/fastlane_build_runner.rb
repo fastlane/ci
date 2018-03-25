@@ -104,9 +104,9 @@ module FastlaneCI
         logger.info("fastlane run complete")
         logger.debug(build_output.join("\n").to_s)
 
-        verbose_log_path = File.expand_path("fastlane.verbose.log") if File.exist?("fastlane.verbose.log")
+        log_path = File.expand_path(File.join(ci_directory, "fastlane.log")) if File.exist?(File.join(ci_directory, "fastlane.log"))
+        artifacts_paths = gather_build_artifact_paths(log_path: log_path)
 
-        artifacts_paths = gather_build_artifact_paths
       rescue StandardError => ex
         logger.debug("Setting build status to failure due to exception")
         self.current_build.status = :ci_problem
@@ -115,7 +115,10 @@ module FastlaneCI
         logger.error(ex)
         logger.error(ex.backtrace)
 
-        artifacts_paths = gather_build_artifact_paths(verbose: true)
+        verbose_log_path = File.expand_path(File.join(ci_directory, "fastlane.verbose.log")) if File.exist?(File.join(ci_directory, "fastlane.verbose.log"))
+        log_path = File.expand_path(File.join(ci_directory, "fastlane.log")) if File.exist?(File.join(ci_directory, "fastlane.log"))
+
+        artifacts_paths = gather_build_artifact_paths(log_path: log_path, verbose_log_path: verbose_log_path)
       ensure
         # Store fastlane.verbose.log, for debugging purposes
         unless verbose_log_path.nil?
@@ -153,10 +156,10 @@ module FastlaneCI
 
     protected
 
-    def gather_build_artifact_paths(verbose: false)
+    def gather_build_artifact_paths(log_path:, verbose_log_path: nil)
       artifact_paths = []
-      artifact_paths << { type: "log", path: "fastlane.log" }
-      artifact_paths << { type: "log", path: "fastlane.verbose.log" } if verbose
+      artifact_paths << { type: "log", path: log_path }
+      artifact_paths << { type: "log", path: verbose_log_path } if verbose_log_path
       constants_with_path = Fastlane::Actions::SharedValues.constants
                                                            .select { |value| value.to_s.include?("PATH") } # Far from ideal, but meanwhile...
                                                            .select { |value| !Fastlane::Actions.lane_context[value].nil? && !Fastlane::Actions.lane_context[value].empty? }

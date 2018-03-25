@@ -143,6 +143,7 @@ module FastlaneCI
         rescue ArgumentError => aex
           logger.debug("Path #{self.local_folder} is not a git directory, deleting and trying again")
           self.clear_directory
+          self.clone
           retry if (retry_count += 1) < 5
           raise "Exceeded retry count for #{__method__}. Exception: #{aex}"
         end
