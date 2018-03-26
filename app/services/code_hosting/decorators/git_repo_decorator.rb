@@ -41,7 +41,11 @@ module FastlaneCI
           send(new_name_for_old_function, *args)
         else
           GitRepoDecorator.pull_operation_mutex.synchronize do
-            git_repo&.pull
+            begin
+              git_repo&.pull
+            rescue StandardError => ex
+              logger.error(ex)
+            end
             send(new_name_for_old_function, *args)
           end
         end
