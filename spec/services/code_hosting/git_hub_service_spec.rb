@@ -1,4 +1,5 @@
-require File.expand_path("../../../../services/code_hosting/git_hub_service.rb", __FILE__)
+require "spec_helper"
+require "app/services/code_hosting/git_hub_service"
 
 describe FastlaneCI::GitHubService do
   describe ".token_scope_validation_error" do
