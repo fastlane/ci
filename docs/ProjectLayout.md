@@ -7,11 +7,11 @@ ci
 │   ├── [features](#features)
 │   ├── [services](#services)
 │   ├── [shared](#shared)
-│   ├── [src](#src)
 │   └── [workers](#workers)
 ├── docs
 ├── public
 ├── [spec](#spec)
+├── [web](#web)
 └── [vendor](#vendor)
 ```
 
@@ -33,11 +33,6 @@ Services are like controllers for your data
 shared
 ---
 
-src
----
-
-Front-end code for the browser UI of the application
-
 workers
 ---
 
@@ -47,6 +42,11 @@ spec
 ---
 
 Rspec tests for the ruby implementation of the web application. Sub-folders here should match the relevant files under test in `app/`
+
+web
+---
+
+Front-end code for the browser UI of the application
 
 vendor
 ---
