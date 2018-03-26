@@ -161,11 +161,12 @@ module FastlaneCI
       end
     end
 
-    def create_project!(name: nil, repo_config: nil, enabled: nil, lane: nil, artifact_provider: nil)
+    def create_project!(name: nil, repo_config: nil, enabled: nil, platform: nil, lane: nil, artifact_provider: nil)
       projects = self.projects.clone
       new_project = Project.new(repo_config: repo_config,
                                 enabled: enabled,
                                 project_name: name,
+                                platform: platform,
                                 lane: lane,
                                 artifact_provider: artifact_provider)
       if !self.project_exist?(new_project.project_name)
