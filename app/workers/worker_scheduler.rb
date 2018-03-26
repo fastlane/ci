@@ -29,9 +29,9 @@ module FastlaneCI
 
     def schedule(&block)
       if self.interval_time
-        self.scheduler.every(self.interval_time) { block.call }
+        self.scheduler.every(self.interval_time) { yield }
       elsif self.cron_schedule
-        job_id = self.scheduler.cron(self.cron_schedule) { block.call }
+        job_id = self.scheduler.cron(self.cron_schedule) { yield }
         scheduled_cron_job = self.scheduler.job(job_id)
         logger.debug("Scheduling cron job for #{self.cron_schedule}.")
         logger.debug("Next time #{scheduled_cron_job.next_time} or #{(scheduled_cron_job.next_time - Time.now) / (60 * 60)} hours from now.")
