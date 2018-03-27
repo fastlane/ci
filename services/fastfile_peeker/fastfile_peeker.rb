@@ -1,5 +1,4 @@
-require_relative "../../fastfile-parser/fastfile_parser"
-
+require "fastfile_parser"
 require "digest"
 
 module FastlaneCI

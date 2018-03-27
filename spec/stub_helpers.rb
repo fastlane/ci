@@ -24,6 +24,7 @@ module StubHelpers
     )
     FastlaneCI::GitRepo.any_instance.stub(:initialize)
     FastlaneCI::GitRepo.any_instance.stub(:setup_repo)
+    FastlaneCI::GitRepo.any_instance.stub(:fetch)
     FastlaneCI::GitRepo.any_instance.stub(:git_config).and_return(fake_git_config)
     FastlaneCI::GitRepo.any_instance.stub(:repo_auth).and_return(fake_repo_auth)
     FastlaneCI::GitRepo.any_instance.stub(:clone)

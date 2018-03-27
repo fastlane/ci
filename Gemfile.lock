@@ -16,7 +16,7 @@ GIT
 
 GIT
   remote: https://github.com/fastlane/fastlane
-  revision: c930686265bb10cae7dbd298779dc6789eabb925
+  revision: 937ea1917cd189506b80a76c050b53121b52f4c5
   specs:
     fastlane (2.87.0)
       CFPropertyList (>= 2.3, < 4.0.0)
@@ -89,7 +89,7 @@ GEM
     dotenv (2.2.1)
     equalizer (0.0.11)
     equatable (0.5.0)
-    et-orbi (1.0.9)
+    et-orbi (1.1.0)
       tzinfo
     eventmachine (1.2.5)
     excon (0.61.0)
