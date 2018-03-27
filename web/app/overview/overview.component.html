@@ -7,3 +7,12 @@
     </div>
   </div>
 </div>
+<div fci-grid>
+  <mat-card class="fci-add-project-card" fci-cell="4">
+    <mat-icon>add</mat-icon>
+    <span class="fci-add-project-text"> Add project </span>
+  </mat-card>
+  <mat-card class="fci-project-card" fci-cell="4" *ngFor="let project of projects">
+    <div class="fci-project-name">{{project.name}}</div>
+  </mat-card>
+</div>
