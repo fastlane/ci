@@ -34,15 +34,16 @@ module FastlaneCI
           return self.cache[hash] if self.cache[hash].kind_of?(Fastlane::FastfileParser)
         end
         git_repo.fetch
-        if !branch.nil? || !branch.empty?
+        if branch && !branch.empty?
           # This perform the checkout of the latest commit in the branch.
           git_repo.checkout_branch(branch)
-        elsif !sha.nil? || !sha.empty?
+        elsif sha && !sha.empty?
           git_repo.chekout_commit(sha)
         else
-          raise "Invalid branch or sha where provided"
+          raise "Invalid branch or sha were provided"
         end
-        if (fastfile_path = self.fastfile_path(root_path: git_repo.local_folder))
+        fastfile_path = self.fastfile_path(root_path: git_repo.local_folder)
+        if fastfile_path
           fastfile = Fastlane::FastfileParser.new(path: fastfile_path)
           self.cache[hash] = fastfile
           return fastfile
