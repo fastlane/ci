@@ -140,6 +140,7 @@ module FastlaneCI
         # TODO: test if this crashes if it's not a git directory
         begin
           @_git = Git.open(self.local_folder)
+          self.checkout_branch(branch: "master", use_global_git_mutex: false)
         rescue ArgumentError => aex
           logger.debug("Path #{self.local_folder} is not a git directory, deleting and trying again")
           self.clear_directory
