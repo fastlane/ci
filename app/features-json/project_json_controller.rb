@@ -1,5 +1,5 @@
 require_relative "../shared/authenticated_controller_base"
-require_relative "./proto/project_summary"
+require_relative "./proto/project_summary_proto"
 
 module FastlaneCI
   # Controller for providing all data relating to projects
@@ -11,7 +11,7 @@ module FastlaneCI
       current_user_config_service = self.current_user_config_service
       all_projects = current_user_config_service.projects(provider_credential: current_provider_credential)
       all_projects_proto = all_projects.map do |project|
-        FastlaneCI::Proto::ProjectSummary.new(project_name: project.project_name, id: project.project_id)
+        ProjectSummaryProto.proto_from(object: project)
       end
 
       return all_projects_proto.to_json
