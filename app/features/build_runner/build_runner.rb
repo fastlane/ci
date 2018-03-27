@@ -114,7 +114,9 @@ module FastlaneCI
                  use_global_git_mutex: false)
       else
         repo.reset_hard!(use_global_git_mutex: use_global_mutex)
-        repo.pull(use_global_git_mutex: use_global_mutex)
+        logger.debug("***************** PULLING (use mutex: #{use_global_mutex}) *******")
+        raise "THIS IS GARBAGE TODO: DELETE ME"
+        # repo.pull(branch:,use_global_git_mutex: use_global_mutex)
       end
 
       logger.debug("Checking out commit #{self.sha} from #{self.project.project_name}")
@@ -129,6 +131,7 @@ module FastlaneCI
       use_global_mutex = self.work_queue.nil?
       # When we're done, clean up by resetting
       repo.reset_hard!(use_global_git_mutex: use_global_mutex)
+      repo.checkout(branch: "master", use_global_git_mutex: use_global_mutex)
     end
 
     def post_run_action
