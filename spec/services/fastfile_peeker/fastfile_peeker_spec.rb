@@ -38,7 +38,7 @@ module FastlaneCI
         )
       end
 
-      it "Uses cache for already peeked Fastfiles", now: true do
+      it "Uses cache for already peeked Fastfiles" do
         allow_any_instance_of(FastlaneCI::GitRepo).to receive(:checkout_branch).with("master").and_return(nil)
         allow_any_instance_of(FastlaneCI::GitRepo).to receive(:local_folder).and_return(
           File.join(repo_1_file_path)
