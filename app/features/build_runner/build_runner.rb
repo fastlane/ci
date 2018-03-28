@@ -44,7 +44,7 @@ module FastlaneCI
     # Work queue where builds should be run
     attr_accessor :work_queue
 
-    def initialize(project:, sha:, github_service:, work_queue: nil, repo:, git_fork_config: nil)
+    def initialize(project:, sha:, github_service:, work_queue:, repo:, git_fork_config: nil)
       # Setting the variables directly (only having `attr_reader`) as they're immutable
       # Once you define a FastlaneBuildRunner, you shouldn't be able to modify them
       @project = project
@@ -104,8 +104,6 @@ module FastlaneCI
     end
 
     def checkout_sha
-      use_global_mutex = self.work_queue.nil?
-
       if git_fork_config
         repo.switch_to_fork(clone_url: git_fork_config.clone_url,
                                branch: git_fork_config.branch,
@@ -113,22 +111,23 @@ module FastlaneCI
                     local_branch_name: "#{git_fork_config.branch}_local_fork",
                  use_global_git_mutex: false)
       else
-        repo.reset_hard!(use_global_git_mutex: use_global_mutex)
-        repo.pull(use_global_git_mutex: use_global_mutex)
+        repo.reset_hard!
+        logger.debug("Pulling `master` in checkout_sha")
+        repo.pull
       end
 
       logger.debug("Checking out commit #{self.sha} from #{self.project.project_name}")
-      repo.checkout_commit(sha: self.sha, use_global_git_mutex: use_global_mutex)
+      repo.checkout_commit(sha: self.sha)
     end
 
     def pre_run_action
+      logger.debug("Running pre_run_action in checkout_sha")
       self.checkout_sha
     end
 
     def reset_repo_state
-      use_global_mutex = self.work_queue.nil?
       # When we're done, clean up by resetting
-      repo.reset_hard!(use_global_git_mutex: use_global_mutex)
+      repo.reset_hard!
     end
 
     def post_run_action

@@ -102,6 +102,7 @@ module FastlaneCI
     end
 
     def refresh_repo
+      logger.debug("Pulling `master` in refresh_repo")
       self.git_repo.pull
     end
 
