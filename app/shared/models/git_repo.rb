@@ -232,7 +232,7 @@ module FastlaneCI
       git_action_with_queue do
         branch_count = 0
         self.git.branches.remote.each do |branch|
-          each_block.call(self.git, branch)
+          yield(self.git, branch)
           branch_count += 1
         end
       end
@@ -314,9 +314,9 @@ module FastlaneCI
 
     def perform_block(use_global_git_mutex: true, &block)
       if use_global_git_mutex
-        git_action_with_queue(ensure_block: proc { unset_auth }) { block.call }
+        git_action_with_queue(ensure_block: proc { unset_auth }) { yield }
       else
-        block.call # Assuming all things in the block are synchronous
+        yield # Assuming all things in the block are synchronous
         self.unset_auth
       end
     end
