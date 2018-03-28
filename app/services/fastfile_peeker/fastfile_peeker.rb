@@ -1,3 +1,5 @@
+require_relative "../../shared/fastfile_finder"
+
 require "fastfile_parser"
 require "digest"
 
@@ -10,17 +12,7 @@ module FastlaneCI
         return @cache
       end
 
-      # Class method that finds the directory for the first Fastfile found given a root_path
-      # @param [String] root_path
-      # @return [String, nil] the path of the Fastfile or nil if no Fastfile found.
-      def fastfile_path(root_path: nil)
-        fastfiles = Dir[File.join(root_path, "fastlane/Fastfile")]
-        fastfiles = Dir[File.join(root_path, "**/fastlane/Fastfile")] if fastfiles.count == 0
-        fastfile_path = fastfiles.first
-        return fastfile_path
-      end
-
-      protected :cache, :fastfile_path
+      protected :cache
 
       # @param [GitRepo] git_repo
       # @param [String, nil] branch
@@ -41,9 +33,9 @@ module FastlaneCI
         else
           raise "Invalid branch or sha were provided"
         end
-        fastfile_path = self.fastfile_path(root_path: git_repo.local_folder)
-        if fastfile_path
-          fastfile = Fastlane::FastfileParser.new(path: fastfile_path)
+        fastfile_path = FastfileFinder.find_fastfile_in_repo(repo: git_repo)
+        if fastfile_path =
+             fastfile = Fastlane::FastfileParser.new(path: fastfile_path)
           self.cache[hash] = fastfile
           return fastfile
         else

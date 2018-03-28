@@ -1,8 +1,8 @@
 require "fastfile_parser"
 require "digest"
 
-require_relative "../../stub_helpers.rb"
-require_relative "../../../services/fastfile_peeker/fastfile_peeker"
+require_relative "../../stub_helpers"
+require_relative "../../../app/services/fastfile_peeker/fastfile_peeker"
 
 module FastlaneCI
   describe FastlaneCI::FastfilePeeker do
