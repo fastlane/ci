@@ -1,0 +1,63 @@
+<hr />
+
+
+<p><code>Fastfile</code> located at path <code><%= fastfile_path %></code></p>
+<div id="lanes">
+	<% fastfile_parser.all_lanes_flat(ignore_actions_outside_of_lanes: true).each do |full_lane_name, lane_content| %>
+		<div class="laneColumn">
+			<button type="button" id="lane-<%= full_lane_name %>" lane="<%= full_lane_name %>" onclick="alert('This button doesnt actually do anything yet, but soon you will be able to select the lane using it')"><%= full_lane_name %></button>
+
+			<% if lane_content[:description].join("").length > 0 %>
+				<div class="laneDescription">
+					<%= lane_content[:description].join(" ") %>
+				</div>
+			<% end %>
+
+			<% lane_content[:actions].each do |current_action| %>
+				<% if current_action[:action] %>
+					<div class="laneAction" lanename="<%= full_lane_name %>" title="<%= CGI.escapeHTML(current_action[:parameters].to_s) %>"><%= current_action[:action] %></div>
+				<% elsif current_action[:advancedCode] %>
+					<div class="laneAction advancedCode" lanename="<%= full_lane_name %>"><%= current_action[:advancedCode] %></div>
+				<% end %>
+			<% end %>
+		</div>
+	<% end %>
+</div>
+
+
+<style>
+  /* Everything related to rendering the lanes */
+  #lanes {
+    
+  }
+  #lanes > .laneColumn {
+    vertical-align: top;
+    display: inline-block;
+    text-align: center;
+    width: 220px;
+    margin-top: 0;
+  }
+  #lanes > .laneColumn > .laneDescription {
+  	background-color: #EEA;
+  	padding: 10px;
+  	border-radius: 9px;
+  	margin-top: 10px;
+  }
+  #lanes > .laneColumn > .laneButton {
+    margin: 0 10px;
+    width: 200px;
+  }
+  #lanes > .laneColumn > .laneAction {
+    background-color: #CCC;
+    padding: 15px;
+    border-radius: 9px;
+    margin: 10px auto 10px auto;
+    text-align: center;
+    width: 150px;
+  }
+  #lanes > .laneColumn > .laneAction.advancedCode {
+    text-align: left;
+    font-family: Consolas, monaco, monospace;
+    font-size: 10px;
+  }
+</style>
