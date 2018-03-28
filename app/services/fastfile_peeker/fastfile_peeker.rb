@@ -16,9 +16,9 @@ module FastlaneCI
         git_repo.fetch
         if branch && !branch.empty?
           # This perform the checkout of the latest commit in the branch.
-          git_repo.checkout_branch(branch)
+          git_repo.checkout_branch(branch: branch)
         elsif sha && !sha.empty?
-          git_repo.chekout_commit(sha)
+          git_repo.chekout_commit(sha: sha)
         else
           raise "Invalid branch or sha were provided"
         end
