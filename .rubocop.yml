@@ -226,6 +226,7 @@ AllCops:
     - './vendor/**/*'
     - './fastfile-parser/**/*'
     - './taskqueue/**/*'
+    - '**/node_modules/**/*'
 
 # They have not to be snake_case
 Naming/FileName:
