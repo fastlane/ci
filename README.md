@@ -63,13 +63,15 @@ Run the rake task: `rake devboostrap`.
 
 ## Environment variables for first run
 
-These are the environment variables that you must have resolved before you can run fastlane.ci. We recommend create a local `.keys` file that you can load using `source .keys` before starting the server.
+These are the environment variables that you must have resolved before you can run fastlane.ci. 
 
 *Note:* For a full list of environment variables and their description, check out [docs/EnvironmentVariables.md](docs/EnvironmentVariables.md).
 
 `fastlane.ci` needs a CI-account that is used by `fastlane.ci` to commit and push changes that happen from the CI-side of things (e.g. a new build is triggered by a new commit).
 
 The setup below will be simplified as the project becomes more mature. As for now, we don't have a UI or automatic onboarding yet, so you'll have to set those variables up.
+
+Please create the following file in `~/.fastlane/ci/.keys` (create the folder first, if it doesn't exist yet)
 
 ```sh
 # Arbitrary key you decide. This will be used for password encryption.
@@ -79,11 +81,11 @@ export FASTLANE_CI_ENCRYPTION_KEY="key"
 # The email address of your fastlane CI bot account
 export FASTLANE_CI_USER="email@bot.com"
 
-# The password of your fastlane CI bot account
+# The token/password of your fastlane CI bot account
 export FASTLANE_CI_PASSWORD="password"
 
 # The git URL (https) for the configuration repo
-export FASTLANE_CI_REPO_URL="https://github.com/your-name/your-ci-config"
+export FASTLANE_CI_REPO_URL="https://github.com/your-name/ci-config"
 
 # Needed just for the first startup of fastlane.ci:
 # The email address used for the initial clone for the config repo
