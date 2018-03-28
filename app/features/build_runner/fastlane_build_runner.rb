@@ -106,7 +106,6 @@ module FastlaneCI
 
         log_path = File.expand_path(File.join(ci_directory, "fastlane.log")) if File.exist?(File.join(ci_directory, "fastlane.log"))
         artifacts_paths = gather_build_artifact_paths(log_path: log_path)
-
       rescue StandardError => ex
         logger.debug("Setting build status to failure due to exception")
         self.current_build.status = :ci_problem
