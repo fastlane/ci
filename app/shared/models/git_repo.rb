@@ -140,6 +140,7 @@ module FastlaneCI
         # TODO: test if this crashes if it's not a git directory
         begin
           @_git = Git.open(self.local_folder)
+          self.checkout_branch(branch: "master", use_global_git_mutex: false)
         rescue ArgumentError => aex
           logger.debug("Path #{self.local_folder} is not a git directory, deleting and trying again")
           self.clear_directory
@@ -321,11 +322,11 @@ module FastlaneCI
       end
     end
 
-    def pull(repo_auth: self.repo_auth, use_global_git_mutex: true)
+    def pull(remote: "origin", branch: "master", repo_auth: self.repo_auth, use_global_git_mutex: true)
       self.perform_block(use_global_git_mutex: use_global_git_mutex) do
         logger.info("Starting pull #{self.git_config.git_url}")
         self.setup_auth(repo_auth: repo_auth)
-        git.pull
+        git.pull(remote, branch)
         logger.debug("Done pulling #{self.git_config.git_url}")
       end
     end
@@ -421,7 +422,8 @@ module FastlaneCI
         # TODO: make sure it doesn't exist yet
         git.branch(local_branch_name)
         reset_hard!(use_global_git_mutex: false)
-        git.pull("git@github.com:taquitosorg/trigger_test.git", branch)
+        git.pull(clone_url, branch)
+        git.reset_hard(git.gcommit(sha))
       end
     end
 

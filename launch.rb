@@ -191,11 +191,11 @@ module FastlaneCI
           end
 
           git_fork_config = nil
-          if matching_open_pr.fork_of_repo?(repo_full_name: repo_full_name)
+          # if matching_open_pr.fork_of_repo?(repo_full_name: repo_full_name)
             git_fork_config = GitForkConfig.new(current_sha: sha,
                                                      branch: matching_open_pr.branch,
                                                   clone_url: matching_open_pr.clone_url)
-          end
+          # end
 
           repo = GitRepo.new(
             git_config: project.repo_config,
@@ -250,11 +250,11 @@ module FastlaneCI
           next if statuses.count > 0
 
           git_fork_config = nil
-          if open_pr.fork_of_repo?(repo_full_name: project.repo_config.full_name)
+          # if open_pr.fork_of_repo?(repo_full_name: project.repo_config.full_name)
             git_fork_config = GitForkConfig.new(current_sha: sha,
                                                      branch: matching_open_pr.branch,
                                                   clone_url: matching_open_pr.clone_url)
-          end
+          # end
 
           repo = GitRepo.new(
             git_config: project.repo_config,

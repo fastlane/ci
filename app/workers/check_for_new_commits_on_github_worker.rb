@@ -3,6 +3,7 @@ require_relative "worker_scheduler"
 require_relative "../services/build_service"
 require_relative "../shared/models/job_trigger"
 require_relative "../shared/logging_module"
+require_relative "../shared/models/git_fork_config"
 
 module FastlaneCI
   # Responsible for checking if there have been new commits
@@ -36,9 +37,13 @@ module FastlaneCI
         builds = build_service.list_builds(project: self.project)
         next if builds.map(&:sha).include?(current_sha)
 
+        git_fork_config = GitForkConfig.new(current_sha: current_sha,
+                                                 branch: branch.name,
+                                              clone_url: git.remote.url)
+
         logger.debug("Detected new commit in #{self.project.project_name} on branch #{branch.name} with sha #{current_sha}")
 
-        self.create_and_queue_build_task(sha: current_sha, repo: repo)
+        self.create_and_queue_build_task(sha: current_sha, repo: repo, git_fork_config: git_fork_config)
       end
     end
   end

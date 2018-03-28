@@ -52,6 +52,10 @@ module FastlaneCI
       @repo = repo
       @git_fork_config = git_fork_config
 
+      if git_fork_config.nil?
+        raise "NO GIT FORK"
+      end
+
       self.all_build_output_log_rows = []
       self.build_change_observer_blocks = []
 
@@ -106,15 +110,17 @@ module FastlaneCI
     def checkout_sha
       use_global_mutex = self.work_queue.nil?
 
-      if git_fork_config
-        repo.switch_to_fork(clone_url: git_fork_config.clone_url,
-                               branch: git_fork_config.branch,
-                                  sha: git_fork_config.current_sha,
-                    local_branch_name: "#{git_fork_config.branch}_local_fork",
+      if self.git_fork_config
+        repo.switch_to_fork(clone_url: self.git_fork_config.clone_url,
+                               branch: self.git_fork_config.branch,
+                                  sha: self.git_fork_config.current_sha,
+                    local_branch_name: "#{self.git_fork_config.branch}_local_fork",
                  use_global_git_mutex: false)
       else
         repo.reset_hard!(use_global_git_mutex: use_global_mutex)
-        repo.pull(use_global_git_mutex: use_global_mutex)
+        logger.debug("***************** PULLING (use mutex: #{use_global_mutex}) *******")
+        raise "THIS IS GARBAGE TODO: DELETE ME"
+        # repo.pull(branch:,use_global_git_mutex: use_global_mutex)
       end
 
       logger.debug("Checking out commit #{self.sha} from #{self.project.project_name}")
@@ -129,6 +135,7 @@ module FastlaneCI
       use_global_mutex = self.work_queue.nil?
       # When we're done, clean up by resetting
       repo.reset_hard!(use_global_git_mutex: use_global_mutex)
+      repo.checkout_branch(branch: "master", use_global_git_mutex: use_global_mutex)
     end
 
     def post_run_action
