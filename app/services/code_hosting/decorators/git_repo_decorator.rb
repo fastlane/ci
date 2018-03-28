@@ -1,4 +1,5 @@
 require_relative "../../services"
+require_relative "../../../shared/logging_module"
 
 module FastlaneCI
   # This module acts as a decorator to be added to any method that potentially will make changes
@@ -18,7 +19,6 @@ module FastlaneCI
   # In this way every method that potentially can make changes over the ci-config repo is
   # delayed until the ci-config repo is updated from remote, as it is our source of truth.
   module GitRepoDecorator
-    prepend FastlaneCI::Logging
     # This decorator method is responsible of pulling and committing-pushing changes from the ci-config repo.
     class << self
       def pull_operation_mutex
@@ -31,7 +31,7 @@ module FastlaneCI
     end
 
     def pull_before(func_name, git_repo: Services.configuration_git_repo)
-      new_name_for_old_function = "#{func_name}_old".to_sym
+      new_name_for_old_function = "#{func_name}_old_pull".to_sym
       alias_method(new_name_for_old_function, func_name)
       define_method(func_name) do |*args|
         # Here we use the mutex as a throttling tool. While a pull operation is
@@ -44,7 +44,9 @@ module FastlaneCI
             begin
               git_repo&.pull
             rescue StandardError => ex
-              logger.error(ex)
+              if self.class.include?(FastlaneCI::Logging)
+                logger.error(ex)
+              end
             end
             send(new_name_for_old_function, *args)
           end
@@ -53,7 +55,7 @@ module FastlaneCI
     end
 
     def commit_after(func_name, git_repo: Services.configuration_git_repo)
-      new_name_for_old_function = "#{func_name}_old".to_sym
+      new_name_for_old_function = "#{func_name}_old_commit".to_sym
       alias_method(new_name_for_old_function, func_name)
       define_method(func_name) do |*args|
         GitRepoDecorator.commit_operation_mutex.synchronize do
@@ -63,7 +65,9 @@ module FastlaneCI
             git_repo&.push
             return return_value
           rescue StandardError => ex
-            logger.error(ex)
+            if self.class.include?(FastlaneCI::Logging)
+              logger.error(ex)
+            end
             # We have to return the value from the original function regardless of possible exceptions raised
             # by the commit or push methods.
             return return_value
