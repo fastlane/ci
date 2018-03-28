@@ -322,11 +322,11 @@ module FastlaneCI
       end
     end
 
-    def pull(branch: "master", repo_auth: self.repo_auth, use_global_git_mutex: true)
+    def pull(remote: "origin", branch: "master", repo_auth: self.repo_auth, use_global_git_mutex: true)
       self.perform_block(use_global_git_mutex: use_global_git_mutex) do
         logger.info("Starting pull #{self.git_config.git_url}")
         self.setup_auth(repo_auth: repo_auth)
-        git.pull(branch: branch)
+        git.pull(remote, branch)
         logger.debug("Done pulling #{self.git_config.git_url}")
       end
     end
