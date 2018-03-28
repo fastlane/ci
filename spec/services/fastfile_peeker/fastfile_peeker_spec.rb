@@ -37,25 +37,6 @@ module FastlaneCI
           "android lane2" => { description: [], actions: [], private: false } }
         )
       end
-
-      it "Uses cache for already peeked Fastfiles" do
-        allow_any_instance_of(FastlaneCI::GitRepo).to receive(:checkout_branch).with("master").and_return(nil)
-        allow_any_instance_of(FastlaneCI::GitRepo).to receive(:local_folder).and_return(
-          File.join(repo_1_file_path)
-        )
-        fastfile = described_class.peek(git_repo: FastlaneCI::GitRepo.new, branch: "master")
-        cache = described_class.send(:cache)
-        key = Digest::SHA2.hexdigest(FastlaneCI::GitRepo.new.git_config.git_url + "master")
-        expect(cache[key].all_lanes_flat).to eql(
-          { "" => { description: [], actions: [{ action: :fastlane_version, parameters: "1.10.0" },
-                                               { action: :default_platform, parameters: :ios }] },
-          "something" => { description: [], actions: [{ action: :sigh, parameters: nil }], private: false },
-          "ios _before_all_block_" => { description: [], actions: [{ action: :cocoapods, parameters: nil }] },
-          "ios beta" => { description: [], actions: [], private: false },
-          "android lane1" => { description: [], actions: [], private: false },
-          "android lane2" => { description: [], actions: [], private: false } }
-        )
-      end
     end
   end
 end
