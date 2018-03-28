@@ -2,7 +2,6 @@ require "spec_helper"
 require "app/services/environment_variable_service"
 
 describe FastlaneCI::EnvironmentVariableService do
-
   describe "#keys_file_path" do
     before(:each) do
       allow(Dir).to receive(:home).and_return("/path/to/home")
