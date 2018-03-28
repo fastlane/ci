@@ -171,7 +171,6 @@ module FastlaneCI
       # For now, this is good enough, as we'll be moving so fast with this one
 
       project_path = project.local_repo_path
-      available_lanes = []
 
       # TODO: remove this once the Fastfile peeker is implemented
       absolute_fastfile_path = File.join(project_path, "master/fastlane/Fastfile")
