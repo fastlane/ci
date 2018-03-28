@@ -5,7 +5,7 @@
 <div id="lanes">
 	<% fastfile_parser.all_lanes_flat(ignore_actions_outside_of_lanes: true).each do |full_lane_name, lane_content| %>
 		<div class="laneColumn">
-			<button type="button" id="lane-<%= full_lane_name %>" lane="<%= full_lane_name %>" onclick="alert('This button doesnt actually do anything yet, but soon youll be able to select the lane usig it')"><%= full_lane_name %></button>
+			<button type="button" id="lane-<%= full_lane_name %>" lane="<%= full_lane_name %>" onclick="alert('This button doesnt actually do anything yet, but soon you will be able to select the lane using it')"><%= full_lane_name %></button>
 
 			<% if lane_content[:description].join("").length > 0 %>
 				<div class="laneDescription">
