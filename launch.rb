@@ -76,8 +76,7 @@ module FastlaneCI
     # not found, but the user has a `FastlaneCI.env.repo_url` which corresponds
     # to a valid remote configuration repository
     def self.clone_repo_if_no_local_repo_and_remote_repo_exists
-      if !Services.onboarding_service.local_configuration_repo_exists? &&
-         Services.onboarding_service.required_keys_and_proper_remote_configuration_repo?
+      if !Services.onboarding_service.local_configuration_repo_exists? && Services.onboarding_service.required_keys_and_proper_remote_configuration_repo?
         Services.onboarding_service.clone_remote_repository_locally
       end
     end
@@ -113,6 +112,8 @@ module FastlaneCI
     end
 
     def self.clone_project_repos
+      return unless Services.onboarding_service.correct_setup?
+
       FastlaneCI::Services.project_service.update_project_repos(provider_credential: Services.provider_credential)
     end
 
