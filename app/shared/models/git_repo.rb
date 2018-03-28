@@ -159,6 +159,7 @@ module FastlaneCI
             # and if some changes in the local repo (added projects, etc.) have been added, they're destroyed.
             # rubocop:disable Metrics/BlockNesting
             if self.local_folder == File.expand_path("~/.fastlane/ci/fastlane-ci-config")
+              # TODO: move this stuff out of here
               # TODO: In case there are conflicts with remote, we want to decide which way we take.
               # For now, we merge using the 'recursive' strategy.
               if !repo.status.changed == 0 && !repo.status.added == 0 && !repo.status.deleted == 0 && !repo.status.untracked == 0
@@ -172,10 +173,14 @@ module FastlaneCI
                 end
               end
             else
-              logger.debug("Resetting #{self.git_config.git_url}")
+              logger.debug("Resetting #{self.git_config.git_url} in setup_repo")
+              self.git.reset_hard
+              logger.debug("Ensuring we're on `master` for #{self.git_config.git_url} in setup_repo")
+              git.branch("master").checkout
+              logger.debug("Resetting `master` #{self.git_config.git_url} in setup_repo")
               self.git.reset_hard
 
-              logger.debug("Pulling #{self.git_config.git_url}")
+              logger.debug("Pulling `master` #{self.git_config.git_url} in setup_repo")
               self.pull
             end
           else
@@ -322,6 +327,7 @@ module FastlaneCI
     end
 
     def pull(repo_auth: self.repo_auth, use_global_git_mutex: true)
+      logger.debug("Enqueuing a pull on `master` (with mutex?: #{use_global_git_mutex}) for #{self.git_config.git_url}")
       self.perform_block(use_global_git_mutex: use_global_git_mutex) do
         logger.info("Starting pull #{self.git_config.git_url}")
         self.setup_auth(repo_auth: repo_auth)
@@ -421,7 +427,7 @@ module FastlaneCI
         # TODO: make sure it doesn't exist yet
         git.branch(local_branch_name)
         reset_hard!(use_global_git_mutex: false)
-        git.pull("git@github.com:taquitosorg/trigger_test.git", branch)
+        git.pull(clone_url, branch)
       end
     end
 

@@ -114,6 +114,7 @@ module FastlaneCI
                  use_global_git_mutex: false)
       else
         repo.reset_hard!(use_global_git_mutex: use_global_mutex)
+        logger.debug("Pulling `master` in checkout_sha")
         repo.pull(use_global_git_mutex: use_global_mutex)
       end
 
@@ -122,6 +123,7 @@ module FastlaneCI
     end
 
     def pre_run_action
+      logger.debug("Running pre_run_action in checkout_sha")
       self.checkout_sha
     end
 
