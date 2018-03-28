@@ -14,16 +14,17 @@ require_relative "app/features/build_runner/build_runner"
 module FastlaneCI
   # Used to use the same layout file across all views
   # https://stackoverflow.com/questions/26080599/sinatra-method-to-set-layout
-  def self.default_layout 
+  def self.default_layout
     "../../../features/global/layout".to_sym
   end
 
-  def self.env 
+
+  def self.env
     @env ||= FastlaneCI::EnvironmentVariables.new
   end
 
   # Our CI app main class
-  class FastlaneApp < Sinatra::Base 
+  class FastlaneApp < Sinatra::Base
     include FastlaneCI::Logging
     Thread.current[:thread_id] = "main"
 
