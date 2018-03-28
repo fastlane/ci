@@ -170,23 +170,21 @@ module FastlaneCI
       # its own Ruby gem, or even part of the fastlane/fastlane main repo
       # For now, this is good enough, as we'll be moving so fast with this one
 
-      relative_fastfile_path = nil
+      project_path = project.local_repo_path
       available_lanes = []
-      # TODO: Follow up in another PR
 
-      # absolute_fastfile_path = project.local_fastfile_path
-      # unless absolute_fastfile_path.nil?
-      #   parser = Fastlane::FastfileParser.new(path: absolute_fastfile_path)
-      #   available_lanes = parser.available_lanes
+      # TODO: remove this once the Fastfile peeker is implemented
+      absolute_fastfile_path = File.join(project_path, "master/fastlane/Fastfile")
+      fastfile_parser = Fastlane::FastfileParser.new(path: absolute_fastfile_path)
+      available_lanes = fastfile_parser.available_lanes
 
-      #   project_path = project.local_repo_path
-      #   relative_fastfile_path = Pathname.new(absolute_fastfile_path).relative_path_from(Pathname.new(project_path))
-      # end
+      relative_fastfile_path = Pathname.new(absolute_fastfile_path).relative_path_from(Pathname.new(project_path))
 
       locals = {
         project: project,
         title: "Project #{project.project_name}",
         available_lanes: available_lanes,
+        fastfile_parser: fastfile_parser,
         fastfile_path: relative_fastfile_path # TODO: rename param `fastfile_path` to `relative_fastfile_path`
       }
 
