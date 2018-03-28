@@ -104,6 +104,11 @@ module FastlaneCI
       client.repos({}, query: { sort: "asc" })
     end
 
+    # @return [Array<String>] names of the branches for the given repo
+    def branch_names(repo:)
+      client.branches(repo).map(&:name)
+    end
+
     # Does the client with the associated credentials have access to the specified repo?
     # @repo [String] Repo URL as string
     def access_to_repo?(repo_url: nil)

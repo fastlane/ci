@@ -1,5 +1,7 @@
 require_relative "../../shared/authenticated_controller_base"
 require_relative "../../shared/models/git_repo"
+require_relative "../../services/fastfile_peeker/fastfile_peeker"
+require_relative "../../shared/fastfile_finder"
 
 require "pathname"
 require "securerandom"
@@ -70,17 +72,78 @@ module FastlaneCI
       erb(:new_project, locals: locals, layout: FastlaneCI.default_layout)
     end
 
-    get "#{HOME}/add/*" do |repo_name|
+    # This is an utility endpoint from where we can retrieve lane information through the front-end using basic JS.
+    # This will be reviewed in the future when we have a proper front-end architecture.
+    get "#{HOME}/lanes/*/*/*" do |org, repo_name, branch|
+      content_type :json
+
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
       github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
-      selected_repo = github_service.repos.select { |repo| repo_name == repo.name }.first
+      selected_repo = github_service.repos.detect { |repo| org + "/" + repo_name == repo.full_name }
+
+      repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
+
+      dir = Dir.mktmpdir
+      repo = FastlaneCI::GitRepo.new(git_config: repo_config,
+                                    local_folder: dir,
+                                    provider_credential: provider_credential,
+                                    async_start: false)
+
+
+      fastfile = FastlaneCI::FastfilePeeker.peek(
+        git_repo: repo,
+        branch: branch
+      )
+
+      fastfile_config = {}
+
+      fastfile.tree.each_key do |key|
+        if key.nil?
+          fastfile_config[:no_platform] = fastfile.tree[key]
+        else
+          fastfile_config[key.to_sym] = fastfile.tree[key]
+        end
+      end
+
+      fastfile_config.to_json
+    end
+
+    get "#{HOME}/add/*/*" do |org, repo_name|
+      provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
+
+      github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
+      selected_repo = github_service.repos.detect { |repo| org + "/" + repo_name == repo.full_name }
 
       # We need to check whether we can checkout the project without issues.
       # So a new project is created with default settings so we can fetch it.
       repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
 
+      locals = {
+          title: "Add new project",
+          repo: repo_config.full_name,
+          branches: github_service.branch_names(repo: repo_config.full_name)
+      }
+
+      erb(:new_project_form, locals: locals, layout: FastlaneCI.default_layout)
+    end
+
+    post "#{HOME}/add/*/*" do |org, repo_name|
+      provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
+
+      github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
+      selected_repo = github_service.repos.detect { |repo| org + "/" + repo_name == repo.full_name }
+
+      repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
+
+      lane = params["selected_lane"]
+      project_name = params["project_name"]
+      branch = params["branch"]
+
       dir = Dir.mktmpdir
+      # Do this so we trigger the clone of the repo.
+      # TODO: Do this wherever it should be done, as we must redirect
+      # to the project details only when this task is finished.
       repo = GitRepo.new(
         git_config: repo_config,
         provider_credential: provider_credential,
@@ -88,58 +151,7 @@ module FastlaneCI
         async_start: false
       )
 
-      # TODO: This should be refactored in some kind of FastlaneUtils` class.`
-      # We have synchronously cloned the repo, now we need to get the lanes.
-      repo_path = repo.local_folder
-      # First assume the fastlane directory and its file is in the root of the project
-      fastfiles = Dir[File.join(repo_path, "fastlane/Fastfile")]
-      # If not, it might be in a subfolder
-      fastfiles = Dir[File.join(repo_path, "**/fastlane/Fastfile")] if fastfiles.count == 0
-
-      if fastfiles.count > 1
-        logger.error("Ugh, multiple Fastfiles found, we're gonna have to build a selection in the future")
-        # for now, just take the first one
-      end
-
-      fastfile_path = fastfiles.first
-
-      parser = Fastlane::FastfileParser.new(path: fastfile_path)
-      available_lanes = parser.available_lanes
-
-      locals = {
-          title: "Add new project",
-          repo: repo,
-          lanes: available_lanes,
-          fastfile_path: fastfile_path
-      }
-
-      # Delete the project
-      FileUtils.rm_rf(repo_path) if File.directory?(File.join(repo_path, ".git"))
-
-      erb(:new_project_form, locals: locals, layout: FastlaneCI.default_layout)
-    end
-
-    post "#{HOME}/add/*" do |repo_name|
-      provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
-
-      github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
-      selected_repo = github_service.repos.detect { |repo| repo_name == repo.name }
-
-      repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
-
-      lane = params["selected_lane"]
-      project_name = params["project_name"]
-
-      dir = Dir.mktmpdir
-      # Do this so we trigger the clone of the repo.
-      # TODO: Do this wherever it should be done, as we must redirect
-      # to the project details only when this task is finished.
-      _ = GitRepo.new(
-        git_config: repo_config,
-        provider_credential: provider_credential,
-        local_folder: dir,
-        async_start: false
-      )
+      repo.checkout_branch(branch: branch)
 
       # We now have enough information to create the new project.
       # TODO: add job_triggers here
@@ -150,7 +162,9 @@ module FastlaneCI
         repo_config: repo_config,
         enabled: true,
         platform: lane.split(" ").last,
-        lane: lane.split(" ").first
+        lane: lane.split(" ").first,
+        # TODO: Until we make a proper interface to attach JobTriggers to a Project, let's add a manual one for the selected branch.
+        job_triggers: [FastlaneCI::ManualJobTrigger.new(branch: branch)]
       )
 
       if !project.nil?

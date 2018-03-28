@@ -13,12 +13,12 @@ module FastlaneCI
       # @param [String, nil] sha
       # @return [Fastlane::FastfileParser]
       def peek(git_repo: nil, branch: nil, sha: nil)
-        git_repo.fetch
+        git_repo.fetch(use_global_git_mutex: false)
         if branch && !branch.empty?
           # This perform the checkout of the latest commit in the branch.
-          git_repo.checkout_branch(branch: branch)
+          git_repo.checkout_branch(branch: branch, use_global_git_mutex: false)
         elsif sha && !sha.empty?
-          git_repo.chekout_commit(sha: sha)
+          git_repo.chekout_commit(sha: sha, use_global_git_mutex: false)
         else
           raise "Invalid branch or sha were provided"
         end
