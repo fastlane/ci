@@ -30,9 +30,9 @@ module FastlaneCI
     post "#{HOME}/keys" do
       if valid_params?(params, post_parameter_list_for_validation)
         Services.environment_variable_service.write_keys_file!(locals: params)
-        variables = { status: STATUS[:success], message: "~/.fastlane/ci/keys file written." }
+        variables = { status: STATUS[:success], message: "#{Services.environment_variable_service.keys_file_path_relative_to_home} file written." }
       else
-        variables = { status: STATUS[:error], message: "~/.fastlane/ci/keys file NOT written." }
+        variables = { status: STATUS[:error], message: "#{Services.environment_variable_service.keys_file_path_relative_to_home} file NOT written." }
       end
 
       locals = { title: "Configuration", variables: variables }

@@ -54,7 +54,7 @@ module FastlaneCI
     #
     # 2) If the encryption key is not `nil`:
     #
-    #    i.  write the encryption key to the `~/.fastlane/ci/.keys` file
+    #    i.  write the encryption key to the CI keys file (FastlaneCI::EnvironmentVariableService#keys_file_path)
     #    ii. load the new environment variables (implicitly)
     #
     # 3) If the encryption key is `nil`, display an error message
@@ -67,12 +67,12 @@ module FastlaneCI
         )
 
         session[:message] = <<~HTML
-          ~/.fastlane/ci/keys file written with the configuration values:<br />
+          #{Services.environment_variable_service.keys_file_path_relative_to_home} file written with the configuration values:<br />
             FASTLANE_CI_ENCRYPTION_KEY=#{params[:encryption_key]}
         HTML
       else
         session[:message] = <<~HTML
-          ERROR: ~/.fastlane/ci/keys file not written.
+          ERROR: #{Services.environment_variable_service.keys_file_path_relative_to_home} file not written.
         HTML
       end
 
@@ -98,7 +98,7 @@ module FastlaneCI
         )
 
         session[:message] = <<~HTML
-          ~/.fastlane/ci/keys file written with the configuration values:<br />
+          #{Services.environment_variable_service.keys_file_path_relative_to_home} file written with the configuration values:<br />
 
           <ul>
             <li>FASTLANE_CI_USER=#{params[:ci_user_email]}</li>
@@ -107,7 +107,7 @@ module FastlaneCI
         HTML
       else
         session[:message] = <<~HTML
-          ERROR: ~/.fastlane/ci/keys file not written.
+          ERROR: #{Services.environment_variable_service.keys_file_path_relative_to_home} file not written.
         HTML
       end
 
@@ -135,7 +135,7 @@ module FastlaneCI
           )
 
           session[:message] = <<~HTML
-            ~/.fastlane/ci/keys file written with the configuration values:
+            #{Services.environment_variable_service.keys_file_path_relative_to_home} file written with the configuration values:
 
             <ul>
               <li>FASTLANE_CI_INITIAL_CLONE_EMAIL='#{params[:clone_user_email]}'</li>
@@ -154,7 +154,7 @@ module FastlaneCI
         end
       else
         session[:message] = <<~HTML
-          ERROR: ~/.fastlane/ci/keys file not written.
+          ERROR: #{Services.environment_variable_service.keys_file_path_relative_to_home} file not written.
         HTML
       end
 

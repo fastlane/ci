@@ -47,7 +47,24 @@ module FastlaneCI
     #
     # @return [String]
     def keys_file_path
-      return File.join(Dir.home, ".fastlane/ci/.keys")
+      return File.join(Dir.home, keys_file_path_from_home)
+    end
+
+    # The path to the environment variables file relative to HOME
+    #
+    # @return [String]
+    def keys_file_path_relative_to_home
+      return "~/#{keys_file_path_from_home}"
+    end
+
+    private
+
+    # The path to the environment variables file having in mind
+    # that it's relative to HOME
+    #
+    # @return [String]
+    def keys_file_path_from_home
+      return ".fastlane/ci/.keys"
     end
   end
 end
