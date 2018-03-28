@@ -247,11 +247,7 @@ module FastlaneCI
     # Make sure to have checked out the right branch for which
     # you want to get the last commit of
     def most_recent_commit
-      self.git.log.each do |commit|
-        # 2 parents only happen on merge commits https://stackoverflow.com/a/3824122
-        return commit unless commit.parents.count >= 2
-      end
-      return nil
+      return self.git.log.first
     end
 
     # Responsible for setting the author information when committing a change
