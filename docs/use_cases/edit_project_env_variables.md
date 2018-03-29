@@ -21,7 +21,7 @@ Once `fastlane.ci` supports distributed builds (multiple Mac workers), this syst
 
 #### Global ENV variables ####
 
-As described in [./edit_global_env_variables.md], the user can set global ENV variables also. `fastlane.ci` will always prefer the project-specific ENV variables over the global ones. To `unset` a global ENV variable, it's enough to set it to an empty string for now, as it will be handled by _fastlane_. We could think about an explicit `unset` in the future.
+As described in [edit_global_env_variables.md](./edit_global_env_variables.md), the user can set global ENV variables also. `fastlane.ci` will always prefer the project-specific ENV variables over the global ones. To `unset` a global ENV variable, it's enough to set it to an empty string for now, as it will be handled by _fastlane_. We could think about an explicit `unset` in the future.
 
 ### Error states ###
 
