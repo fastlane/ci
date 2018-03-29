@@ -20,7 +20,7 @@ Once `fastlane.ci` supports distributed builds (multiple Mac workers), this syst
 
 #### Project specific settings ####
 
-As described in [./edit_project_env_variables.md], the user can override ENV variables per project.
+As described in [edit_project_env_variables](./edit_project_env_variables.md), the user can override ENV variables per project.
 
 ### Error states ###
 
