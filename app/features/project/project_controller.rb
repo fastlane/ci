@@ -73,8 +73,10 @@ module FastlaneCI
 
     # This is an utility endpoint from where we can retrieve lane information through the front-end using basic JS.
     # This will be reviewed in the future when we have a proper front-end architecture.
-    get "#{HOME}/lanes/*/*/*" do |org, repo_name, branch|
+    get "#{HOME}/*/lanes" do
       content_type :json
+
+      org, repo_name, branch, = params[:splat].first.split("/")
 
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
@@ -110,7 +112,9 @@ module FastlaneCI
       fastfile_config.to_json
     end
 
-    get "#{HOME}/add/*/*" do |org, repo_name|
+    get "#{HOME}/*/add" do
+      org, repo_name, = params[:splat].first.split("/")
+
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
       github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
@@ -129,7 +133,9 @@ module FastlaneCI
       erb(:new_project_form, locals: locals, layout: FastlaneCI.default_layout)
     end
 
-    post "#{HOME}/add/*/*" do |org, repo_name|
+    post "#{HOME}/*/add" do
+      org, repo_name, = params[:splat].first.split("/")
+
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
       github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)

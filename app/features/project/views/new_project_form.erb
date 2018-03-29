@@ -39,7 +39,7 @@
     request = new XMLHttpRequest();
     request.timeout = 1000 * 60 * 10; // 10 minutes
     request.responseType = 'json';
-    request.open('GET', "/projects_erb/lanes/<%= CGI.escape(repo) %>/" + el.value, true);
+    request.open('GET', "/projects_erb/<%= repo %>/" + el.value + "/lanes", true);
     request.onload = function() {
       if (request.status >= 200 && request.status < 400) {
         var data = request.response;
@@ -77,7 +77,7 @@
   <%= erb :"../../partials/navigation" %>
 
   <main class="mdl-layout__content" style="padding: 40px">
-    <form method="POST" action="/projects_erb/add/<%= CGI.escape(repo) %>">
+    <form method="POST" action="/projects_erb/<%= repo %>/add">
       <h5>Adding <%= repo %></h5>
       <div class="mdl-textfield mdl-js-textfield">
         <input class="mdl-textfield__input" type="text" name="project_name" value="<%= repo %>">
