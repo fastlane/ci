@@ -50,6 +50,11 @@ module FastlaneCI
 
       # Trim out all the commits that we already have a build for, so we're just left with the new commits
       shas_to_build = new_commit_shas - local_build_shas_by_date
+      if shas_to_build.length == 0
+        logger.debug("No new commits found")
+        return
+      end
+
       logger.debug("Creating a build task for commits: #{shas_to_build}")
 
       shas_to_build.each do |sha|
