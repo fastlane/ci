@@ -214,7 +214,7 @@ module FastlaneCI
         project: self.project,
         number: new_build_number,
         status: :pending,
-        timestamp: Time.now,
+        timestamp: Time.now.utc,
         duration: -1,
         sha: self.sha
       )

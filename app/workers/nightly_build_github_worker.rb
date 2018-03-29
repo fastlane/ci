@@ -21,11 +21,11 @@ module FastlaneCI
     def work
       logger.debug("Running nightly builds on GitHub")
 
-      self.target_branches do |git, branch|
+      self.target_branches_async do |git, branch|
         current_sha = self.repo.most_recent_commit.sha
         logger.debug("Running Nightly build on branch #{branch.name} with sha #{current_sha}")
 
-        self.create_and_queue_build_task(sha: current_sha, repo: self.repo)
+        self.create_and_queue_build_task(sha: current_sha)
       end
     end
   end

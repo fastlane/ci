@@ -120,7 +120,7 @@ module FastlaneCI
         return
       end
 
-      logger.debug("Synchronously starting up repo: #{self.git_config.git_url}")
+      logger.debug("Synchronously starting up repo: #{self.git_config.git_url} at: #{local_folder}")
       now = Time.now.utc
       sleep_timeout = now + sync_setup_timeout_seconds # 10 second startup timeout
       while !setup_task.completed && now < sleep_timeout
@@ -233,7 +233,7 @@ module FastlaneCI
 
     # call like you would self.git.branches.remote.each { |branch| branch.yolo }
     # call like you would, but you also get the git repo involved, so it's  .each { |git, branch| branch.yolo; git.yolo }
-    def git_and_remote_branches_each(&each_block)
+    def git_and_remote_branches_each_async(&each_block)
       git_action_with_queue do
         branch_count = 0
         self.git.branches.remote.each do |branch|

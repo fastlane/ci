@@ -68,13 +68,13 @@ module FastlaneCI
       )
     end
 
-    def target_branches(&block)
+    def target_branches_async(&block)
       repo = self.git_repo
 
       # is needed to see if there are new branches (called async)
       repo.fetch
 
-      repo.git_and_remote_branches_each do |git, branch|
+      repo.git_and_remote_branches_each_async do |git, branch|
         next if branch.name.include?("HEAD ->")
         # next unless self.target_branches_set.include?(branch.name)
 
@@ -88,11 +88,19 @@ module FastlaneCI
       end
     end
 
-    def create_and_queue_build_task(sha:, repo:)
+    def create_and_queue_build_task(sha:)
       credential = self.provider_credential
       current_project = self.project
       current_sha = sha
       return unless Services.build_runner_service.find_build_runner(project_id: current_project.id, sha: current_sha).nil?
+
+      repo = GitRepo.new(
+        git_config: project.repo_config,
+        provider_credential: provider_credential,
+        local_folder: File.join(project.local_repo_path, "builds", sha),
+        async_start: false
+      )
+
       build_runner = FastlaneBuildRunner.new(
         project: current_project,
         sha: current_sha,

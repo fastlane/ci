@@ -99,6 +99,10 @@ module FastlaneCI
       return updated_commits
     end
 
+    def get_commits(repo_full_name:, branch: nil, since_time_utc:)
+      self.client.commits(repo_full_name, branch: branch, since: since_time_utc.iso8601)
+    end
+
     # TODO: parse those here or in service layer?
     def repos
       client.repos({}, query: { sort: "asc" })
