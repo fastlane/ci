@@ -5,32 +5,32 @@ module FastlaneCI
   # this is set to the fastlane runner before executing the user's Fastfile
   class FastlaneLog
     # The file path for the log output.
-    attr_accessor :file_path
+    attr_reader :file_path
 
     # Base severity from which the log will store events.
-    attr_accessor :severity
+    attr_reader :severity
 
     def initialize(file_path: nil, severity: Logger::INFO)
       raise "No file path provided" if file_path.to_s.length == 0
-      self.file_path = file_path
-      self.severity = severity
+      @file_path = file_path
+      @severity = severity
     end
 
     def log
       return @log if @log
 
-      @log ||= Logger.new(self.file_path)
+      @log ||= Logger.new(file_path)
 
-      @log.formatter = proc do |severity, datetime, progname, msg|
-        "#{format_string(datetime, severity)}#{msg}\n"
+      @log.formatter = proc do |log_severity, datetime, progname, msg|
+        "#{format_string(datetime, log_severity)}#{msg}\n"
       end
 
-      @log.sev_threshold = self.severity
+      @log.sev_threshold = severity
 
       return @log
     end
 
-    def format_string(datetime = Time.now, severity = "")
+    def format_string(datetime = Time.now)
       return "[#{datetime.strftime('%H:%M:%S')}]: "
     end
 
