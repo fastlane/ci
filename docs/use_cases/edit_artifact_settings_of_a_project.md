@@ -15,9 +15,9 @@ The developer added a new artifact provider to a given project. From now on, all
 ### Steps ###
 1. In the project settings, the user sees what artifact provider is currently being used
 1. The user can click on `Replace artifact provider`
-  1. If there are no connected artifact providers yet, the user is redirected to [./connecting_a_new_artifact_provider](connecting_a_new_artifact_provider.md)
-  1. If there are connected artifact providers, the user can choose one in the list, and have the option to connect a new one (which would redirect the user to [./connecting_a_new_artifact_provider](connecting_a_new_artifact_provider.md))
-  1. Sensible defaults are used
+    1. If there are no connected artifact providers yet, the user is redirected to [./connecting_a_new_artifact_provider](connecting_a_new_artifact_provider.md)
+    1. If there are connected artifact providers, the user can choose one in the list, and have the option to connect a new one (which would redirect the user to [./connecting_a_new_artifact_provider](connecting_a_new_artifact_provider.md))
+    1. Sensible defaults are used
 1. The user sees the currently set "parameters" of the used artifact provider, and can edit them, this includes:
     - By default fastlane.ci stores all artifacts, this can be changed:
         - Simple ignore list (e.g. `*.ipa`, or `*.tmp`)
