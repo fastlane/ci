@@ -22,7 +22,6 @@ module FastlaneCI
     @env ||= FastlaneCI::EnvironmentVariables.new
   end
 
-  # Our CI app main class
   class FastlaneApp < Sinatra::Base
     include FastlaneCI::Logging
     Thread.current[:thread_id] = "main"
