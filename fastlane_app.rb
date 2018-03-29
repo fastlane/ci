@@ -18,7 +18,6 @@ module FastlaneCI
     "../../../features/global/layout".to_sym
   end
 
-
   def self.env
     @env ||= FastlaneCI::EnvironmentVariables.new
   end
