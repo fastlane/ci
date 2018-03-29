@@ -90,7 +90,6 @@ module FastlaneCI
                                     provider_credential: provider_credential,
                                     async_start: false)
 
-
       fastfile = FastlaneCI::FastfilePeeker.peek(
         git_repo: repo,
         branch: branch

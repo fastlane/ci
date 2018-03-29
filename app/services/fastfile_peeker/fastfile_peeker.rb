@@ -7,7 +7,6 @@ module FastlaneCI
   # Utility class designed for parsing Fastfiles in a repo.
   class FastfilePeeker
     class << self
-
       # @param [GitRepo] git_repo
       # @param [String, nil] branch
       # @param [String, nil] sha
