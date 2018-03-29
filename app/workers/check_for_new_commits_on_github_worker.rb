@@ -5,6 +5,7 @@ require_relative "../shared/models/job_trigger"
 require_relative "../shared/logging_module"
 
 require "time"
+require "set"
 
 module FastlaneCI
   # Responsible for checking if there have been new commits
@@ -27,38 +28,35 @@ module FastlaneCI
     end
 
     def check_for_new_commits
+      repo_full_name = self.project.repo_config.full_name
+      logger.debug("Checking for new commits: #{self.project.project_name} (#{repo_full_name})")
       build_service = FastlaneCI::Services.build_service
 
       # Sorted by newest timestamps first
-      sorted_builds = build_service.list_builds(project: self.project).sort { |x, y| y.timestamp.to_i <=> x.timestamp.to_i }
+      builds = build_service.list_builds(project: self.project)
 
-      # All the shas for builds we have run, sorted by build timestamp (newest builds first)
-      local_build_shas_by_date = sorted_builds.map(&:sha)
+      # All the shas for builds we have run and dump it to a set so we can filter with it
+      local_build_shas_set = builds.map(&:sha).to_set
 
-      # Look at the last commit time, then subtract 5 minutes from it to account for clock drift between this computer and the git repo
-      drift_time_seconds = 300
-      since_time_utc_seconds = sorted_builds.first&.timestamp.to_i - drift_time_seconds || Time.now.utc.to_i - drift_time_seconds
+      # Get all commits from the open PRs
+      open_pull_requests = self.github_service.open_pull_requests(repo_full_name: repo_full_name)
 
-      since_time_utc = Time.at(since_time_utc_seconds.to_i).utc
-      repo_full_name = self.project.repo_config.full_name
-      logger.debug("Looking for commits that are newer than #{since_time_utc.iso8601} for #{self.project.project_name} (#{repo_full_name})")
+      # Filter out the PR shas that are already in the builds
+      new_commit_prs = open_pull_requests.reject { |pr| local_build_shas_set.include?(pr.current_sha) }
 
-      # Get all the new commits since the last build time (minus whatever drift we determined above)
-      new_commits = github_service.get_commits(repo_full_name: repo_full_name, since_time_utc: since_time_utc)
-      logger.debug("Found #{new_commits.length} potential new commit(s)") unless new_commits.length == 0
-      new_commit_shas = new_commits.map(&:sha)
-
-      # Trim out all the commits that we already have a build for, so we're just left with the new commits
-      shas_to_build = new_commit_shas - local_build_shas_by_date
-      if shas_to_build.length == 0
+      if new_commit_prs.length == 0
         logger.debug("No new commits found for #{self.project.project_name} (#{repo_full_name})")
         return
       end
 
-      logger.debug("Creating a build task for commits: #{shas_to_build} from #{self.project.project_name} (#{repo_full_name})")
+      pr_details = new_commit_prs.map { |pr| "#{pr.repo_full_name}:#{pr.branch}:#{pr.current_sha}" }
+      logger.debug("Creating build task(s) for #{self.project.project_name} (#{repo_full_name}): #{pr_details}")
 
-      shas_to_build.each do |sha|
-        self.create_and_queue_build_task(sha: sha)
+      new_commit_prs.each do |pr|
+        git_fork_config = GitForkConfig.new(current_sha: pr.current_sha,
+                                                 branch: pr.branch,
+                                              clone_url: pr.clone_url)
+        self.create_and_queue_build_task(sha: pr.current_sha, git_fork_config: git_fork_config)
       end
     end
 

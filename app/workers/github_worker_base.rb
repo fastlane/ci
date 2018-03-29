@@ -54,25 +54,18 @@ module FastlaneCI
       return @thread_id
     end
 
-    def create_and_queue_build_task(sha:)
+    def create_and_queue_build_task(sha:, git_fork_config: nil)
       credential = self.provider_credential
       current_project = self.project
       current_sha = sha
       return unless Services.build_runner_service.find_build_runner(project_id: current_project.id, sha: current_sha).nil?
-
-      repo = GitRepo.new(
-        git_config: project.repo_config,
-        provider_credential: provider_credential,
-        local_folder: File.join(project.local_repo_path, "builds", sha),
-        async_start: false
-      )
 
       build_runner = FastlaneBuildRunner.new(
         project: current_project,
         sha: current_sha,
         github_service: self.github_service,
         work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
-        repo: repo
+        git_fork_config: git_fork_config
       )
       build_runner.setup(parameters: nil)
       build_task = Services.build_runner_service.add_build_runner(build_runner: build_runner)
