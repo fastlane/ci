@@ -198,19 +198,11 @@ module FastlaneCI
                                                   clone_url: matching_open_pr.clone_url)
           end
 
-          repo = GitRepo.new(
-            git_config: project.repo_config,
-            provider_credential: Services.provider_credential,
-            local_folder: File.join(project.local_repo_path, "pending_statuses_on_startup", sha),
-            async_start: false
-          )
-
           build_runner = FastlaneBuildRunner.new(
             project: project,
             sha: sha,
             github_service: github_service,
             work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
-            repo: repo,
             git_fork_config: git_fork_config
           )
           build_runner.setup(parameters: nil)
@@ -257,13 +249,6 @@ module FastlaneCI
                                                   clone_url: matching_open_pr.clone_url)
           end
 
-          repo = GitRepo.new(
-            git_config: project.repo_config,
-            provider_credential: Services.provider_credential,
-            local_folder: File.join(project.local_repo_path, "missing_statuses_on_startup", open_pr.current_sha),
-            async_start: false
-          )
-
           logger.debug("Found sha: #{open_pr.current_sha} in #{open_pr.repo_full_name} missing status, adding build.")
 
           build_runner = FastlaneBuildRunner.new(
@@ -271,7 +256,6 @@ module FastlaneCI
             sha: open_pr.current_sha,
             github_service: github_service,
             work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
-            repo: repo,
             git_fork_config: git_fork_config
           )
           build_runner.setup(parameters: nil)

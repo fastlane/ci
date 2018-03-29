@@ -44,12 +44,11 @@ module FastlaneCI
     # Work queue where builds should be run
     attr_accessor :work_queue
 
-    def initialize(project:, sha:, github_service:, work_queue:, repo:, git_fork_config: nil)
+    def initialize(project:, sha:, github_service:, work_queue:, git_fork_config: nil)
       # Setting the variables directly (only having `attr_reader`) as they're immutable
       # Once you define a FastlaneBuildRunner, you shouldn't be able to modify them
       @project = project
       @sha = sha
-      @repo = repo
       @git_fork_config = git_fork_config
 
       self.all_build_output_log_rows = []
@@ -61,6 +60,13 @@ module FastlaneCI
       @work_queue = work_queue
 
       self.prepare_build_object
+
+      @repo = GitRepo.new(
+        git_config: project.repo_config,
+        provider_credential: github_service.provider_credential,
+        local_folder: File.join(project.local_repo_path, "builds", sha),
+        async_start: false
+      )
     end
 
     # Access the build number of that specific BuildRunner
