@@ -1,4 +1,4 @@
-require_relative "../../shared/fastfile_finder"
+require_relative "fastfile_finder"
 
 require "fastfile_parser"
 require "digest"
