@@ -214,7 +214,10 @@ module FastlaneCI
         project: self.project,
         number: new_build_number,
         status: :pending,
-        timestamp: Time.now,
+        # Ensure we're using UTC because your server might have a different timezone.
+        # While this isn't neccesary since timestamps are already UTC, it's good to message it here.
+        # so that utc stuff is discoverable
+        timestamp: Time.now.utc,
         duration: -1,
         sha: self.sha
       )

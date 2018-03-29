@@ -16,9 +16,9 @@ GIT
 
 GIT
   remote: https://github.com/fastlane/fastlane
-  revision: 937ea1917cd189506b80a76c050b53121b52f4c5
+  revision: 6f55e7acf460de0e0d4c5af5f924862043bf8692
   specs:
-    fastlane (2.87.0)
+    fastlane (2.88.0)
       CFPropertyList (>= 2.3, < 4.0.0)
       addressable (>= 2.3, < 3.0.0)
       babosa (>= 1.0.2, < 2.0.0)
@@ -92,7 +92,7 @@ GEM
     et-orbi (1.1.0)
       tzinfo
     eventmachine (1.2.5)
-    excon (0.61.0)
+    excon (0.62.0)
     faraday (0.14.0)
       multipart-post (>= 1.2, < 3)
     faraday-cookie_jar (0.0.6)
@@ -178,7 +178,7 @@ GEM
     rack (2.0.4)
     rack-protection (2.0.1)
       rack
-    rack-test (0.8.3)
+    rack-test (1.0.0)
       rack (>= 1.0, < 3)
     rainbow (3.0.0)
     rake (12.3.1)
