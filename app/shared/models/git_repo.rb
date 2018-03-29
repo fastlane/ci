@@ -407,11 +407,12 @@ module FastlaneCI
       return git_task
     end
 
-    def fetch
-      git_action_with_queue(ensure_block: proc { unset_auth }) do
+    def fetch(use_global_git_mutex: true)
+      logger.debug("Enqueuing a fetch on (with mutex?: #{use_global_git_mutex}) for #{self.git_config.git_url}")
+      self.perform_block(use_global_git_mutex: use_global_git_mutex) do
         logger.debug("Starting fetch #{self.git_config.git_url}".freeze)
         self.temporary_storage_path = self.setup_auth(repo_auth: repo_auth)
-        self.git.fetch
+        self.git.remotes.each { |remote| self.git.fetch(remote) }
         logger.debug("Done fetching #{self.git_config.git_url}".freeze)
       end
     end

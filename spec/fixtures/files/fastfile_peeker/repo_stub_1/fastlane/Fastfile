@@ -1,0 +1,24 @@
+fastlane_version("1.10.0")
+
+default_platform(:ios)
+
+platform :ios do
+  before_all do
+    cocoapods
+  end
+
+  lane :beta do
+  end
+end
+
+lane :something do
+  sigh
+end
+
+platform :android do
+  lane :lane1 do
+  end
+
+  lane :lane2 do
+  end
+end

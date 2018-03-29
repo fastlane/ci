@@ -35,7 +35,7 @@ module FastlaneCI
     # @return [ArtifactProvider]
     attr_accessor :artifact_provider
 
-    def initialize(repo_config: nil, enabled: nil, project_name: nil, platform: nil, lane: nil, id: nil, artifact_provider: LocalArtifactProvider.new)
+    def initialize(repo_config: nil, enabled: nil, project_name: nil, platform: nil, lane: nil, id: nil, artifact_provider: LocalArtifactProvider.new, job_triggers: [])
       self.repo_config = repo_config
       self.enabled = enabled
       self.project_name = project_name
