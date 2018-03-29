@@ -19,14 +19,38 @@ module FastlaneCI
     end
 
     def work
-      logger.debug("Running nightly builds on GitHub")
+      logger.debug("Running nightly build for #{self.project.project_name} (#{repo_full_name})")
+      build_service = FastlaneCI::Services.build_service
 
-      self.target_branches_async do |git, branch|
-        current_sha = self.repo.most_recent_commit.sha
-        logger.debug("Running Nightly build on branch #{branch.name} with sha #{current_sha}")
+      # Sorted by newest timestamps first
+      sorted_builds = build_service.list_builds(project: self.project).sort { |x, y| y.timestamp.to_i <=> x.timestamp.to_i }
 
-        self.create_and_queue_build_task(sha: current_sha)
+      # All the shas for builds we have run, sorted by build timestamp (newest builds first)
+      local_build_shas_by_date = sorted_builds.map(&:sha)
+
+      # Find all commits from the previous 24 hours and 10 minutes
+      since_time_utc_seconds = Time.now.utc.to_i - (24 * 60 * 60 + 600)
+
+      since_time_utc = Time.at(since_time_utc_seconds.to_i).utc
+      repo_full_name = self.project.repo_config.full_name
+      logger.debug("Looking for commits that are newer than #{since_time_utc.iso8601} for #{self.project.project_name} (#{repo_full_name})")
+
+      # Get all the new commits since the last build time (minus whatever drift we determined above)
+      new_commits = github_service.get_commits(repo_full_name: repo_full_name, since_time_utc: since_time_utc)
+      logger.debug("Found #{new_commits.length} commit(s) since the last run, building the most recent for #{self.project.project_name} (#{repo_full_name})") unless new_commits.length == 0
+      newest_commit = new_commits.map(&:sha).first
+
+      if newest_commit.nil?
+        # Ok, no new commits in the past day, then we can just rebuild the last build
+        newest_commit = local_build_shas_by_date.first
+        if newest_commit.nil?
+          logger.debug("No commits found for nightly build in #{self.project.project_name} (#{repo_full_name})")
+          return
+        end
       end
+
+      logger.debug("Creating a build task for commit: #{newest_commit} from #{self.project.project_name} (#{repo_full_name})")
+      self.create_and_queue_build_task(sha: newest_commit)
     end
   end
 end
