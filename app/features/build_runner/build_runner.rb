@@ -42,7 +42,7 @@ module FastlaneCI
     attr_accessor :build_change_observer_blocks
 
     # Work queue where builds should be run
-    attr_accessor :work_queue
+    attr_reader :work_queue
 
     def initialize(project:, sha:, github_service:, work_queue:, git_fork_config: nil)
       # Setting the variables directly (only having `attr_reader`) as they're immutable
@@ -162,9 +162,9 @@ module FastlaneCI
       }
 
       # If we have a work_queue, execute on that
-      if self.work_queue
+      if work_queue
         runner_task = TaskQueue::Task.new(work_block: work_block, ensure_block: post_run_block)
-        self.work_queue.add_task_async(task: runner_task)
+        work_queue.add_task_async(task: runner_task)
       else
         # No work queue? Just call the block then
         logger.debug("Not using a workqueue for build runner #{self.class}, this is probably a bug")
