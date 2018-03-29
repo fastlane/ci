@@ -87,6 +87,8 @@ bundle exec rspec
 bundle exec rubocop -a
 ```
 
+Don't merge me bro
+
 ----
 
 [Interested? Be the first to hear about the official release](https://tinyletter.com/fastlane-tools)
