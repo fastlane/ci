@@ -1,7 +1,6 @@
 require_relative "worker_base"
 require_relative "../shared/models/provider_credential"
 require_relative "../shared/logging_module"
-require_relative "../shared/models/git_repo"
 require_relative "../services/build_runner_service"
 require_relative "../services/code_hosting/git_hub_service"
 
@@ -16,7 +15,6 @@ module FastlaneCI
     attr_accessor :serial_task_queue
     attr_accessor :project_full_name
     attr_accessor :target_branches_set
-    attr_writer :git_repo
 
     def provider_type
       return FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
@@ -54,18 +52,6 @@ module FastlaneCI
       current_class_name = self.class.name.split("::").last
       @thread_id = "#{current_class_name}:#{time_nano}: #{self.serial_task_queue.name}"
       return @thread_id
-    end
-
-    # This is a separate method, so it's lazy loaded
-    # since it will be run on the "main" thread if it were
-    # part of the #initialize method
-    def git_repo
-      @git_repo ||= GitRepo.new(
-        git_config: project.repo_config,
-        provider_credential: provider_credential,
-        local_folder: File.join(project.local_repo_path, "worker_checkout"),
-        async_start: false
-      )
     end
 
     def create_and_queue_build_task(sha:)
