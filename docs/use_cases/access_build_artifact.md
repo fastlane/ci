@@ -24,7 +24,7 @@ The developer is able to download the raw/full artifact attached to a build
 1. The (prettified) fastlane build output is already shown in the build details
 1. Next to the build output, there is a list of all the available artifacts (this could be `n` items), potentially with some extra information
     1. the size of the artifact
-    1. the used storage backend (e.g. Google Cloud Storage, SFTP, etc.)
+    1. the used artifact provider (e.g. Google Cloud Storage, SFTP, etc.)
     1. the name of the artifact
 1. By clicking on the specific build artifact, a new browser tab is opened with the URL provided by the storage used for this particular build
 
