@@ -68,26 +68,6 @@ module FastlaneCI
       )
     end
 
-    def target_branches_async(&block)
-      repo = self.git_repo
-
-      # is needed to see if there are new branches (called async)
-      repo.fetch
-
-      repo.git_and_remote_branches_each_async do |git, branch|
-        next if branch.name.include?("HEAD ->")
-        # next unless self.target_branches_set.include?(branch.name)
-
-        # There might be un-committed changes in there, so ignore
-        git.reset_hard
-
-        # Check out the specific branch, this will detach our current head
-        branch.checkout
-
-        block.call(git, branch)
-      end
-    end
-
     def create_and_queue_build_task(sha:)
       credential = self.provider_credential
       current_project = self.project
