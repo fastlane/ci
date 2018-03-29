@@ -36,7 +36,7 @@ module FastlaneCI
       logger.debug("Looking for commits that are newer than #{since_time_utc.iso8601} for #{self.project.project_name} (#{repo_full_name})")
 
       # Get all the new commits since the last build time (minus whatever drift we determined above)
-      new_commits = github_service.get_commits(repo_full_name: repo_full_name, since_time_utc: since_time_utc)
+      new_commits = github_service.recent_commits(repo_full_name: repo_full_name, since_time_utc: since_time_utc)
       logger.debug("Found #{new_commits.length} commit(s) since the last run, building the most recent for #{self.project.project_name} (#{repo_full_name})") unless new_commits.length == 0
       newest_commit = new_commits.map(&:sha).first
 
