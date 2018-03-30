@@ -23,43 +23,43 @@ module FastlaneCI
     # Is a UUID so we're not open to ID guessing attacks
     #
     # @return [String]
-    attr_accessor :id
+    attr_reader :id
 
     # The relative priority of a notification
     #
     # @return [String]
-    attr_accessor :priority
+    attr_reader :priority
 
     # The type of a notification
     #
     # @return [String]
-    attr_accessor :type
+    attr_reader :type
 
     # The id of the user the notification is associated with
     #
     # @return [String]
-    attr_accessor :user_id
+    attr_reader :user_id
 
     # The name of a notification, which combined with the message can uniquely
     # specify it
     #
     # @return [String]
-    attr_accessor :name
+    attr_reader :name
 
     # Notification message to be displayed in the dashboard
     #
     # @return [String]
-    attr_accessor :message
+    attr_reader :message
 
     # The time the notification was created
     #
     # @return [String]
-    attr_accessor :created_at
+    attr_reader :created_at
 
     # The last time the notification was updated
     #
     # @return [String]
-    attr_accessor :updated_at
+    attr_reader :updated_at
 
     # Instantiates a new `Notification` model object
     #
@@ -70,14 +70,14 @@ module FastlaneCI
     # @param  [String] name
     # @param  [String] message
     def initialize(id: nil, priority: nil, type: nil, user_id: nil, name: nil, message: nil, created_at: nil, updated_at: nil)
-      self.id = id || SecureRandom.uuid
-      self.priority = priority
-      self.type = type
-      self.name = name
-      self.user_id = user_id
-      self.message = message
-      self.created_at = created_at || Time.now.to_s
-      self.updated_at = updated_at || Time.now.to_s
+      @id = id || SecureRandom.uuid
+      @priority = priority
+      @type = type
+      @name = name
+      @user_id = user_id
+      @message = message
+      @created_at = created_at || Time.now.to_s
+      @updated_at = updated_at || Time.now.to_s
 
       # The `from_json!` method does not allow validations, since it creates the
       # instance with all values set to `nil`
@@ -102,14 +102,14 @@ module FastlaneCI
     #
     # @raise [StandardError]
     def validate_priority!
-      raise StandardError unless PRIORITIES.values.include?(self.priority)
+      raise StandardError unless PRIORITIES.values.include?(priority)
     end
 
     # Validates the type of the notification is in the `TYPE` enum
     #
     # @raise [StandardError]
     def validate_type!
-      raise StandardError unless TYPES.values.include?(self.type)
+      raise StandardError unless TYPES.values.include?(type)
     end
   end
 end
