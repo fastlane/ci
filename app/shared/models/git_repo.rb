@@ -275,7 +275,7 @@ module FastlaneCI
     def setup_auth(repo_auth: self.repo_auth)
       # generate a unique file name for this specific user, host, and git url
       git_auth_key = Digest::SHA2.hexdigest(repo_auth.remote_host + repo_auth.username + git_config.git_url)
-      temporary_storage_path = File.join(temporary_git_storage, "git-auth-#{git_auth_key}")
+      self.temporary_storage_path = File.join(temporary_git_storage, "git-auth-#{git_auth_key}")
 
       # More details: https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
       # Creates the `local_folder` directory if it does not exist
