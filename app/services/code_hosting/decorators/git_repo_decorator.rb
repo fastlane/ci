@@ -30,7 +30,7 @@ module FastlaneCI
       end
     end
 
-    def pull_before(func_name, git_repo: Services.configuration_git_repo)
+    def pull_before(func_name, git_repo: FastlaneCI::Services.configuration_git_repo)
       new_name_for_old_function = "#{func_name}_old_pull".to_sym
       alias_method(new_name_for_old_function, func_name)
       define_method(func_name) do |*args|
@@ -54,7 +54,7 @@ module FastlaneCI
       end
     end
 
-    def commit_after(func_name, git_repo: Services.configuration_git_repo)
+    def commit_after(func_name, git_repo: FastlaneCI::Services.configuration_git_repo)
       new_name_for_old_function = "#{func_name}_old_commit".to_sym
       alias_method(new_name_for_old_function, func_name)
       define_method(func_name) do |*args|
