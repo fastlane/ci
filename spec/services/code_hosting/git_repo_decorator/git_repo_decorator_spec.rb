@@ -9,7 +9,7 @@ describe FastlaneCI::GitRepoDecorator do
     stub_services
 
     class ClassThatReadsFromRepo
-      extend FastlaneCI::GitRepoDecorator
+      include FastlaneCI::GitRepoDecorator
 
       def some_method_that_reads
         return "read"
@@ -18,7 +18,7 @@ describe FastlaneCI::GitRepoDecorator do
     end
 
     class ClassThatWritesToRepo
-      extend FastlaneCI::GitRepoDecorator
+      include FastlaneCI::GitRepoDecorator
 
       def some_method_that_writes
         return "write"
@@ -27,7 +27,7 @@ describe FastlaneCI::GitRepoDecorator do
     end
 
     class ClassThatWritesAndReadsRepo
-      extend FastlaneCI::GitRepoDecorator
+      include FastlaneCI::GitRepoDecorator
 
       class << self
         def git_repo
