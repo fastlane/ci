@@ -1,5 +1,4 @@
 require "../../shared/json_convertible"
-require "json"
 
 module FastlaneCI
   # Generic base mixin to create ViewModels from any Model that is JSONConvertible.
@@ -66,11 +65,11 @@ module FastlaneCI
       # @return [Hash] object dictionary representation for the ViewModel.
       def viewmodel_from!(object:)
         raise "Override base_model(model) in order to use the ViewModel mixin." if @base_model.nil?
-        raise "Incorrect object type. Expected #{@base_model}, got #{object.class}" unless object.kind_of?(object_class)
+        raise "Incorrect object type. Expected #{@base_model}, got #{object.class}" unless object.kind_of?(@base_model)
         if object.respond_to?(:to_object_dictionary)
           return object.to_object_dictionary(ignore_instance_variables: @base_model.instance_variables - self.attributes)
         else
-          raise "#{object.class} does not include JSONConvertible." unless @base_model.include?(JSONConvertible)
+          raise "#{@base_model} does not include JSONConvertible." unless @base_model.include?(JSONConvertible)
         end
         raise "Unknown error occurred."
       end
