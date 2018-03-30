@@ -11,7 +11,7 @@ module FastlaneCI
     attr_reader :type
 
     # @return [String] the branch we are concerned with
-    attr_branch :branch
+    attr_reader :branch
 
     def initialize(type: nil, branch: nil)
       @type = type

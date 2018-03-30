@@ -59,7 +59,7 @@ module FastlaneCI
     # The last time the notification was updated
     #
     # @return [String]
-    attr_reader :updated_at
+    attr_accessor :updated_at
 
     # Instantiates a new `Notification` model object
     #
