@@ -67,11 +67,10 @@ module FastlaneCI
         raise "Override base_model(model) in order to use the ViewModel mixin." if @base_model.nil?
         raise "Incorrect object type. Expected #{@base_model}, got #{object.class}" unless object.kind_of?(@base_model)
         if object.respond_to?(:to_object_dictionary)
-          return object.to_object_dictionary(ignore_instance_variables: @base_model.instance_variables - self.attributes)
+          return object.to_object_dictionary(ignore_instance_variables: @base_model.instance_variables - included_attributes)
         else
           raise "#{@base_model} does not include JSONConvertible." unless @base_model.include?(JSONConvertible)
         end
-        raise "Unknown error occurred."
       end
     end
   end
