@@ -146,6 +146,18 @@ module FastlaneCI
       lane = params["selected_lane"]
       project_name = params["project_name"]
       branch = params["branch"]
+      trigger_type = params["selected_trigger"]
+      hour = params["hour"]
+      minute = params["minute"]
+
+      case trigger_type
+      when "commit"
+        trigger = FastlaneCI::CommitJobTrigger.new(branch: branch)
+      when "manual"
+        trigger = FastlaneCI::ManualJobTrigger.new(branch: branch)
+      when "nightly"
+        trigger = FastlaneCI::NightlyJobTrigger.new(branch: branch, hour: hour.to_i, minute: minute.to_i)
+      end
 
       dir = Dir.mktmpdir
       # Do this so we trigger the clone of the repo.
@@ -171,7 +183,7 @@ module FastlaneCI
         platform: lane.split(" ").last,
         lane: lane.split(" ").first,
         # TODO: Until we make a proper interface to attach JobTriggers to a Project, let's add a manual one for the selected branch.
-        job_triggers: [FastlaneCI::ManualJobTrigger.new(branch: branch)]
+        job_triggers: (trigger.nil? ? [] : [trigger])
       )
 
       if !project.nil?
