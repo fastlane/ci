@@ -159,19 +159,6 @@ module FastlaneCI
         trigger = FastlaneCI::NightlyJobTrigger.new(branch: branch, hour: hour.to_i, minute: minute.to_i)
       end
 
-      dir = Dir.mktmpdir
-      # Do this so we trigger the clone of the repo.
-      # TODO: Do this wherever it should be done, as we must redirect
-      # to the project details only when this task is finished.
-      repo = GitRepo.new(
-        git_config: repo_config,
-        provider_credential: provider_credential,
-        local_folder: dir,
-        async_start: false
-      )
-
-      repo.checkout_branch(branch: branch)
-
       # We now have enough information to create the new project.
       # TODO: add job_triggers here
       # We shouldn't be blocking manual trigger builds
@@ -187,6 +174,18 @@ module FastlaneCI
       )
 
       if !project.nil?
+        # Do this so we trigger the clone of the repo.
+        # TODO: Do this wherever it should be done, as we must redirect
+        # to the project details only when this task is finished.
+        repo = GitRepo.new(
+          git_config: repo_config,
+          provider_credential: provider_credential,
+          local_folder: project.local_repo_path,
+          async_start: false
+        )
+
+        repo.checkout_branch(branch: branch, use_global_git_mutex: false)
+
         redirect("#{HOME}/#{project.id}")
       else
         raise "Project couldn't be created"

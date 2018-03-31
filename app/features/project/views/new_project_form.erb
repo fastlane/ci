@@ -84,25 +84,33 @@
       case "commit":
         document.querySelectorAll("#submit_form")[0].disabled = false;
         document.querySelectorAll("#nightly")[0].style.display = "none";
+        check_nightly(null);
         break;
       case "manual":
         document.querySelectorAll("#submit_form")[0].disabled = false;
         document.querySelectorAll("#nightly")[0].style.display = "none";
+        check_nightly(null);
         break;
       case "nightly":
         document.querySelectorAll("#nightly")[0].style.display = "";
+        document.querySelectorAll("#submit_form")[0].disabled = true;
+        check_nightly(document.querySelectorAll("#nightly")[0]);
         break;
     }
+    
   }
   function check_nightly(el) {
-    if (el.value) {
-      if (isFinite(parseInt(el.value))) {
+    if (el && el.value) {
+      if (isFinite(parseInt(document.querySelectorAll("#minute")[0].value)) && isFinite(parseInt(document.querySelectorAll("#hour")[0].value))) {
         document.querySelectorAll("#submit_form")[0].disabled = false;
-      } else {
+      }
+      else {
         document.querySelectorAll("#submit_form")[0].disabled = true;
       }
     } else {
-      document.querySelectorAll("#submit_form")[0].disabled = true;
+      if (isFinite(parseInt(document.querySelectorAll("#minute")[0].value)) && isFinite(parseInt(document.querySelectorAll("#hour")[0].value))) {
+        document.querySelectorAll("#submit_form")[0].disabled = false;
+      }
     }
   }
   </script>
