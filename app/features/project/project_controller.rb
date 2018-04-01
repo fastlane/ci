@@ -73,13 +73,15 @@ module FastlaneCI
 
     # This is an utility endpoint from where we can retrieve lane information through the front-end using basic JS.
     # This will be reviewed in the future when we have a proper front-end architecture.
-    get "#{HOME}/lanes/*/*/*" do |org, repo_name, branch|
+    get "#{HOME}/*/lanes" do
       content_type :json
+
+      org, repo_name, branch, = params[:splat].first.split("/")
 
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
       github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
-      selected_repo = github_service.repos.detect { |repo| org + "/" + repo_name == repo.full_name }
+      selected_repo = github_service.repos.detect { |repo| repo_name == repo.name && org = repo.owner }
 
       repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
 
@@ -96,6 +98,9 @@ module FastlaneCI
 
       fastfile_config = {}
 
+      # The fastfile.tree might have (for now) nil keys due to lanes being outside of
+      # a platform itself. So we take that nil key and transform it into a generic :no_platform
+      # key.
       fastfile.tree.each_key do |key|
         if key.nil?
           fastfile_config[:no_platform] = fastfile.tree[key]
@@ -107,11 +112,13 @@ module FastlaneCI
       fastfile_config.to_json
     end
 
-    get "#{HOME}/add/*/*" do |org, repo_name|
+    get "#{HOME}/*/add" do
+      org, repo_name, = params[:splat].first.split("/")
+
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
       github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
-      selected_repo = github_service.repos.detect { |repo| org + "/" + repo_name == repo.full_name }
+      selected_repo = github_service.repos.detect { |repo| repo_name == repo.name && org = repo.owner }
 
       # We need to check whether we can checkout the project without issues.
       # So a new project is created with default settings so we can fetch it.
@@ -126,11 +133,13 @@ module FastlaneCI
       erb(:new_project_form, locals: locals, layout: FastlaneCI.default_layout)
     end
 
-    post "#{HOME}/add/*/*" do |org, repo_name|
+    post "#{HOME}/*/add" do
+      org, repo_name, = params[:splat].first.split("/")
+
       provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
 
       github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
-      selected_repo = github_service.repos.detect { |repo| org + "/" + repo_name == repo.full_name }
+      selected_repo = github_service.repos.detect { |repo| repo_name == repo.name && org = repo.owner }
 
       repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
 
