@@ -1,3 +1,5 @@
+# rubocop:disable Style/RedundantSelf
+
 require "faye/websocket"
 require_relative "../../shared/logging_module"
 
@@ -89,3 +91,5 @@ module FastlaneCI
     end
   end
 end
+
+# rubocop:enable Style/RedundantSelf

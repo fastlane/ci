@@ -3,13 +3,13 @@ module FastlaneCI
   class Transactor
     # Runs given block inside of a transaction, automatically starting and ending it. Throw an exception to roll back
     def transaction
-      self.start_transaction
+      start_transaction
       result = yield
       return result
     rescue StandardError => ex
-      self.rollback(error: ex)
+      rollback(error: ex)
     ensure
-      self.end_transaction
+      end_transaction
     end
 
     # true if called while a transaction is in progress

@@ -1,3 +1,5 @@
+# rubocop:disable Style/RedundantSelf
+
 require_relative "../features/build_runner/fastlane_build_runner"
 
 module FastlaneCI
@@ -23,7 +25,7 @@ module FastlaneCI
       self.build_runners << build_runner
 
       task = TaskQueue::Task.new(work_block: proc { build_runner.start })
-      self.build_runner_task_queue.add_task_async(task: task)
+      build_runner_task_queue.add_task_async(task: task)
 
       return task
     end
@@ -34,9 +36,11 @@ module FastlaneCI
 
     # Fetch all the active runners, and see if there is one WIP
     def find_build_runner(project_id:, sha: nil, build_number: nil)
-      return self.build_runners.find do |build_runner|
+      return build_runners.find do |build_runner|
         build_runner.project.id == project_id && (build_runner.sha == sha || build_runner.current_build.number == build_number)
       end
     end
   end
 end
+
+# rubocop:enable Style/RedundantSelf

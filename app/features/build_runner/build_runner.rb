@@ -1,3 +1,5 @@
+# rubocop:disable Style/RedundantSelf
+
 require_relative "../../shared/models/artifact"
 require_relative "./build_runner_output_row"
 
@@ -23,7 +25,7 @@ module FastlaneCI
     attr_reader :code_hosting_service
 
     # A reference to FastlaneCI::Build
-    attr_reader :current_build
+    attr_accessor :current_build
 
     # The commit sha we want to run the build for
     attr_reader :sha
@@ -59,7 +61,7 @@ module FastlaneCI
 
       @work_queue = work_queue
 
-      self.prepare_build_object
+      prepare_build_object
 
       @repo = GitRepo.new(
         git_config: project.repo_config,
@@ -71,7 +73,7 @@ module FastlaneCI
 
     # Access the build number of that specific BuildRunner
     def current_build_number
-      return self.current_build.number
+      return current_build.number
     end
 
     # Use this method for additional setup for subclasses
@@ -87,26 +89,26 @@ module FastlaneCI
       #   Artifact.new(
       #     type: artifact[:type],
       #     reference: artifact[:path],
-      #     provider: self.project.artifact_provider
+      #     provider: project.artifact_provider
       #   )
       # end.map do |artifact|
-      #   self.project.artifact_provider.store!(artifact: artifact, build: self.current_build, project: self.project)
+      #   project.artifact_provider.store!(artifact: artifact, build: current_build, project: project)
       # end
 
       # self.current_build.artifacts = artifacts
       self.current_build.artifacts = []
 
       duration = Time.now - start_time
-      current_build.duration = duration
+      self.current_build.duration = duration
 
       # Status is set on the `current_build` object by the subclass
-      self.save_build_status!
+      save_build_status!
     rescue StandardError => ex
       logger.error(ex)
       duration = Time.now - start_time
-      current_build.duration = duration
-      current_build.status = :failure # TODO: also handle failure
-      self.save_build_status!
+      self.current_build.duration = duration
+      self.current_build.status = :failure # TODO: also handle failure
+      save_build_status!
     end
 
     def checkout_sha
@@ -122,13 +124,13 @@ module FastlaneCI
         repo.pull
       end
 
-      logger.debug("Checking out commit #{self.sha} from #{self.project.project_name}")
-      repo.checkout_commit(sha: self.sha)
+      logger.debug("Checking out commit #{sha} from #{project.project_name}")
+      repo.checkout_commit(sha: sha)
     end
 
     def pre_run_action
       logger.debug("Running pre_run_action in checkout_sha")
-      self.checkout_sha
+      checkout_sha
     end
 
     def reset_repo_state
@@ -137,8 +139,8 @@ module FastlaneCI
     end
 
     def post_run_action
-      logger.debug("Finished running #{self.project.project_name} for #{self.sha}")
-      self.reset_repo_state
+      logger.debug("Finished running #{project.project_name} for #{sha}")
+      reset_repo_state
     end
 
     # Starts the build, incrementing the build number from the number of builds
@@ -146,19 +148,19 @@ module FastlaneCI
     #
     # @return [nil]
     def start
-      logger.debug("Starting build runner #{self.class} for #{self.project.project_name} #{self.project.id} sha: #{self.sha} now...")
+      logger.debug("Starting build runner #{self.class} for #{project.project_name} #{project.id} sha: #{sha} now...")
       start_time = Time.now
       artifact_handler_block = proc { |artifact_paths| complete_run(start_time: start_time, artifact_paths: artifact_paths) }
 
       work_block = proc {
-        self.pre_run_action
-        self.run(completion_block: artifact_handler_block) do |current_row|
+        pre_run_action
+        run(completion_block: artifact_handler_block) do |current_row|
           new_row(current_row)
         end
       }
 
       post_run_block = proc {
-        self.post_run_action
+        post_run_action
       }
 
       # If we have a work_queue, execute on that
@@ -193,10 +195,10 @@ module FastlaneCI
 
       # Report back the row
       # 1) Store it in the history of logs (used to access half-built builds)
-      self.all_build_output_log_rows << row
+      all_build_output_log_rows << row
 
       # 2) Report back to all listeners, usually socket connections
-      self.build_change_observer_blocks.each do |current_block|
+      build_change_observer_blocks.each do |current_block|
         current_block.call(row)
       end
     end
@@ -204,11 +206,11 @@ module FastlaneCI
     # Add a listener to get real time updates on new rows (see `new_row`)
     # This is used for the socket connection to the user's browser
     def add_listener(block)
-      self.build_change_observer_blocks << block
+      build_change_observer_blocks << block
     end
 
     def prepare_build_object
-      builds = Services.build_service.list_builds(project: self.project)
+      builds = Services.build_service.list_builds(project: project)
 
       if builds.count > 0
         new_build_number = builds.sort_by(&:number).last.number + 1
@@ -217,7 +219,7 @@ module FastlaneCI
       end
 
       @current_build = FastlaneCI::Build.new(
-        project: self.project,
+        project: project,
         number: new_build_number,
         status: :pending,
         # Ensure we're using UTC because your server might have a different timezone.
@@ -225,7 +227,7 @@ module FastlaneCI
         # so that utc stuff is discoverable
         timestamp: Time.now.utc,
         duration: -1,
-        sha: self.sha
+        sha: sha
       )
       save_build_status!
     end
@@ -235,8 +237,8 @@ module FastlaneCI
     def save_build_status_locally!
       # Create or update the local build file in the config directory
       Services.build_service.add_build!(
-        project: self.project,
-        build: self.current_build
+        project: project,
+        build: current_build
       )
 
       # Commit & Push the changes to git remote
@@ -258,14 +260,14 @@ module FastlaneCI
     # Using a `rescue` block here is important
     # As the build is still green, even though we couldn't set the GH status
     def save_build_status_source!
-      status_context = self.project.project_name
+      status_context = project.project_name
 
-      self.code_hosting_service.set_build_status!(
-        repo: self.project.repo_config.git_url,
-        sha: self.sha,
-        state: self.current_build.status,
+      code_hosting_service.set_build_status!(
+        repo: project.repo_config.git_url,
+        sha: sha,
+        state: current_build.status,
         status_context: status_context,
-        description: self.current_build.description
+        description: current_build.description
       )
     rescue StandardError => ex
       logger.error("Error setting the build status on remote service")
@@ -275,3 +277,5 @@ module FastlaneCI
 end
 
 require_relative "./fastlane_build_runner"
+
+# rubocop:enable Style/RedundantSelf

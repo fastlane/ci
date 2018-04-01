@@ -23,7 +23,7 @@ module FastlaneCI
     attr_reader :remote_host # in the case of github, this is usually `github.com`
     attr_reader :username    # whatever the git repo needs for a username, usually just an email, usually CI
     attr_reader :full_name   # whatever the git repo needs for a username, usually just an email, usually fastlane.CI
-    attr_accessor :auth_token  # usually an API key, but could be a password, usually fastlane.CI's auth_token
+    attr_reader :auth_token # usually an API key, but could be a password, usually fastlane.CI's auth_token
     def initialize(remote_host: nil, username: nil, full_name: nil, auth_token: nil)
       @remote_host = remote_host
       @username = username
