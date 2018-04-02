@@ -10,7 +10,7 @@
   <main class="mdl-layout__content" style="padding: 40px" id="main">
 
 
-<h1>Build Log <%= build.number %></h1>
+<h1>Build <%= build.number %></h1>
 <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
   <tbody>
     <tr>
@@ -34,11 +34,34 @@
 
 <hr />
 
+<% if build.artifacts.count > 0 %>
+  <h1>Artifacts</h1>
+  <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+    <thead>
+      <tr>
+        <tr>
+          <th>Artifact type</th>
+          <th>Path</th>
+        </tr>
+      </tr>
+    </thead>
+    <tbody>
+      <% build.artifacts.each do |current_artifact| %>
+        <tr>
+          <td><%= current_artifact.type %></td>
+          <td><%= current_artifact.reference %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <hr />
+<% end %>
 
 
 <code id="log">
-  <% if existing_rows.count > 0 %>
-    <%= existing_rows.join("\n") %>
+  <% if existing_rows.to_s.length > 0 %>
+    <%= existing_rows %>
   <% else %>
     Loading...
   <% end %>
@@ -56,7 +79,7 @@
     uri += "/?&project=<%= project.id %>&build=<%= build.number %>"; // we add that extra & to make the Ruby URI parser work
     var ws = new WebSocket(uri);
     console.log("Listening to web socket connection now for URL " + uri + "...")
-    var firstMessageReceived = <%= existing_rows.count == 0 ? false : true %>;
+    var firstMessageReceived = <%= existing_rows.to_s.length == 0 ? false : true %>;
     ws.onmessage = function(message) {
       if (firstMessageReceived == false) {
         document.getElementById("log").innerHTML = ""

@@ -89,19 +89,17 @@ module FastlaneCI
     end
 
     def complete_run(start_time:, artifact_paths: [])
-      # Disable due to https://github.com/fastlane/ci/issues/380
-      # artifacts = artifact_paths.map do |artifact|
-      #   Artifact.new(
-      #     type: artifact[:type],
-      #     reference: artifact[:path],
-      #     provider: self.project.artifact_provider
-      #   )
-      # end.map do |artifact|
-      #   self.project.artifact_provider.store!(artifact: artifact, build: self.current_build, project: self.project)
-      # end
+      artifacts = artifact_paths.map do |artifact|
+        Artifact.new(
+          type: artifact[:type],
+          reference: artifact[:path],
+          provider: self.project.artifact_provider
+        )
+      end.map do |artifact|
+        self.project.artifact_provider.store!(artifact: artifact, build: self.current_build, project: self.project)
+      end
 
-      # self.current_build.artifacts = artifacts
-      self.current_build.artifacts = []
+      self.current_build.artifacts = artifacts
 
       duration = Time.now - start_time
       current_build.duration = duration
