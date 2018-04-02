@@ -4,21 +4,28 @@
       <th>Status</th>
       <th>Build Number</th>
       <th>Started</th>
+      <th>Branch/Sha</th>
       <th>Trigger</th>
     </tr>
   </thead>
   <tbody>
     <% project.builds.each do |build| %>
       <% url = "/projects_erb/#{project.id}/builds/#{build.number}" %>
-      <tr style="cursor: pointer;" onclick="location.href='<%= url %>'">
-        <td>
+      <tr style="cursor: pointer;">
+        <td onclick="location.href='<%= url %>'">
           <%= erb(:"../../build/views/build_status", locals: { status: build.status }) %>
         </td>
-        <td style="text-align: center;">
+        <td style="text-align: center;" onclick="location.href='<%= url %>'">
           <%= build.number %>
         </td>
-        <td>
+        <td onclick="location.href='<%= url %>'">
           <%= build.timestamp.strftime("%Y%m%dT%H%M%S%z") %>
+        </td>
+        <td>
+          <!-- # TODO: The line below doesn't work for `git://` URLs (which we currently don't support anyway) -->
+          <a href="<%= build.project.repo_config.git_url %>/commit/<%= build.sha %>" target="_blank">
+            <%= build.sha[0...7] %>
+          </a>
         </td>
         <td>
           <a href="/projects_erb/<%= project.id %>/trigger?sha=<%= build.sha %>" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
