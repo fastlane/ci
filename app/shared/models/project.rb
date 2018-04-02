@@ -46,7 +46,7 @@ module FastlaneCI
       # TODO: This is fine for now to avoid runtime fails due to lack of triggers.
       # In the future, the Add Project workflow, should provide the enough interface
       # in order to add as many JobTriggers as the user wants.
-      self.job_triggers = [ManualJobTrigger.new(branch: "master")]
+      self.job_triggers = job_triggers
     end
 
     def find_triggers_of_type(trigger_type:)

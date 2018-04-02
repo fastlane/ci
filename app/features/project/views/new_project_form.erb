@@ -8,11 +8,15 @@
   var valid_name = false;
   var valid_branch = false;
   var valid_lane = false;
+  var valid_trigger = false;
   document.addEventListener("DOMContentLoaded", function() {
     document.querySelectorAll("#submit_form")[0].disabled = true;
     document.querySelectorAll("#selected_lane")[0].style.display = "none";
     document.querySelectorAll("#lane_to_run")[0].style.display = "none";
     document.querySelectorAll("#loading")[0].style.display = "none";
+    document.querySelectorAll("#trigger")[0].style.display = "none";
+    document.querySelectorAll("#trigger_selector")[0].style.display = "none";
+    document.querySelectorAll("#nightly")[0].style.display = "none";
     check_existence(document.querySelectorAll("input[name=project_name]")[0].value);
     setInterval(function() { 
       max_dots = 5;
@@ -40,6 +44,9 @@
     document.querySelectorAll("#selected_lane")[0].style.display = "none";
     document.querySelectorAll("#selected_lane")[0].innerHTML = "";
     document.querySelectorAll("#loading")[0].style.display = "";
+    document.querySelectorAll("#trigger")[0].style.display = "none";
+    document.querySelectorAll("#trigger_selector")[0].style.display = "none";
+    document.querySelectorAll("#nightly")[0].style.display = "none";
     request = new XMLHttpRequest();
     request.timeout = 1000 * 60 * 10; // 10 minutes
     request.responseType = 'json';
@@ -76,6 +83,39 @@
   function check_lane() {
     valid_lane = true;
   }
+  function check_trigger(el) {
+    var trigger_value = el.value;
+    switch(trigger_value) {
+      case "commit":
+        valid_trigger = true;
+        document.querySelectorAll("#nightly")[0].style.display = "none";
+        check_nightly(null);
+        break;
+      case "manual":
+        valid_trigger = true;
+        document.querySelectorAll("#nightly")[0].style.display = "none";
+        check_nightly(null);
+        break;
+      case "nightly":
+        document.querySelectorAll("#nightly")[0].style.display = "";
+        check_nightly(document.querySelectorAll("#nightly")[0]);
+        break;
+    }
+  }
+  function check_nightly(el) {
+    if (el && el.value) {
+      if (isFinite(parseInt(document.querySelectorAll("#minute")[0].value)) && isFinite(parseInt(document.querySelectorAll("#hour")[0].value))) {
+        valid_trigger = true;
+      }
+      else {
+        valid_trigger = false;
+      }
+    } else {
+      if (isFinite(parseInt(document.querySelectorAll("#minute")[0].value)) && isFinite(parseInt(document.querySelectorAll("#hour")[0].value))) {
+        valid_trigger = true;
+      }
+    }
+  }
   var valid_request = null;
   function check_existence(value) {
     if (value) {
@@ -111,7 +151,7 @@
     }
   }
   setInterval(function() {
-    if (valid_branch && valid_name && valid_lane) {
+    if (valid_branch && valid_name && valid_lane && valid_trigger) {
       document.querySelectorAll("#submit_form")[0].disabled = false;
     } else {
       document.querySelectorAll("#submit_form")[0].disabled = true;
@@ -145,6 +185,32 @@
       </div>
       <select name="selected_lane", id="selected_lane" onchange="check_lane()">
       </select>
+      <br />
+      <h5 id="trigger">Select trigger</h5>
+      <div id="trigger_selector">
+        <select name="selected_trigger", id="selected_trigger", onchange="check_trigger(this)">
+          <option disabled selected value>Select a trigger</option>
+          <option value="commit">Commit</option>
+          <option value="manual">Manual</option>
+          <option value="nightly">Nightly</option>
+        </select>
+      <div id="nightly">
+        <br />
+        <br />
+        <p>Select the nightly schedule</p>
+        <select name="hour", id="hour", onchange="check_nightly(this)">
+          <option disabled selected value>Select an hour</option>
+          <% (0..23).each do |hour| %>
+            <option value="<%= hour %>"><%= hour %></option>
+          <% end %>
+        </select>
+        <select name="minute", id="minute", onchange="check_nightly(this)">
+          <option disabled selected value>Select a minute</option>
+          <% (0..59).each do |minute| %>
+            <option value="<%= minute %>"><%= minute %></option>
+          <% end %>
+        </select>
+      </div>
       <br />
       <br />
       <input id="submit_form" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" type="submit" title="Save">
