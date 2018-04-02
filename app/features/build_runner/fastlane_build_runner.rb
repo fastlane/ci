@@ -51,7 +51,7 @@ module FastlaneCI
 
       temporary_output_directory = Dir.mktmpdir
       verbose_log = FastlaneCI::FastlaneLog.new(
-        file_path: File.join(temporary_output_directory, "fastlane.verbose.log"), 
+        file_path: File.join(temporary_output_directory, "fastlane.verbose.log"),
         severity: Logger::DEBUG
       )
       info_log = FastlaneCI::FastlaneLog.new(
@@ -158,7 +158,7 @@ module FastlaneCI
       artifact_paths = []
       loggers.each do |current_logger|
         next unless File.exist?(current_logger.file_path)
-        artifact_paths << { 
+        artifact_paths << {
           type: "log",
           path: File.expand_path(current_logger.file_path)
         }
