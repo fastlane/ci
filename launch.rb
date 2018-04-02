@@ -254,9 +254,9 @@ module FastlaneCI
 
           git_fork_config = nil
           if open_pr.fork_of_repo?(repo_full_name: project.repo_config.full_name)
-            git_fork_config = GitForkConfig.new(current_sha: sha,
-                                                     branch: matching_open_pr.branch,
-                                                  clone_url: matching_open_pr.clone_url)
+            git_fork_config = GitForkConfig.new(current_sha: open_pr.current_sha,
+                                                     branch: open_pr.branch,
+                                                  clone_url: open_pr.clone_url)
           end
 
           logger.debug("Found sha: #{open_pr.current_sha} in #{open_pr.repo_full_name} missing status, adding build.")
