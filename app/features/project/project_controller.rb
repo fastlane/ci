@@ -18,6 +18,8 @@ module FastlaneCI
     # TODO: this should actually be a POST request
     get "#{HOME}/:project_id/trigger" do
       project_id = params[:project_id]
+      current_sha = params[:sha] if params[:sha].to_s.length > 0 # passing a specific sha is optional, so this might be nil
+
       project = self.user_project_with_id(project_id: project_id)
       current_github_provider_credential = self.check_and_get_provider_credential
 
@@ -27,7 +29,7 @@ module FastlaneCI
       repo = FastlaneCI::GitRepo.new(git_config: project.repo_config,
                                    local_folder: checkout_folder,
                             provider_credential: current_github_provider_credential)
-      current_sha = repo.most_recent_commit.sha
+      current_sha ||= repo.most_recent_commit.sha
       manual_triggers_allowed = project.job_triggers.any? { |trigger| trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual] }
 
       unless manual_triggers_allowed
