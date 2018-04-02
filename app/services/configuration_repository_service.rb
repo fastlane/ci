@@ -33,6 +33,9 @@ module FastlaneCI
     #
     # @return [Boolean]
     def configuration_repository_valid?
+      # Return cached true value, if it was successful, otherwise keep checking because it might have been fixed
+      return @config_repo_exists unless @config_repo_exists.nil? || (@config_repo_exists == false)
+
       valid = configuration_repository_exists?
       logger.debug("Configuration repo #{repo_shortform} doesn't exist") unless valid
 
@@ -53,7 +56,11 @@ module FastlaneCI
     #
     # @return [Boolean]
     def configuration_repository_exists?
-      return client.repository?(repo_shortform)
+      # Return cached true value, if it was successful, otherwise keep checking because it might have been fixed
+      return @config_repo_exists unless @config_repo_exists.nil? || (@config_repo_exists == false)
+
+      @config_repo_exists = client.repository?(repo_shortform)
+      return @config_repo_exists
     end
 
     private
