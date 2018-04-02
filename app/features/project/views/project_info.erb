@@ -3,7 +3,8 @@
     <tr>
       <th>Status</th>
       <th>Build Number</th>
-      <th>Triggered</th>
+      <th>Started</th>
+      <th>Trigger</th>
     </tr>
   </thead>
   <tbody>
@@ -13,8 +14,17 @@
         <td>
           <%= erb(:"../../build/views/build_status", locals: { status: build.status }) %>
         </td>
-        <td style="text-align: center;"><%= build.number %></td>
-        <td><%= build.timestamp.strftime("%Y%m%dT%H%M%S%z") %></td>
+        <td style="text-align: center;">
+          <%= build.number %>
+        </td>
+        <td>
+          <%= build.timestamp.strftime("%Y%m%dT%H%M%S%z") %>
+        </td>
+        <td>
+          <a href="/projects_erb/<%= project.id %>/trigger?sha=<%= build.sha %>" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+          Re-Run for this commit
+          </a>
+        </td>
       </tr>
     <% end %>
   </tbody>
