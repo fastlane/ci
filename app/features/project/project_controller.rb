@@ -18,6 +18,8 @@ module FastlaneCI
     # TODO: this should actually be a POST request
     get "#{HOME}/:project_id/trigger" do
       project_id = params[:project_id]
+      current_sha = params[:sha] if params[:sha].to_s.length > 0 # passing a specific sha is optional, so this might be nil
+
       project = self.user_project_with_id(project_id: project_id)
       current_github_provider_credential = self.check_and_get_provider_credential
 
@@ -27,7 +29,7 @@ module FastlaneCI
       repo = FastlaneCI::GitRepo.new(git_config: project.repo_config,
                                    local_folder: checkout_folder,
                             provider_credential: current_github_provider_credential)
-      current_sha = repo.most_recent_commit.sha
+      current_sha ||= repo.most_recent_commit.sha
       manual_triggers_allowed = project.job_triggers.any? { |trigger| trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual] }
 
       unless manual_triggers_allowed
@@ -190,23 +192,30 @@ module FastlaneCI
       # Long term, the best appraoch would probably to have the FastfileParser be
       # its own Ruby gem, or even part of the fastlane/fastlane main repo
       # For now, this is good enough, as we'll be moving so fast with this one
-
       project_path = project.local_repo_path
 
-      # TODO: remove this once the Fastfile peeker is implemented
-      absolute_fastfile_path = File.join(project_path, "master/fastlane/Fastfile")
-      fastfile_parser = Fastlane::FastfileParser.new(path: absolute_fastfile_path)
-      available_lanes = fastfile_parser.available_lanes
-
-      relative_fastfile_path = Pathname.new(absolute_fastfile_path).relative_path_from(Pathname.new(project_path))
-
+      # we set the values below to default to nil, just because `erb` has an easier time then
+      # checking for nil, instead of using `defined?` to see if a variable is defined
       locals = {
         project: project,
         title: "Project #{project.project_name}",
-        available_lanes: available_lanes,
-        fastfile_parser: fastfile_parser,
-        fastfile_path: relative_fastfile_path # TODO: rename param `fastfile_path` to `relative_fastfile_path`
+        available_lanes: nil,
+        fastfile_parser: nil,
+        fastfile_path: nil
       }
+
+      if File.directory?(project_path)
+        # TODO: remove this once the Fastfile peeker is implemented
+        absolute_fastfile_path = File.join(project_path, "master/fastlane/Fastfile")
+        fastfile_parser = Fastlane::FastfileParser.new(path: absolute_fastfile_path)
+        available_lanes = fastfile_parser.available_lanes
+
+        relative_fastfile_path = Pathname.new(absolute_fastfile_path).relative_path_from(Pathname.new(project_path))
+
+        locals[:available_lanes] = available_lanes
+        locals[:fastfile_parser] = fastfile_parser
+        locals[:fastfile_path] = relative_fastfile_path # TODO: rename param `fastfile_path` to `relative_fastfile_path`
+      end
 
       erb(:project, locals: locals, layout: FastlaneCI.default_layout)
     end
