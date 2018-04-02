@@ -172,8 +172,8 @@ module FastlaneCI
         name: project_name,
         repo_config: repo_config,
         enabled: true,
-        platform: lane.split(" ").last,
-        lane: lane.split(" ").first,
+        platform: lane.split(" ").first,
+        lane: lane.split(" ").last,
         # TODO: Until we make a proper interface to attach JobTriggers to a Project, let's add a manual one for the selected branch.
         job_triggers: [trigger]
       )
