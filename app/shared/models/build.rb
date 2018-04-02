@@ -35,7 +35,7 @@ module FastlaneCI
     attr_accessor :artifacts
 
     # @return [String] An optional message to go along with the build, will show up as part of the build status on github
-    attr_reader :description
+    attr_accessor :description
 
     def initialize(project: nil, number: nil, status: nil, timestamp: nil, duration: nil, sha: nil, description: nil)
       @project = project
