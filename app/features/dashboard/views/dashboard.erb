@@ -32,26 +32,11 @@
 
     <br />
 
-    <h3>Projects you don't have access to</h3>
-    <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
-      <thead>
-        <tr>
-          <th style="width: 300px; text-align: center">Project Name</th>
-          <th>Access</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% projects_without_access.each do |project| %>
-          <tr>
-            <td style="text-align: center;"><%= project.project_name %></td>
-            <td>🚫</td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-    <p>To get access to those projects, make sure your GitHub account has access to them</p>
-
-    <br />
+    <% if projects_without_access.count > 0 %>
+      <h3>There are some projects you don't have access to</h3>
+      <p>to gain access to any repos you are missing from your organization, reach out to your GitHub org admin. They'll have to give you write access to the repo</p>
+      <br />
+    <% end %>
 
     <a href="/projects_erb/add" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
       Add new Project

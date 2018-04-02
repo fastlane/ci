@@ -5,6 +5,7 @@
 [![Twitter: @KrauseFx](https://img.shields.io/badge/contact-@KrauseFx-blue.svg?style=flat)](https://twitter.com/KrauseFx)
 [![Twitter: @taquitos](https://img.shields.io/badge/contact-@taquitos-blue.svg?style=flat)](https://twitter.com/taquitos)
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://github.com/fastlane/ci/blob/master/LICENSE)
+[![Coverage Status](https://coveralls.io/repos/github/fastlane/ci/badge.svg?branch=master)](https://coveralls.io/github/fastlane/ci?branch=master)
 
 # [WIP] fastlane.ci
 
