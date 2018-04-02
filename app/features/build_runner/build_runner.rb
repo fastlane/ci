@@ -147,7 +147,8 @@ module FastlaneCI
         GIT_URL: self.repo.git_config.git_url,
         GIT_SHA: self.current_build.sha,
         BUILD_URL: "https://fastlane.ci", # TODO: actually build the URL, we don't know our own host, right?
-        CI_NAME: "fastlane.ci"
+        CI_NAME: "fastlane.ci",
+        CI: true
       }
 
       if self.git_fork_config && self.git_fork_config.branch.to_s.length > 0
