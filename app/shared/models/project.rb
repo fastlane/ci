@@ -49,6 +49,12 @@ module FastlaneCI
       self.job_triggers = [ManualJobTrigger.new(branch: "master")]
     end
 
+    def find_triggers_of_type(trigger_type:)
+      return self.job_triggers.find_all do |current_trigger|
+        current_trigger.type.to_sym == trigger_type.to_sym
+      end
+    end
+
     def builds
       builds = FastlaneCI::Services.build_service.list_builds(project: self)
 

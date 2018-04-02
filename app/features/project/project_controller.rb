@@ -18,6 +18,8 @@ module FastlaneCI
     # TODO: this should actually be a POST request
     get "#{HOME}/:project_id/trigger" do
       project_id = params[:project_id]
+      current_sha = params[:sha] if params[:sha].to_s.length > 0 # passing a specific sha is optional, so this might be nil
+
       project = self.user_project_with_id(project_id: project_id)
       current_github_provider_credential = self.check_and_get_provider_credential
 
@@ -27,7 +29,7 @@ module FastlaneCI
       repo = FastlaneCI::GitRepo.new(git_config: project.repo_config,
                                    local_folder: checkout_folder,
                             provider_credential: current_github_provider_credential)
-      current_sha = repo.most_recent_commit.sha
+      current_sha ||= repo.most_recent_commit.sha
       manual_triggers_allowed = project.job_triggers.any? { |trigger| trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual] }
 
       unless manual_triggers_allowed
@@ -41,7 +43,8 @@ module FastlaneCI
         project: project,
         sha: current_sha,
         github_service: FastlaneCI::GitHubService.new(provider_credential: current_github_provider_credential),
-        work_queue: FastlaneCI::GitRepo.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
+        work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
+        trigger: project.find_triggers_of_type(trigger_type: :manual).first
       )
       build_runner.setup(parameters: nil)
       Services.build_runner_service.add_build_runner(build_runner: build_runner)
@@ -200,19 +203,27 @@ module FastlaneCI
 
       project_path = project.local_repo_path
 
-      fastfile_path = FastlaneCI::FastfileFinder.search_path(path: project_path)
-      fastfile_parser = Fastlane::FastfileParser.new(path: fastfile_path)
-      available_lanes = fastfile_parser.available_lanes
-
-      relative_fastfile_path = Pathname.new(fastfile_path).relative_path_from(Pathname.new(project_path))
-
+      # we set the values below to default to nil, just because `erb` has an easier time then
+      # checking for nil, instead of using `defined?` to see if a variable is defined
       locals = {
         project: project,
         title: "Project #{project.project_name}",
-        available_lanes: available_lanes,
-        fastfile_parser: fastfile_parser,
-        fastfile_path: relative_fastfile_path
+        available_lanes: nil,
+        fastfile_parser: nil,
+        fastfile_path: nil
       }
+
+      if File.directory?(project_path)
+        fastfile_path = FastlaneCI::FastfileFinder.search_path(path: project_path)
+        fastfile_parser = Fastlane::FastfileParser.new(path: fastfile_path)
+        available_lanes = fastfile_parser.available_lanes
+
+        relative_fastfile_path = Pathname.new(fastfile_path).relative_path_from(Pathname.new(project_path))
+
+        locals[:available_lanes] = available_lanes
+        locals[:fastfile_parser] = fastfile_parser
+        locals[:fastfile_path] = relative_fastfile_path
+      end
 
       erb(:project, locals: locals, layout: FastlaneCI.default_layout)
     end

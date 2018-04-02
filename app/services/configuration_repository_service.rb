@@ -19,6 +19,7 @@ module FastlaneCI
     # Creates a remote repository if it does not already exist, complete with
     # the expected remote files `user.json` and `projects.json`
     def create_private_remote_configuration_repo
+      # TODO: Handle the common case of when provided account can't create a new private repo
       client.create_repository(repo_name, private: true) unless configuration_repository_exists?
       create_remote_json_file("users.json", json_string: serialized_users)
       create_remote_json_file("projects.json")
@@ -32,6 +33,9 @@ module FastlaneCI
     #
     # @return [Boolean]
     def configuration_repository_valid?
+      # Return cached true value, if it was successful, otherwise keep checking because it might have been fixed
+      return @config_repo_exists unless @config_repo_exists.nil? || (@config_repo_exists == false)
+
       valid = configuration_repository_exists?
       logger.debug("Configuration repo #{repo_shortform} doesn't exist") unless valid
 
@@ -52,7 +56,11 @@ module FastlaneCI
     #
     # @return [Boolean]
     def configuration_repository_exists?
-      return client.repository?(repo_shortform)
+      # Return cached true value, if it was successful, otherwise keep checking because it might have been fixed
+      return @config_repo_exists unless @config_repo_exists.nil? || (@config_repo_exists == false)
+
+      @config_repo_exists = client.repository?(repo_shortform)
+      return @config_repo_exists
     end
 
     private

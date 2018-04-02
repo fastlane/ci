@@ -16,6 +16,8 @@ module FastlaneCI
     end
 
     def self.take_off
+      @launch_queue = TaskQueue::TaskQueue.new(name: "fastlane.ci launch queue")
+
       require_fastlane_ci
       verify_app_built
       verify_dependencies
@@ -133,8 +135,15 @@ module FastlaneCI
       github_projects = Services.config_service.projects(provider_credential: Services.provider_credential)
       github_service = FastlaneCI::GitHubService.new(provider_credential: Services.provider_credential)
 
-      run_pending_github_builds(projects: github_projects, github_service: github_service)
-      enqueue_builds_for_open_github_prs_with_no_status(projects: github_projects, github_service: github_service)
+      restart_pending_builds_task = TaskQueue::Task.new(work_block: proc {
+        run_pending_github_builds(projects: github_projects, github_service: github_service)
+      })
+      @launch_queue.add_task_async(task: restart_pending_builds_task)
+
+      start_builds_for_prs_with_no_status_builds_task = TaskQueue::Task.new(work_block: proc {
+        enqueue_builds_for_open_github_prs_with_no_status(projects: github_projects, github_service: github_service)
+      })
+      @launch_queue.add_task_async(task: start_builds_for_prs_with_no_status_builds_task)
     end
 
     def self.launch_workers
@@ -203,7 +212,8 @@ module FastlaneCI
             sha: sha,
             github_service: github_service,
             work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
-            git_fork_config: git_fork_config
+            git_fork_config: git_fork_config,
+            trigger: project.find_triggers_of_type(trigger_type: :commit).first
           )
           build_runner.setup(parameters: nil)
           Services.build_runner_service.add_build_runner(build_runner: build_runner)
@@ -244,9 +254,9 @@ module FastlaneCI
 
           git_fork_config = nil
           if open_pr.fork_of_repo?(repo_full_name: project.repo_config.full_name)
-            git_fork_config = GitForkConfig.new(current_sha: sha,
-                                                     branch: matching_open_pr.branch,
-                                                  clone_url: matching_open_pr.clone_url)
+            git_fork_config = GitForkConfig.new(current_sha: open_pr.current_sha,
+                                                     branch: open_pr.branch,
+                                                  clone_url: open_pr.clone_url)
           end
 
           logger.debug("Found sha: #{open_pr.current_sha} in #{open_pr.repo_full_name} missing status, adding build.")
@@ -256,7 +266,8 @@ module FastlaneCI
             sha: open_pr.current_sha,
             github_service: github_service,
             work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
-            git_fork_config: git_fork_config
+            git_fork_config: git_fork_config,
+            trigger: project.find_triggers_of_type(trigger_type: :commit).first
           )
           build_runner.setup(parameters: nil)
           Services.build_runner_service.add_build_runner(build_runner: build_runner)
