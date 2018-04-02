@@ -47,7 +47,11 @@ module FastlaneCI
     # Array of env variables that were set, that we need to unset after the run
     attr_accessor :environment_variables_set
 
-    def initialize(project:, sha:, github_service:, work_queue:, triggered_by:, git_fork_config: nil)
+    def initialize(project:, sha:, github_service:, work_queue:, trigger:, git_fork_config: nil)
+      if trigger.nil?
+        raise "No trigger provided, this is probably caused by a build being triggered, but then the project not having this particular build trigger associated"
+      end
+
       # Setting the variables directly (only having `attr_reader`) as they're immutable
       # Once you define a FastlaneBuildRunner, you shouldn't be able to modify them
       @project = project
@@ -62,7 +66,7 @@ module FastlaneCI
 
       @work_queue = work_queue
 
-      self.prepare_build_object(triggered_by: triggered_by)
+      self.prepare_build_object(trigger: trigger)
 
       @repo = GitRepo.new(
         git_config: project.repo_config,
@@ -266,7 +270,7 @@ module FastlaneCI
       self.build_change_observer_blocks << block
     end
 
-    def prepare_build_object
+    def prepare_build_object(trigger:)
       builds = Services.build_service.list_builds(project: self.project)
 
       if builds.count > 0
@@ -285,7 +289,7 @@ module FastlaneCI
         timestamp: Time.now.utc,
         duration: -1,
         sha: self.sha,
-        triggered_by: triggered_by
+        trigger: trigger.type
       )
       save_build_status!
     end

@@ -58,7 +58,7 @@ module FastlaneCI
                                               clone_url: pr.clone_url)
         self.create_and_queue_build_task(
           sha: pr.current_sha,
-          triggered_by: JobTrigger::TRIGGER_TYPE[:commit],
+          trigger: project.find_triggers_of_type(trigger_type: :commit).first,
           git_fork_config: git_fork_config
         )
       end

@@ -38,9 +38,9 @@ module FastlaneCI
     attr_accessor :description
 
     # @return [String] the trigger type that triggered this particular build
-    attr_accessor :triggered_by
+    attr_accessor :trigger
 
-    def initialize(project: nil, number: nil, status: nil, timestamp: nil, duration: nil, sha: nil, description: nil, triggered_by: nil)
+    def initialize(project: nil, number: nil, status: nil, timestamp: nil, duration: nil, sha: nil, description: nil, trigger: nil)
       self.project = project
       self.number = number
       self.status = status
@@ -49,7 +49,7 @@ module FastlaneCI
       self.sha = sha
       self.artifacts = []
       self.description = description
-      self.triggered_by = triggered_by
+      self.trigger = trigger
     end
 
     def status=(new_value)
