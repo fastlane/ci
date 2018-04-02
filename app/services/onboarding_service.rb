@@ -46,6 +46,8 @@ module FastlaneCI
     #
     # @return [Boolean]
     def required_keys_and_proper_remote_configuration_repo?
+      return @setup_correctly unless @setup_correctly.nil?
+
       unless no_missing_keys?
         logger.debug("Missing environment variables.")
         return false
@@ -56,7 +58,8 @@ module FastlaneCI
         return false
       end
 
-      return true
+      @setup_correctly = true
+      return @setup_correctly
     end
 
     # Returns `true` if the local configuration repository exists
