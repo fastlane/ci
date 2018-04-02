@@ -16,6 +16,8 @@ module FastlaneCI
     end
 
     def self.take_off
+      @launch_queue = TaskQueue::TaskQueue.new(name: "fastlane.ci launch queue")
+
       require_fastlane_ci
       verify_app_built
       verify_dependencies
@@ -133,8 +135,15 @@ module FastlaneCI
       github_projects = Services.config_service.projects(provider_credential: Services.provider_credential)
       github_service = FastlaneCI::GitHubService.new(provider_credential: Services.provider_credential)
 
-      run_pending_github_builds(projects: github_projects, github_service: github_service)
-      enqueue_builds_for_open_github_prs_with_no_status(projects: github_projects, github_service: github_service)
+      restart_pending_builds_task = TaskQueue::Task.new(work_block: proc {
+        run_pending_github_builds(projects: github_projects, github_service: github_service)
+      })
+      @launch_queue.add_task_async(task: restart_pending_builds_task)
+
+      start_builds_for_prs_with_no_status_builds_task = TaskQueue::Task.new(work_block: proc {
+        enqueue_builds_for_open_github_prs_with_no_status(projects: github_projects, github_service: github_service)
+      })
+      @launch_queue.add_task_async(task: start_builds_for_prs_with_no_status_builds_task)
     end
 
     def self.launch_workers
