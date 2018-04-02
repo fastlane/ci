@@ -74,6 +74,7 @@ If you're having trouble and need to debug, you can add the following environmen
 
 `FASTLANE_CI_VERBOSE` enables extra logging which includes thread ids, and other non-essential information that could be useful during debugging.
 
+Test pending/empty build
 
 ## Run tests
 
