@@ -50,7 +50,7 @@ module FastlaneCI
       end
 
       logger.debug("Creating a build task for commit: #{newest_commit} from #{self.project.project_name} (#{repo_full_name})")
-      self.create_and_queue_build_task(sha: newest_commit)
+      self.create_and_queue_build_task(sha: newest_commit, triggered_by: JobTrigger::TRIGGER_TYPE[:nightly])
     end
   end
 end
