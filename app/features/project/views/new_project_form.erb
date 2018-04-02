@@ -81,6 +81,8 @@
     request.send();
   }
   function check_lane() {
+    document.querySelectorAll("#trigger")[0].style.display = "";
+    document.querySelectorAll("#trigger_selector")[0].style.display = "";
     valid_lane = true;
   }
   function check_trigger(el) {
