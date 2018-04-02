@@ -1,5 +1,3 @@
-# rubocop:disable Style/RedundantSelf
-
 require_relative "../../shared/models/artifact"
 require_relative "./build_runner_output_row"
 
@@ -96,18 +94,18 @@ module FastlaneCI
       # end
 
       # self.current_build.artifacts = artifacts
-      self.current_build.artifacts = []
+      current_build.artifacts = []
 
       duration = Time.now - start_time
-      self.current_build.duration = duration
+      current_build.duration = duration
 
       # Status is set on the `current_build` object by the subclass
       save_build_status!
     rescue StandardError => ex
       logger.error(ex)
       duration = Time.now - start_time
-      self.current_build.duration = duration
-      self.current_build.status = :failure # TODO: also handle failure
+      current_build.duration = duration
+      current_build.status = :failure # TODO: also handle failure
       save_build_status!
     end
 
@@ -277,5 +275,3 @@ module FastlaneCI
 end
 
 require_relative "./fastlane_build_runner"
-
-# rubocop:enable Style/RedundantSelf
