@@ -192,6 +192,8 @@ module FastlaneCI
       # For now, this is good enough, as we'll be moving so fast with this one
       project_path = project.local_repo_path
 
+      # we set the values below to default to nil, just because `erb` has an easier time then
+      # checking for nil, instead of using `defined?` to see if a variable is defined
       locals = {
         project: project,
         title: "Project #{project.project_name}",
