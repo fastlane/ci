@@ -23,7 +23,7 @@
         </td>
         <td>
           <!-- # TODO: The line below doesn't work for `git://` URLs (which we currently don't support anyway) -->
-          <a href="<%= build.project.repo_config.git_url %>/commit/<%= build.sha %>" target="_blank">
+          <a href="<%= build.project.repo_config.git_url %>/commit/<%= build.sha %>" target="_blank" class="commit-sha">
             <%= build.sha[0...7] %>
           </a>
         </td>
@@ -36,3 +36,13 @@
     <% end %>
   </tbody>
 </table>
+
+<style type="text/css">
+  .commit-sha {
+    border: 1px solid #ED5281;
+    padding: 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    background-color: rgba(237, 82, 129, 0.02)
+  }
+</style>
