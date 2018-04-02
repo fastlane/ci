@@ -44,10 +44,10 @@ gem "fastlane", git: "https://github.com/fastlane/fastlane"
 gem "taskqueue", git: "https://github.com/fastlane/TaskQueue", ref: "5b3f459", require: false
 
 group :test, :development do
+  gem "coveralls"
   gem "pry"
   gem "pry-byebug"
   gem "rack-test", require: "rack/test"
   gem "rake"
   gem "rspec"
-  gem "coveralls"
 end
