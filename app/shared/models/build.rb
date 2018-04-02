@@ -48,6 +48,11 @@ module FastlaneCI
       @description = description
     end
 
+    # Most cases we don't want people doing this, but there are a couple valid reasons, make it explicit
+    def update_project!(new_project)
+      @project = new_project
+    end
+
     def status=(new_value)
       return if new_value.nil? # as during init we might init with 0 when filling in JSON values
       new_value = new_value.to_sym
