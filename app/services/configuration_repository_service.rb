@@ -19,6 +19,7 @@ module FastlaneCI
     # Creates a remote repository if it does not already exist, complete with
     # the expected remote files `user.json` and `projects.json`
     def create_private_remote_configuration_repo
+      # TODO: Handle the common case of when provided account can't create a new private repo
       client.create_repository(repo_name, private: true) unless configuration_repository_exists?
       create_remote_json_file("users.json", json_string: serialized_users)
       create_remote_json_file("projects.json")
