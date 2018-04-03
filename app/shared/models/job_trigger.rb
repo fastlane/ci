@@ -8,14 +8,14 @@ module FastlaneCI
     }
 
     # @return [TRIGGER_TYPE]
-    attr_accessor :type
+    attr_reader :type
 
     # @return [String] the branch we are concerned with
-    attr_accessor :branch
+    attr_reader :branch
 
     def initialize(type: nil, branch: nil)
-      self.type = type
-      self.branch = branch
+      @type = type
+      @branch = branch
     end
   end
 

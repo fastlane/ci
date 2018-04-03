@@ -24,6 +24,8 @@ During the normal operation of fastlane.ci, you'll need a few values. Some value
 
 `FASTLANE_CI_CLEANUP_OLD_CHECKOUTS` - When server starts up, clear out all the old checkouts that aren't `fastlane-ci-config` projects.
 
+`FASTLANE_CI_DISABLE_PUSHES` - Sometimes we just want to commit and not push to remote. Useful when debugging your ci config using the same config as your production setup.
+
 ## Tips and tricks
 **Here's what @taquitos has in his `.bash_profile`:**
 
