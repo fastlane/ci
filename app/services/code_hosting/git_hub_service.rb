@@ -36,9 +36,6 @@ module FastlaneCI
     def initialize(provider_credential: nil)
       @provider_credential = provider_credential
       @_client = Octokit::Client.new(access_token: provider_credential.api_token)
-      if client.access_token.nil?
-        client.access_token = provider_credential.api_token
-      end
       begin
         if client.rate_limit!.remaining.zero?
           sleep_time = client.rate_limit!.resets_in
@@ -48,6 +45,8 @@ module FastlaneCI
       rescue Octokit::TooManyRequests => ex
         logger.error(ex)
         raise ex
+      rescue Octokit::Unauthorized => ex # Maybe the token does not give access to rate limits.
+        logger.error(ex)
       end
       Octokit.auto_paginate = true # TODO: just for now, we probably should do smart pagination in the future
     end

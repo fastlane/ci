@@ -9,20 +9,6 @@ module FastlaneCI
     include FastlaneCI::Logging
     include FastlaneCI::GitHubHandler
 
-    class << self
-      # Loads the octokit cache stack for speed-up calls to github service.
-      # As explained in: https://github.com/octokit/octokit.rb#caching
-      def load_octokit_cache_stack
-        @stack ||= Faraday::RackBuilder.new do |builder|
-          builder.use(Faraday::HttpCache, serializer: Marshal, shared_cache: false)
-          builder.use(Octokit::Response::RaiseError)
-          builder.adapter(Faraday.default_adapter)
-        end
-        return if Octokit.middleware.handlers.include?(Faraday::HttpCache)
-        Octokit.middleware = @stack
-      end
-    end
-
     # @return [Octokit::Client]
     attr_reader :client
 
@@ -30,11 +16,7 @@ module FastlaneCI
     #
     # @param  [ProviderCredential] provider_credential
     def initialize(provider_credential: nil)
-      ConfigurationRepositoryService.load_octokit_cache_stack
       @client = Octokit::Client.new(access_token: provider_credential.api_token)
-      if client.access_token.nil?
-        client.access_token = provider_credential.api_token
-      end
       begin
         if client.rate_limit!.remaining.zero?
           sleep_time = client.rate_limit!.resets_in
@@ -44,6 +26,8 @@ module FastlaneCI
       rescue Octokit::TooManyRequests => ex
         logger.error(ex)
         raise ex
+      rescue Octokit::Unauthorized => ex # Maybe the token does not give access to rate limits.
+        logger.error(ex)
       end
     end
 
