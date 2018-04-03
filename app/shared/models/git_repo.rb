@@ -377,20 +377,20 @@ module FastlaneCI
         untracked = git.status.untracked
 
         if changed.count == 0 && added.count == 0 && deleted.count == 0 && untracked.count == 0
-          logger.debug("No changes in repo #{self.git_config.full_name}, skipping commit #{commit_message}")
+          logger.debug("No changes in repo #{git_config.full_name}, skipping commit #{commit_message}")
         else
           git.commit(commit_message)
           push(use_global_git_mutex: false) if push_after_commit
-          logger.debug("Done commit_changes! #{self.git_config.full_name} for #{repo_auth.username}")
+          logger.debug("Done commit_changes! #{git_config.full_name} for #{repo_auth.username}")
         end
       end
     end
 
     def push(use_global_git_mutex: true, repo_auth: self.repo_auth)
       perform_block(use_global_git_mutex: use_global_git_mutex) do
-        logger.debug("Pushing to #{self.git_config.git_url}")
-        self.setup_author(full_name: repo_auth.full_name, username: repo_auth.username)
-        self.temporary_storage_path = self.setup_auth(repo_auth: repo_auth)
+        logger.debug("Pushing to #{git_config.git_url}")
+        setup_author(full_name: repo_auth.full_name, username: repo_auth.username)
+        self.temporary_storage_path = setup_auth(repo_auth: repo_auth)
         # TODO: how do we handle branches
         git.push
         logger.debug("Done pushing to #{git_config.git_url}")

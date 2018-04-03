@@ -20,8 +20,8 @@ module FastlaneCI
       project_id = params[:project_id]
       current_sha = params[:sha] if params[:sha].to_s.length > 0 # passing a specific sha is optional, so this might be nil
 
-      project = self.user_project_with_id(project_id: project_id)
-      current_github_provider_credential = self.check_and_get_provider_credential
+      project = user_project_with_id(project_id: project_id)
+      current_github_provider_credential = check_and_get_provider_credential
 
       # Create random folder for checkout, prefixed with `manual_build`
       checkout_folder = File.join(File.expand_path(project.local_repo_path), "manual_build_#{SecureRandom.uuid}")

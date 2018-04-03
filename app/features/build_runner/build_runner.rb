@@ -66,7 +66,7 @@ module FastlaneCI
 
       @work_queue = work_queue
 
-      self.prepare_build_object(trigger: trigger)
+      prepare_build_object(trigger: trigger)
 
       @repo = GitRepo.new(
         git_config: project.repo_config,
@@ -135,8 +135,8 @@ module FastlaneCI
 
     def pre_run_action
       logger.debug("Running pre_run_action in checkout_sha")
-      self.checkout_sha
-      self.setup_build_specific_environment_variables
+      checkout_sha
+      setup_build_specific_environment_variables
     end
 
     def setup_build_specific_environment_variables
@@ -146,17 +146,17 @@ module FastlaneCI
       # https://wiki.jenkins.io/display/JENKINS/Building+a+software+project
       env_mapping = {
         BUILD_NUMBER: current_build_number,
-        JOB_NAME: self.project.project_name,
-        WORKSPACE: self.project.local_repo_path,
-        GIT_URL: self.repo.git_config.git_url,
-        GIT_SHA: self.current_build.sha,
+        JOB_NAME: project.project_name,
+        WORKSPACE: project.local_repo_path,
+        GIT_URL: repo.git_config.git_url,
+        GIT_SHA: current_build.sha,
         BUILD_URL: "https://fastlane.ci", # TODO: actually build the URL, we don't know our own host, right?
         CI_NAME: "fastlane.ci",
         CI: true
       }
 
-      if self.git_fork_config && self.git_fork_config.branch.to_s.length > 0
-        env_mapping[:GIT_BRANCH] = self.git_fork_config.branch # TODO: does this work?
+      if git_fork_config && git_fork_config.branch.to_s.length > 0
+        env_mapping[:GIT_BRANCH] = git_fork_config.branch # TODO: does this work?
       else
         env_mapping[:GIT_BRANCH] = "master" # TODO: use actual default branch?
       end
@@ -182,7 +182,7 @@ module FastlaneCI
       end
       ENV[key.to_s] = value.to_s
 
-      self.environment_variables_set << key
+      environment_variables_set << key
     end
 
     def reset_repo_state
@@ -191,14 +191,14 @@ module FastlaneCI
     end
 
     def post_run_action
-      logger.debug("Finished running #{self.project.project_name} for #{self.sha}")
-      self.reset_repo_state
+      logger.debug("Finished running #{project.project_name} for #{sha}")
+      reset_repo_state
 
-      self.unset_build_specific_environment_variables
+      unset_build_specific_environment_variables
     end
 
     def unset_build_specific_environment_variables
-      self.environment_variables_set.each do |key|
+      environment_variables_set.each do |key|
         ENV.delete(key.to_s)
       end
       self.environment_variables_set = nil
@@ -288,7 +288,7 @@ module FastlaneCI
         # so that utc stuff is discoverable
         timestamp: Time.now.utc,
         duration: -1,
-        sha: self.sha,
+        sha: sha,
         trigger: trigger.type
       )
       save_build_status!
