@@ -155,7 +155,7 @@ module FastlaneCI
     end
 
     def setup_build_specific_environment_variables
-      self.environment_variables_set = []
+      @environment_variables_set = []
 
       # We try to follow the existing formats
       # https://wiki.jenkins.io/display/JENKINS/Building+a+software+project
@@ -213,10 +213,11 @@ module FastlaneCI
     end
 
     def unset_build_specific_environment_variables
+      return if environment_variables_set.nil?
       environment_variables_set.each do |key|
         ENV.delete(key.to_s)
       end
-      self.environment_variables_set = nil
+      @environment_variables_set = nil
     end
 
     # Starts the build, incrementing the build number from the number of builds
