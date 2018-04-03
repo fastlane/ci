@@ -9,7 +9,7 @@ module FastlaneCI
 
     def self.find_fastfile_in_repo(repo:, relative_path: false)
       local_storage = repo.local_folder
-      return self.search_path(path: local_storage, relative_path: relative_path)
+      return search_path(path: local_storage, relative_path: relative_path)
     end
 
     # if you're using this with the fastfile parser, you need to use `relative: false`

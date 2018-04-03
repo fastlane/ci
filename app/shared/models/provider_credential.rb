@@ -1,4 +1,5 @@
 require "json"
+
 module FastlaneCI
   # base class for all provider credentials, see GitHubProviderCredential as an example
   class ProviderCredential
@@ -15,7 +16,7 @@ module FastlaneCI
 
     PROVIDER_CREDENTIAL_TYPES = doubled_types.freeze
 
-    attr_accessor :id
+    attr_reader :id
     attr_accessor :ci_user # user associated with this provider
 
     attr_writer :type # must be defined in sub class
@@ -45,7 +46,7 @@ module FastlaneCI
     end
 
     def initialize
-      self.id = SecureRandom.uuid
+      @id = SecureRandom.uuid
     end
   end
 end

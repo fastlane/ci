@@ -10,7 +10,7 @@
   <h5>Lane to run</h5>
   <p><code>Fastfile</code> located at path <code><%= fastfile_path %></code></p>
   <select name="selected_lane">
-    <% available_lanes.each do |current_lane| %>
+    <% Array(available_lanes).each do |current_lane| %>
       <option value="<%= current_lane %>"><%= current_lane %></option>
     <% end %>
   </select>
@@ -19,4 +19,6 @@
   <input class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" type="submit" title="Save">
 </form>
 
-<%= erb(:"../../fastfile_editor/views/fastfile", locals: { fastfile_parser: fastfile_parser, fastfile_path: fastfile_path }) %>
+<% if fastfile_parser %>
+  <%= erb(:"../../fastfile_editor/views/fastfile", locals: { fastfile_parser: fastfile_parser, fastfile_path: fastfile_path }) %>
+<% end %>

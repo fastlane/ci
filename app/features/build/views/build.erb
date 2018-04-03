@@ -10,11 +10,67 @@
   <main class="mdl-layout__content" style="padding: 40px" id="main">
 
 
-<h1>Build Log <%= build.number %></h1>
+<h1>Build <%= build.number %></h1>
+<table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+  <tbody>
+    <tr>
+      <td>Build duration</td><td><%= build.duration.round %> seconds</td>
+    </tr>
+    <tr>
+      <td>Build started</td><td><%= build.timestamp.strftime("%Y%m%dT%H%M%S%z") %></td></tr>
+    </tr>
+    <tr>
+      <td>Job Trigger</td><td><%= build.trigger %></td>
+    </tr>
+    <tr>
+      <td>Sha</td><td><%= build.sha %></td>
+    </tr>
+    <tr>
+      <td>Build description</td><td><%= build.description %></td>
+    </tr>
+    <tr>
+      <td>Build status</td><td><%= build.status %></td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <a href="/projects_erb/<%= project.id %>/trigger?sha=<%= build.sha %>" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+          Re-Run for this commit
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<% if build.artifacts.count > 0 %>
+  <h1>Artifacts</h1>
+  <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+    <thead>
+      <tr>
+        <tr>
+          <th>Artifact type</th>
+          <th>Path</th>
+        </tr>
+      </tr>
+    </thead>
+    <tbody>
+      <% build.artifacts.each do |current_artifact| %>
+        <tr>
+          <td><%= current_artifact.type %></td>
+          <td><%= current_artifact.provider.retrieve!(artifact: current_artifact) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <hr />
+<% end %>
+
 
 <code id="log">
-  <% if existing_rows.count > 0 %>
-    <%= existing_rows.join("\n") %>
+  <% if existing_rows.to_s.length > 0 %>
+    <%= existing_rows %>
   <% else %>
     Loading...
   <% end %>
@@ -25,6 +81,8 @@
   Back to Project
 </a>
 
+<% unless build_complete %>
+
 <script type="text/javascript">
   document.addEventListener("DOMContentLoaded", function(event) {
     var scheme = "ws://"
@@ -32,19 +90,24 @@
     uri += "/?&project=<%= project.id %>&build=<%= build.number %>"; // we add that extra & to make the Ruby URI parser work
     var ws = new WebSocket(uri);
     console.log("Listening to web socket connection now for URL " + uri + "...")
-    var firstMessageReceived = <%= existing_rows.count == 0 ? false : true %>;
+    var firstMessageReceived = <%= existing_rows.to_s.length == 0 ? false : true %>;
     ws.onmessage = function(message) {
       if (firstMessageReceived == false) {
         document.getElementById("log").innerHTML = ""
         firstMessageReceived = true
       }
-      console.log(message)
       var data = JSON.parse(message.data)
-      console.log(data)
-      document.getElementById("log").innerHTML += data["html"]
-
-      var mainView = document.getElementById("main")
-      mainView.scrollTo(0, mainView.scrollHeight)
+      if (data["html"]) {
+        document.getElementById("log").innerHTML += data["html"]
+        var mainView = document.getElementById("main")
+        mainView.scrollTo(0, mainView.scrollHeight)
+      }
+      if (data["type"] == "last_message") {
+        console.log("Last message received - reloading page")
+        // We reload the page here, to make sure all the artifacts and build details are listed
+        // including the build status
+        window.location.reload();
+      }
     }
     ws.onopen = function(something) {
       console.log("Open")
@@ -61,6 +124,7 @@
     }
   });
 </script>
+<% end %>
 
 <style type="text/css">
   p.success {
@@ -71,6 +135,13 @@
   }
   p.command_output {
     color: #005aff;
+  }
+  p.header {
+    color: green;
+    border-top: 2px solid green;
+    border-bottom: 2px solid green;
+    padding: 10px 0;
+    margin: 15px 0;
   }
   code > p {
     margin: 0 0 -3px;

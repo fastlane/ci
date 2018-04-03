@@ -16,6 +16,8 @@ module FastlaneCI
     end
 
     def self.take_off
+      @launch_queue = TaskQueue::TaskQueue.new(name: "fastlane.ci launch queue")
+
       require_fastlane_ci
       verify_app_built
       verify_dependencies
@@ -28,6 +30,9 @@ module FastlaneCI
       configure_thread_abort
       Services.reset_services!
       clone_project_repos
+
+      # order matters here
+      cleanup_old_checkouts
 
       register_available_controllers
       start_github_workers
@@ -46,7 +51,28 @@ module FastlaneCI
     def self.verify_app_built
       if ENV["WEB_APP"]
         app_exists = File.file?(File.join("public", ".dist", "index.html"))
-        raise "The web application is not built. Please build with the Angular CLI and Try Again.\nEx. ng build --deploy-url=\"/.dist\"" unless app_exists
+
+        unless app_exists
+          raise "The web app not built. Build with the Angular CLI and Try Again, e.g. ng build --deploy-url=\"/.dist\""
+        end
+      end
+    end
+
+    def self.cleanup_old_checkouts
+      return unless ENV["FASTLANE_CI_CLEANUP_OLD_CHECKOUTS"]
+
+      all_projects = Services.config_service.projects(provider_credential: Services.provider_credential)
+
+      # find all projects that are not the fastlane-ci-config
+      non_config_projects = all_projects.select do |project|
+        # don't include fastlane-ci-config
+        # add some protection for accidental directory deletion, if the directory is `.` or `` we'll kills stuff on
+        # accident. so just say if it's > 5 chars long, it's probably an actual ID and not a bug
+        project.id != "fastlane-ci-config" && project.id.to_s.length > 5
+      end
+
+      non_config_projects.each do |project|
+        FileUtils.rm_rf(File.join(File.expand_path("~/.fastlane/ci/"), project.id))
       end
     end
 
@@ -76,7 +102,8 @@ module FastlaneCI
     # not found, but the user has a `FastlaneCI.env.repo_url` which corresponds
     # to a valid remote configuration repository
     def self.clone_repo_if_no_local_repo_and_remote_repo_exists
-      if !Services.onboarding_service.local_configuration_repo_exists? && Services.onboarding_service.required_keys_and_proper_remote_configuration_repo?
+      if !Services.onboarding_service.local_configuration_repo_exists? &&
+         Services.onboarding_service.required_keys_and_proper_remote_configuration_repo?
         Services.onboarding_service.clone_remote_repository_locally
       end
     end
@@ -114,7 +141,10 @@ module FastlaneCI
     def self.clone_project_repos
       return unless Services.onboarding_service.correct_setup?
 
-      FastlaneCI::Services.project_service.update_project_repos(provider_credential: Services.provider_credential)
+      FastlaneCI::Services.project_service.update_project_repos(
+        provider_credential: Services.provider_credential,
+        notification_service: Services.notification_service
+      )
     end
 
     def self.start_github_workers
@@ -133,8 +163,15 @@ module FastlaneCI
       github_projects = Services.config_service.projects(provider_credential: Services.provider_credential)
       github_service = FastlaneCI::GitHubService.new(provider_credential: Services.provider_credential)
 
-      run_pending_github_builds(projects: github_projects, github_service: github_service)
-      enqueue_builds_for_open_github_prs_with_no_status(projects: github_projects, github_service: github_service)
+      restart_pending_builds_task = TaskQueue::Task.new(work_block: proc {
+        run_pending_github_builds(projects: github_projects, github_service: github_service)
+      })
+      @launch_queue.add_task_async(task: restart_pending_builds_task)
+
+      start_builds_for_prs_with_no_status_builds_task = TaskQueue::Task.new(work_block: proc {
+        enqueue_builds_for_open_github_prs_with_no_status(projects: github_projects, github_service: github_service)
+      })
+      @launch_queue.add_task_async(task: start_builds_for_prs_with_no_status_builds_task)
     end
 
     def self.launch_workers
@@ -145,12 +182,15 @@ module FastlaneCI
         projects.each do |project|
           Services.worker_service.start_workers_for_project_and_credential(
             project: project,
-            provider_credential: provider_credential
+            provider_credential: provider_credential,
+            notification_service: Services.notification_service
           )
         end
       end
 
-      logger.info("Seems like no workers were started to monitor your projects") if Services.worker_service.num_workers == 0
+      if Services.worker_service.num_workers.zero?
+        logger.info("Seems like no workers were started to monitor your projects")
+      end
 
       # Initialize the workers
       # For now, we're not using a fancy framework that adds multiple heavy dependencies
@@ -166,17 +206,26 @@ module FastlaneCI
       logger.debug("Searching all projects for commits with pending status that need a new build")
       # For each project, rerun all builds with the status of "pending"
       projects.each do |project|
-        pending_build_shas_needing_rebuilds = Services.build_service.pending_build_shas_needing_rebuilds(project: project)
-        logger.debug("No pending work to reschedule for #{project.project_name}") if pending_build_shas_needing_rebuilds.count == 0
+        pending_build_shas_needing_rebuilds = Services.build_service.pending_build_shas_needing_rebuilds(
+          project: project
+        )
+
+        if pending_build_shas_needing_rebuilds.count.zero?
+          logger.debug("No pending work to reschedule for #{project.project_name}")
+        end
 
         repo_full_name = project.repo_config.full_name
         branches_to_check = project.job_triggers
                                    .select { |trigger| trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit] }
                                    .map(&:branch)
                                    .uniq
+
         # We have a list of shas that need rebuilding, but we need to know which repo_full_name they belong to
         # because they could be forks of the main repo, so let's grab all that info
-        open_pull_requests = github_service.open_pull_requests(repo_full_name: repo_full_name, branches: branches_to_check)
+        open_pull_requests = github_service.open_pull_requests(
+          repo_full_name: repo_full_name,
+          branches: branches_to_check
+        )
 
         # Enqueue each pending build rerun in an asynchronous task queue
         pending_build_shas_needing_rebuilds.each do |sha|
@@ -187,23 +236,31 @@ module FastlaneCI
           matching_open_pr = open_pull_requests.detect { |open_pr| open_pr.current_sha == sha }
 
           if matching_open_pr.nil?
-            logger.debug("We have sha: #{sha} needing rebuild, but it doesn't belong to an open pr, so we're gonna skip it.")
+            logger.debug(
+              "We have sha: #{sha} needing rebuild, but it doesn't belong to an open pr, so we're gonna skip it."
+            )
             next
           end
 
           git_fork_config = nil
+
           if matching_open_pr.fork_of_repo?(repo_full_name: repo_full_name)
-            git_fork_config = GitForkConfig.new(current_sha: sha,
-                                                     branch: matching_open_pr.branch,
-                                                  clone_url: matching_open_pr.clone_url)
+            git_fork_config = GitForkConfig.new(
+              current_sha: sha,
+              branch: matching_open_pr.branch,
+              clone_url: matching_open_pr.clone_url
+            )
           end
 
           build_runner = FastlaneBuildRunner.new(
             project: project,
             sha: sha,
             github_service: github_service,
-            work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
-            git_fork_config: git_fork_config
+            notification_service: Services.notification_service,
+            # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
+            work_queue: FastlaneCI::GitRepo.git_action_queue,
+            git_fork_config: git_fork_config,
+            trigger: project.find_triggers_of_type(trigger_type: :commit).first
           )
           build_runner.setup(parameters: nil)
           Services.build_runner_service.add_build_runner(build_runner: build_runner)
@@ -237,16 +294,21 @@ module FastlaneCI
 
         open_prs.each do |open_pr|
           logger.debug("Checking #{open_pr.repo_full_name} sha: #{open_pr.current_sha} for missing status")
-          statuses = github_service.statuses_for_commit_sha(repo_full_name: open_pr.repo_full_name, sha: open_pr.current_sha)
+          statuses = github_service.statuses_for_commit_sha(
+            repo_full_name: open_pr.repo_full_name,
+            sha: open_pr.current_sha
+          )
 
           # if we have a status, skip it!
           next if statuses.count > 0
 
           git_fork_config = nil
           if open_pr.fork_of_repo?(repo_full_name: project.repo_config.full_name)
-            git_fork_config = GitForkConfig.new(current_sha: sha,
-                                                     branch: matching_open_pr.branch,
-                                                  clone_url: matching_open_pr.clone_url)
+            git_fork_config = GitForkConfig.new(
+              current_sha: open_pr.current_sha,
+              branch: open_pr.branch,
+              clone_url: open_pr.clone_url
+            )
           end
 
           logger.debug("Found sha: #{open_pr.current_sha} in #{open_pr.repo_full_name} missing status, adding build.")
@@ -255,8 +317,11 @@ module FastlaneCI
             project: project,
             sha: open_pr.current_sha,
             github_service: github_service,
-            work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
-            git_fork_config: git_fork_config
+            notification_service: Services.notification_service,
+            # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
+            work_queue: FastlaneCI::GitRepo.git_action_queue,
+            git_fork_config: git_fork_config,
+            trigger: project.find_triggers_of_type(trigger_type: :commit).first
           )
           build_runner.setup(parameters: nil)
           Services.build_runner_service.add_build_runner(build_runner: build_runner)

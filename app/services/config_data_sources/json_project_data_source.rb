@@ -91,31 +91,35 @@ module FastlaneCI
         if !params[:user] && !params[:provider_credential]
           raise "Either user or a provider credential is mandatory."
         else
-          params[:provider_credential] ||= params[:user].provider_credential(type: ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
+          params[:provider_credential] ||= params[:user].provider_credential(
+            type: ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
+          )
           git_config = params[:git_config]
 
           @git_repo = FastlaneCI::GitRepo.new(git_config: git_config,
                                             local_folder: json_folder_path,
-                                     provider_credential: params[:provider_credential])
+                                     provider_credential: params[:provider_credential],
+                                    notification_service: params[:notification_service])
         end
       end
     end
 
     def refresh_repo
       logger.debug("Pulling `master` in refresh_repo")
-      self.git_repo.pull
+      git_repo.pull
     end
 
     # Access configuration
     def projects
       JSONProjectDataSource.projects_file_semaphore.synchronize do
-        path = self.git_repo.file_path("projects.json")
+        path = git_repo.file_path("projects.json")
         return [] unless File.exist?(path)
 
         saved_projects = JSON.parse(File.read(path)).map do |project_json|
           project = Project.from_json!(project_json)
           project
         end
+
         return saved_projects
       end
     end
@@ -141,13 +145,13 @@ module FastlaneCI
 
     def projects=(projects)
       JSONProjectDataSource.projects_file_semaphore.synchronize do
-        File.write(self.git_repo.file_path("projects.json"), JSON.pretty_generate(projects.map(&:to_object_dictionary)))
+        File.write(git_repo.file_path("projects.json"), JSON.pretty_generate(projects.map(&:to_object_dictionary)))
       end
     end
 
     def git_repos
       JSONProjectDataSource.repos_file_semaphore.synchronize do
-        path = self.git_repo.file_path("repos.json")
+        path = git_repo.file_path("repos.json")
         return [] unless File.exist?(path)
 
         saved_git_repos = JSON.parse(File.read(path)).map(&GitRepoConfig.method(:from_json!))
@@ -157,24 +161,34 @@ module FastlaneCI
 
     def save_git_repo_configs!(git_repo_configs: nil)
       JSONProjectDataSource.repos_file_semaphore.synchronize do
-        path = self.git_repo.file_path("repos.json")
+        path = git_repo.file_path("repos.json")
         File.write(path, JSON.pretty_generate(git_repo_configs.map(&:to_object_dictionary)))
       end
     end
 
-    def create_project!(name: nil, repo_config: nil, enabled: nil, platform: nil, lane: nil, artifact_provider: nil, job_triggers: nil)
-      projects = self.projects.clone
-      new_project = Project.new(repo_config: repo_config,
-                                enabled: enabled,
-                                project_name: name,
-                                platform: platform,
-                                lane: lane,
-                                artifact_provider: artifact_provider,
-                                job_triggers: job_triggers)
-      if !self.project_exist?(new_project.project_name)
+    def create_project!(
+      name: nil,
+      repo_config: nil,
+      enabled: nil,
+      platform: nil,
+      lane: nil,
+      artifact_provider: nil,
+      job_triggers: nil
+    )
+      projects = projects.clone
+      new_project = Project.new(
+        repo_config: repo_config,
+        enabled: enabled,
+        project_name: name,
+        platform: platform,
+        lane: lane,
+        artifact_provider: artifact_provider,
+        job_triggers: job_triggers
+      )
+      if !project_exist?(new_project.project_name)
         projects << new_project
         self.projects = projects
-        logger.debug("Added project #{new_project.project_name} to projects.json in #{self.json_folder_path}")
+        logger.debug("Added project #{new_project.project_name} to projects.json in #{json_folder_path}")
         return new_project
       else
         logger.debug("Couldn't add project #{new_project.project_name} because it already exists")
@@ -184,7 +198,7 @@ module FastlaneCI
 
     # Define that the name of the project must be unique
     def project_exist?(name)
-      return self.projects.any? { |existing_project| existing_project.project_name == name }
+      return projects.any? { |existing_project| existing_project.project_name == name }
     end
 
     def update_project!(project: nil)
@@ -193,7 +207,7 @@ module FastlaneCI
       end
       project_index = nil
       existing_project = nil
-      self.projects.each.with_index do |old_project, index|
+      projects.each.with_index do |old_project, index|
         if old_project.id.casecmp(project.id.downcase).zero?
           project_index = index
           existing_project = old_project
@@ -205,7 +219,9 @@ module FastlaneCI
         logger.debug("Couldn't update project #{project.project_name} because it doesn't exists")
         raise "Couldn't update project #{project.project_name} because it doesn't exists"
       else
-        logger.debug("Updating project #{existing_project.project_name}, writing out to projects.json to #{json_folder_path}")
+        project_name = existing_project.project_name
+        logger.debug("Updating project #{project_name}, writing out to projects.json to #{json_folder_path}")
+
         projects = self.projects
         projects[project_index] = project
         self.projects = projects
@@ -218,7 +234,7 @@ module FastlaneCI
       end
       project_index = nil
       existing_project = nil
-      self.projects.each.with_index do |old_project, index|
+      projects.each.with_index do |old_project, index|
         if old_project.id.casecmp(project.id.downcase).zero?
           project_index = index
           existing_project = old_project
@@ -230,7 +246,9 @@ module FastlaneCI
         logger.debug("Couldn't delete project #{project.project_name} because it doesn't exists")
         raise "Couldn't update project #{project.project_name} because it doesn't exists"
       else
-        logger.debug("Deleting project #{existing_project.project_name}, writing out to projects.json to #{json_folder_path}")
+        project_name = existing_project.project_name
+        logger.debug("Deleting project #{project_name}, writing out to projects.json to #{json_folder_path}")
+
         projects = self.projects
         projects.delete_at(project_index)
         self.projects = projects

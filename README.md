@@ -5,6 +5,7 @@
 [![Twitter: @KrauseFx](https://img.shields.io/badge/contact-@KrauseFx-blue.svg?style=flat)](https://twitter.com/KrauseFx)
 [![Twitter: @taquitos](https://img.shields.io/badge/contact-@taquitos-blue.svg?style=flat)](https://twitter.com/taquitos)
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://github.com/fastlane/ci/blob/master/LICENSE)
+[![Coverage Status](https://coveralls.io/repos/github/fastlane/ci/badge.svg?branch=master)](https://coveralls.io/github/fastlane/ci?branch=master)
 
 # [WIP] fastlane.ci
 
@@ -32,16 +33,12 @@ With this project, we don't just want to make using CI easier, we want to bring 
 
 ## Project Status
 
-- This project is a very early work in progress (WIP) and can't be used yet
+- This project is a work in progress (WIP) and can't be used yet
 - The idea is to build and iterate with the mobile development community out in the open
 - We'd love your help to shape the product, check out [CONTRIBUTING.md](CONTRIBUTING.md) for more info
 - Our complete task list is available on our public [GitHub board](https://github.com/fastlane/ci/projects/1)
 - We also have our current [milestones listed](https://github.com/fastlane/ci/milestones)
 - We started a [poll](https://github.com/fastlane/ci/issues/93) to get a better feeling of how you'd be using `fastlane.ci`, please comment and let us know.
-
-<a href="https://github.com/fastlane/ci/milestones">
-  <img src="docs/assets/github_milestones.png" width="600" />
-</a>
 
 ## Docs
 
@@ -55,9 +52,22 @@ With this project, we don't just want to make using CI easier, we want to bring 
 
 Requires Ruby 2.3.3 or higher. macOS and Xcode are required when building iOS projects. Refer to the [fastlane documentation](https://docs.fastlane.tools/getting-started/ios/setup/#installing-fastlane) for more information.
 
+## Using `fastlane.ci`
+
+Right now, `fastlane.ci` is in Alpha, we'd love for you to give it a try. Getting up and running isn't as smooth as it will be once we ship a public release, but it shouldn't be too hard:
+
+1. Open the Terminal on the Mac you want to run as `fastlane.ci`
+1. `git clone https://github.com/fastlane/ci`
+1. `cd ci`
+1. `gem install bundle`
+1. `bundle update`
+1. `bundle exec rackup -p 8080 --env production`
+1. Open [localhost:8080](http://localhost:8080/) in your web browser
+1. Follow the onboarding instructions in your browser. In particular you'll have to create a separate GitHub account that will be used for all bot activities
+
 ## Development installation
 
-Run the rake task: `rake devboostrap`.
+Run the rake task: `rake devbootstrap`.
 1. Install all dependencies (ruby, javascript)
 2. Add a pre-commit hook
 

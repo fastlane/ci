@@ -19,6 +19,7 @@ module FastlaneCI
     # Creates a remote repository if it does not already exist, complete with
     # the expected remote files `user.json` and `projects.json`
     def create_private_remote_configuration_repo
+      # TODO: Handle the common case of when provided account can't create a new private repo
       client.create_repository(repo_name, private: true) unless configuration_repository_exists?
       create_remote_json_file("users.json", json_string: serialized_users)
       create_remote_json_file("projects.json")
@@ -32,6 +33,9 @@ module FastlaneCI
     #
     # @return [Boolean]
     def configuration_repository_valid?
+      # Return cached true value, if it was successful, otherwise keep checking because it might have been fixed
+      return @config_repo_exists unless @config_repo_exists.nil? || (@config_repo_exists == false)
+
       valid = configuration_repository_exists?
       logger.debug("Configuration repo #{repo_shortform} doesn't exist") unless valid
 
@@ -52,7 +56,11 @@ module FastlaneCI
     #
     # @return [Boolean]
     def configuration_repository_exists?
-      return client.repository?(repo_shortform)
+      # Return cached true value, if it was successful, otherwise keep checking because it might have been fixed
+      return @config_repo_exists unless @config_repo_exists.nil? || (@config_repo_exists == false)
+
+      @config_repo_exists = client.repository?(repo_shortform)
+      return @config_repo_exists
     end
 
     private
@@ -106,12 +114,9 @@ module FastlaneCI
         repo_shortform, file_path, "Add initial #{file_path}", json_string
       )
     rescue Octokit::UnprocessableEntity
-      logger.debug(
-        <<~WARNING_MESSAGE
-          The file #{file_path} already exists in remote configuration repo:
-          #{repo_shortform}. Not overwriting the file.
-        WARNING_MESSAGE
-      )
+      # rubocop:disable Metrics/LineLength
+      logger.debug("The file #{file_path} already exists in remote configuration repo: #{repo_shortform}. Not overwriting the file.")
+      # rubocop:enable Metrics/LineLength
     end
 
     #####################################################
@@ -130,7 +135,8 @@ module FastlaneCI
       logger.debug("Checking that #{repo_shortform}/#{file_path} is a json array")
 
       contents_map = client.contents(repo_shortform, path: file_path)
-      contents_json = contents_map[:encoding] == "base64" ? Base64.decode64(contents_map[:content]) : contents_map[:content]
+      contents_json =
+        contents_map[:encoding] == "base64" ? Base64.decode64(contents_map[:content]) : contents_map[:content]
       contents = JSON.parse(contents_json)
 
       return contents.kind_of?(Array)
