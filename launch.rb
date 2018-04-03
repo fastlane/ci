@@ -53,10 +53,7 @@ module FastlaneCI
         app_exists = File.file?(File.join("public", ".dist", "index.html"))
 
         unless app_exists
-          raise <<~ERROR
-            The web application is not built. Please build with the Angular CLI and Try Again.\nEx. ng build
-            --deploy-url=\"/.dist\"
-          ERROR
+          raise "The web app not built. Build with the Angular CLI and Try Again, e.g. ng build --deploy-url=\"/.dist\""
         end
       end
     end

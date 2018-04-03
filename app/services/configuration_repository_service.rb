@@ -114,12 +114,9 @@ module FastlaneCI
         repo_shortform, file_path, "Add initial #{file_path}", json_string
       )
     rescue Octokit::UnprocessableEntity
-      logger.debug(
-        <<~WARNING_MESSAGE
-          The file #{file_path} already exists in remote configuration repo:
-          #{repo_shortform}. Not overwriting the file.
-        WARNING_MESSAGE
-      )
+      # rubocop:disable Metrics/LineLength
+      logger.debug("The file #{file_path} already exists in remote configuration repo: #{repo_shortform}. Not overwriting the file.")
+      # rubocop:enable Metrics/LineLength
     end
 
     #####################################################

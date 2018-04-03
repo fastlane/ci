@@ -219,11 +219,8 @@ module FastlaneCI
         logger.debug("Couldn't update project #{project.project_name} because it doesn't exists")
         raise "Couldn't update project #{project.project_name} because it doesn't exists"
       else
-        logger.debug(
-          <<~LOG
-            Updating project #{existing_project.project_name}, writing out to projects.json to #{json_folder_path}
-          LOG
-        )
+        project_name = existing_project.project_name
+        logger.debug("Updating project #{project_name}, writing out to projects.json to #{json_folder_path}")
 
         projects = self.projects
         projects[project_index] = project

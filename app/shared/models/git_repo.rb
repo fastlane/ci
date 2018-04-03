@@ -277,10 +277,9 @@ module FastlaneCI
       credential_mismatch = credential_type != git_config_credential_type
 
       if credential_mismatch
-        raise <<~ERROR
-          provider_credential.type and git_config.provider_credential_type_needed mismatch: #{credential_type} vs
-          #{git_config_credential_type}
-        ERROR
+        # rubocop:disable Metrics/LineLength
+        raise "provider_credential.type and git_config.provider_credential_type_needed mismatch: #{credential_type} vs #{git_config_credential_type}"
+        # rubocop:enable Metrics/LineLength
       end
     end
 
