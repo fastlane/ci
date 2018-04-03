@@ -96,11 +96,10 @@ module FastlaneCI
           )
           git_config = params[:git_config]
 
-          @git_repo = FastlaneCI::GitRepo.new(
-            git_config: git_config,
-            local_folder: json_folder_path,
-            provider_credential: params[:provider_credential]
-          )
+          @git_repo = FastlaneCI::GitRepo.new(git_config: git_config,
+                                            local_folder: json_folder_path,
+                                     provider_credential: params[:provider_credential],
+                                    notification_service: params[:notification_service])
         end
       end
     end
@@ -220,11 +219,8 @@ module FastlaneCI
         logger.debug("Couldn't update project #{project.project_name} because it doesn't exists")
         raise "Couldn't update project #{project.project_name} because it doesn't exists"
       else
-        logger.debug(
-          <<~LOG
-            Updating project #{existing_project.project_name}, writing out to projects.json to #{json_folder_path}
-          LOG
-        )
+        project_name = existing_project.project_name
+        logger.debug("Updating project #{project_name}, writing out to projects.json to #{json_folder_path}")
 
         projects = self.projects
         projects[project_index] = project
@@ -250,11 +246,8 @@ module FastlaneCI
         logger.debug("Couldn't delete project #{project.project_name} because it doesn't exists")
         raise "Couldn't update project #{project.project_name} because it doesn't exists"
       else
-        logger.debug(
-          <<~LOG
-            Deleting project #{existing_project.project_name}, writing out to projects.json to #{json_folder_path}
-          LOG
-        )
+        project_name = existing_project.project_name
+        logger.debug("Deleting project #{project_name}, writing out to projects.json to #{json_folder_path}")
 
         projects = self.projects
         projects.delete_at(project_index)

@@ -53,10 +53,7 @@ module FastlaneCI
         app_exists = File.file?(File.join("public", ".dist", "index.html"))
 
         unless app_exists
-          raise <<~ERROR
-            The web application is not built. Please build with the Angular CLI and Try Again.\nEx. ng build
-            --deploy-url=\"/.dist\"
-          ERROR
+          raise "The web app not built. Build with the Angular CLI and Try Again, e.g. ng build --deploy-url=\"/.dist\""
         end
       end
     end
@@ -144,7 +141,10 @@ module FastlaneCI
     def self.clone_project_repos
       return unless Services.onboarding_service.correct_setup?
 
-      FastlaneCI::Services.project_service.update_project_repos(provider_credential: Services.provider_credential)
+      FastlaneCI::Services.project_service.update_project_repos(
+        provider_credential: Services.provider_credential,
+        notification_service: Services.notification_service
+      )
     end
 
     def self.start_github_workers
@@ -182,7 +182,8 @@ module FastlaneCI
         projects.each do |project|
           Services.worker_service.start_workers_for_project_and_credential(
             project: project,
-            provider_credential: provider_credential
+            provider_credential: provider_credential,
+            notification_service: Services.notification_service
           )
         end
       end
@@ -255,6 +256,7 @@ module FastlaneCI
             project: project,
             sha: sha,
             github_service: github_service,
+            notification_service: Services.notification_service,
             # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
             work_queue: FastlaneCI::GitRepo.git_action_queue,
             git_fork_config: git_fork_config,
@@ -315,6 +317,7 @@ module FastlaneCI
             project: project,
             sha: open_pr.current_sha,
             github_service: github_service,
+            notification_service: Services.notification_service,
             # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
             work_queue: FastlaneCI::GitRepo.git_action_queue,
             git_fork_config: git_fork_config,

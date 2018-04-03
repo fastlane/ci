@@ -11,15 +11,22 @@ module FastlaneCI
     attr_reader :scheduler
     attr_reader :trigger_type
 
-    def initialize(provider_credential: nil, project: nil)
+    def initialize(provider_credential: nil, project: nil, notification_service:)
       @trigger_type = FastlaneCI::JobTrigger::TRIGGER_TYPE[:nightly]
       @scheduler = WorkerScheduler.new(cron_schedule: NIGHTLY_CRON_TIME)
+      @notification_service = notification_service
 
-      super(provider_credential: provider_credential, project: project) # This starts the work by calling `work`
+      # This starts the work by calling `work`
+      super(
+        provider_credential: provider_credential,
+        project: project,
+        notification_service: notification_service
+      )
     end
 
     def work
       logger.debug("Running nightly build for #{project.project_name} (#{repo_full_name})")
+      # TODO: build_service could be injected instead of referenced like this
       build_service = FastlaneCI::Services.build_service
 
       # Sorted by newest timestamps first
@@ -33,23 +40,17 @@ module FastlaneCI
 
       since_time_utc = Time.at(since_time_utc_seconds.to_i).utc
       repo_full_name = project.repo_config.full_name
-      logger.debug(
-        <<~LOG
-          Looking for commits that are newer than #{since_time_utc.iso8601} for #{project.project_name}
-          (#{repo_full_name})
-        LOG
-      )
+
+      # rubocop:disable Metrics/LineLength
+      logger.debug("Looking for commits that are newer than #{since_time_utc.iso8601} for #{project.project_name} (#{repo_full_name})")
 
       # Get all the new commits since the last build time (minus whatever drift we determined above)
       new_commits = github_service.recent_commits(repo_full_name: repo_full_name, since_time_utc: since_time_utc)
       unless new_commits.length == 0
-        logger.debug(
-          <<~LOG
-            Found #{new_commits.length} commit(s) since the last run, building the most recent for
-            #{project.project_name} (#{repo_full_name})")
-          LOG
-        )
+        logger.debug("Found #{new_commits.length} commit(s) since the last run, building the most recent for #{project.project_name} (#{repo_full_name})")
       end
+      # rubocop:enable Metrics/LineLength
+
       newest_commit = new_commits.map(&:sha).first
 
       if newest_commit.nil?
@@ -66,7 +67,8 @@ module FastlaneCI
       )
       create_and_queue_build_task(
         sha: newest_commit,
-        trigger: project.find_triggers_of_type(trigger_type: :nightly).first
+        trigger: project.find_triggers_of_type(trigger_type: :nightly).first,
+        notification_service: notification_service
       )
     end
   end

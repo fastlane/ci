@@ -47,12 +47,11 @@ module FastlaneCI
     # Array of env variables that were set, that we need to unset after the run
     attr_accessor :environment_variables_set
 
-    def initialize(project:, sha:, github_service:, work_queue:, trigger:, git_fork_config: nil)
+    def initialize(project:, sha:, github_service:, notification_service:, work_queue:, trigger:, git_fork_config: nil)
       if trigger.nil?
-        raise <<~ERROR
-          No trigger provided, this is probably caused by a build being triggered, but then the project not having this
-          particular build trigger associated
-        ERROR
+        # rubocop:disable Metrics/LineLength
+        raise "No trigger provided, this is probably caused by a build being triggered, but then the project not having this particular build trigger associated"
+        # rubocop:enable Metrics/LineLength
       end
 
       # Setting the variables directly (only having `attr_reader`) as they're immutable
@@ -75,6 +74,7 @@ module FastlaneCI
         git_config: project.repo_config,
         provider_credential: github_service.provider_credential,
         local_folder: File.join(project.local_repo_path, "builds", sha),
+        notification_service: notification_service,
         async_start: false
       )
     end

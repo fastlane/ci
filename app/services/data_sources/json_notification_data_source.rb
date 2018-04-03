@@ -1,4 +1,3 @@
-require "securerandom"
 require_relative "notification_data_source"
 require_relative "../../shared/logging_module"
 require_relative "../../shared/json_convertible"
@@ -91,12 +90,9 @@ module FastlaneCI
       else
         @notifications[notification_index] = notification
         self.notifications = @notifications
-        logger.debug(
-          <<~LOG
-            Updating notification #{existing_notification.name}, writing out notifications.json to
-            #{notifications_file_path}
-          LOG
-        )
+        path = notifications_file_path
+        notification_name = existing_notification.name
+        logger.debug("Updating notification #{notification_name}, writing out notifications.json to #{path}")
       end
     end
 
