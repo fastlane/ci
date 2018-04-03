@@ -41,7 +41,7 @@ module FastlaneCI
         # if the server was restarted, we're gonna end here in this code block
         build_log_artifact = build.artifacts.find do |current_artifact|
           # We can improve the detection in the future, to actually mark an artifact as "default output"
-          current_artifact.type == "log" && current_artifact.reference.end_with?("fastlane.log")
+          current_artifact.type.include?("log") && current_artifact.reference.end_with?("fastlane.log")
         end
 
         if build_log_artifact
