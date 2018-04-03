@@ -36,9 +36,9 @@ module FastlaneCI
     def create_user!(id: nil, email: nil, password: nil)
       email = email.strip
 
-      unless self.user_data_source.user_exist?(email: email)
+      unless user_data_source.user_exist?(email: email)
         logger.debug("Creating account #{email}")
-        return self.user_data_source.create_user!(id: id, email: email, password: password, provider_credentials: [])
+        return user_data_source.create_user!(id: id, email: email, password: password, provider_credentials: [])
       end
 
       logger.debug("Account #{email} already exists!")
@@ -47,7 +47,7 @@ module FastlaneCI
 
     # TODO: THIS ALWAYS TURNS THE PROVIDER CREDENTIALS INTO HASHES
     def update_user!(user: nil)
-      success = self.user_data_source.update_user!(user: user)
+      success = user_data_source.update_user!(user: user)
       if success
         # TODO: remove this message if https://github.com/fastlane/ci/issues/292 is fixed
         logger.info("Updated user #{user.email}, that means you should call `find_user(id:)` see https://github.com/fastlane/ci/issues/292")
@@ -57,14 +57,14 @@ module FastlaneCI
 
     # @return [User]
     def find_user(id: nil)
-      return self.user_data_source.find_user(id: id)
+      return user_data_source.find_user(id: id)
     end
 
     def login(email:, password:)
       email = email.strip
 
       logger.debug("Attempting to login user with email #{email}")
-      user = self.user_data_source.login(email: email, password: password)
+      user = user_data_source.login(email: email, password: password)
       return user
     end
 

@@ -27,42 +27,41 @@ module FastlaneCI
     attr_accessor :enabled
 
     # @return [String] Is a UUID so we're not open to ID guessing attacks
-    attr_accessor :id
+    attr_reader :id
 
     # @return [Array[JobTrigger]] The job triggers
-    attr_accessor :job_triggers
+    attr_reader :job_triggers
 
     # @return [ArtifactProvider]
-    attr_accessor :artifact_provider
+    attr_reader :artifact_provider
 
     def initialize(repo_config: nil, enabled: nil, project_name: nil, platform: nil, lane: nil, id: nil, artifact_provider: LocalArtifactProvider.new, job_triggers: [])
-      self.repo_config = repo_config
-      self.enabled = enabled
-      self.project_name = project_name
-      self.id = id || SecureRandom.uuid
-      self.platform = platform
-      self.lane = lane
-      self.artifact_provider = artifact_provider
+      @repo_config = repo_config
+      @enabled = enabled
+      @project_name = project_name
+      @id = id || SecureRandom.uuid
+      @platform = platform
+      @lane = lane
+      @artifact_provider = artifact_provider
       # TODO: This is fine for now to avoid runtime fails due to lack of triggers.
       # In the future, the Add Project workflow, should provide the enough interface
       # in order to add as many JobTriggers as the user wants.
-      self.job_triggers = job_triggers
+      @job_triggers = job_triggers
     end
 
     def find_triggers_of_type(trigger_type:)
-      return self.job_triggers.find_all do |current_trigger|
+      return job_triggers.find_all do |current_trigger|
         current_trigger.type.to_sym == trigger_type.to_sym
       end
     end
 
     def builds
       builds = FastlaneCI::Services.build_service.list_builds(project: self)
-
       return builds.sort_by(&:number).reverse
     end
 
     def local_repo_path
-      return File.join(File.expand_path("~/.fastlane/ci/"), self.id)
+      return File.join(File.expand_path("~/.fastlane/ci/"), id)
     end
   end
 end

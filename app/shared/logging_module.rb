@@ -34,7 +34,7 @@ module FastlaneCI
           class_name = self.class.name.split("::").last
           if class_name == "Class"
             # bad assumption, we're coming from a class method
-            class_name = self.name.split("::").last
+            class_name = name.split("::").last
           end
 
           progname ||= class_name

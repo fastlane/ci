@@ -35,53 +35,51 @@ module FastlaneCI
       enabled ||= true
       # we use LocalArtifactProvider by default
       artifact_provider ||= LocalArtifactProvider.new
-      project = self.project_data_source.create_project!(name: name, repo_config: repo_config, enabled: enabled, platform: platform, lane: lane, artifact_provider: artifact_provider, job_triggers: job_triggers)
+      project = project_data_source.create_project!(name: name, repo_config: repo_config, enabled: enabled, platform: platform, lane: lane, artifact_provider: artifact_provider, job_triggers: job_triggers)
       raise "Project couldn't be created" if project.nil?
-      self.commit_repo_changes!(message: "Created project #{project.project_name}.")
+      commit_repo_changes!(message: "Created project #{project.project_name}.")
       # We shallow clone the repo to have the information needed for retrieving lanes.
       return project
     end
 
     def update_project!(project: nil)
-      self.project_data_source.update_project!(project: project)
-      self.commit_repo_changes!(message: "Updated project #{project.project_name}.")
+      project_data_source.update_project!(project: project)
+      commit_repo_changes!(message: "Updated project #{project.project_name}.")
     end
 
     # @return [Project]
     def project(name: nil)
-      if self.project_data_source.project_exist?(name)
-        return self.project_data_source
-                   .projects
-                   .detect { |existing_project| existing_project.project_name == name }
+      if project_data_source.project_exist?(name)
+        return project_data_source.projects.detect { |existing_project| existing_project.project_name == name }
       end
     end
 
     # @return [Project]
     def project_by_id(id)
-      return self.project_data_source.projects.detect { |project| project.id == id }
+      return project_data_source.projects.detect { |project| project.id == id }
     end
 
     # TODO: remove this, we shouldn't be exposing implicitly private variables here
     # @return [GitRepo]
     def git_repo
-      return self.project_data_source.git_repo
+      return project_data_source.git_repo
     end
 
     def refresh_repo
       logger.debug("Pulling `master` in refresh_repo")
-      self.git_repo.pull
+      git_repo.pull
     end
 
     # @return [Array[Project]]
     def projects
-      return self.project_data_source.projects
+      return project_data_source.projects
     end
 
     # Ensure we have the projects checked out that we need
     # Returns all repos setup
     def update_project_repos(provider_credential: nil)
       configured_repos = []
-      self.projects.each do |project|
+      projects.each do |project|
         branches = project.job_triggers
                           .map(&:branch)
                           .uniq
@@ -99,8 +97,8 @@ module FastlaneCI
     end
 
     def delete_project!(project: nil)
-      self.project_data_source.delete_project!(project: project)
-      self.commit_repo_changes!(message: "Deleted project #{project.project_name}.")
+      project_data_source.delete_project!(project: project)
+      commit_repo_changes!(message: "Deleted project #{project.project_name}.")
     end
 
     # Not sure if this must be here or not, but we can open a discussion on this.

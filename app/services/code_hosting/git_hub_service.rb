@@ -19,11 +19,10 @@ module FastlaneCI
     # The email is actually optional for API access
     # However we ask for the email on login, as we also plan on doing commits for the user
     # and this way we can make sure to configure things properly for git to use the email
-    attr_accessor :provider_credential
+    attr_reader :provider_credential
 
     def initialize(provider_credential: nil)
-      self.provider_credential = provider_credential
-
+      @provider_credential = provider_credential
       @_client = Octokit::Client.new(access_token: provider_credential.api_token)
       Octokit.auto_paginate = true # TODO: just for now, we probably should do smart pagination in the future
     end
@@ -85,12 +84,12 @@ module FastlaneCI
     # updates the most current commit to "pending" on all open prs if they don't have a status.
     # returns a list of commits that have been updated to `pending` status
     def update_all_open_prs_without_status_to_pending_status!(repo_full_name: nil, status_context: nil)
-      open_pr_commits = self.open_pull_requests(repo_full_name: repo_full_name)
+      open_pr_commits = open_pull_requests(repo_full_name: repo_full_name)
       updated_commits = []
       open_pr_commits.each do |open_pull_request|
-        statuses = self.statuses_for_commit_sha(repo_full_name: open_pull_request.repo_full_name, sha: open_pull_request.current_sha)
+        statuses = statuses_for_commit_sha(repo_full_name: open_pull_request.repo_full_name, sha: open_pull_request.current_sha)
         next unless statuses.count == 0
-        self.set_build_status!(repo: open_pull_request.repo_full_name,
+        set_build_status!(repo: open_pull_request.repo_full_name,
                                 sha: open_pull_request.current_sha,
                               state: "pending",
                      status_context: status_context)
@@ -100,7 +99,7 @@ module FastlaneCI
     end
 
     def recent_commits(repo_full_name:, branch:, since_time_utc:)
-      self.client.commits_since(repo_full_name, since_time_utc, branch)
+      client.commits_since(repo_full_name, since_time_utc, branch)
     end
 
     # TODO: parse those here or in service layer?

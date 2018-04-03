@@ -12,7 +12,7 @@ module FastlaneCI
     attr_accessor :project_to_workers_dictionary
 
     def initialize
-      self.project_to_workers_dictionary = {}
+      @project_to_workers_dictionary = {}
     end
 
     def project_to_workers_dictionary_key(project: nil, user_responsible: nil)
@@ -25,7 +25,7 @@ module FastlaneCI
       raise "Unable to start workers for `#{project.project_name}`, no `user_responsible` for given `provider_credential`: #{provider_credential.email}" if user_responsible.nil?
 
       workers_key = project_to_workers_dictionary_key(project: project, user_responsible: user_responsible)
-      raise "Worker already exists for project: #{project.project_name}, for user #{user_responsible.email}" unless self.project_to_workers_dictionary[workers_key].nil?
+      raise "Worker already exists for project: #{project.project_name}, for user #{user_responsible.email}" unless project_to_workers_dictionary[workers_key].nil?
 
       repo_config = project.repo_config
       raise "incompatible repo_config and provider_credential" if provider_credential.type != repo_config.provider_credential_type_needed
@@ -34,32 +34,32 @@ module FastlaneCI
       new_workers = []
       case provider_credential.type
       when FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
-        if self.project_has_trigger_type?(project: project, trigger_type: FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit])
+        if project_has_trigger_type?(project: project, trigger_type: FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit])
           new_workers << FastlaneCI::CheckForNewCommitsOnGithubWorker.new(provider_credential: provider_credential, project: project)
         end
-        if self.project_has_trigger_type?(project: project, trigger_type: FastlaneCI::JobTrigger::TRIGGER_TYPE[:nightly])
+        if project_has_trigger_type?(project: project, trigger_type: FastlaneCI::JobTrigger::TRIGGER_TYPE[:nightly])
           new_workers << FastlaneCI::NightlyBuildGithubWorker.new(provider_credential: provider_credential, project: project)
         end
       else
         raise "unrecognized provider_type: #{provider_credential.type}"
       end
 
-      self.project_to_workers_dictionary[workers_key] = new_workers
+      project_to_workers_dictionary[workers_key] = new_workers
     end
 
     def stop_workers(project: nil, user_responsible: nil)
       workers_key = project_to_workers_dictionary_key(project: project, user_responsible: user_responsible)
-      workers = self.project_to_workers_dictionary[workers_key]
+      workers = project_to_workers_dictionary[workers_key]
 
       # worker will die, may take up to `timeout` seconds
       workers.each(&:die!)
 
-      self.project_to_workers_dictionary[workers_key] = nil
+      project_to_workers_dictionary[workers_key] = nil
     end
 
     # @return [Integer]
     def num_workers
-      return self.project_to_workers_dictionary.values.reduce(0) do |sum, workers|
+      return project_to_workers_dictionary.values.reduce(0) do |sum, workers|
         sum + workers.length
       end
     end

@@ -9,36 +9,38 @@ module FastlaneCI
   class GitHubWorkerBase < WorkerBase
     include FastlaneCI::Logging
 
-    attr_accessor :provider_credential
-    attr_accessor :project
-    attr_accessor :github_service
-    attr_accessor :serial_task_queue
-    attr_accessor :project_full_name
-    attr_accessor :target_branches_set
+    attr_reader :provider_credential
+    attr_reader :project
+    attr_reader :github_service
+    attr_reader :target_branches_set
+    attr_reader :project_full_name
+    attr_reader :serial_task_queue
 
     def provider_type
       return FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
     end
 
     def initialize(provider_credential: nil, project: nil)
-      self.provider_credential = provider_credential
-      self.github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
-      self.project = project
+      @provider_credential = provider_credential
+      @github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
+      @project = project
+      @target_branches_set = Set.new
 
-      self.target_branches_set = Set.new
       project.job_triggers.each do |trigger|
-        if trigger.type == self.trigger_type
-          self.target_branches_set.add(trigger.branch)
+        if trigger.type == trigger_type
+          target_branches_set.add(trigger.branch)
         end
       end
 
-      self.project_full_name = project.repo_config.git_url
+      @project_full_name =
+        if project.repo_config.kind_of?(FastlaneCI::GitRepoConfig) &&
+           !project.repo_config.full_name.nil?
+          project.repo_config.full_name
+        else
+          project.repo_config.git_url
+        end
 
-      if project.repo_config.kind_of?(FastlaneCI::GitRepoConfig)
-        self.project_full_name = project.repo_config.full_name unless project.repo_config.full_name.nil?
-      end
-
-      self.serial_task_queue = TaskQueue::TaskQueue.new(name: "#{self.project_full_name}:#{provider_credential.ci_user.email}")
+      @serial_task_queue = TaskQueue::TaskQueue.new(name: "#{project_full_name}:#{provider_credential.ci_user.email}")
 
       super() # This starts the work by calling `work`
     end
@@ -50,20 +52,20 @@ module FastlaneCI
 
       time_nano = Time.now.nsec
       current_class_name = self.class.name.split("::").last
-      @thread_id = "#{current_class_name}:#{time_nano}: #{self.serial_task_queue.name}"
+      @thread_id = "#{current_class_name}:#{time_nano}: #{serial_task_queue.name}"
       return @thread_id
     end
 
     def create_and_queue_build_task(sha:, trigger:, git_fork_config: nil)
-      credential = self.provider_credential
-      current_project = self.project
+      credential = provider_credential
+      current_project = project
       current_sha = sha
       return unless Services.build_runner_service.find_build_runner(project_id: current_project.id, sha: current_sha).nil?
 
       build_runner = FastlaneBuildRunner.new(
         project: current_project,
         sha: current_sha,
-        github_service: self.github_service,
+        github_service: github_service,
         work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
         git_fork_config: git_fork_config,
         trigger: trigger
@@ -71,7 +73,7 @@ module FastlaneCI
       build_runner.setup(parameters: nil)
       build_task = Services.build_runner_service.add_build_runner(build_runner: build_runner)
 
-      logger.debug("Adding task for #{self.project_full_name}: #{credential.ci_user.email}: #{current_sha[-6..-1]}")
+      logger.debug("Adding task for #{project_full_name}: #{credential.ci_user.email}: #{current_sha[-6..-1]}")
       return build_task
     end
 

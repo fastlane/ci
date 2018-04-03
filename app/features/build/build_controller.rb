@@ -12,7 +12,7 @@ module FastlaneCI
     get "#{HOME}/*" do |project_id, build_number|
       build_number = build_number.to_i
 
-      project = self.user_project_with_id(project_id: project_id)
+      project = user_project_with_id(project_id: project_id)
       build = project.builds.find { |b| b.number == build_number }
 
       # Fetch all the active runners, and see if there is one WIP

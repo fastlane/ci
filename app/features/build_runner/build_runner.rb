@@ -23,7 +23,7 @@ module FastlaneCI
     attr_reader :code_hosting_service
 
     # A reference to FastlaneCI::Build
-    attr_reader :current_build
+    attr_accessor :current_build
 
     # The commit sha we want to run the build for
     attr_reader :sha
@@ -42,7 +42,7 @@ module FastlaneCI
     attr_accessor :build_change_observer_blocks
 
     # Work queue where builds should be run
-    attr_accessor :work_queue
+    attr_reader :work_queue
 
     # Array of env variables that were set, that we need to unset after the run
     attr_accessor :environment_variables_set
@@ -66,7 +66,7 @@ module FastlaneCI
 
       @work_queue = work_queue
 
-      self.prepare_build_object(trigger: trigger)
+      prepare_build_object(trigger: trigger)
 
       @repo = GitRepo.new(
         git_config: project.repo_config,
@@ -78,7 +78,7 @@ module FastlaneCI
 
     # Access the build number of that specific BuildRunner
     def current_build_number
-      return self.current_build.number
+      return current_build.number
     end
 
     # Use this method for additional setup for subclasses
@@ -94,26 +94,26 @@ module FastlaneCI
       #   Artifact.new(
       #     type: artifact[:type],
       #     reference: artifact[:path],
-      #     provider: self.project.artifact_provider
+      #     provider: project.artifact_provider
       #   )
       # end.map do |artifact|
-      #   self.project.artifact_provider.store!(artifact: artifact, build: self.current_build, project: self.project)
+      #   project.artifact_provider.store!(artifact: artifact, build: current_build, project: project)
       # end
 
       # self.current_build.artifacts = artifacts
-      self.current_build.artifacts = []
+      current_build.artifacts = []
 
       duration = Time.now - start_time
       current_build.duration = duration
 
       # Status is set on the `current_build` object by the subclass
-      self.save_build_status!
+      save_build_status!
     rescue StandardError => ex
       logger.error(ex)
       duration = Time.now - start_time
       current_build.duration = duration
       current_build.status = :failure # TODO: also handle failure
-      self.save_build_status!
+      save_build_status!
     end
 
     def checkout_sha
@@ -129,14 +129,14 @@ module FastlaneCI
         repo.pull
       end
 
-      logger.debug("Checking out commit #{self.sha} from #{self.project.project_name}")
-      repo.checkout_commit(sha: self.sha)
+      logger.debug("Checking out commit #{sha} from #{project.project_name}")
+      repo.checkout_commit(sha: sha)
     end
 
     def pre_run_action
       logger.debug("Running pre_run_action in checkout_sha")
-      self.checkout_sha
-      self.setup_build_specific_environment_variables
+      checkout_sha
+      setup_build_specific_environment_variables
     end
 
     def setup_build_specific_environment_variables
@@ -146,17 +146,17 @@ module FastlaneCI
       # https://wiki.jenkins.io/display/JENKINS/Building+a+software+project
       env_mapping = {
         BUILD_NUMBER: current_build_number,
-        JOB_NAME: self.project.project_name,
-        WORKSPACE: self.project.local_repo_path,
-        GIT_URL: self.repo.git_config.git_url,
-        GIT_SHA: self.current_build.sha,
+        JOB_NAME: project.project_name,
+        WORKSPACE: project.local_repo_path,
+        GIT_URL: repo.git_config.git_url,
+        GIT_SHA: current_build.sha,
         BUILD_URL: "https://fastlane.ci", # TODO: actually build the URL, we don't know our own host, right?
         CI_NAME: "fastlane.ci",
         CI: true
       }
 
-      if self.git_fork_config && self.git_fork_config.branch.to_s.length > 0
-        env_mapping[:GIT_BRANCH] = self.git_fork_config.branch # TODO: does this work?
+      if git_fork_config && git_fork_config.branch.to_s.length > 0
+        env_mapping[:GIT_BRANCH] = git_fork_config.branch # TODO: does this work?
       else
         env_mapping[:GIT_BRANCH] = "master" # TODO: use actual default branch?
       end
@@ -182,7 +182,7 @@ module FastlaneCI
       end
       ENV[key.to_s] = value.to_s
 
-      self.environment_variables_set << key
+      environment_variables_set << key
     end
 
     def reset_repo_state
@@ -191,14 +191,14 @@ module FastlaneCI
     end
 
     def post_run_action
-      logger.debug("Finished running #{self.project.project_name} for #{self.sha}")
-      self.reset_repo_state
+      logger.debug("Finished running #{project.project_name} for #{sha}")
+      reset_repo_state
 
-      self.unset_build_specific_environment_variables
+      unset_build_specific_environment_variables
     end
 
     def unset_build_specific_environment_variables
-      self.environment_variables_set.each do |key|
+      environment_variables_set.each do |key|
         ENV.delete(key.to_s)
       end
       self.environment_variables_set = nil
@@ -209,25 +209,25 @@ module FastlaneCI
     #
     # @return [nil]
     def start
-      logger.debug("Starting build runner #{self.class} for #{self.project.project_name} #{self.project.id} sha: #{self.sha} now...")
+      logger.debug("Starting build runner #{self.class} for #{project.project_name} #{project.id} sha: #{sha} now...")
       start_time = Time.now
       artifact_handler_block = proc { |artifact_paths| complete_run(start_time: start_time, artifact_paths: artifact_paths) }
 
       work_block = proc {
-        self.pre_run_action
-        self.run(completion_block: artifact_handler_block) do |current_row|
+        pre_run_action
+        run(completion_block: artifact_handler_block) do |current_row|
           new_row(current_row)
         end
       }
 
       post_run_block = proc {
-        self.post_run_action
+        post_run_action
       }
 
       # If we have a work_queue, execute on that
-      if self.work_queue
+      if work_queue
         runner_task = TaskQueue::Task.new(work_block: work_block, ensure_block: post_run_block)
-        self.work_queue.add_task_async(task: runner_task)
+        work_queue.add_task_async(task: runner_task)
       else
         # No work queue? Just call the block then
         logger.debug("Not using a workqueue for build runner #{self.class}, this is probably a bug")
@@ -256,10 +256,10 @@ module FastlaneCI
 
       # Report back the row
       # 1) Store it in the history of logs (used to access half-built builds)
-      self.all_build_output_log_rows << row
+      all_build_output_log_rows << row
 
       # 2) Report back to all listeners, usually socket connections
-      self.build_change_observer_blocks.each do |current_block|
+      build_change_observer_blocks.each do |current_block|
         current_block.call(row)
       end
     end
@@ -267,11 +267,11 @@ module FastlaneCI
     # Add a listener to get real time updates on new rows (see `new_row`)
     # This is used for the socket connection to the user's browser
     def add_listener(block)
-      self.build_change_observer_blocks << block
+      build_change_observer_blocks << block
     end
 
     def prepare_build_object(trigger:)
-      builds = Services.build_service.list_builds(project: self.project)
+      builds = Services.build_service.list_builds(project: project)
 
       if builds.count > 0
         new_build_number = builds.sort_by(&:number).last.number + 1
@@ -280,7 +280,7 @@ module FastlaneCI
       end
 
       @current_build = FastlaneCI::Build.new(
-        project: self.project,
+        project: project,
         number: new_build_number,
         status: :pending,
         # Ensure we're using UTC because your server might have a different timezone.
@@ -288,7 +288,7 @@ module FastlaneCI
         # so that utc stuff is discoverable
         timestamp: Time.now.utc,
         duration: -1,
-        sha: self.sha,
+        sha: sha,
         trigger: trigger.type
       )
       save_build_status!
@@ -299,8 +299,8 @@ module FastlaneCI
     def save_build_status_locally!
       # Create or update the local build file in the config directory
       Services.build_service.add_build!(
-        project: self.project,
-        build: self.current_build
+        project: project,
+        build: current_build
       )
 
       # Commit & Push the changes to git remote
@@ -322,14 +322,14 @@ module FastlaneCI
     # Using a `rescue` block here is important
     # As the build is still green, even though we couldn't set the GH status
     def save_build_status_source!
-      status_context = self.project.project_name
+      status_context = project.project_name
 
-      self.code_hosting_service.set_build_status!(
-        repo: self.project.repo_config.git_url,
-        sha: self.sha,
-        state: self.current_build.status,
+      code_hosting_service.set_build_status!(
+        repo: project.repo_config.git_url,
+        sha: sha,
+        state: current_build.status,
         status_context: status_context,
-        description: self.current_build.description
+        description: current_build.description
       )
     rescue StandardError => ex
       logger.error("Error setting the build status on remote service")
