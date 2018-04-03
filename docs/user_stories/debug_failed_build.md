@@ -8,7 +8,7 @@
 6. User’s Build passes
 7. User merges PR
 #### Use Case
-1. GitHub has Status update on PR that build failed
+1. GitHub has Status update and comment from fastlane on PR indicating that the build failed
 2. User opens fastlane ci Web UI
 4. Assuming already logged in
 5. User opens Project for their Repo + branch
