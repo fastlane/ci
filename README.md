@@ -61,7 +61,7 @@ Right now, `fastlane.ci` is in Alpha, we'd love for you to give it a try. Gettin
 1. `cd ci`
 1. `gem install bundle`
 1. `bundle update`
-1. `bundle exec rackup -p 8080 --env proudction`
+1. `bundle exec rackup -p 8080 --env production`
 1. Open [localhost:8080](http://localhost:8080/) in your web browser
 1. Follow the onboarding instructions in your browser. In particular you'll have to create a separate GitHub account that will be used for all bot activities
 
