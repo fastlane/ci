@@ -6,16 +6,34 @@ require_relative "../string_encrypter"
 module FastlaneCI
   # GitHub ProviderCredential class
   class GitHubProviderCredential < ProviderCredential
+    # @return [String]
+    attr_reader :id
+
+    # @return [String]
+    attr_reader :email
+
+    # @return [PROVIDER_CREDENTIAL_TYPES]
+    attr_reader :type
+
+    # @return [String]
+    attr_reader :provider_name
+
+    # @return [String]
+    attr_reader :full_name
+
+    # @return [String]
+    attr_reader :remote_host
+
     attr_accessor :encrypted_api_token
 
     def initialize(id: nil, email: nil, full_name: nil, api_token: nil)
-      self.id = id || SecureRandom.uuid
-      self.email = email
-      self.full_name = full_name
-      self.api_token = api_token
-      self.provider_name = "GitHub"
-      self.type = PROVIDER_CREDENTIAL_TYPES[:github]
-      self.remote_host = "github.com"
+      @id = id || SecureRandom.uuid
+      @email = email
+      @full_name = full_name
+      @api_token = api_token
+      @provider_name = "GitHub"
+      @type = PROVIDER_CREDENTIAL_TYPES[:github]
+      @remote_host = "github.com"
     end
 
     def api_token=(value)
@@ -30,26 +48,6 @@ module FastlaneCI
     def api_token
       return nil if @encrypted_api_token.nil?
       return StringEncrypter.decode(Base64.decode64(@encrypted_api_token))
-    end
-
-    def email
-      return @email
-    end
-
-    def type
-      return @type
-    end
-
-    def provider_name
-      return @provider_name
-    end
-
-    def full_name
-      return @full_name
-    end
-
-    def remote_host
-      return @remote_host
     end
   end
 end

@@ -5,10 +5,10 @@ module FastlaneCI
   # Responsible for running `git pull` on the ci config repo
   # in the background, every x seconds
   class RefreshConfigDataSourcesWorker < WorkerBase
-    attr_accessor :scheduler
+    attr_reader :scheduler
 
     def initialize
-      self.scheduler = WorkerScheduler.new(interval_time: 15)
+      @scheduler = WorkerScheduler.new(interval_time: 15)
     end
 
     def work

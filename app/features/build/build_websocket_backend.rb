@@ -49,9 +49,9 @@ module FastlaneCI
         build_number = url_details[:build_number]
         project_id = url_details[:project_id]
 
-        self.websocket_clients[project_id] ||= {}
-        self.websocket_clients[project_id][build_number] ||= []
-        self.websocket_clients[project_id][build_number] << ws
+        websocket_clients[project_id] ||= {}
+        websocket_clients[project_id][build_number] ||= []
+        websocket_clients[project_id][build_number] << ws
 
         current_build_runner = Services.build_runner_service.find_build_runner(
           project_id: project_id,
@@ -81,7 +81,7 @@ module FastlaneCI
         build_number = url_details[:build_number]
         project_id = url_details[:project_id]
 
-        self.websocket_clients[project_id][build_number].delete(ws)
+        websocket_clients[project_id][build_number].delete(ws)
         ws = nil
       end
 

@@ -72,7 +72,7 @@ module FastlaneCI
       @_configuration_git_repo ||= FastlaneCI::GitRepo.new(
         git_config: ci_config_repo,
         provider_credential: provider_credential,
-        local_folder: self.ci_config_git_repo_path
+        local_folder: ci_config_git_repo_path
       )
     end
 

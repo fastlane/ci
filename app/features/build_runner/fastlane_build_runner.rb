@@ -27,7 +27,7 @@ module FastlaneCI
       # TODO: We have to update `Project` to properly let the user define platform and lane
       #   Currently we just split the string
       #   See https://github.com/fastlane/ci/issues/236
-      lane_pieces = self.project.lane.split(" ")
+      lane_pieces = project.lane.split(" ")
 
       # Setting the variables directly (only having `attr_reader`) as they're immutable
       # Once you define a FastlaneBuildRunner, you shouldn't be able to modify them
@@ -45,7 +45,7 @@ module FastlaneCI
 
       ci_output = FastlaneCI::FastlaneCIOutput.new(
         each_line_block: proc do |raw_row|
-          block.call(self.convert_raw_row_to_object(raw_row))
+          block.call(convert_raw_row_to_object(raw_row))
         end
       )
 
@@ -66,11 +66,11 @@ module FastlaneCI
       # this only takes a few ms the first time being called
       Fastlane.load_actions
 
-      fast_file_path = FastlaneCI::FastfileFinder.find_fastfile_in_repo(repo: self.repo)
+      fast_file_path = FastlaneCI::FastfileFinder.find_fastfile_in_repo(repo: repo)
       if fast_file_path.nil? || !File.exist?(fast_file_path)
-        logger.info("unable to start fastlane run lane: #{self.lane} platform: #{self.platform}, params: #{self.parameters}, no Fastfile for commit")
-        self.current_build.status = :missing_fastfile
-        self.current_build.description = "We're unable to start fastlane run lane: #{self.lane} platform: #{self.platform}, params: #{self.parameters}, because no Fastfile existed at the time the commit was made"
+        logger.info("unable to start fastlane run lane: #{lane} platform: #{platform}, params: #{parameters}, no Fastfile for commit")
+        current_build.status = :missing_fastfile
+        current_build.description = "We're unable to start fastlane run lane: #{lane} platform: #{platform}, params: #{parameters}, because no Fastfile existed at the time the commit was made"
         completion_block.call([])
         return
       end
@@ -81,35 +81,35 @@ module FastlaneCI
       begin
         # TODO: I think we need to clear out the singleton values, such as lane context, and all that jazz
         # Execute the Fastfile here
-        logger.info("starting fastlane run lane: #{self.lane} platform: #{self.platform}, params: #{self.parameters} from #{fast_file_path}")
+        logger.info("starting fastlane run lane: #{lane} platform: #{platform}, params: #{parameters} from #{fast_file_path}")
 
         # Attach a listener to the output to see if we have a failure. If so, this build failed
-        self.add_listener(proc do |row|
+        add_listener(proc do |row|
           @encountered_failure_output = true if row.did_fail_build?
         end)
 
-        build_output = ["#{fast_file_path}, #{self.lane} platform: #{self.platform}, params: #{self.parameters} from output"]
+        build_output = ["#{fast_file_path}, #{lane} platform: #{platform}, params: #{parameters} from output"]
         # Attach a listener so we can collect the build output and display it all at once
-        self.add_listener(proc do |row|
+        add_listener(proc do |row|
           build_output << "#{row.time}: #{row.message}"
         end)
 
         # TODO: the fast_file.runner should probably handle this
-        logger.debug("Switching to #{self.repo.local_folder} to run `fastlane`")
+        logger.debug("Switching to #{repo.local_folder} to run `fastlane`")
         # Change over to the repo
-        Dir.chdir(self.repo.local_folder)
+        Dir.chdir(repo.local_folder)
 
         # Make sure to load all the dependencies of the Gemfile
         # TODO: support projects that don't have a Gemfile defined
         Bundler.with_clean_env do
           # Run fastlane now
-          fast_file.runner.execute(self.lane, self.platform, self.parameters)
+          fast_file.runner.execute(lane, platform, parameters)
         end
 
         if @encountered_failure_output
-          self.current_build.status = :failure
+          current_build.status = :failure
         else
-          self.current_build.status = :success
+          current_build.status = :success
         end
 
         logger.info("fastlane run complete")
@@ -118,8 +118,8 @@ module FastlaneCI
         artifacts_paths = gather_build_artifact_paths(loggers: [verbose_log, info_log])
       rescue StandardError => ex
         logger.debug("Setting build status to failure due to exception")
-        self.current_build.status = :ci_problem
-        self.current_build.description = "fastlane.ci encountered an error, check fastlane.ci logs for more information"
+        current_build.status = :ci_problem
+        current_build.description = "fastlane.ci encountered an error, check fastlane.ci logs for more information"
 
         logger.error(ex)
         logger.error(ex.backtrace)
