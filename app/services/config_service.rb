@@ -51,15 +51,23 @@ module FastlaneCI
 
     def octokit_projects(provider_credential: nil)
       # Get a list of all the repos `provider` has access to
-      logger.debug("Getting code host for #{provider_credential.ci_user.email}, #{provider_credential.type}") if provider_credential.ci_user
+      if provider_credential.ci_user
+        logger.debug("Getting code host for #{provider_credential.ci_user.email}, #{provider_credential.type}")
+      end
       current_code_hosting_service = code_hosting_service(provider_credential: provider_credential)
 
-      logger.debug("Finding projects we have access to with #{provider_credential.ci_user.email}, #{provider_credential.type}") if provider_credential.ci_user
+      if provider_credential.ci_user
+        logger.debug(
+          "Finding projects we have access to with #{provider_credential.ci_user.email}, #{provider_credential.type}"
+        )
+      end
+
       projects = project_service.projects.select do |project|
         current_code_hosting_service.access_to_repo?(repo_url: project.repo_config.git_url)
       end
 
-      # return all projects that are the union of this current user's provider_credential, and the passed in provider_credential
+      # return all projects that are the union of this current user's provider_credential, and the passed in
+      # provider_credential
       return projects
     end
 

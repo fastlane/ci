@@ -138,7 +138,12 @@ module FastlaneCI
       logger.debug("Checking that #{repo_shortform}/#{file_path} is a json array")
 
       contents_map = client.contents(repo_shortform, path: file_path)
-      contents_json = contents_map[:encoding] == "base64" ? Base64.decode64(contents_map[:content]) : contents_map[:content]
+      contents_json =
+        if contents_map[:encoding] == "base64"
+          Base64.decode64(contents_map[:content])
+        else
+          contents_map[:content]
+        end
       contents = JSON.parse(contents_json)
 
       return contents.kind_of?(Array)

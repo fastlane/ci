@@ -15,12 +15,14 @@ module FastlaneCI
     # @param  [NotificationDataSource] notification_data_source
     # @raise  [Exception]
     def initialize(notification_data_source: nil)
-      unless notification_data_source.nil?
-        raise "notification_data_source must be descendant of #{NotificationDataSource.name}" unless notification_data_source.class <= NotificationDataSource
+      if !notification_data_source.nil? && notification_data_source.class > NotificationDataSource
+        raise "notification_data_source must be descendant of #{NotificationDataSource.name}"
       end
 
       if notification_data_source.nil?
-        logger.debug("notification_data_source is new, using `ENV[\"data_store_folder\"]` if available, or `sample_data` folder")
+        logger.debug(
+          "notification_data_source is new, using `ENV[\"data_store_folder\"]` if available, or `sample_data` folder"
+        )
         data_store_folder = ENV["data_store_folder"]
         data_store_folder ||= File.join(FastlaneCI::FastlaneApp.settings.root, "sample_data")
         notification_data_source = JSONNotificationDataSource.new(json_folder_path: data_store_folder)

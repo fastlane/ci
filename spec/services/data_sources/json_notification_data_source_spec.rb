@@ -21,9 +21,10 @@ describe FastlaneCI::JSONNotificationDataSource do
 
   describe "#create_notification!" do
     before(:each) do
-      File.should_receive(:read)
-          .with(notifications_file_path)
-          .and_return("[]")
+      File
+        .should_receive(:read)
+        .with(notifications_file_path)
+        .and_return("[]")
     end
 
     it "returns a new `Notification`" do
@@ -43,9 +44,10 @@ describe FastlaneCI::JSONNotificationDataSource do
 
     context "notification doesn't exist" do
       before(:each) do
-        File.should_receive(:read)
-            .with(notifications_file_path)
-            .and_return("[]")
+        File
+          .should_receive(:read)
+          .with(notifications_file_path)
+          .and_return("[]")
       end
 
       it "raises an error message and doesn't write to the `notifications.json` file" do
@@ -56,9 +58,10 @@ describe FastlaneCI::JSONNotificationDataSource do
 
     context "notification exists" do
       before(:each) do
-        File.should_receive(:read)
-            .with(notifications_file_path)
-            .and_return(json_notification_string)
+        File
+          .should_receive(:read)
+          .with(notifications_file_path)
+          .and_return(json_notification_string)
       end
 
       it "writes to the `notifications.json` file" do

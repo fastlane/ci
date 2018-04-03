@@ -10,7 +10,9 @@ describe FastlaneCI::GitHubService do
       allow(client_instance).to receive(:scopes).with("valid_token").and_return(["repo"])
     end
     it "returns validation error properties if token invalid" do
-      expect(FastlaneCI::GitHubService.token_scope_validation_error("invalid_token")).to eq([["_unrecognized_scope"], "repo"])
+      expect(
+        FastlaneCI::GitHubService.token_scope_validation_error("invalid_token")
+      ).to eq([["_unrecognized_scope"], "repo"])
     end
     it "returns nil if token valid" do
       expect(FastlaneCI::GitHubService.token_scope_validation_error("valid_token")).to be_nil

@@ -57,7 +57,10 @@ module FastlaneCI
 
     def retrieve!(artifact: nil)
       raise "Artifact to store was not provided or wrong type provided" unless artifact&.is_a?(Artifact)
-      raise "#{self.class.name} needs an existing file in #{artifact.reference}, but it was not found" unless File.exist?(artifact.reference)
+
+      unless File.exist?(artifact.reference)
+        raise "#{self.class.name} needs an existing file in #{artifact.reference}, but it was not found"
+      end
 
       return artifact.reference
     end

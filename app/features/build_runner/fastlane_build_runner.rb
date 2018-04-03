@@ -59,10 +59,20 @@ module FastlaneCI
       Fastlane.load_actions
 
       fast_file_path = FastlaneCI::FastfileFinder.find_fastfile_in_repo(repo: repo)
+
       if fast_file_path.nil? || !File.exist?(fast_file_path)
-        logger.info("unable to start fastlane run lane: #{lane} platform: #{platform}, params: #{parameters}, no Fastfile for commit")
+        logger.info(
+          <<~LOG
+            unable to start fastlane run lane: #{lane} platform: #{platform}, params: #{parameters}, no Fastfile for
+            commit
+          LOG
+        )
         current_build.status = :missing_fastfile
-        current_build.description = "We're unable to start fastlane run lane: #{lane} platform: #{platform}, params: #{parameters}, because no Fastfile existed at the time the commit was made"
+        current_build.description = <<~DESCRIPTION
+          We're unable to start fastlane run lane: #{lane} platform: #{platform}, params: #{parameters}, because no
+          Fastfile existed at the time the commit was made
+        DESCRIPTION
+
         completion_block.call([])
         return
       end
@@ -74,7 +84,11 @@ module FastlaneCI
       begin
         # TODO: I think we need to clear out the singleton values, such as lane context, and all that jazz
         # Execute the Fastfile here
-        logger.info("starting fastlane run lane: #{lane} platform: #{platform}, params: #{parameters} from #{fast_file_path}")
+        logger.info(
+          <<~LOG
+            starting fastlane run lane: #{lane} platform: #{platform}, params: #{parameters} from #{fast_file_path}
+          LOG
+        )
 
         # Attach a listener to the output to see if we have a failure. If so, this build failed
         add_listener(proc do |row|
@@ -108,7 +122,10 @@ module FastlaneCI
         logger.info("fastlane run complete")
         logger.debug(build_output.join("\n").to_s)
 
-        log_path = File.expand_path(File.join(ci_directory, "fastlane.log")) if File.exist?(File.join(ci_directory, "fastlane.log"))
+        if File.exist?(File.join(ci_directory, "fastlane.log"))
+          log_path = File.expand_path(File.join(ci_directory, "fastlane.log"))
+        end
+
         artifacts_paths = gather_build_artifact_paths(log_path: log_path)
       rescue StandardError => ex
         logger.debug("Setting build status to failure due to exception")
@@ -118,8 +135,13 @@ module FastlaneCI
         logger.error(ex)
         logger.error(ex.backtrace)
 
-        verbose_log_path = File.expand_path(File.join(ci_directory, "fastlane.verbose.log")) if File.exist?(File.join(ci_directory, "fastlane.verbose.log"))
-        log_path = File.expand_path(File.join(ci_directory, "fastlane.log")) if File.exist?(File.join(ci_directory, "fastlane.log"))
+        if File.exist?(File.join(ci_directory, "fastlane.verbose.log"))
+          verbose_log_path = File.expand_path(File.join(ci_directory, "fastlane.verbose.log"))
+        end
+
+        if File.exist?(File.join(ci_directory, "fastlane.log"))
+          log_path = File.expand_path(File.join(ci_directory, "fastlane.log"))
+        end
 
         artifacts_paths = gather_build_artifact_paths(log_path: log_path, verbose_log_path: verbose_log_path)
       ensure
@@ -145,7 +167,12 @@ module FastlaneCI
       # we append the HTML code that should be used in the `html` key
       # the result looks like this
       #
-      #   {"type":"success","message":"Driving the lane 'ios beta'","html":"<p class=\"success\">Driving the lane 'ios beta'</p>","time"=>...}
+      #   {
+      #     "type": "success",
+      #     "message": "Driving the lane 'ios beta'",
+      #     "html": "<p class=\"success\">Driving the lane 'ios beta'</p>",
+      #     "time" => ...
+      #   }
       #
       # Also we use our custom BuildRunnerOutputRow class to represent the current row
       current_row = FastlaneCI::BuildRunnerOutputRow.new(
@@ -163,10 +190,14 @@ module FastlaneCI
       artifact_paths = []
       artifact_paths << { type: "log", path: log_path }
       artifact_paths << { type: "log", path: verbose_log_path } if verbose_log_path
-      constants_with_path = Fastlane::Actions::SharedValues.constants
-                                                           .select { |value| value.to_s.include?("PATH") } # Far from ideal, but meanwhile...
-                                                           .select { |value| !Fastlane::Actions.lane_context[value].nil? && !Fastlane::Actions.lane_context[value].empty? }
-                                                           .map { |value| { type: value.to_s, path: Fastlane::Actions.lane_context[value] } }
+      constants_with_path =
+        Fastlane::Actions::SharedValues
+          .constants
+          .select { |value| value.to_s.include?("PATH") } # Far from ideal, but meanwhile...
+          .select do |value|
+            !Fastlane::Actions.lane_context[value].nil? && !Fastlane::Actions.lane_context[value].empty?
+          end
+          .map { |value| { type: value.to_s, path: Fastlane::Actions.lane_context[value] } }
       return artifact_paths.concat(constants_with_path)
     end
   end

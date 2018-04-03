@@ -30,7 +30,8 @@ module FastlaneCI
       return @user_config_service
     end
 
-    # assume we need a user's provider credential for GitHub, realy though, a provider credential type should come from the controller
+    # assume we need a user's provider credential for GitHub, realy though, a provider credential type should come from
+    # the controller
     def check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
       provider_credential = user.provider_credential(type: type)
       raise "User #{user.email} doesn't have any linked `#{type}` accounts" if provider_credential.nil?

@@ -7,8 +7,8 @@ module FastlaneCI
     attr_accessor :build_data_source
 
     def initialize(build_data_source: nil)
-      unless build_data_source.nil?
-        raise "build_data_source must be descendant of #{BuildDataSource.name}" unless build_data_source.class <= BuildDataSource
+      if !build_data_source.nil? && build_data_source.class > BuildDataSource
+        raise "build_data_source must be descendant of #{BuildDataSource.name}"
       end
 
       self.build_data_source = build_data_source
@@ -28,15 +28,15 @@ module FastlaneCI
       all_builds = list_builds(project: project)
 
       all_completed_builds_shas = all_builds
-                                  .reject { |build| build.status == "pending" }
-                                  .map(&:sha)
-                                  .uniq
+        .reject { |build| build.status == "pending" }
+        .map(&:sha)
+        .uniq
 
       all_pending_builds_shas_needing_rebuilds = all_builds
-                                                 .select { |build| build.status == "pending" }
-                                                 .map(&:sha)
-                                                 .uniq
-                                                 .-(all_completed_builds_shas)
+        .select { |build| build.status == "pending" }
+        .map(&:sha)
+        .uniq
+        .-(all_completed_builds_shas)
 
       return all_pending_builds_shas_needing_rebuilds
     end
