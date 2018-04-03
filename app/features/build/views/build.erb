@@ -58,7 +58,7 @@
       <% build.artifacts.each do |current_artifact| %>
         <tr>
           <td><%= current_artifact.type %></td>
-          <td><%= current_artifact.provider.retrieve!(artifact: current_artifact) %></td>
+          <td><%= link_to current_artifact.type.html_safe, current_artifact.provider.retrieve!(artifact: current_artifact) %></td>
         </tr>
       <% end %>
     </tbody>
