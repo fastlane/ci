@@ -181,7 +181,7 @@ module FastlaneCI
       raise ex unless notification_service
 
       user_unfriendly_message = ex.message.to_s
-      if user_unfriendly_message.contains("unable to access")
+      if user_unfriendly_message.include?("unable to access")
         priority = Notification::PRIORITIES[:urgent]
         notification_service.create_notification!(
           priority: priority,
