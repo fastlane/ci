@@ -51,11 +51,11 @@ module FastlaneCI
       logger.debug("Using folder path for user data: #{json_folder_path}")
       # load up the json file here
       # parse all data into objects so we can fail fast on error
-      self.reload_users
+      reload_users
     end
 
     def user_file_path(path: "users.json")
-      File.join(self.json_folder_path, path)
+      File.join(json_folder_path, path)
     end
 
     def users
@@ -102,7 +102,7 @@ module FastlaneCI
     end
 
     def login(email: nil, password: nil)
-      user = self.users.detect { |existing_user| existing_user.email.casecmp(email.downcase).zero? }
+      user = users.detect { |existing_user| existing_user.email.casecmp(email.downcase).zero? }
 
       if user.nil?
         logger.debug("Couldn't find user with email #{email} in list of available accounts")
@@ -126,7 +126,7 @@ module FastlaneCI
 
     # just check to see if we have a user with that email...
     def user_exist?(email: nil)
-      return self.users.any? { |existing_user| existing_user.email.casecmp(email.downcase).zero? }
+      return users.any? { |existing_user| existing_user.email.casecmp(email.downcase).zero? }
     end
 
     # TODO: this isn't threadsafe
@@ -134,7 +134,7 @@ module FastlaneCI
       user_index = nil
       existing_user = nil
 
-      self.users.each.with_index do |old_user, index|
+      users.each.with_index do |old_user, index|
         if old_user.email.casecmp(user.email.downcase).zero?
           user_index = index
           existing_user = old_user
@@ -163,7 +163,7 @@ module FastlaneCI
         provider_credentials: provider_credentials
       )
 
-      if !self.user_exist?(email: email)
+      if !user_exist?(email: email)
         users.push(new_user)
         self.users = users
         logger.debug("Added user #{new_user.email}, writing out users.json to #{user_file_path}")
@@ -178,7 +178,7 @@ module FastlaneCI
     #
     # @return [User]
     def find_user(id: nil)
-      return self.users.detect { |user| user.id == id }
+      return users.detect { |user| user.id == id }
     end
   end
 end

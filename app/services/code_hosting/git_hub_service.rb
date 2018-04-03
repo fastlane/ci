@@ -19,11 +19,10 @@ module FastlaneCI
     # The email is actually optional for API access
     # However we ask for the email on login, as we also plan on doing commits for the user
     # and this way we can make sure to configure things properly for git to use the email
-    attr_accessor :provider_credential
+    attr_reader :provider_credential
 
     def initialize(provider_credential: nil)
-      self.provider_credential = provider_credential
-
+      @provider_credential = provider_credential
       @_client = Octokit::Client.new(access_token: provider_credential.api_token)
       Octokit.auto_paginate = true # TODO: just for now, we probably should do smart pagination in the future
     end
@@ -31,9 +30,11 @@ module FastlaneCI
     def self.token_scope_validation_error(token)
       required = "repo"
       scopes = Octokit::Client.new.scopes(token)
+
       if scopes.include?(required)
         return nil
       end
+
       return scopes, required
     end
 
@@ -55,20 +56,26 @@ module FastlaneCI
     # branches should be nil if you want all branches to be considered
     def open_pull_requests(repo_full_name: nil, branches: nil)
       all_open_pull_requests = client.pull_requests(repo_full_name, state: "open").map do |pr|
-        GitHubOpenPR.new(current_sha: pr.head.sha,
-                              branch: pr.head.ref,
-                      repo_full_name: pr.head.repo.full_name,
-                           clone_url: pr.head.repo.clone_url)
+        GitHubOpenPR.new(
+          current_sha: pr.head.sha,
+          branch: pr.head.ref,
+          repo_full_name: pr.head.repo.full_name,
+          clone_url: pr.head.repo.clone_url
+        )
       end
 
       # if no specific branch, return all open prs
       return all_open_pull_requests if branches.nil? || branches.count == 0
 
       branch_set = branches.to_set
-      all_open_pull_requests_on_branch = all_open_pull_requests.select { |pull_request| branch_set.include?(pull_request.branch) }
+      all_open_pull_requests_on_branch = all_open_pull_requests.select do |pull_request|
+        branch_set.include?(pull_request.branch)
+      end
 
       # we want only the PRs whose latest commit was to one of the branches passed in
-      logger.debug("Returning all open prs from: #{repo_full_name}, branches: #{branches}, pr count: #{all_open_pull_requests.count}")
+      pr_count = all_open_pull_requests.count
+      logger.debug("Returning all open prs from: #{repo_full_name}, branches: #{branches}, pr count: #{pr_count}")
+
       return all_open_pull_requests_on_branch
     end
 
@@ -78,29 +85,42 @@ module FastlaneCI
     #       can run builds for one repo
     def statuses_for_commit_sha(repo_full_name: nil, sha: nil)
       all_statuses = client.statuses(repo_full_name, sha)
-      only_ci_statuses = all_statuses.select { |status| status.context.start_with?(GitHubService.status_context_prefix) }
+
+      only_ci_statuses = all_statuses.select do |status|
+        status.context.start_with?(GitHubService.status_context_prefix)
+      end
+
       return only_ci_statuses
     end
 
     # updates the most current commit to "pending" on all open prs if they don't have a status.
     # returns a list of commits that have been updated to `pending` status
     def update_all_open_prs_without_status_to_pending_status!(repo_full_name: nil, status_context: nil)
-      open_pr_commits = self.open_pull_requests(repo_full_name: repo_full_name)
+      open_pr_commits = open_pull_requests(repo_full_name: repo_full_name)
       updated_commits = []
+
       open_pr_commits.each do |open_pull_request|
-        statuses = self.statuses_for_commit_sha(repo_full_name: open_pull_request.repo_full_name, sha: open_pull_request.current_sha)
+        statuses = statuses_for_commit_sha(
+          repo_full_name: open_pull_request.repo_full_name,
+          sha: open_pull_request.current_sha
+        )
+
         next unless statuses.count == 0
-        self.set_build_status!(repo: open_pull_request.repo_full_name,
-                                sha: open_pull_request.current_sha,
-                              state: "pending",
-                     status_context: status_context)
+
+        set_build_status!(
+          repo: open_pull_request.repo_full_name,
+          sha: open_pull_request.current_sha,
+          state: "pending",
+          status_context: status_context
+        )
         updated_commits << open_pull_request.current_sha
       end
+
       return updated_commits
     end
 
     def recent_commits(repo_full_name:, branch:, since_time_utc:)
-      self.client.commits_since(repo_full_name, since_time_utc, branch)
+      client.commits_since(repo_full_name, since_time_utc, branch)
     end
 
     # TODO: parse those here or in service layer?

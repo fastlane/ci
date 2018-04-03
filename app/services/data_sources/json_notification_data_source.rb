@@ -1,4 +1,3 @@
-require "securerandom"
 require_relative "notification_data_source"
 require_relative "../../shared/logging_module"
 require_relative "../../shared/json_convertible"
@@ -91,7 +90,9 @@ module FastlaneCI
       else
         @notifications[notification_index] = notification
         self.notifications = @notifications
-        logger.debug("Updating notification #{existing_notification.name}, writing out notifications.json to #{notifications_file_path}")
+        path = notifications_file_path
+        notification_name = existing_notification.name
+        logger.debug("Updating notification #{notification_name}, writing out notifications.json to #{path}")
       end
     end
 
@@ -105,11 +106,19 @@ module FastlaneCI
     # @param  [String] message
     # @return [Notification]
     def create_notification!(id: nil, priority: nil, type: nil, user_id: nil, name: nil, message: nil)
-      new_notification = Notification.new(priority: priority, type: type, user_id: user_id, name: name, message: message)
+      new_notification = Notification.new(
+        priority: priority,
+        type: type,
+        user_id: user_id,
+        name: name,
+        message: message
+      )
 
       if !notification_exist?(id: new_notification.id)
         self.notifications = @notifications.push(new_notification)
-        logger.debug("Added notification #{new_notification.name}, writing out notifications.json to #{notifications_file_path}")
+        logger.debug(
+          "Added notification #{new_notification.name}, writing out notifications.json to #{notifications_file_path}"
+        )
         return new_notification
       else
         logger.debug("Couldn't add notification #{notification.name} because it already exists")

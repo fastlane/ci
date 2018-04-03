@@ -17,7 +17,15 @@ module FastlaneCI
       not_implemented(__method__)
     end
 
-    def create_project!(name: nil, repo_config: nil, enabled: nil, platform: nil, lane: nil, artifact_provider: nil, job_triggers: nil)
+    def create_project!(
+      name: nil,
+      repo_config: nil,
+      enabled: nil,
+      platform: nil,
+      lane: nil,
+      artifact_provider: nil,
+      job_triggers: nil
+    )
       not_implemented(__method__)
     end
 

@@ -72,7 +72,8 @@ module FastlaneCI
       @_configuration_git_repo ||= FastlaneCI::GitRepo.new(
         git_config: ci_config_repo,
         provider_credential: provider_credential,
-        local_folder: self.ci_config_git_repo_path
+        local_folder: ci_config_git_repo_path,
+        notification_service: Services.notification_service
       )
     end
 
@@ -83,7 +84,9 @@ module FastlaneCI
         password: FastlaneCI.env.ci_user_password
       )
       if @_ci_user.nil?
+        # rubocop:disable Metrics/LineLength
         raise "Could not find ci_user for current setup, or the provided ci_user_password is incorrect, please make sure a user with the email #{FastlaneCI.env.ci_user_email} exists in your users.json"
+        # rubocop:enable Metrics/LineLength
       end
       return @_ci_user
     end
@@ -112,7 +115,11 @@ module FastlaneCI
     # Start up a ProjectService from our JSONProjectDataSource
     def self.project_service
       @_project_service ||= FastlaneCI::ProjectService.new(
-        project_data_source: FastlaneCI::JSONProjectDataSource.create(ci_config_git_repo_path, git_config: ci_config_repo, user: ci_user)
+        project_data_source: FastlaneCI::JSONProjectDataSource.create(
+          ci_config_git_repo_path,
+          git_config: ci_config_repo,
+          user: ci_user
+        )
       )
     end
 
