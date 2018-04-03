@@ -31,6 +31,9 @@ module FastlaneCI
       Services.reset_services!
       clone_project_repos
 
+      # order matters here
+      cleanup_old_checkouts
+
       register_available_controllers
       start_github_workers
       restart_any_pending_work
@@ -49,6 +52,24 @@ module FastlaneCI
       if ENV["WEB_APP"]
         app_exists = File.file?(File.join("public", ".dist", "index.html"))
         raise "The web application is not built. Please build with the Angular CLI and Try Again.\nEx. ng build --deploy-url=\"/.dist\"" unless app_exists
+      end
+    end
+
+    def self.cleanup_old_checkouts
+      return unless ENV["FASTLANE_CI_CLEANUP_OLD_CHECKOUTS"]
+
+      all_projects = Services.config_service.projects(provider_credential: Services.provider_credential)
+
+      # find all projects that are not the fastlane-ci-config
+      non_config_projects = all_projects.select do |project|
+        # don't include fastlane-ci-config
+        # add some protection for accidental directory deletion, if the directory is `.` or `` we'll kills stuff on accident.
+        # so just say if it's > 5 chars long, it's probably an actual ID and not a bug
+        project.id != "fastlane-ci-config" && project.id.to_s.length > 5
+      end
+
+      non_config_projects.each do |project|
+        FileUtils.rm_rf(File.join(File.expand_path("~/.fastlane/ci/"), project.id))
       end
     end
 
