@@ -15,15 +15,17 @@ module FastlaneCI
     attr_reader :target_branches_set
     attr_reader :project_full_name
     attr_reader :serial_task_queue
+    attr_reader :notification_service
 
     def provider_type
       return FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
     end
 
-    def initialize(provider_credential: nil, project: nil)
+    def initialize(provider_credential: nil, project: nil, notification_service:)
       @provider_credential = provider_credential
       @github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
       @project = project
+      @notification_service = notification_service
       @target_branches_set = Set.new
 
       project.job_triggers.each do |trigger|
@@ -56,7 +58,7 @@ module FastlaneCI
       return @thread_id
     end
 
-    def create_and_queue_build_task(sha:, trigger:, git_fork_config: nil)
+    def create_and_queue_build_task(sha:, trigger:, git_fork_config: nil, notification_service:)
       credential = provider_credential
       current_project = project
       current_sha = sha
@@ -69,8 +71,8 @@ module FastlaneCI
         project: current_project,
         sha: current_sha,
         github_service: github_service,
-        # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
-        work_queue: FastlaneCI::GitRepo.git_action_queue,
+        notification_service: notification_service,
+        work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
         git_fork_config: git_fork_config,
         trigger: trigger
       )
