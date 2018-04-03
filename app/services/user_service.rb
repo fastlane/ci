@@ -10,8 +10,10 @@ module FastlaneCI
     attr_accessor :user_data_source
 
     def initialize(user_data_source: nil)
-      unless user_data_source.nil? || user_data_source.class <= UserDataSource
-        raise "user_data_source must be descendant of #{UserDataSource.name}"
+      unless user_data_source.nil?
+        unless user_data_source.class <= UserDataSource
+          raise "user_data_source must be descendant of #{UserDataSource.name}"
+        end
       end
 
       if user_data_source.nil?

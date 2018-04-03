@@ -7,8 +7,10 @@ module FastlaneCI
     attr_accessor :build_data_source
 
     def initialize(build_data_source: nil)
-      unless build_data_source.nil? || build_data_source.class <= BuildDataSource
-        raise "build_data_source must be descendant of #{BuildDataSource.name}"
+      unless build_data_source.nil?
+        unless build_data_source.class <= BuildDataSource
+          raise "build_data_source must be descendant of #{BuildDataSource.name}"
+        end
       end
 
       self.build_data_source = build_data_source

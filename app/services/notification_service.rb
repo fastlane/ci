@@ -15,8 +15,10 @@ module FastlaneCI
     # @param  [NotificationDataSource] notification_data_source
     # @raise  [Exception]
     def initialize(notification_data_source: nil)
-      unless notification_data_source.nil? || notification_data_source.class <= NotificationDataSource
-        raise "notification_data_source must be descendant of #{NotificationDataSource.name}"
+      unless notification_data_source.nil?
+        unless notification_data_source.class <= NotificationDataSource
+          raise "notification_data_source must be descendant of #{NotificationDataSource.name}"
+        end
       end
 
       if notification_data_source.nil?
