@@ -123,6 +123,9 @@ module FastlaneCI
           time: Time.now
         )
       )
+      # Remove ourselves from the list of active build runners
+      # to let the garbage collector do its thing
+      Services.build_runner_service.remove_build_runner(build_runner: self)
     end
 
     def checkout_sha

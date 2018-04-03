@@ -28,6 +28,10 @@ module FastlaneCI
       return task
     end
 
+    def remove_build_runner(build_runner:)
+      build_runners.delete(build_runner)
+    end
+
     def build_runner_task_queue
       @_build_runner_task_queue ||= TaskQueue::TaskQueue.new(name: "build runner service")
     end
