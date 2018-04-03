@@ -96,7 +96,8 @@ module FastlaneCI
 
           @git_repo = FastlaneCI::GitRepo.new(git_config: git_config,
                                             local_folder: json_folder_path,
-                                     provider_credential: params[:provider_credential])
+                                     provider_credential: params[:provider_credential],
+                                    notification_service: params[:notification_service])
         end
       end
     end

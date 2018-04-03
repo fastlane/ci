@@ -94,7 +94,7 @@ module FastlaneCI
                    async_start: false,
                    sync_setup_timeout_seconds: 300,
                    callback: nil,
-                   notification_service: nil)
+                   notification_service:)
       GitRepo.load_octokit_cache_stack
       logger.debug("Creating repo in #{local_folder} for a copy of #{git_config.git_url}")
       validate_initialization_params!(git_config: git_config, local_folder: local_folder, provider_credential: provider_credential, async_start: async_start, callback: callback)
