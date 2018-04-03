@@ -36,7 +36,6 @@ module FastlaneCI
 
     # Login with fastlane.ci credentials
     get "#{HOME}/ci_login" do
-
       client = Octokit::Client.new(access_token: FastlaneCI.env.clone_user_api_token)
 
       unless client.nil?
