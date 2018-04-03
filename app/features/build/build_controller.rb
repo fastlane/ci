@@ -6,6 +6,16 @@ module FastlaneCI
   # Controller for a single project view. Responsible for updates, triggering builds, and displaying project info
   class BuildController < AuthenticatedControllerBase
     HOME = "/projects_erb/*/builds"
+    COLOR_MAPPING = {
+      30 => :black,
+      31 => :red,
+      32 => :green,
+      33 => :yellow,
+      34 => :blue,
+      35 => :magenta,
+      36 => :cyan,
+      37 => :white
+    }
 
     use(FastlaneCI::BuildWebsocketBackend)
 
@@ -56,16 +66,7 @@ module FastlaneCI
     # back to HTML code that can be rendered by the user's browser
     # We probably want to re-visit this in the future, but for now it's good
     def convert_ansi_to_html(data)
-      {
-        30 => :black,
-        31 => :red,
-        32 => :green,
-        33 => :yellow,
-        34 => :blue,
-        35 => :magenta,
-        36 => :cyan,
-        37 => :white
-      }.each do |k, v|
+      COLOR_MAPPING.each do |k, v|
         data.gsub!(/\e\[#{k}m/, "<span style=\"color:#{v}\">")
       end
       return data.gsub(/\e\[0m/, "</span>")
