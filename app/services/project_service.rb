@@ -98,7 +98,7 @@ module FastlaneCI
 
     # Ensure we have the projects checked out that we need
     # Returns all repos setup
-    def update_project_repos(provider_credential: nil)
+    def update_project_repos(provider_credential: nil, notification_service:)
       configured_repos = []
 
       projects.each do |project|
@@ -112,7 +112,8 @@ module FastlaneCI
             git_config: project.repo_config,
             provider_credential: provider_credential,
             local_folder: File.join(project.local_repo_path, branch),
-            async_start: false
+            async_start: false,
+            notification_service: notification_service
           )
           configured_repos << repo
         end

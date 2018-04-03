@@ -51,6 +51,11 @@ module FastlaneCI
     # @return [String]
     attr_reader :message
 
+    # Notification message details that might help debugging, generally exception.message, not user-friendly
+    #
+    # @return [String]
+    attr_accessor :details
+
     # The time the notification was created
     #
     # @return [String]
@@ -69,6 +74,7 @@ module FastlaneCI
     # @param  [String] user_id
     # @param  [String] name
     # @param  [String] message
+    # @param  [String] details
     def initialize(
       id: nil,
       priority: nil,
@@ -77,14 +83,16 @@ module FastlaneCI
       name: nil,
       message: nil,
       created_at: nil,
-      updated_at: nil
+      updated_at: nil,
+      details: nil
     )
       @id = id || SecureRandom.uuid
-      @priority = priority
+      @priority = priority || Notification::PRIORITIES[:normal]
       @type = type
       @name = name
       @user_id = user_id
       @message = message
+      @details = details
       @created_at = created_at || Time.now.to_s
       @updated_at = updated_at || Time.now.to_s
 

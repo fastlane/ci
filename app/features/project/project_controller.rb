@@ -27,11 +27,10 @@ module FastlaneCI
       # Create random folder for checkout, prefixed with `manual_build`
       checkout_folder = File.join(File.expand_path(project.local_repo_path), "manual_build_#{SecureRandom.uuid}")
       # TODO: This should be hidden in a service
-      repo = FastlaneCI::GitRepo.new(
-        git_config: project.repo_config,
-        local_folder: checkout_folder,
-        provider_credential: current_github_provider_credential
-      )
+      repo = FastlaneCI::GitRepo.new(git_config: project.repo_config,
+                                   local_folder: checkout_folder,
+                            provider_credential: current_github_provider_credential,
+                           notification_service: FastlaneCI::Services.notification_service)
       current_sha ||= repo.most_recent_commit.sha
       manual_triggers_allowed = project.job_triggers.any? do |trigger|
         trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual]
@@ -48,8 +47,8 @@ module FastlaneCI
         project: project,
         sha: current_sha,
         github_service: FastlaneCI::GitHubService.new(provider_credential: current_github_provider_credential),
-        # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
-        work_queue: FastlaneCI::GitRepo.git_action_queue,
+        notification_service: FastlaneCI::Services.notification_service,
+        work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
         trigger: project.find_triggers_of_type(trigger_type: :manual).first
       )
       build_runner.setup(parameters: nil)
@@ -99,12 +98,11 @@ module FastlaneCI
       repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
 
       dir = Dir.mktmpdir
-      repo = FastlaneCI::GitRepo.new(
-        git_config: repo_config,
-        local_folder: dir,
-        provider_credential: provider_credential,
-        async_start: false
-      )
+      repo = FastlaneCI::GitRepo.new(git_config: repo_config,
+                                    local_folder: dir,
+                                    provider_credential: provider_credential,
+                                    async_start: false,
+                                    notification_service: FastlaneCI::Services.notification_service)
 
       fastfile = FastlaneCI::FastfilePeeker.peek(
         git_repo: repo,

@@ -1,4 +1,3 @@
-require "securerandom"
 require_relative "notification_data_source"
 require_relative "../../shared/logging_module"
 require_relative "../../shared/json_convertible"
