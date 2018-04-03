@@ -124,6 +124,9 @@ module FastlaneCI
           time: Time.now
         )
       )
+      # Remove ourselves from the list of active build runners
+      # to let the garbage collector do its thing
+      Services.build_runner_service.remove_build_runner(build_runner: self)
     end
 
     def checkout_sha
@@ -224,15 +227,16 @@ module FastlaneCI
       logger.debug("Starting build runner #{self.class} for #{project.project_name} #{project.id} sha: #{sha} now...")
       start_time = Time.now
 
-      artifact_handler_block = proc do |artifact_paths|
-        complete_run(start_time: start_time, artifact_paths: artifact_paths)
-      end
-
       work_block = proc {
         pre_run_action
-        run(completion_block: artifact_handler_block) do |current_row|
-          new_row(current_row)
-        end
+        run(
+          new_line_block: proc do |current_row|
+            new_row(current_row)
+          end,
+          completion_block: proc do |artifact_paths|
+            complete_run(start_time: start_time, artifact_paths: artifact_paths)
+          end
+        )
       }
 
       post_run_block = proc {
@@ -253,7 +257,8 @@ module FastlaneCI
 
     # @return [Array[String]] of references for the different artifacts created by the runner.
     # TODO: are these Artifact objects or paths?
-    def run(*args)
+    # Important: The `run` method must always call completion_block, even when there is an exception
+    def run(new_line_block:, completion_block:)
       not_implemented(__method__)
     end
 

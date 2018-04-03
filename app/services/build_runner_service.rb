@@ -17,15 +17,23 @@ module FastlaneCI
     end
 
     # @return TaskQueue::Task
-    def add_build_runner(build_runner: nil)
+    def add_build_runner(build_runner:)
       raise "No build runner provided" unless build_runner.kind_of?(BuildRunner)
 
-      build_runners << build_runner
-
-      task = TaskQueue::Task.new(work_block: proc { build_runner.start })
+      task = TaskQueue::Task.new(work_block: proc do
+        build_runners << build_runner
+        build_runner.start
+      end)
       build_runner_task_queue.add_task_async(task: task)
 
       return task
+    end
+
+    def remove_build_runner(build_runner:)
+      task = TaskQueue::Task.new(work_block: proc do
+        build_runners.delete(build_runner)
+      end)
+      build_runner_task_queue.add_task_async(task: task)
     end
 
     def build_runner_task_queue

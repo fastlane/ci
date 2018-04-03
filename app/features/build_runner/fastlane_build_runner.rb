@@ -38,14 +38,13 @@ module FastlaneCI
     end
 
     # completion_block is called with an array of artifacts
-    def run(completion_block: nil, &block)
-      raise "No block provided for `run` method" unless block_given?
-      raise "No completion_block provided for `run` method" if completion_block.nil?
+    def run(new_line_block:, completion_block:)
+      artifacts_paths = [] # first thing we do, as we access it in the `ensure` block of this method
       require "fastlane"
 
       ci_output = FastlaneCI::FastlaneCIOutput.new(
         each_line_block: proc do |raw_row|
-          block.call(convert_raw_row_to_object(raw_row))
+          new_line_block.call(convert_raw_row_to_object(raw_row))
         end
       )
 
@@ -74,8 +73,6 @@ module FastlaneCI
         current_build.status = :missing_fastfile
         current_build.description = "We're unable to start fastlane run lane: #{lane} platform: #{platform}, params: #{parameters}, because no Fastfile existed at the time the commit was made"
         # rubocop:enable Metrics/LineLength
-
-        completion_block.call([])
         return
       end
 
