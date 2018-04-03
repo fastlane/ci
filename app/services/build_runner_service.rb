@@ -1,5 +1,3 @@
-# rubocop:disable Style/RedundantSelf
-
 require_relative "../features/build_runner/fastlane_build_runner"
 
 module FastlaneCI
@@ -22,7 +20,7 @@ module FastlaneCI
     def add_build_runner(build_runner: nil)
       raise "No build runner provided" unless build_runner.kind_of?(BuildRunner)
 
-      self.build_runners << build_runner
+      build_runners << build_runner
 
       task = TaskQueue::Task.new(work_block: proc { build_runner.start })
       build_runner_task_queue.add_task_async(task: task)
@@ -42,5 +40,3 @@ module FastlaneCI
     end
   end
 end
-
-# rubocop:enable Style/RedundantSelf

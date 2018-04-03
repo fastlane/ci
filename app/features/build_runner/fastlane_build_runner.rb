@@ -1,5 +1,3 @@
-# rubocop:disable Style/RedundantSelf
-
 require_relative "./fastlane_build_runner_helpers/fastlane_ci_output"
 require_relative "./fastlane_build_runner_helpers/fastlane_log"
 require_relative "./fastlane_build_runner_helpers/fastlane_output_to_html"
@@ -63,8 +61,8 @@ module FastlaneCI
       fast_file_path = FastlaneCI::FastfileFinder.find_fastfile_in_repo(repo: repo)
       if fast_file_path.nil? || !File.exist?(fast_file_path)
         logger.info("unable to start fastlane run lane: #{lane} platform: #{platform}, params: #{parameters}, no Fastfile for commit")
-        self.current_build.status = :missing_fastfile
-        self.current_build.description = "We're unable to start fastlane run lane: #{lane} platform: #{platform}, params: #{parameters}, because no Fastfile existed at the time the commit was made"
+        current_build.status = :missing_fastfile
+        current_build.description = "We're unable to start fastlane run lane: #{lane} platform: #{platform}, params: #{parameters}, because no Fastfile existed at the time the commit was made"
         completion_block.call([])
         return
       end
@@ -98,13 +96,13 @@ module FastlaneCI
         # TODO: support projects that don't have a Gemfile defined
         Bundler.with_clean_env do
           # Run fastlane now
-          fast_file.runner.execute(self.lane, self.platform, self.parameters)
+          fast_file.runner.execute(lane, platform, parameters)
         end
 
         if @encountered_failure_output
-          self.current_build.status = :failure
+          current_build.status = :failure
         else
-          self.current_build.status = :success
+          current_build.status = :success
         end
 
         logger.info("fastlane run complete")
@@ -114,8 +112,8 @@ module FastlaneCI
         artifacts_paths = gather_build_artifact_paths(log_path: log_path)
       rescue StandardError => ex
         logger.debug("Setting build status to failure due to exception")
-        self.current_build.status = :ci_problem
-        self.current_build.description = "fastlane.ci encountered an error, check fastlane.ci logs for more information"
+        current_build.status = :ci_problem
+        current_build.description = "fastlane.ci encountered an error, check fastlane.ci logs for more information"
 
         logger.error(ex)
         logger.error(ex.backtrace)
@@ -173,5 +171,3 @@ module FastlaneCI
     end
   end
 end
-
-# rubocop:enable Style/RedundantSelf
