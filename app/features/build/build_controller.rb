@@ -21,17 +21,33 @@ module FastlaneCI
         build_number: build_number
       )
 
-      if current_build_runner.nil?
-        # Loading the output of a finished build after a server restart isn't finished yet
-        # see https://github.com/fastlane/ci/issues/312 for more information
-        raise "Couldn't find build runner for project #{project_id} with build_number #{build_number}"
+      if current_build_runner
+        existing_rows = current_build_runner.all_build_output_log_rows.map(&:html).join("\n")
+      else
+        # `current_build_runner` is only defined if the build was just run a while back
+        # if the server was restarted, we're gonna end here in this code block
+        build_log_artifact = build.artifacts.find do |current_artifact|
+          # We can improve the detection in the future, to actually mark an artifact as "default output"
+          current_artifact.type == "log" && current_artifact.reference.end_with?("fastlane.log")
+        end
+
+        if build_log_artifact
+          artifact_file_content = File.read(build_log_artifact.provider.retrieve!(artifact: build_log_artifact))
+          existing_rows = artifact_file_content.gsub("\n", "<br />")
+        else
+          raise "Couldn't load previous output for build #{build_number}"
+        end
       end
+
+      # the `build_complete` line is not 100% accurate, but good enough for now.
+      # This assumes we clean up build_runners https://github.com/fastlane/ci/issues/496
 
       locals = {
         project: project,
         build: build,
         title: "Project #{project.project_name}, Build #{build.number}",
-        existing_rows: current_build_runner.all_build_output_log_rows.map(&:html)
+        existing_rows: existing_rows,
+        build_complete: current_build_runner.nil?
       }
       erb(:build, locals: locals, layout: FastlaneCI.default_layout)
     end

@@ -67,8 +67,8 @@ module FastlaneCI
         )
 
         session[:message] = <<~HTML
-          #{Services.environment_variable_service.keys_file_path_relative_to_home} file written with the configuration values:<br />
-            FASTLANE_CI_ENCRYPTION_KEY=#{params[:encryption_key]}
+          #{Services.environment_variable_service.keys_file_path_relative_to_home} file written with the configuration
+          values:<br /> FASTLANE_CI_ENCRYPTION_KEY=#{params[:encryption_key]}
         HTML
       else
         session[:message] = <<~HTML
@@ -98,7 +98,8 @@ module FastlaneCI
         )
 
         session[:message] = <<~HTML
-          #{Services.environment_variable_service.keys_file_path_relative_to_home} file written with the configuration values:<br />
+          #{Services.environment_variable_service.keys_file_path_relative_to_home} file written with the configuration
+          values:<br />
 
           <ul>
             <li>FASTLANE_CI_USER=#{params[:ci_user_email]}</li>
@@ -135,7 +136,8 @@ module FastlaneCI
           )
 
           session[:message] = <<~HTML
-            #{Services.environment_variable_service.keys_file_path_relative_to_home} file written with the configuration values:
+            #{Services.environment_variable_service.keys_file_path_relative_to_home} file written with the
+            configuration values:
 
             <ul>
               <li>FASTLANE_CI_INITIAL_CLONE_EMAIL='#{params[:clone_user_email]}'</li>
@@ -146,7 +148,9 @@ module FastlaneCI
           scopes, required = scope_validation_error
           scopes_list_wording = scopes.count > 0 ? scopes.map { |scope| "\"#{scope}\"" }.join(",") : "empty"
           scopes_wording = scopes.count > 1 ? "scopes" : "scope"
-          error_message = "Token should be in \"#{required}\" scope, currently it's in #{scopes_list_wording} #{scopes_wording}."
+          error_message = <<~ERROR
+            Token should be in \"#{required}\" scope, currently it's in #{scopes_list_wording} #{scopes_wording}.
+          ERROR
           session[:message] = <<~HTML
             ERROR: #{error_message} See the image below.
           HTML

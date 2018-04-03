@@ -16,27 +16,43 @@ module FastlaneCI
     end
 
     def project_to_workers_dictionary_key(project: nil, user_responsible: nil)
-      logger.debug("Generating a key for project: `#{project.project_name}` (#{project.id}), user: #{user_responsible.email}")
+      logger.debug(
+        "Generating a key for project: `#{project.project_name}` (#{project.id}), user: #{user_responsible.email}"
+      )
       return "#{project.id}_#{user_responsible.id}"
     end
 
     def start_workers_for_project_and_credential(project: nil, provider_credential: nil, notification_service:)
       user_responsible = provider_credential.ci_user
-      raise "Unable to start workers for `#{project.project_name}`, no `user_responsible` for given `provider_credential`: #{provider_credential.email}" if user_responsible.nil?
+
+      if user_responsible.nil?
+        raise <<~ERROR
+          Unable to start workers for `#{project.project_name}`, no `user_responsible` for given `provider_credential`:
+          #{provider_credential.email}
+        ERROR
+      end
 
       workers_key = project_to_workers_dictionary_key(project: project, user_responsible: user_responsible)
-      raise "Worker already exists for project: #{project.project_name}, for user #{user_responsible.email}" unless project_to_workers_dictionary[workers_key].nil?
+
+      unless project_to_workers_dictionary[workers_key].nil?
+        raise "Worker already exists for project: #{project.project_name}, for user #{user_responsible.email}"
+      end
 
       repo_config = project.repo_config
-      raise "incompatible repo_config and provider_credential" if provider_credential.type != repo_config.provider_credential_type_needed
+
+      if provider_credential.type != repo_config.provider_credential_type_needed
+        raise "incompatible repo_config and provider_credential"
+      end
 
       logger.debug("Starting worker for #{project.project_name}, on behalf of #{user_responsible.email}")
       new_workers = []
+
       case provider_credential.type
       when FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
         if project_has_trigger_type?(project: project, trigger_type: FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit])
           new_workers << FastlaneCI::CheckForNewCommitsOnGithubWorker.new(provider_credential: provider_credential, project: project, notification_service: notification_service)
         end
+
         if project_has_trigger_type?(project: project, trigger_type: FastlaneCI::JobTrigger::TRIGGER_TYPE[:nightly])
           new_workers << FastlaneCI::NightlyBuildGithubWorker.new(provider_credential: provider_credential, project: project, notification_service: notification_service)
         end

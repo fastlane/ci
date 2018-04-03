@@ -91,7 +91,9 @@ module FastlaneCI
         if !params[:user] && !params[:provider_credential]
           raise "Either user or a provider credential is mandatory."
         else
-          params[:provider_credential] ||= params[:user].provider_credential(type: ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
+          params[:provider_credential] ||= params[:user].provider_credential(
+            type: ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
+          )
           git_config = params[:git_config]
 
           @git_repo = FastlaneCI::GitRepo.new(git_config: git_config,
@@ -117,6 +119,7 @@ module FastlaneCI
           project = Project.from_json!(project_json)
           project
         end
+
         return saved_projects
       end
     end
@@ -163,15 +166,25 @@ module FastlaneCI
       end
     end
 
-    def create_project!(name: nil, repo_config: nil, enabled: nil, platform: nil, lane: nil, artifact_provider: nil, job_triggers: nil)
+    def create_project!(
+      name: nil,
+      repo_config: nil,
+      enabled: nil,
+      platform: nil,
+      lane: nil,
+      artifact_provider: nil,
+      job_triggers: nil
+    )
       projects = projects.clone
-      new_project = Project.new(repo_config: repo_config,
-                                enabled: enabled,
-                                project_name: name,
-                                platform: platform,
-                                lane: lane,
-                                artifact_provider: artifact_provider,
-                                job_triggers: job_triggers)
+      new_project = Project.new(
+        repo_config: repo_config,
+        enabled: enabled,
+        project_name: name,
+        platform: platform,
+        lane: lane,
+        artifact_provider: artifact_provider,
+        job_triggers: job_triggers
+      )
       if !project_exist?(new_project.project_name)
         projects << new_project
         self.projects = projects
@@ -206,7 +219,12 @@ module FastlaneCI
         logger.debug("Couldn't update project #{project.project_name} because it doesn't exists")
         raise "Couldn't update project #{project.project_name} because it doesn't exists"
       else
-        logger.debug("Updating project #{existing_project.project_name}, writing out to projects.json to #{json_folder_path}")
+        logger.debug(
+          <<~LOG
+            Updating project #{existing_project.project_name}, writing out to projects.json to #{json_folder_path}
+          LOG
+        )
+
         projects = self.projects
         projects[project_index] = project
         self.projects = projects

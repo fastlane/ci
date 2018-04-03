@@ -36,7 +36,12 @@ module FastlaneCI
         job_id = scheduler.cron(cron_schedule) { block.call }
         scheduled_cron_job = scheduler.job(job_id)
         logger.debug("Scheduling cron job for #{cron_schedule}.")
-        logger.debug("Next time #{scheduled_cron_job.next_time} or #{(scheduled_cron_job.next_time - Time.now) / (60 * 60)} hours from now.")
+        logger.debug(
+          <<~LOG
+            Next time #{scheduled_cron_job.next_time} or #{(scheduled_cron_job.next_time - Time.now) / (60 * 60)} hours
+            from now.
+          LOG
+        )
       end
     end
 

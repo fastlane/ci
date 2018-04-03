@@ -18,7 +18,8 @@ module FastlaneCI
     # TODO: this should actually be a POST request
     get "#{HOME}/:project_id/trigger" do
       project_id = params[:project_id]
-      current_sha = params[:sha] if params[:sha].to_s.length > 0 # passing a specific sha is optional, so this might be nil
+      # passing a specific sha is optional, so this might be nil
+      current_sha = params[:sha] if params[:sha].to_s.length > 0
 
       project = user_project_with_id(project_id: project_id)
       current_github_provider_credential = check_and_get_provider_credential
@@ -31,7 +32,9 @@ module FastlaneCI
                             provider_credential: current_github_provider_credential,
                            notification_service: FastlaneCI::Services.notification_service)
       current_sha ||= repo.most_recent_commit.sha
-      manual_triggers_allowed = project.job_triggers.any? { |trigger| trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual] }
+      manual_triggers_allowed = project.job_triggers.any? do |trigger|
+        trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual]
+      end
 
       unless manual_triggers_allowed
         status(403) # Forbidden
@@ -67,11 +70,13 @@ module FastlaneCI
     end
 
     get "#{HOME}/add" do
-      provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
+      provider_credential = check_and_get_provider_credential(
+        type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
+      )
 
       locals = {
-          title: "Add new project",
-          repos: FastlaneCI::GitHubService.new(provider_credential: provider_credential).repos
+        title: "Add new project",
+        repos: FastlaneCI::GitHubService.new(provider_credential: provider_credential).repos
       }
       erb(:new_project, locals: locals, layout: FastlaneCI.default_layout)
     end
@@ -83,7 +88,9 @@ module FastlaneCI
 
       org, repo_name, branch, = params[:splat].first.split("/")
 
-      provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
+      provider_credential = check_and_get_provider_credential(
+        type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
+      )
 
       github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
       selected_repo = github_service.repos.detect { |repo| repo_name == repo.name && org = repo.owner }
@@ -121,7 +128,9 @@ module FastlaneCI
     get "#{HOME}/*/add" do
       org, repo_name, = params[:splat].first.split("/")
 
-      provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
+      provider_credential = check_and_get_provider_credential(
+        type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
+      )
 
       github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
       selected_repo = github_service.repos.detect { |repo| repo_name == repo.name && org = repo.owner }
@@ -131,9 +140,9 @@ module FastlaneCI
       repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
 
       locals = {
-          title: "Add new project",
-          repo: repo_config.full_name,
-          branches: github_service.branch_names(repo: repo_config.full_name)
+        title: "Add new project",
+        repo: repo_config.full_name,
+        branches: github_service.branch_names(repo: repo_config.full_name)
       }
 
       erb(:new_project_form, locals: locals, layout: FastlaneCI.default_layout)
@@ -142,7 +151,9 @@ module FastlaneCI
     post "#{HOME}/*/add" do
       org, repo_name, = params[:splat].first.split("/")
 
-      provider_credential = check_and_get_provider_credential(type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github])
+      provider_credential = check_and_get_provider_credential(
+        type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
+      )
 
       github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
       selected_repo = github_service.repos.detect { |repo| repo_name == repo.name && org = repo.owner }
@@ -177,7 +188,8 @@ module FastlaneCI
         enabled: true,
         platform: lane.split(" ").first,
         lane: lane.split(" ").last,
-        # TODO: Until we make a proper interface to attach JobTriggers to a Project, let's add a manual one for the selected branch.
+        # TODO: Until we make a proper interface to attach JobTriggers to a Project, let's add a manual one for the
+        # selected branch.
         job_triggers: [trigger]
       )
 

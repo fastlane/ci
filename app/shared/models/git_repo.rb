@@ -19,7 +19,8 @@ module FastlaneCI
   # What github needs is an `api_token`, but a local git repo might only need a `password`.
   # We'll call both of these "auth_tokens" here, this way we can use GitRepoAuth
   # as a way to unify those, and prevent overloading names at the data source.
-  # Otherwise, in the JSON we'd see "password" but for some repos that might be an auth_token, or an api_token, or password
+  # Otherwise, in the JSON we'd see "password" but for some repos that might be an auth_token, or an api_token, or
+  # password
   class GitRepoAuth
     attr_reader :remote_host # in the case of github, this is usually `github.com`
     attr_reader :username    # whatever the git repo needs for a username, usually just an email, usually CI
@@ -86,7 +87,8 @@ module FastlaneCI
     # @param git_config [GitConfig]
     # @param provider_credential [ProviderCredential]
     # @param async_start [Bool] Whether the repo should be setup async or not. (Defaults to `true`)
-    # @param sync_setup_timeout_seconds [Integer] When in sync setup mode, how many seconds to wait until raise an exception. (Defaults to 300)
+    # @param sync_setup_timeout_seconds [Integer] When in sync setup mode, how many seconds to wait until raise an
+    #        exception. (Defaults to 300)
     # @param callback [proc(GitRepo)] When in async setup mode, the proc to be called with the final GitRepo setup.
     def initialize(git_config: nil,
                    local_folder: nil,
@@ -97,7 +99,15 @@ module FastlaneCI
                    notification_service:)
       GitRepo.load_octokit_cache_stack
       logger.debug("Creating repo in #{local_folder} for a copy of #{git_config.git_url}")
-      validate_initialization_params!(git_config: git_config, local_folder: local_folder, provider_credential: provider_credential, async_start: async_start, callback: callback)
+
+      validate_initialization_params!(
+        git_config: git_config,
+        local_folder: local_folder,
+        provider_credential: provider_credential,
+        async_start: async_start,
+        callback: callback
+      )
+
       @git_config = git_config
       @local_folder = local_folder
       @callback = callback
@@ -135,6 +145,7 @@ module FastlaneCI
       logger.debug("Synchronously starting up repo: #{git_config.git_url} at: #{local_folder}")
       now = Time.now.utc
       sleep_timeout = now + sync_setup_timeout_seconds # 10 second startup timeout
+
       while !setup_task.completed && now < sleep_timeout
         time_left = sleep_timeout - now
         logger.debug("Not setup yet, sleeping (time before timeout: #{time_left}) #{git_config.git_url}")
@@ -191,14 +202,16 @@ module FastlaneCI
           if repo.remote("origin").url.casecmp(git_config.git_url.downcase).zero?
             # If our courrent repo is the ci-config repo and has changes on it, we should commit them before
             # other actions, to prevent local changes to be lost.
-            # This is a common issue, ci_config repo gets recreated several times trough the Services.configuration_git_repo
-            # and if some changes in the local repo (added projects, etc.) have been added, they're destroyed.
+            # This is a common issue, ci_config repo gets recreated several times trough the
+            # Services.configuration_git_repo and if some changes in the local repo (added projects, etc.) have been
+            # added, they're destroyed.
             # rubocop:disable Metrics/BlockNesting
             if local_folder == File.expand_path("~/.fastlane/ci/fastlane-ci-config")
               # TODO: move this stuff out of here
               # TODO: In case there are conflicts with remote, we want to decide which way we take.
               # For now, we merge using the 'recursive' strategy.
-              if repo.status.changed.count > 0 || repo.status.added.count > 0 || repo.status.deleted.count > 0 || repo.status.untracked.count > 0
+              if repo.status.changed.count > 0 || repo.status.added.count > 0 || repo.status.deleted.count > 0 ||
+                 repo.status.untracked.count > 0
                 begin
                   repo.add(all: true)
                   repo.commit("Sync changes")
@@ -223,7 +236,9 @@ module FastlaneCI
               end
             end
           else
-            logger.debug("[#{git_config.id}] Repo URL seems to have changed... deleting the old directory and cloning again")
+            logger.debug(
+              "[#{git_config.id}] Repo URL seems to have changed... deleting the old directory and cloning again"
+            )
             clear_directory
             clone
           end
@@ -243,7 +258,13 @@ module FastlaneCI
       # rubocop:enable Metrics/BlockNesting
     end
 
-    def validate_initialization_params!(git_config: nil, local_folder: nil, provider_credential: nil, async_start: nil, callback: nil)
+    def validate_initialization_params!(
+      git_config: nil,
+      local_folder: nil,
+      provider_credential: nil,
+      async_start: nil,
+      callback: nil
+    )
       raise "No git config provided" if git_config.nil?
       raise "No local_folder provided" if local_folder.nil?
       raise "No provider_credential provided" if provider_credential.nil?
@@ -253,7 +274,13 @@ module FastlaneCI
       git_config_credential_type = git_config.provider_credential_type_needed
 
       credential_mismatch = credential_type != git_config_credential_type
-      raise "provider_credential.type and git_config.provider_credential_type_needed mismatch: #{credential_type} vs #{git_config_credential_type}" if credential_mismatch
+
+      if credential_mismatch
+        raise <<~ERROR
+          provider_credential.type and git_config.provider_credential_type_needed mismatch: #{credential_type} vs
+          #{git_config_credential_type}
+        ERROR
+      end
     end
 
     def clear_directory
@@ -271,7 +298,7 @@ module FastlaneCI
     end
 
     # call like you would git.branches.remote.each { |branch| branch.yolo }
-    # call like you would, but you also get the git repo involved, so it's  .each { |git, branch| branch.yolo; git.yolo }
+    # call like you would, but you also get the git repo involved, so it's .each { |git, branch| branch.yolo; git.yolo }
     def git_and_remote_branches_each_async(&each_block)
       git_action_with_queue do
         branch_count = 0
@@ -335,7 +362,9 @@ module FastlaneCI
         # TODO: check if we find a better way for the initial clone to work without setting system global state
         scope = "global"
       end
-      use_credentials_command = "git config --#{scope} credential.helper 'store --file #{temporary_storage_path.shellescape}' #{local_folder}"
+      use_credentials_command = <<~COMMAND
+        git config --#{scope} credential.helper 'store --file #{temporary_storage_path.shellescape}' #{local_folder}
+      COMMAND
 
       # Uncomment if you want to debug git credential stuff, keeping it commented out because it's very noisey
       # logger.debug("Setting credentials for #{git_config.git_url} with command: #{use_credentials_command}")

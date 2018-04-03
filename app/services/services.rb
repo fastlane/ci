@@ -84,7 +84,10 @@ module FastlaneCI
         password: FastlaneCI.env.ci_user_password
       )
       if @_ci_user.nil?
-        raise "Could not find ci_user for current setup, or the provided ci_user_password is incorrect, please make sure a user with the email #{FastlaneCI.env.ci_user_email} exists in your users.json"
+        raise <<~ERROR
+          Could not find ci_user for current setup, or the provided ci_user_password is incorrect, please make sure a
+          user with the email #{FastlaneCI.env.ci_user_email} exists in your users.json
+        ERROR
       end
       return @_ci_user
     end
@@ -113,7 +116,11 @@ module FastlaneCI
     # Start up a ProjectService from our JSONProjectDataSource
     def self.project_service
       @_project_service ||= FastlaneCI::ProjectService.new(
-        project_data_source: FastlaneCI::JSONProjectDataSource.create(ci_config_git_repo_path, git_config: ci_config_repo, user: ci_user)
+        project_data_source: FastlaneCI::JSONProjectDataSource.create(
+          ci_config_git_repo_path,
+          git_config: ci_config_repo,
+          user: ci_user
+        )
       )
     end
 

@@ -55,6 +55,9 @@ Naming/VariableNumber:
 MultilineBlockChain:
   Enabled: false
 
+Style/MultilineMethodCallIndentation:
+  EnforcedStyle: aligned
+
 #
 #   File.chmod(0777, f)
 #
@@ -166,12 +169,13 @@ Style/AndOr:
 
 # Configuration parameters: CountComments.
 Metrics/ClassLength:
-  Max: 320
-
+  Max: 350
 
 # Configuration parameters: AllowURI, URISchemes.
 Metrics/LineLength:
-  Max: 370
+  Max: 120
+  Exclude:
+    - './spec/**/*'
 
 # Configuration parameters: CountKeywordArgs.
 Metrics/ParameterLists:

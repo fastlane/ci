@@ -52,11 +52,16 @@ module FastlaneCI
       )
       self.bucket = storage.bucket(bucket_name)
       permissions = bucket.test_permissions("storage.objects.create", "storage.objects.get")
-      raise "The credentials provided by #{File.basename(json_keyfile_path)} are insufficient to perform needed actions by the provider, needed: 'storage.objects.create', 'storage.objects.get' got #{permissions}." \
-        unless permissions.include?("storage.objects.create") && permissions.include?("storage.objects.get")
+
+      unless permissions.include?("storage.objects.create") && permissions.include?("storage.objects.get")
+        raise <<~ERROR
+          The credentials provided by #{File.basename(json_keyfile_path)} are insufficient to perform needed actions by
+          the provider, needed: 'storage.objects.create', 'storage.objects.get' got #{permissions}.
+        ERROR
+      end
     end
 
-    def store!(artifact: nil, build: nil, project: nil)
+    def store!(artifact:, build:, project:)
       raise "Artifact to store was not provided or wrong type provided" unless artifact&.is_a?(Artifact)
       raise "Build was not provided or wrong type provided" unless build&.is_a?(Build)
       raise "Project was not provided or wrong type provided" unless project&.is_a?(Project)
@@ -65,9 +70,16 @@ module FastlaneCI
 
       original_artifact_reference = Pathname.new(artifact.reference)
 
-      raise "Artifact referenced at #{original_artifact_reference} was not found" unless File.exist?(original_artifact_reference)
+      unless File.exist?(original_artifact_reference)
+        raise "Artifact referenced at #{original_artifact_reference} was not found"
+      end
 
-      new_artifact_reference = File.join(project.id, build.number.to_s, artifact.type, File.basename(original_artifact_reference))
+      new_artifact_reference = File.join(
+        project.id,
+        build.number.to_s,
+        artifact.type,
+        File.basename(original_artifact_reference)
+      )
 
       file = bucket.create_file(original_artifact_reference.to_s, new_artifact_reference)
 
@@ -78,7 +90,7 @@ module FastlaneCI
       return artifact # This is the Artifact that we will store in the build.
     end
 
-    def retrieve!(artifact: nil)
+    def retrieve!(artifact:)
       raise "Artifact to store was not provided or wrong type provided" unless artifact&.is_a?(Artifact)
 
       init_storage!

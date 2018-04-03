@@ -4,7 +4,10 @@ describe FastlaneCI do
       next unless File.directory?(feature_directory)
       it "#{feature_directory} has a README.md" do
         readme_path = File.join(feature_directory, "README.md")
-        expect(File.exist?(readme_path)).to eq(true), "Every directory in the `feature` area must have a README.md describing the scope and responsibilities of the classes (#{feature_directory})"
+        expect(File.exist?(readme_path)).to eq(true), <<~MESSAGE
+          Every directory in the `feature` area must have a README.md describing the scope and responsibilities of the
+          classes (#{feature_directory})
+        MESSAGE
 
         content = File.read(readme_path)
         expect(content.length).to be > 20
@@ -16,7 +19,10 @@ describe FastlaneCI do
       next unless File.directory?(service_directory)
       it "#{service_directory} has a README.md" do
         readme_path = File.join(service_directory, "README.md")
-        expect(File.exist?(readme_path)).to eq(true), "Every directory in the `feature` area must have a README.md describing the scope and responsibilities of the classes (#{service_directory})"
+        expect(File.exist?(readme_path)).to eq(true), <<~MESSAGE
+          Every directory in the `feature` area must have a README.md describing the scope and responsibilities of the
+          classes (#{service_directory})
+        MESSAGE
 
         content = File.read(readme_path)
         expect(content).to start_with("# `#{service_directory.gsub('app/', '')}`")
