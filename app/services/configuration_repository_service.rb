@@ -32,17 +32,18 @@ module FastlaneCI
     def initialize(provider_credential: nil)
       ConfigurationRepositoryService.load_octokit_cache_stack
       @client = Octokit::Client.new(access_token: provider_credential.api_token)
+      if client.access_token.nil?
+        client.access_token = provider_credential.api_token
+      end
       begin
-        if @client.rate_limit!.remaining
-          sleep_time = @client.rate_limit!.resets_in
+        if client.rate_limit!.remaining.zero?
+          sleep_time = client.rate_limit!.resets_in
           logger.error("Rate Limit exceeded, sleeping for #{sleep_time} seconds")
           sleep(sleep_time)
         end
       rescue Octokit::TooManyRequests => ex
         logger.error(ex)
-        # For some reason, setting the api token sometimes resets some internal issue with Octokit Client
-        # Rate Limit Exceptions.
-        @client.access_token = provider_credential.api_token
+        raise ex
       end
     end
 
@@ -145,7 +146,7 @@ module FastlaneCI
         client.contents(repo_shortform, path: file_path)
       end
     rescue Octokit::NotFound
-      @client.create_contents(
+      client.create_contents(
         repo_shortform, file_path, "Add initial #{file_path}", json_string
       )
     rescue Octokit::UnprocessableEntity
