@@ -17,7 +17,7 @@ module FastlaneCI
     attr_reader :type
 
     # @return [String] The reference to the artifact to a certain ArtifactProvider
-    attr_reader :reference
+    attr_accessor :reference
 
     # @return [ArtifactProvider] The reference to the ArtifactProvider that stores the artifact
     attr_reader :provider
