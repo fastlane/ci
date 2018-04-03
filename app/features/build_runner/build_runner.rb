@@ -117,11 +117,13 @@ module FastlaneCI
       save_build_status!
     ensure
       # Make sure to notify the listeners that the build is over
-      new_row(FastlaneCI::BuildRunnerOutputRow.new(
-                type: :last_message,
-                message: nil,
-                time: Time.now
-      ))
+      new_row(
+        FastlaneCI::BuildRunnerOutputRow.new(
+          type: :last_message,
+          message: nil,
+          time: Time.now
+        )
+      )
     end
 
     def checkout_sha
