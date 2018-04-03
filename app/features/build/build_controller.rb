@@ -32,18 +32,22 @@ module FastlaneCI
         end
 
         if build_log_artifact
-          existing_rows = File.read(build_log_artifact.provider.retrieve!(artifact: build_log_artifact)).gsub("\n", "<br />")
+          artifact_file_content = File.read(build_log_artifact.provider.retrieve!(artifact: build_log_artifact))
+          existing_rows = artifact_file_content.gsub("\n", "<br />")
         else
           raise "Couldn't load previous output for build #{build_number}"
         end
       end
+
+      # the `build_complete` line is not 100% accurate, but good enough for now.
+      # This assumes we clean up build_runners https://github.com/fastlane/ci/issues/496
 
       locals = {
         project: project,
         build: build,
         title: "Project #{project.project_name}, Build #{build.number}",
         existing_rows: existing_rows,
-        build_complete: current_build_runner.nil? # this is not 100% accurate, but good enough for now. This assumes we clean up build_runners https://github.com/fastlane/ci/issues/496
+        build_complete: current_build_runner.nil?
       }
       erb(:build, locals: locals, layout: FastlaneCI.default_layout)
     end

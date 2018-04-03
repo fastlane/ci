@@ -52,8 +52,13 @@ module FastlaneCI
       )
       self.bucket = storage.bucket(bucket_name)
       permissions = bucket.test_permissions("storage.objects.create", "storage.objects.get")
-      raise "The credentials provided by #{File.basename(json_keyfile_path)} are insufficient to perform needed actions by the provider, needed: 'storage.objects.create', 'storage.objects.get' got #{permissions}." \
-        unless permissions.include?("storage.objects.create") && permissions.include?("storage.objects.get")
+
+      unless permissions.include?("storage.objects.create") && permissions.include?("storage.objects.get")
+        raise <<~ERROR
+          The credentials provided by #{File.basename(json_keyfile_path)} are insufficient to perform needed actions by
+          the provider, needed: 'storage.objects.create', 'storage.objects.get' got #{permissions}.
+        ERROR
+      end
     end
 
     def store!(artifact:, build:, project:)
@@ -65,9 +70,16 @@ module FastlaneCI
 
       original_artifact_reference = Pathname.new(artifact.reference)
 
-      raise "Artifact referenced at #{original_artifact_reference} was not found" unless File.exist?(original_artifact_reference)
+      unless File.exist?(original_artifact_reference)
+        raise "Artifact referenced at #{original_artifact_reference} was not found"
+      end
 
-      new_artifact_reference = File.join(project.id, build.number.to_s, artifact.type, File.basename(original_artifact_reference))
+      new_artifact_reference = File.join(
+        project.id,
+        build.number.to_s,
+        artifact.type,
+        File.basename(original_artifact_reference)
+      )
 
       file = bucket.create_file(original_artifact_reference.to_s, new_artifact_reference)
 

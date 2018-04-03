@@ -49,7 +49,10 @@ module FastlaneCI
 
     def initialize(project:, sha:, github_service:, work_queue:, trigger:, git_fork_config: nil)
       if trigger.nil?
-        raise "No trigger provided, this is probably caused by a build being triggered, but then the project not having this particular build trigger associated"
+        raise <<~ERROR
+          No trigger provided, this is probably caused by a build being triggered, but then the project not having this
+          particular build trigger associated
+        ERROR
       end
 
       # Setting the variables directly (only having `attr_reader`) as they're immutable
@@ -123,11 +126,13 @@ module FastlaneCI
 
     def checkout_sha
       if git_fork_config
-        repo.switch_to_fork(clone_url: git_fork_config.clone_url,
-                               branch: git_fork_config.branch,
-                                  sha: git_fork_config.current_sha,
-                    local_branch_name: "#{git_fork_config.branch}_local_fork",
-                 use_global_git_mutex: false)
+        repo.switch_to_fork(
+          clone_url: git_fork_config.clone_url,
+          branch: git_fork_config.branch,
+          sha: git_fork_config.current_sha,
+          local_branch_name: "#{git_fork_config.branch}_local_fork",
+          use_global_git_mutex: false
+        )
       else
         repo.reset_hard!
         logger.debug("Pulling `master` in checkout_sha")
@@ -216,6 +221,7 @@ module FastlaneCI
     def start
       logger.debug("Starting build runner #{self.class} for #{project.project_name} #{project.id} sha: #{sha} now...")
       start_time = Time.now
+
       artifact_handler_block = proc do |artifact_paths|
         complete_run(start_time: start_time, artifact_paths: artifact_paths)
       end

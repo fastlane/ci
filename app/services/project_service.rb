@@ -15,27 +15,48 @@ module FastlaneCI
 
     def initialize(project_data_source: nil)
       unless project_data_source.nil?
-        raise "project_data_source must be descendant of #{ProjectDataSource.name}" unless project_data_source.class <= ProjectDataSource
+        unless project_data_source.class <= ProjectDataSource
+          raise "project_data_source must be descendant of #{ProjectDataSource.name}"
+        end
       end
 
       self.project_data_source = project_data_source
     end
 
-    def create_project!(name: nil, repo_config: nil, enabled: nil, platform: nil, lane: nil, artifact_provider: nil, job_triggers: nil)
+    def create_project!(
+      name: nil,
+      repo_config: nil,
+      enabled: nil,
+      platform: nil,
+      lane: nil,
+      artifact_provider: nil,
+      job_triggers: nil
+    )
       unless repo_config.nil?
-        raise "repo_config must be configured with an instance of #{RepoConfig.name}" unless repo_config.class <= RepoConfig
+        unless repo_config.class <= RepoConfig
+          raise "repo_config must be configured with an instance of #{RepoConfig.name}"
+        end
       end
       if lane.nil?
         raise "lane parameter must be configured"
       end
       # we can guess the other parameters if not provided
-      # the name parameter can be inferred from the url of the repo. (i.e., "https://gitub.com/fastlane/ci" -> "fastlane/ci")
+      # the name parameter can be inferred from the url of the repo.
+      # (i.e., "https://gitub.com/fastlane/ci" -> "fastlane/ci")
       name ||= repo_config.git_url.split("/").last(2).join("/")
       # we infer that the new project will be enabled by default
       enabled ||= true
       # we use LocalArtifactProvider by default
       artifact_provider ||= LocalArtifactProvider.new
-      project = project_data_source.create_project!(name: name, repo_config: repo_config, enabled: enabled, platform: platform, lane: lane, artifact_provider: artifact_provider, job_triggers: job_triggers)
+      project = project_data_source.create_project!(
+        name: name,
+        repo_config: repo_config,
+        enabled: enabled,
+        platform: platform,
+        lane: lane,
+        artifact_provider: artifact_provider,
+        job_triggers: job_triggers
+      )
       raise "Project couldn't be created" if project.nil?
       commit_repo_changes!(message: "Created project #{project.project_name}.")
       # We shallow clone the repo to have the information needed for retrieving lanes.
@@ -79,10 +100,12 @@ module FastlaneCI
     # Returns all repos setup
     def update_project_repos(provider_credential: nil)
       configured_repos = []
+
       projects.each do |project|
         branches = project.job_triggers
                           .map(&:branch)
                           .uniq
+
         branches.each do |branch|
           logger.debug("Ensuring #{project.repo_config.git_url} (branch: #{branch}) is checked out")
           repo = GitRepo.new(
@@ -103,8 +126,7 @@ module FastlaneCI
 
     # Not sure if this must be here or not, but we can open a discussion on this.
     def commit_repo_changes!(message: nil, file_to_commit: nil)
-      Services.configuration_git_repo.commit_changes!(commit_message: message,
-                                                        file_to_commit: file_to_commit)
+      Services.configuration_git_repo.commit_changes!(commit_message: message, file_to_commit: file_to_commit)
     end
 
     def push_configuration_repo_changes!

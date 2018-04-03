@@ -20,7 +20,9 @@ module FastlaneCI
         wrapping_type = "p"
         wrapping_class = type_to_class(row.type)
 
-        return "<#{wrapping_type} class=\"#{wrapping_class}\">#{format_string(row.time)}#{row.message}</#{wrapping_type}>"
+        return <<~HTML
+          <#{wrapping_type} class=\"#{wrapping_class}\">#{format_string(row.time)}#{row.message}</#{wrapping_type}>
+        HTML
       end
 
       def type_to_class(type)

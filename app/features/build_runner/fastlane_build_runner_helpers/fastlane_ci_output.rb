@@ -191,7 +191,11 @@ module FastlaneCI
 
     def non_interactive!(message)
       important(message)
-      crash!("Could not retrieve response as fastlane runs fastlane.ci and can't ask for additional inputs during its run")
+      crash!(
+        <<~ERROR
+          Could not retrieve response as fastlane runs fastlane.ci and can't ask for additional inputs during its run
+        ERROR
+      )
     end
   end
 end
