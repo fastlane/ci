@@ -46,7 +46,7 @@ module FastlaneCI
     end
 
     def api_token
-      return nil if @encrypted_api_token.nil?
+      return @api_token if @encrypted_api_token.nil?
       return StringEncrypter.decode(Base64.decode64(@encrypted_api_token))
     end
   end
