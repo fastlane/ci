@@ -61,17 +61,11 @@ module FastlaneCI
       fast_file_path = FastlaneCI::FastfileFinder.find_fastfile_in_repo(repo: repo)
 
       if fast_file_path.nil? || !File.exist?(fast_file_path)
-        logger.info(
-          <<~LOG
-            unable to start fastlane run lane: #{lane} platform: #{platform}, params: #{parameters}, no Fastfile for
-            commit
-          LOG
-        )
+        # rubocop:disable Metrics/LineLength
+        logger.info("unable to start fastlane run lane: #{lane} platform: #{platform}, params: #{parameters}, no Fastfile for commit")
         current_build.status = :missing_fastfile
-        current_build.description = <<~DESCRIPTION
-          We're unable to start fastlane run lane: #{lane} platform: #{platform}, params: #{parameters}, because no
-          Fastfile existed at the time the commit was made
-        DESCRIPTION
+        current_build.description = "We're unable to start fastlane run lane: #{lane} platform: #{platform}, params: #{parameters}, because no Fastfile existed at the time the commit was made"
+        # rubocop:enable Metrics/LineLength
 
         completion_block.call([])
         return
@@ -84,11 +78,9 @@ module FastlaneCI
       begin
         # TODO: I think we need to clear out the singleton values, such as lane context, and all that jazz
         # Execute the Fastfile here
-        logger.info(
-          <<~LOG
-            starting fastlane run lane: #{lane} platform: #{platform}, params: #{parameters} from #{fast_file_path}
-          LOG
-        )
+        # rubocop:disable Metrics/LineLength
+        logger.info("starting fastlane run lane: #{lane} platform: #{platform}, params: #{parameters} from #{fast_file_path}")
+        # rubocop:enable Metrics/LineLength
 
         # Attach a listener to the output to see if we have a failure. If so, this build failed
         add_listener(proc do |row|

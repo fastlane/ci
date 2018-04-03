@@ -148,18 +148,15 @@ module FastlaneCI
           scopes, required = scope_validation_error
           scopes_list_wording = scopes.count > 0 ? scopes.map { |scope| "\"#{scope}\"" }.join(",") : "empty"
           scopes_wording = scopes.count > 1 ? "scopes" : "scope"
-          error_message = <<~ERROR
-            Token should be in \"#{required}\" scope, currently it's in #{scopes_list_wording} #{scopes_wording}.
-          ERROR
-          session[:message] = <<~HTML
-            ERROR: #{error_message} See the image below.
-          HTML
+          # rubocop:disable Metrics/LineLength
+          error_message = "Token should be in \"#{required}\" scope, currently it's in #{scopes_list_wording} #{scopes_wording}."
+          # rubocop:enable Metrics/LineLength
+          session[:message] = "ERROR: #{error_message} See the image below."
           logger.error(error_message)
         end
       else
-        session[:message] = <<~HTML
-          ERROR: #{Services.environment_variable_service.keys_file_path_relative_to_home} file not written.
-        HTML
+        path = Services.environment_variable_service.keys_file_path_relative_to_home
+        session[:message] = "ERROR: #{path} file not written."
       end
 
       redirect("#{HOME}/initial_clone_user")

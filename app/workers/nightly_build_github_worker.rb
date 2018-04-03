@@ -33,23 +33,17 @@ module FastlaneCI
 
       since_time_utc = Time.at(since_time_utc_seconds.to_i).utc
       repo_full_name = project.repo_config.full_name
-      logger.debug(
-        <<~LOG
-          Looking for commits that are newer than #{since_time_utc.iso8601} for #{project.project_name}
-          (#{repo_full_name})
-        LOG
-      )
+
+      # rubocop:disable Metrics/LineLength
+      logger.debug("Looking for commits that are newer than #{since_time_utc.iso8601} for #{project.project_name} (#{repo_full_name})")
 
       # Get all the new commits since the last build time (minus whatever drift we determined above)
       new_commits = github_service.recent_commits(repo_full_name: repo_full_name, since_time_utc: since_time_utc)
       unless new_commits.length == 0
-        logger.debug(
-          <<~LOG
-            Found #{new_commits.length} commit(s) since the last run, building the most recent for
-            #{project.project_name} (#{repo_full_name})")
-          LOG
-        )
+        logger.debug("Found #{new_commits.length} commit(s) since the last run, building the most recent for #{project.project_name} (#{repo_full_name})")
       end
+      # rubocop:enable Metrics/LineLength
+
       newest_commit = new_commits.map(&:sha).first
 
       if newest_commit.nil?

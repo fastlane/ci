@@ -83,10 +83,9 @@ module FastlaneCI
         password: FastlaneCI.env.ci_user_password
       )
       if @_ci_user.nil?
-        raise <<~ERROR
-          Could not find ci_user for current setup, or the provided ci_user_password is incorrect, please make sure a
-          user with the email #{FastlaneCI.env.ci_user_email} exists in your users.json
-        ERROR
+        # rubocop:disable Metrics/LineLength
+        raise "Could not find ci_user for current setup, or the provided ci_user_password is incorrect, please make sure a user with the email #{FastlaneCI.env.ci_user_email} exists in your users.json"
+        # rubocop:enable Metrics/LineLength
       end
       return @_ci_user
     end

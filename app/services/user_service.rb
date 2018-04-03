@@ -54,12 +54,9 @@ module FastlaneCI
       success = user_data_source.update_user!(user: user)
       if success
         # TODO: remove this message if https://github.com/fastlane/ci/issues/292 is fixed
-        logger.info(
-          <<~LOG
-            Updated user #{user.email}, that means you should call `find_user(id:)` see
-            https://github.com/fastlane/ci/issues/292
-          LOG
-        )
+        # rubocop:disable Metrics/LineLength
+        logger.info("Updated user #{user.email}, that means you should call `find_user(id:)` see https://github.com/fastlane/ci/issues/292")
+        # rubocop:enable Metrics/LineLength
       end
       return success
     end
