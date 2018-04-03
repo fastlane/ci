@@ -75,7 +75,17 @@ module FastlaneCI
     # @param  [String] name
     # @param  [String] message
     # @param  [String] details
-    def initialize(id: nil, priority: nil, type: nil, user_id: nil, name: nil, message: nil, created_at: nil, updated_at: nil, details: nil)
+    def initialize(
+      id: nil,
+      priority: nil,
+      type: nil,
+      user_id: nil,
+      name: nil,
+      message: nil,
+      created_at: nil,
+      updated_at: nil,
+      details: nil
+    )
       @id = id || SecureRandom.uuid
       @priority = priority || Notification::PRIORITIES[:normal]
       @type = type

@@ -16,7 +16,12 @@ module FastlaneCI
       @scheduler = WorkerScheduler.new(cron_schedule: NIGHTLY_CRON_TIME)
       @notification_service = notification_service
 
-      super(provider_credential: provider_credential, project: project, notification_service: notification_service) # This starts the work by calling `work`
+      # This starts the work by calling `work`
+      super(
+        provider_credential: provider_credential,
+        project: project,
+        notification_service: notification_service
+      )
     end
 
     def work

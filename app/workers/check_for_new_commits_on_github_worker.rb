@@ -24,7 +24,12 @@ module FastlaneCI
       @scheduler = WorkerScheduler.new(interval_time: 10)
       @github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
 
-      super(provider_credential: provider_credential, project: project, notification_service: notification_service) # This starts the work by calling `work`
+      # This starts the work by calling `work`
+      super(
+        provider_credential: provider_credential,
+        project: project,
+        notification_service: notification_service
+      )
     end
 
     def check_for_new_commits

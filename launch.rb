@@ -319,6 +319,7 @@ module FastlaneCI
             project: project,
             sha: open_pr.current_sha,
             github_service: github_service,
+            notification_service: Services.notification_service,
             # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
             work_queue: FastlaneCI::GitRepo.git_action_queue,
             git_fork_config: git_fork_config,

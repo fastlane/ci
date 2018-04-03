@@ -153,8 +153,9 @@ module FastlaneCI
         now = Time.now.utc
       end
 
-      raise "Unable to start git repo #{git_config.git_url} in #{sync_setup_timeout_seconds} seconds" if now > sleep_timeout
-      logger.debug("Done starting up repo: #{git_config.git_url}")
+      repo_url = git_config.git_url
+      raise "Unable to start git repo #{repo_url} in #{sync_setup_timeout_seconds} seconds" if now > sleep_timeout
+      logger.debug("Done starting up repo: #{repo_url}")
     end
 
     # Message is used to display custom logging in the console.
@@ -422,32 +423,34 @@ module FastlaneCI
 
     def checkout_commit(sha: nil, repo_auth: self.repo_auth, use_global_git_mutex: true)
       perform_block(use_global_git_mutex: use_global_git_mutex) do
-        logger.info("Checking out sha: #{sha} from #{git_config.git_url}")
+        repo_url = git_config.git_url
+        logger.info("Checking out sha: #{sha} from #{repo_url}")
         setup_auth(repo_auth: repo_auth)
 
         begin
           git.reset_hard(git.gcommit(sha))
         rescue StandardError => ex
-          handle_exception(ex, console_message: "Error resetting and checking out sha: #{sha} from #{git_config.git_url}")
+          handle_exception(ex, console_message: "Error resetting and checking out sha: #{sha} from #{repo_url}")
         end
 
-        logger.debug("Done resetting and checking out sha: #{sha} from #{git_config.git_url}")
+        logger.debug("Done resetting and checking out sha: #{sha} from #{repo_url}")
       end
     end
 
     # Discard any changes
     def reset_hard!(use_global_git_mutex: true)
       perform_block(use_global_git_mutex: use_global_git_mutex) do
-        logger.debug("Starting reset_hard! #{git.branch.name} in #{git_config.git_url}".freeze)
+        repo_url = git_config.git_url
+        logger.debug("Starting reset_hard! #{git.branch.name} in #{repo_url}".freeze)
 
         begin
           git.reset_hard
           git.clean(force: true, d: true)
         rescue StandardError => ex
-          handle_exception(ex, console_message: "Error resetting and cleaning #{git.branch.name} in #{git_config.git_url}")
+          handle_exception(ex, console_message: "Error resetting and cleaning #{git.branch.name} in #{repo_url}")
         end
 
-        logger.debug("Done reset_hard! #{git.branch.name} in #{git_config.git_url}".freeze)
+        logger.debug("Done reset_hard! #{git.branch.name} in #{repo_url}".freeze)
       end
     end
 
