@@ -56,7 +56,7 @@ module FastlaneCI
         unless permissions.include?("storage.objects.create") && permissions.include?("storage.objects.get")
     end
 
-    def store!(artifact: nil, build: nil, project: nil)
+    def store!(artifact:, build:, project:)
       raise "Artifact to store was not provided or wrong type provided" unless artifact&.is_a?(Artifact)
       raise "Build was not provided or wrong type provided" unless build&.is_a?(Build)
       raise "Project was not provided or wrong type provided" unless project&.is_a?(Project)
@@ -79,7 +79,7 @@ module FastlaneCI
       return artifact # This is the Artifact that we will store in the build.
     end
 
-    def retrieve!(artifact: nil)
+    def retrieve!(artifact:)
       raise "Artifact to store was not provided or wrong type provided" unless artifact&.is_a?(Artifact)
 
       init_storage!

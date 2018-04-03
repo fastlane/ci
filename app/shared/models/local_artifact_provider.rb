@@ -27,7 +27,7 @@ module FastlaneCI
       FileUtils.mkdir_p(root_path) unless File.directory?(root_path)
     end
 
-    def store!(artifact: nil, build: nil, project: nil)
+    def store!(artifact:, build:, project:)
       raise "Artifact to store was not provided or wrong type provided" unless artifact&.is_a?(Artifact)
       raise "Build was not provided or wrong type provided" unless build&.is_a?(Build)
       raise "Project was not provided or wrong type provided" unless project&.is_a?(Project)
@@ -55,7 +55,7 @@ module FastlaneCI
       artifact # This is the Artifact that we will store in the build.
     end
 
-    def retrieve!(artifact: nil)
+    def retrieve!(artifact:)
       raise "Artifact to store was not provided or wrong type provided" unless artifact&.is_a?(Artifact)
       raise "#{self.class.name} needs an existing file in #{artifact.reference}, but it was not found" unless File.exist?(artifact.reference)
 
