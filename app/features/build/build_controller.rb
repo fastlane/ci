@@ -42,7 +42,8 @@ module FastlaneCI
         project: project,
         build: build,
         title: "Project #{project.project_name}, Build #{build.number}",
-        existing_rows: existing_rows
+        existing_rows: existing_rows,
+        build_complete: current_build_runner.nil? # this is not 100% accurate, but good enough for now. This assumes we clean up build_runners https://github.com/fastlane/ci/issues/496
       }
       erb(:build, locals: locals, layout: FastlaneCI.default_layout)
     end

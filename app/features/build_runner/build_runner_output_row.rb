@@ -33,6 +33,12 @@ module FastlaneCI
       return @_did_fail_build
     end
 
+    # Is this the last row? We guarantee that we send this out to listeners
+    # as it allows the observer to properly clean things up
+    def last_message?
+      return type == :last_message
+    end
+
     def to_json
       return {
         type: type,

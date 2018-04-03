@@ -112,6 +112,13 @@ module FastlaneCI
       current_build.duration = duration
       current_build.status = :failure # TODO: also handle failure
       save_build_status!
+    ensure
+      # Make sure to notify the listeners that the build is over
+      new_row(FastlaneCI::BuildRunnerOutputRow.new(
+                type: :last_message,
+                message: nil,
+                time: Time.now
+      ))
     end
 
     def checkout_sha
@@ -209,7 +216,9 @@ module FastlaneCI
     def start
       logger.debug("Starting build runner #{self.class} for #{project.project_name} #{project.id} sha: #{sha} now...")
       start_time = Time.now
-      artifact_handler_block = proc { |artifact_paths| complete_run(start_time: start_time, artifact_paths: artifact_paths) }
+      artifact_handler_block = proc do |artifact_paths|
+        complete_run(start_time: start_time, artifact_paths: artifact_paths)
+      end
 
       work_block = proc {
         pre_run_action
