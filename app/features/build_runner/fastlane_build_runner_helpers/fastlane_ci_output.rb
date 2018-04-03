@@ -1,4 +1,3 @@
-
 require_relative "./fastlane_log"
 require "fastlane"
 
