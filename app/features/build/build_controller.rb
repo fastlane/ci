@@ -33,7 +33,7 @@ module FastlaneCI
 
         if build_log_artifact
           artifact_file_content = File.read(build_log_artifact.provider.retrieve!(artifact: build_log_artifact))
-          existing_rows = artifact_file_content.gsub("\n", "<br />")
+          existing_rows = convert_ansi_to_html(artifact_file_content.gsub("\n", "<br />"))
         else
           raise "Couldn't load previous output for build #{build_number}"
         end
@@ -50,6 +50,25 @@ module FastlaneCI
         build_complete: current_build_runner.nil?
       }
       erb(:build, locals: locals, layout: FastlaneCI.default_layout)
+    end
+
+    # convert .log files that include the color information as ANSI code
+    # back to HTML code that can be rendered by the user's browser
+    # We probably want to re-visit this in the future, but for now it's good
+    def convert_ansi_to_html(data)
+      {
+        30 => :black,
+        31 => :red,
+        32 => :green,
+        33 => :yellow,
+        34 => :blue,
+        35 => :magenta,
+        36 => :cyan,
+        37 => :white
+      }.each do |k, v|
+        data.gsub!(/\e\[#{k}m/, "<span style=\"color:#{v}\">")
+      end
+      return data.gsub(/\e\[0m/, "</span>")
     end
   end
 end
