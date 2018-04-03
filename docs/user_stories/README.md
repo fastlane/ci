@@ -11,4 +11,4 @@
 * __Critical User Journey__ - is a user journey that is either very common, or very important to get right, or both.
 * __Use Cases__ - describe a complete interaction between the software and users
 ## Goal: I want to debug a build that failed
-### [P0: As a developer, a GitHub Repo, I want every change to be submitted with the confidence that it doesn’t break the App](./debug_failed_build.md)
+### [P0: As a developer, with a PR that fails to build, I want to find the root cause so I can fix it and merges](./debug_failed_build.md)
