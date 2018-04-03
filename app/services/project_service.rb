@@ -14,7 +14,7 @@ module FastlaneCI
     attr_accessor :project_data_source
 
     def initialize(project_data_source: nil)
-      if !project_data_source.nil? && project_data_source.class > ProjectDataSource
+      unless project_data_source.nil? || project_data_source.class <= ProjectDataSource
         raise "project_data_source must be descendant of #{ProjectDataSource.name}"
       end
 
@@ -30,7 +30,7 @@ module FastlaneCI
       artifact_provider: nil,
       job_triggers: nil
     )
-      if !repo_config.nil? && repo_config.class > RepoConfig
+      unless repo_config.nil? || repo_config.class <= RepoConfig
         raise "repo_config must be configured with an instance of #{RepoConfig.name}"
       end
       if lane.nil?
