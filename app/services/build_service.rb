@@ -28,14 +28,14 @@ module FastlaneCI
       all_builds = list_builds(project: project)
 
       all_completed_builds_shas = all_builds
-        .reject { |build| build.status == "pending" }
-        .map(&:sha)
-        .uniq
+                                  .reject { |build| build.status == "pending" }
+                                  .map(&:sha)
+                                  .uniq
 
       all_pending_builds_shas_needing_rebuilds = all_builds
-        .select { |build| build.status == "pending" }
-        .map(&:sha)
-        .uniq
+                                                 .select { |build| build.status == "pending" }
+                                                 .map(&:sha)
+                                                 .uniq
         .-(all_completed_builds_shas)
 
       return all_pending_builds_shas_needing_rebuilds

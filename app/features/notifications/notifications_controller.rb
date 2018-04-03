@@ -19,9 +19,9 @@ module FastlaneCI
     # @return [Array[Notification]]
     def user_notifications
       return Services
-          .notification_service
-          .notifications
-          .select { |notification| notification.user_id == user.id }
+             .notification_service
+             .notifications
+             .select { |notification| notification.user_id == user.id }
     end
   end
 end

@@ -106,9 +106,9 @@ module FastlaneCI
       else
         # Delete the old credential, and push on the new one
         new_provider_credentials = user
-          .provider_credentials
-          .delete_if { |credential| credential.id == id }
-          .push(provider_credential)
+                                   .provider_credentials
+                                   .delete_if { |credential| credential.id == id }
+                                   .push(provider_credential)
 
         new_user = User.new(
           id: user.id,

@@ -55,8 +55,8 @@ module FastlaneCI
     # @return [Hash]
     def user_credentials
       return users
-          .map { |user| [user.id, user.provider_credentials] }
-          .to_h
+             .map { |user| [user.id, user.provider_credentials] }
+             .to_h
     end
 
     # Empty provider credential for use in `/create` action form. The

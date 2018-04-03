@@ -56,7 +56,7 @@ MultilineBlockChain:
   Enabled: false
 
 Style/MultilineMethodCallIndentation:
-  EnforcedStyle: indented
+  EnforcedStyle: aligned
 
 #
 #   File.chmod(0777, f)
