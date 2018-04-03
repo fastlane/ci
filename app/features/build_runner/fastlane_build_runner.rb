@@ -191,13 +191,16 @@ module FastlaneCI
       artifact_paths << { type: "log", path: log_path }
       artifact_paths << { type: "log", path: verbose_log_path } if verbose_log_path
       constants_with_path =
-        Fastlane::Actions::SharedValues
-        .constants
-        .select { |value| value.to_s.include?("PATH") } # Far from ideal, but meanwhile...
-        .select do |value|
-          !Fastlane::Actions.lane_context[value].nil? && !Fastlane::Actions.lane_context[value].empty?
-        end
-        .map { |value| { type: value.to_s, path: Fastlane::Actions.lane_context[value] } }
+        Fastlane::Actions::SharedValues.constants
+                                       .select { |value| value.to_s.include?("PATH") } # Far from ideal
+                                       .select do |value|
+                                         !Fastlane::Actions.lane_context[value].nil? &&
+                                           !Fastlane::Actions.lane_context[value].empty?
+                                       end
+                                       .map do |value|
+                                         { type: value.to_s, path: Fastlane::Actions.lane_context[value] }
+                                       end
+
       return artifact_paths.concat(constants_with_path)
     end
   end

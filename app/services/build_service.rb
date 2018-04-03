@@ -36,7 +36,7 @@ module FastlaneCI
                                                  .select { |build| build.status == "pending" }
                                                  .map(&:sha)
                                                  .uniq
-        .-(all_completed_builds_shas)
+                                                 .-(all_completed_builds_shas)
 
       return all_pending_builds_shas_needing_rebuilds
     end

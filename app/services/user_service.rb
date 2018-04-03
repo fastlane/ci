@@ -105,10 +105,9 @@ module FastlaneCI
         logger.error("Can't update provider credential for user, since user does not exist.")
       else
         # Delete the old credential, and push on the new one
-        new_provider_credentials = user
-                                   .provider_credentials
-                                   .delete_if { |credential| credential.id == id }
-                                   .push(provider_credential)
+        new_provider_credentials = user.provider_credentials
+                                       .delete_if { |credential| credential.id == id }
+                                       .push(provider_credential)
 
         new_user = User.new(
           id: user.id,

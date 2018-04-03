@@ -36,8 +36,14 @@ module FastlaneCI
     attr_reader :artifact_provider
 
     def initialize(
-      repo_config: nil, enabled: nil, project_name: nil, platform: nil, lane: nil, id: nil,
-      artifact_provider: LocalArtifactProvider.new, job_triggers: []
+      repo_config: nil,
+      enabled: nil,
+      project_name: nil,
+      platform: nil,
+      lane: nil,
+      id: nil,
+      artifact_provider: LocalArtifactProvider.new,
+      job_triggers: []
     )
       @repo_config = repo_config
       @enabled = enabled

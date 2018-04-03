@@ -214,11 +214,10 @@ module FastlaneCI
         end
 
         repo_full_name = project.repo_config.full_name
-        branches_to_check = project
-                            .job_triggers
-                            .select { |trigger| trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit] }
-                            .map(&:branch)
-                            .uniq
+        branches_to_check = project.job_triggers
+                                   .select { |trigger| trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit] }
+                                   .map(&:branch)
+                                   .uniq
 
         # We have a list of shas that need rebuilding, but we need to know which repo_full_name they belong to
         # because they could be forks of the main repo, so let's grab all that info
@@ -279,11 +278,10 @@ module FastlaneCI
         next unless credential_type == FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
 
         # Collect all the branches from the triggers on this project that are commit-based
-        branches_to_check = project
-                            .job_triggers
-                            .select { |trigger| trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit] }
-                            .map(&:branch)
-                            .uniq
+        branches_to_check = project.job_triggers
+                                   .select { |trigger| trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit] }
+                                   .map(&:branch)
+                                   .uniq
 
         repo_full_name = project.repo_config.full_name
         # let's get all commit shas that need a build (no status yet)

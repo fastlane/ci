@@ -42,7 +42,14 @@ module FastlaneCI
     attr_accessor :trigger
 
     def initialize(
-      project: nil, number: nil, status: nil, timestamp: nil, duration: nil, sha: nil, description: nil, trigger: nil
+      project: nil,
+      number: nil,
+      status: nil,
+      timestamp: nil,
+      duration: nil,
+      sha: nil,
+      description: nil,
+      trigger: nil
     )
       @project = project
       @number = number

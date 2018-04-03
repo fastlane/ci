@@ -86,7 +86,11 @@ module FastlaneCI
     #        exception. (Defaults to 300)
     # @param callback [proc(GitRepo)] When in async setup mode, the proc to be called with the final GitRepo setup.
     def initialize(
-      git_config: nil, local_folder: nil, provider_credential: nil, async_start: false, sync_setup_timeout_seconds: 300,
+      git_config: nil,
+      local_folder: nil,
+      provider_credential: nil,
+      async_start: false,
+      sync_setup_timeout_seconds: 300,
       callback: nil
     )
       GitRepo.load_octokit_cache_stack
@@ -226,7 +230,11 @@ module FastlaneCI
     end
 
     def validate_initialization_params!(
-      git_config: nil, local_folder: nil, provider_credential: nil, async_start: nil, callback: nil
+      git_config: nil,
+      local_folder: nil,
+      provider_credential: nil,
+      async_start: nil,
+      callback: nil
     )
       raise "No git config provided" if git_config.nil?
       raise "No local_folder provided" if local_folder.nil?
