@@ -1,6 +1,9 @@
 require "bundler/setup"
 $LOAD_PATH << File.dirname(File.expand_path("../", __FILE__))
 
+require "coveralls"
+Coveralls.wear!
+
 require "rack/test"
 require "rspec"
 require "stub_helpers"
@@ -20,7 +23,6 @@ RSpec.configure do |config|
   config.include(RSpecMixin)
   config.include(StubHelpers)
   config.include(HelperFunctions)
-
   config.formatter = :documentation
   config.tty = true
   config.color = true

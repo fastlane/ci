@@ -162,7 +162,7 @@ module FastlaneCI
               # TODO: move this stuff out of here
               # TODO: In case there are conflicts with remote, we want to decide which way we take.
               # For now, we merge using the 'recursive' strategy.
-              if !repo.status.changed == 0 && !repo.status.added == 0 && !repo.status.deleted == 0 && !repo.status.untracked == 0
+              if repo.status.changed.count > 0 || repo.status.added.count > 0 || repo.status.deleted.count > 0 || repo.status.untracked.count > 0
                 begin
                   repo.add(all: true)
                   repo.commit("Sync changes")
@@ -362,7 +362,7 @@ module FastlaneCI
     # This method commits and pushes all changes
     # if `file_to_commit` is `nil`, all files will be added
     # TODO: this method isn't actually tested yet
-    def commit_changes!(commit_message: nil, file_to_commit: nil, repo_auth: self.repo_auth)
+    def commit_changes!(commit_message: nil, push_after_commit: true, file_to_commit: nil, repo_auth: self.repo_auth)
       git_action_with_queue do
         logger.debug("Starting commit_changes! #{git_config.git_url} for #{repo_auth.username}")
         raise "file_to_commit not yet implemented" if file_to_commit
@@ -374,21 +374,23 @@ module FastlaneCI
         changed = git.status.changed
         added = git.status.added
         deleted = git.status.deleted
+        untracked = git.status.untracked
 
-        if changed.count == 0 && added.count == 0 && deleted.count == 0
-          logger.debug("No changes in repo #{git_config.full_name}, skipping commit #{commit_message}")
+        if changed.count == 0 && added.count == 0 && deleted.count == 0 && untracked.count == 0
+          logger.debug("No changes in repo #{self.git_config.full_name}, skipping commit #{commit_message}")
         else
           git.commit(commit_message)
-          logger.debug("Done commit_changes! #{git_config.full_name} for #{repo_auth.username}")
+          push(use_global_git_mutex: false) if push_after_commit
+          logger.debug("Done commit_changes! #{self.git_config.full_name} for #{repo_auth.username}")
         end
       end
     end
 
-    def push(repo_auth: self.repo_auth)
-      git_action_with_queue(ensure_block: proc { unset_auth }) do
-        logger.debug("Pushing to #{git_config.git_url}")
-        setup_author(full_name: repo_auth.full_name, username: repo_auth.username)
-        self.temporary_storage_path = setup_auth(repo_auth: repo_auth)
+    def push(use_global_git_mutex: true, repo_auth: self.repo_auth)
+      perform_block(use_global_git_mutex: use_global_git_mutex) do
+        logger.debug("Pushing to #{self.git_config.git_url}")
+        self.setup_author(full_name: repo_auth.full_name, username: repo_auth.username)
+        self.temporary_storage_path = self.setup_auth(repo_auth: repo_auth)
         # TODO: how do we handle branches
         git.push
         logger.debug("Done pushing to #{git_config.git_url}")

@@ -37,7 +37,10 @@ module FastlaneCI
     # @return [String] An optional message to go along with the build, will show up as part of the build status on github
     attr_accessor :description
 
-    def initialize(project: nil, number: nil, status: nil, timestamp: nil, duration: nil, sha: nil, description: nil)
+    # @return [String] the trigger type that triggered this particular build
+    attr_accessor :trigger
+
+    def initialize(project: nil, number: nil, status: nil, timestamp: nil, duration: nil, sha: nil, description: nil, trigger: nil)
       @project = project
       @number = number
       @status = status
@@ -46,6 +49,7 @@ module FastlaneCI
       @sha = sha
       @artifacts = []
       @description = description
+      self.trigger = trigger
     end
 
     # Most cases we don't want people doing this, but there are a couple valid reasons, make it explicit

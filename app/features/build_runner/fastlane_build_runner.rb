@@ -94,8 +94,12 @@ module FastlaneCI
         # Change over to the repo
         Dir.chdir(repo.local_folder)
 
-        # Run fastlane now
-        fast_file.runner.execute(lane, platform, parameters)
+        # Make sure to load all the dependencies of the Gemfile
+        # TODO: support projects that don't have a Gemfile defined
+        Bundler.with_clean_env do
+          # Run fastlane now
+          fast_file.runner.execute(self.lane, self.platform, self.parameters)
+        end
 
         if @encountered_failure_output
           self.current_build.status = :failure

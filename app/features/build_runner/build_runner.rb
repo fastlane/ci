@@ -44,7 +44,14 @@ module FastlaneCI
     # Work queue where builds should be run
     attr_reader :work_queue
 
-    def initialize(project:, sha:, github_service:, work_queue:, git_fork_config: nil)
+    # Array of env variables that were set, that we need to unset after the run
+    attr_accessor :environment_variables_set
+
+    def initialize(project:, sha:, github_service:, work_queue:, trigger:, git_fork_config: nil)
+      if trigger.nil?
+        raise "No trigger provided, this is probably caused by a build being triggered, but then the project not having this particular build trigger associated"
+      end
+
       # Setting the variables directly (only having `attr_reader`) as they're immutable
       # Once you define a FastlaneBuildRunner, you shouldn't be able to modify them
       @project = project
@@ -59,7 +66,7 @@ module FastlaneCI
 
       @work_queue = work_queue
 
-      prepare_build_object
+      self.prepare_build_object(trigger: trigger)
 
       @repo = GitRepo.new(
         git_config: project.repo_config,
@@ -128,7 +135,54 @@ module FastlaneCI
 
     def pre_run_action
       logger.debug("Running pre_run_action in checkout_sha")
-      checkout_sha
+      self.checkout_sha
+      self.setup_build_specific_environment_variables
+    end
+
+    def setup_build_specific_environment_variables
+      self.environment_variables_set = []
+
+      # We try to follow the existing formats
+      # https://wiki.jenkins.io/display/JENKINS/Building+a+software+project
+      env_mapping = {
+        BUILD_NUMBER: current_build_number,
+        JOB_NAME: self.project.project_name,
+        WORKSPACE: self.project.local_repo_path,
+        GIT_URL: self.repo.git_config.git_url,
+        GIT_SHA: self.current_build.sha,
+        BUILD_URL: "https://fastlane.ci", # TODO: actually build the URL, we don't know our own host, right?
+        CI_NAME: "fastlane.ci",
+        CI: true
+      }
+
+      if self.git_fork_config && self.git_fork_config.branch.to_s.length > 0
+        env_mapping[:GIT_BRANCH] = self.git_fork_config.branch # TODO: does this work?
+      else
+        env_mapping[:GIT_BRANCH] = "master" # TODO: use actual default branch?
+      end
+
+      # We need to duplicate some ENV variables
+      env_mapping[:CI_BUILD_NUMBER] = env_mapping[:BUILD_NUMBER]
+      env_mapping[:CI_BUILD_URL] = env_mapping[:BUILD_URL]
+      env_mapping[:CI_BRANCH] = env_mapping[:GIT_BRANCH]
+      # env_mapping[:CI_PULL_REQUEST] = nil # TODO: do we have the PR information here?
+
+      env_mapping.each do |key, value|
+        set_build_specific_env_variable(key: key, value: value)
+      end
+
+      # TODO: to add potentially
+      # - BUILD_ID
+      # - BUILD_TAG
+    end
+
+    def set_build_specific_env_variable(key:, value:)
+      if ENV[key.to_s].to_s.strip.length > 0
+        logger.info("Environment variable `#{key}` is already set, overwriting now")
+      end
+      ENV[key.to_s] = value.to_s
+
+      self.environment_variables_set << key
     end
 
     def reset_repo_state
@@ -137,8 +191,17 @@ module FastlaneCI
     end
 
     def post_run_action
-      logger.debug("Finished running #{project.project_name} for #{sha}")
-      reset_repo_state
+      logger.debug("Finished running #{self.project.project_name} for #{self.sha}")
+      self.reset_repo_state
+
+      self.unset_build_specific_environment_variables
+    end
+
+    def unset_build_specific_environment_variables
+      self.environment_variables_set.each do |key|
+        ENV.delete(key.to_s)
+      end
+      self.environment_variables_set = nil
     end
 
     # Starts the build, incrementing the build number from the number of builds
@@ -207,7 +270,7 @@ module FastlaneCI
       build_change_observer_blocks << block
     end
 
-    def prepare_build_object
+    def prepare_build_object(trigger:)
       builds = Services.build_service.list_builds(project: project)
 
       if builds.count > 0
@@ -225,7 +288,8 @@ module FastlaneCI
         # so that utc stuff is discoverable
         timestamp: Time.now.utc,
         duration: -1,
-        sha: sha
+        sha: self.sha,
+        trigger: trigger.type
       )
       save_build_status!
     end

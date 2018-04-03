@@ -18,8 +18,10 @@ module FastlaneCI
     # TODO: this should actually be a POST request
     get "#{HOME}/:project_id/trigger" do
       project_id = params[:project_id]
-      project = user_project_with_id(project_id: project_id)
-      current_github_provider_credential = check_and_get_provider_credential
+      current_sha = params[:sha] if params[:sha].to_s.length > 0 # passing a specific sha is optional, so this might be nil
+
+      project = self.user_project_with_id(project_id: project_id)
+      current_github_provider_credential = self.check_and_get_provider_credential
 
       # Create random folder for checkout, prefixed with `manual_build`
       checkout_folder = File.join(File.expand_path(project.local_repo_path), "manual_build_#{SecureRandom.uuid}")
@@ -27,7 +29,7 @@ module FastlaneCI
       repo = FastlaneCI::GitRepo.new(git_config: project.repo_config,
                                    local_folder: checkout_folder,
                             provider_credential: current_github_provider_credential)
-      current_sha = repo.most_recent_commit.sha
+      current_sha ||= repo.most_recent_commit.sha
       manual_triggers_allowed = project.job_triggers.any? { |trigger| trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual] }
 
       unless manual_triggers_allowed
@@ -41,7 +43,8 @@ module FastlaneCI
         project: project,
         sha: current_sha,
         github_service: FastlaneCI::GitHubService.new(provider_credential: current_github_provider_credential),
-        work_queue: FastlaneCI::GitRepo.git_action_queue # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
+        work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
+        trigger: project.find_triggers_of_type(trigger_type: :manual).first
       )
       build_runner.setup(parameters: nil)
       Services.build_runner_service.add_build_runner(build_runner: build_runner)
@@ -146,19 +149,20 @@ module FastlaneCI
       lane = params["selected_lane"]
       project_name = params["project_name"]
       branch = params["branch"]
+      trigger_type = params["selected_trigger"]
+      hour = params["hour"]
+      minute = params["minute"]
 
-      dir = Dir.mktmpdir
-      # Do this so we trigger the clone of the repo.
-      # TODO: Do this wherever it should be done, as we must redirect
-      # to the project details only when this task is finished.
-      repo = GitRepo.new(
-        git_config: repo_config,
-        provider_credential: provider_credential,
-        local_folder: dir,
-        async_start: false
-      )
-
-      repo.checkout_branch(branch: branch)
+      case trigger_type
+      when FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit]
+        trigger = FastlaneCI::CommitJobTrigger.new(branch: branch)
+      when FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual]
+        trigger = FastlaneCI::ManualJobTrigger.new(branch: branch)
+      when FastlaneCI::JobTrigger::TRIGGER_TYPE[:nightly]
+        trigger = FastlaneCI::NightlyJobTrigger.new(branch: branch, hour: hour.to_i, minute: minute.to_i)
+      else
+        raise "Couldn't create a JobTrigger"
+      end
 
       # We now have enough information to create the new project.
       # TODO: add job_triggers here
@@ -168,13 +172,25 @@ module FastlaneCI
         name: project_name,
         repo_config: repo_config,
         enabled: true,
-        platform: lane.split(" ").last,
-        lane: lane.split(" ").first,
+        platform: lane.split(" ").first,
+        lane: lane.split(" ").last,
         # TODO: Until we make a proper interface to attach JobTriggers to a Project, let's add a manual one for the selected branch.
-        job_triggers: [FastlaneCI::ManualJobTrigger.new(branch: branch)]
+        job_triggers: [trigger]
       )
 
       if !project.nil?
+        # Do this so we trigger the clone of the repo.
+        # TODO: Do this wherever it should be done, as we must redirect
+        # to the project details only when this task is finished.
+        repo = GitRepo.new(
+          git_config: repo_config,
+          provider_credential: provider_credential,
+          local_folder: project.local_repo_path,
+          async_start: false
+        )
+
+        repo.checkout_branch(branch: branch)
+
         redirect("#{HOME}/#{project.id}")
       else
         raise "Project couldn't be created"
@@ -185,28 +201,29 @@ module FastlaneCI
     get "#{HOME}/:project_id" do
       project = user_project_with_id(project_id: params[:project_id])
 
-      # TODO: We now access a file directly from the submodule
-      # That's of course far from ideal, and not something we want to do long term
-      # Long term, the best appraoch would probably to have the FastfileParser be
-      # its own Ruby gem, or even part of the fastlane/fastlane main repo
-      # For now, this is good enough, as we'll be moving so fast with this one
-
       project_path = project.local_repo_path
 
-      # TODO: remove this once the Fastfile peeker is implemented
-      absolute_fastfile_path = File.join(project_path, "master/fastlane/Fastfile")
-      fastfile_parser = Fastlane::FastfileParser.new(path: absolute_fastfile_path)
-      available_lanes = fastfile_parser.available_lanes
-
-      relative_fastfile_path = Pathname.new(absolute_fastfile_path).relative_path_from(Pathname.new(project_path))
-
+      # we set the values below to default to nil, just because `erb` has an easier time then
+      # checking for nil, instead of using `defined?` to see if a variable is defined
       locals = {
         project: project,
         title: "Project #{project.project_name}",
-        available_lanes: available_lanes,
-        fastfile_parser: fastfile_parser,
-        fastfile_path: relative_fastfile_path # TODO: rename param `fastfile_path` to `relative_fastfile_path`
+        available_lanes: nil,
+        fastfile_parser: nil,
+        fastfile_path: nil
       }
+
+      if File.directory?(project_path)
+        fastfile_path = FastlaneCI::FastfileFinder.search_path(path: project_path)
+        fastfile_parser = Fastlane::FastfileParser.new(path: fastfile_path)
+        available_lanes = fastfile_parser.available_lanes
+
+        relative_fastfile_path = Pathname.new(fastfile_path).relative_path_from(Pathname.new(project_path))
+
+        locals[:available_lanes] = available_lanes
+        locals[:fastfile_parser] = fastfile_parser
+        locals[:fastfile_path] = relative_fastfile_path
+      end
 
       erb(:project, locals: locals, layout: FastlaneCI.default_layout)
     end
