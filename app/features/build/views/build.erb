@@ -23,6 +23,15 @@
       <td>Job Trigger</td><td><%= build.trigger %></td>
     </tr>
     <tr>
+      <td>Sha</td><td><%= build.sha %></td>
+    </tr>
+    <tr>
+      <td>Build description</td><td><%= build.description %></td>
+    </tr>
+    <tr>
+      <td>Build status</td><td><%= build.status %></td>
+    </tr>
+    <tr>
       <td colspan="2">
         <a href="/projects_erb/<%= project.id %>/trigger?sha=<%= build.sha %>" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
           Re-Run for this commit
