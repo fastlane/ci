@@ -17,7 +17,7 @@ module FastlaneCI
     end
 
     # @return TaskQueue::Task
-    def add_build_runner(build_runner: nil)
+    def add_build_runner(build_runner:)
       raise "No build runner provided" unless build_runner.kind_of?(BuildRunner)
 
       build_runners << build_runner
