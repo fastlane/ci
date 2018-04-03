@@ -146,23 +146,24 @@ module FastlaneCI
       logger.debug("Done starting up repo: #{git_config.git_url}")
     end
 
-    def handle_exception(ex, message: nil)
-      unless message.nil?
-        logger.error(message)
+    # Message is used to display custom logging in the console.
+    def handle_exception(ex, console_message: nil)
+      unless console_message.nil?
+        logger.error(console_message)
       end
       logger.error(ex)
 
       # No way to notify nicely? Alright, let's die X-(
       raise ex unless notification_service
 
-      message = ex.message.to_s
-      if message.contains("unable to access")
+      user_unfriendly_message = ex.message.to_s
+      if user_unfriendly_message.contains("unable to access")
         priority = Notification::PRIORITIES[:urgent]
         notification_service.create_notification!(
           priority: priority,
           name: "Repo access error",
           message: "Unable to acccess #{git_config.git_url}",
-          details: ex.message
+          details: user_unfriendly_message
         )
       else
         raise ex
@@ -203,7 +204,7 @@ module FastlaneCI
                   repo.commit("Sync changes")
                   git.push("origin", branch: "master", force: true)
                 rescue StandardError => ex
-                  handle_exception(ex, message: "Error commiting changes to ci-config repo")
+                  handle_exception(ex, console_message: "Error commiting changes to ci-config repo")
                 end
               end
             else
@@ -218,7 +219,7 @@ module FastlaneCI
                 logger.debug("Pulling `master` #{git_config.git_url} in setup_repo")
                 pull
               rescue StandardError => ex
-                handle_exception(ex, message: "Error commiting changes to ci-config repo")
+                handle_exception(ex, console_message: "Error commiting changes to ci-config repo")
               end
             end
           else
@@ -368,7 +369,7 @@ module FastlaneCI
         begin
           git.pull
         rescue StandardError => ex
-          handle_exception(ex, message: "Error pulling #{git_config.git_url}")
+          handle_exception(ex, console_message: "Error pulling #{git_config.git_url}")
         end
 
         logger.debug("Done pulling #{git_config.git_url}")
@@ -383,7 +384,7 @@ module FastlaneCI
         begin
           git.branch(branch).checkout
         rescue StandardError => ex
-          handle_exception(ex, message: "Error checking out #{git_config.git_url}, branch: #{branch}")
+          handle_exception(ex, console_message: "Error checking out #{git_config.git_url}, branch: #{branch}")
         end
 
         logger.debug("Done checking out branch: #{branch} from #{git_config.git_url}")
@@ -398,7 +399,7 @@ module FastlaneCI
         begin
           git.reset_hard(git.gcommit(sha))
         rescue StandardError => ex
-          handle_exception(ex, message: "Error resetting and checking out sha: #{sha} from #{git_config.git_url}")
+          handle_exception(ex, console_message: "Error resetting and checking out sha: #{sha} from #{git_config.git_url}")
         end
 
         logger.debug("Done resetting and checking out sha: #{sha} from #{git_config.git_url}")
@@ -414,7 +415,7 @@ module FastlaneCI
           git.reset_hard
           git.clean(force: true, d: true)
         rescue StandardError => ex
-          handle_exception(ex, message: "Error resetting and cleaning #{git.branch.name} in #{git_config.git_url}")
+          handle_exception(ex, console_message: "Error resetting and cleaning #{git.branch.name} in #{git_config.git_url}")
         end
 
         logger.debug("Done reset_hard! #{git.branch.name} in #{git_config.git_url}".freeze)
@@ -458,7 +459,7 @@ module FastlaneCI
         begin
           git.push
         rescue StandardError => ex
-          handle_exception(ex, message: "Error pushing to #{git_config.git_url}")
+          handle_exception(ex, console_message: "Error pushing to #{git_config.git_url}")
         end
 
         logger.debug("Done pushing to #{git_config.git_url}")
@@ -485,7 +486,7 @@ module FastlaneCI
         begin
           git.remotes.each { |remote| git.fetch(remote) }
         rescue StandardError => ex
-          handle_exception(ex, message: "Error fetching each remote from #{git_config.git_url}")
+          handle_exception(ex, console_message: "Error fetching each remote from #{git_config.git_url}")
         end
 
         logger.debug("Done fetching #{git_config.git_url}".freeze)
@@ -503,7 +504,7 @@ module FastlaneCI
         begin
           git.pull(clone_url, branch)
         rescue StandardError => ex
-          handle_exception(ex, message: "Error switching to a fork: #{clone_url}, branch: #{branch}")
+          handle_exception(ex, console_message: "Error switching to a fork: #{clone_url}, branch: #{branch}")
         end
       end
     end
@@ -554,12 +555,14 @@ module FastlaneCI
       logger.debug("[#{git_config.id}]: Cloning git repo #{git_config.git_url} to #{@local_folder}")
 
       begin
-        Git.clone(git_config.git_url,
-                  "", # checkout into the local_folder
-                  path: local_folder,
-                  recursive: true)
+        Git.clone(
+          git_config.git_url,
+          "", # checkout into the local_folder
+          path: local_folder,
+          recursive: true
+        )
       rescue StandardError => ex
-        handle_exception(ex, message: "Error cloning #{git_config.git_url} to #{@local_folder}")
+        handle_exception(ex, console_message: "Error cloning #{git_config.git_url} to #{@local_folder}")
       end
     end
   end
