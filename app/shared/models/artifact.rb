@@ -20,7 +20,7 @@ module FastlaneCI
     attr_accessor :reference
 
     # @return [ArtifactProvider] The reference to the ArtifactProvider that stores the artifact
-    attr_reader :provider
+    attr_accessor :provider
 
     def initialize(type: nil, reference: nil, provider: nil, id: nil)
       @type = type
