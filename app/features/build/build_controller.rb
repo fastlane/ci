@@ -32,7 +32,7 @@ module FastlaneCI
         end
 
         if build_log_artifact
-          existing_rows = File.read(build_log_artifact.reference).gsub("\n", "<br />")
+          existing_rows = File.read(build_log_artifact.provider.retrieve!(artifact: build_log_artifact)).gsub("\n", "<br />")
         else
           raise "Couldn't load previous output for build #{build_number}"
         end

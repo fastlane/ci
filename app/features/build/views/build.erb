@@ -49,7 +49,7 @@
       <% build.artifacts.each do |current_artifact| %>
         <tr>
           <td><%= current_artifact.type %></td>
-          <td><%= current_artifact.reference %></td>
+          <td><%= current_artifact.provider.retrieve!(artifact: current_artifact) %></td>
         </tr>
       <% end %>
     </tbody>
