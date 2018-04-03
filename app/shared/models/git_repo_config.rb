@@ -7,14 +7,17 @@ module FastlaneCI
   class GitRepoConfig < RepoConfig
     include FastlaneCI::Logging
 
-    attr_accessor :full_name # GitHub full_name, like fastlane/ci (vs just `ci`)
+    # GitHub full_name, like fastlane/ci (vs just `ci`)
+    attr_reader :full_name
 
-    def initialize(id: nil,
-                   git_url: nil,
-                   description: nil,
-                   name: nil,
-                   full_name: nil,
-                   hidden: false)
+    def initialize(
+      id: nil,
+      git_url: nil,
+      description: nil,
+      name: nil,
+      full_name: nil,
+      hidden: false
+    )
       super(
         id: id,
         git_url: git_url,
@@ -24,7 +27,7 @@ module FastlaneCI
         hidden: hidden
       )
 
-      self.full_name = full_name
+      @full_name = full_name
     end
 
     def self.from_octokit_repo!(repo: nil)

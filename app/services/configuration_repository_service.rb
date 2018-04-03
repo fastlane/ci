@@ -114,12 +114,9 @@ module FastlaneCI
         repo_shortform, file_path, "Add initial #{file_path}", json_string
       )
     rescue Octokit::UnprocessableEntity
-      logger.debug(
-        <<~WARNING_MESSAGE
-          The file #{file_path} already exists in remote configuration repo:
-          #{repo_shortform}. Not overwriting the file.
-        WARNING_MESSAGE
-      )
+      # rubocop:disable Metrics/LineLength
+      logger.debug("The file #{file_path} already exists in remote configuration repo: #{repo_shortform}. Not overwriting the file.")
+      # rubocop:enable Metrics/LineLength
     end
 
     #####################################################
@@ -138,7 +135,8 @@ module FastlaneCI
       logger.debug("Checking that #{repo_shortform}/#{file_path} is a json array")
 
       contents_map = client.contents(repo_shortform, path: file_path)
-      contents_json = contents_map[:encoding] == "base64" ? Base64.decode64(contents_map[:content]) : contents_map[:content]
+      contents_json =
+        contents_map[:encoding] == "base64" ? Base64.decode64(contents_map[:content]) : contents_map[:content]
       contents = JSON.parse(contents_json)
 
       return contents.kind_of?(Array)

@@ -49,14 +49,15 @@ module FastlaneCI
         build_number = url_details[:build_number]
         project_id = url_details[:project_id]
 
-        self.websocket_clients[project_id] ||= {}
-        self.websocket_clients[project_id][build_number] ||= []
-        self.websocket_clients[project_id][build_number] << ws
+        websocket_clients[project_id] ||= {}
+        websocket_clients[project_id][build_number] ||= []
+        websocket_clients[project_id][build_number] << ws
 
         current_build_runner = Services.build_runner_service.find_build_runner(
           project_id: project_id,
           build_number: build_number
         )
+        next if current_build_runner.nil? # this is the case if the build was run a while ago
 
         # TODO: Think this through, do we properly add new listener, and notify them of line changes, etc.
         #       Also how does the "offboarding" of runners work once the tests are finished
@@ -80,7 +81,7 @@ module FastlaneCI
         build_number = url_details[:build_number]
         project_id = url_details[:project_id]
 
-        self.websocket_clients[project_id][build_number].delete(ws)
+        websocket_clients[project_id][build_number].delete(ws)
         ws = nil
       end
 

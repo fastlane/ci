@@ -7,11 +7,11 @@ module FastlaneCI
   class FastlaneCIOutput < FastlaneCore::Interface
     # The block being called for each new line that should
     # be stored in the log.
-    attr_accessor :each_line_block
+    attr_reader :each_line_block
 
     def initialize(each_line_block: nil)
       raise "No each_line_block provided" if each_line_block.nil?
-      self.each_line_block = each_line_block
+      @each_line_block = each_line_block
       @output_listeners = []
     end
 
@@ -27,7 +27,7 @@ module FastlaneCI
 
     def error(message)
       @output_listeners.each { |listener| listener.error(message) }
-      self.each_line_block.call(
+      each_line_block.call(
         type: :error,
         message: message,
         time: Time.now
@@ -36,7 +36,7 @@ module FastlaneCI
 
     def important(message)
       @output_listeners.each { |listener| listener.important(message) }
-      self.each_line_block.call(
+      each_line_block.call(
         type: :important,
         message: message,
         time: Time.now
@@ -45,7 +45,7 @@ module FastlaneCI
 
     def success(message)
       @output_listeners.each { |listener| listener.success(message) }
-      self.each_line_block.call(
+      each_line_block.call(
         type: :success,
         message: message,
         time: Time.now
@@ -56,7 +56,7 @@ module FastlaneCI
     # that means you're accidentally calling this method instead of a local variable on the stack frame before this
     def message(message)
       @output_listeners.each { |listener| listener.message(message) }
-      self.each_line_block.call(
+      each_line_block.call(
         type: :message,
         message: message,
         time: Time.now
@@ -65,7 +65,7 @@ module FastlaneCI
 
     def deprecated(message)
       @output_listeners.each { |listener| listener.deprecated(message) }
-      self.each_line_block.call(
+      each_line_block.call(
         type: :error,
         message: message,
         time: Time.now
@@ -74,7 +74,7 @@ module FastlaneCI
 
     def command(message)
       @output_listeners.each { |listener| listener.command(message) }
-      self.each_line_block.call(
+      each_line_block.call(
         type: :command,
         message: message,
         time: Time.now
@@ -85,7 +85,7 @@ module FastlaneCI
       actual = (message.split("\r").last || "") # as clearing the line will remove the `>` and the time stamp
       actual.split("\n").each do |msg|
         prefix = msg.include?("▸") ? "" : "▸ "
-        self.each_line_block.call(
+        each_line_block.call(
           type: :command_output,
           message: prefix + msg,
           time: Time.now
@@ -99,7 +99,7 @@ module FastlaneCI
 
     def header(message)
       @output_listeners.each { |listener| listener.header(message) }
-      self.each_line_block.call(
+      each_line_block.call(
         type: :header,
         message: message,
         time: Time.now
@@ -109,7 +109,7 @@ module FastlaneCI
     # TODO: Check if we can find a good way to not have to
     #   overwrite all these methods
     def crash!(exception)
-      self.each_line_block.call(
+      each_line_block.call(
         type: :crash,
         message: exception.to_s,
         time: Time.now
@@ -118,7 +118,7 @@ module FastlaneCI
     end
 
     def user_error!(error_message, options = {})
-      self.each_line_block.call(
+      each_line_block.call(
         type: :user_error,
         message: error_message,
         time: Time.now
@@ -127,7 +127,7 @@ module FastlaneCI
     end
 
     def shell_error!(error_message, options = {})
-      self.each_line_block.call(
+      each_line_block.call(
         type: :shell_error,
         message: error_message,
         time: Time.now
@@ -136,7 +136,7 @@ module FastlaneCI
     end
 
     def build_failure!(error_message, options = {})
-      self.each_line_block.call(
+      each_line_block.call(
         type: :build_failure,
         message: error_message,
         time: Time.now
@@ -145,7 +145,7 @@ module FastlaneCI
     end
 
     def test_failure!(error_message)
-      self.each_line_block.call(
+      each_line_block.call(
         type: :test_failure,
         message: error_message,
         time: Time.now
@@ -154,7 +154,7 @@ module FastlaneCI
     end
 
     def abort_with_message!(error_message)
-      self.each_line_block.call(
+      each_line_block.call(
         type: :abort,
         message: error_message,
         time: Time.now
@@ -191,7 +191,7 @@ module FastlaneCI
 
     def non_interactive!(message)
       important(message)
-      self.crash!("Could not retrieve response as fastlane runs fastlane.ci and can't ask for additional inputs during its run")
+      crash!("Can't ask for additional inputs during fastlane run when in CI")
     end
   end
 end

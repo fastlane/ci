@@ -17,7 +17,7 @@ module FastlaneCI
       # @param [any] **params
       # @return [JSONDataSource]
       def create(json_folder_path, **params)
-        instance = self.new
+        instance = new
         instance.json_folder_path = json_folder_path
         instance.after_creation(params)
         return instance

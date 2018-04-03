@@ -13,7 +13,7 @@ module FastlaneCI
     # @param [Build] build, the build which generated the artifact.
     # @param [Project] project, the project which generated the build.
     # @return [Artifact] the resulting Artifact after being stored by the ArtifactProvider.
-    def store!(artifact: nil, build: nil, project: nil)
+    def store!(artifact:, build:, project:)
       not_implemented(__method__)
     end
 
@@ -23,7 +23,7 @@ module FastlaneCI
     #
     # @param [Artifact] artifact, the artifact we want to retrieve.
     # @return [String] the resulting Artifact reference after being retrieved by the ArtifactProvider.
-    def retrieve!(artifact: nil)
+    def retrieve!(artifact:)
       not_implemented(__method__)
     end
   end

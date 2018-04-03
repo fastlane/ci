@@ -6,15 +6,15 @@ module FastlaneCI
     #
     # The Artifact model provides a simple interface to store a reference to any kind of data, but it is a dummy class.
     # It does not know how to access to its resource.
-    # Also, it holds a reference to the ArtifactProvider which created the Artifact itself.
+    # Also, it holds a reference to the ArtifactProvider which created the Artifact itself
     #
 
     # @return [UUID] The id of the artifact.
-    attr_accessor :id
+    attr_reader :id
 
     # type is just a String that refers to the kind of data that the Artifact represents (i.e., ipa, apk, log, etc.)
     # @return [String] The type or kind of artifact.
-    attr_accessor :type
+    attr_reader :type
 
     # @return [String] The reference to the artifact to a certain ArtifactProvider
     attr_accessor :reference
@@ -23,10 +23,10 @@ module FastlaneCI
     attr_accessor :provider
 
     def initialize(type: nil, reference: nil, provider: nil, id: nil)
-      self.type = type
-      self.reference = reference
-      self.provider = provider
-      self.id = id || SecureRandom.uuid
+      @type = type
+      @reference = reference
+      @provider = provider
+      @id = id || SecureRandom.uuid
     end
   end
 end

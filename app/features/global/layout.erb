@@ -11,6 +11,7 @@
     <!-- 
     <%= erb :"../../partials/notification_banner" %> 
     -->
+    <!-- More info https://github.com/fastlane/ci/issues/514 -->
     <%= yield %>
   </body>
 </html>
@@ -18,13 +19,15 @@
 <!-- Modal display script -->
 <script>
   var dialog = document.querySelector('dialog');
-  if (! dialog.showModal) dialogPolyfill.registerDialog(dialog);
+  if (dialog) {
+    if (!dialog.showModal) dialogPolyfill.registerDialog(dialog);
 
-  <% if message %>
-    dialog.showModal();
-  <% end %>
+    <% if message %>
+      dialog.showModal();
+    <% end %>
 
-  dialog.querySelector('.close').addEventListener('click', function() {
-    dialog.close();
-  });
+    dialog.querySelector('.close').addEventListener('click', function() {
+      dialog.close();
+    });
+  }
 </script>

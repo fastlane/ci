@@ -101,7 +101,7 @@ module FastlaneCI
           logger.debug(ex.to_s)
           raise "Error parsing build information on path '#{File.expand_path(build_path)}'"
         end
-        build.project = project # this is not part of the x.json file
+        build.update_project!(project) # this is not part of the x.json file
         build
       end
 
