@@ -11,6 +11,10 @@ module FastlaneCI
     # The raw message to show
     attr_reader :message
 
+    # The plan is to remove this, as we want to render it on the front-end
+    # Tracked as GitHub issue https://github.com/fastlane/ci/issues/213
+    attr_accessor :html
+
     # Timestamp (Time)
     attr_reader :time
 
@@ -33,7 +37,8 @@ module FastlaneCI
       return {
         type: type,
         message: message,
-        time: time
+        time: time,
+        html: html
       }.to_json
     end
   end
