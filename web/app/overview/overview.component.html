@@ -8,14 +8,16 @@
   </div>
 </div>
 <div fci-grid *ngIf="projects">
-  <mat-card fci-cell="16" class="fci-overview-project-list">
+  <div fci-cell="16" class="fci-overview-project-list">
     <mat-nav-list>
       <!-- Add anchor to route to the project details page -->
-      <mat-list-item *ngFor="let project of projects">
-        <!-- TODO Add status icon -->
-        <mat-icon matListIcon>do_not_disturb</mat-icon>
-        {{project.name}}
-      </mat-list-item>
+      <mat-card *ngFor="let project of projects">
+        <mat-list-item>
+          <!-- TODO Add status icon -->
+          <mat-icon matListIcon>do_not_disturb</mat-icon>
+          <h4 matLine>{{project.name}}</h4>
+        </mat-list-item>
+      </mat-card>
     </mat-nav-list>
-  </mat-card>
+  </div>
 </div>
