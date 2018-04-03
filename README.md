@@ -40,10 +40,6 @@ With this project, we don't just want to make using CI easier, we want to bring 
 - We also have our current [milestones listed](https://github.com/fastlane/ci/milestones)
 - We started a [poll](https://github.com/fastlane/ci/issues/93) to get a better feeling of how you'd be using `fastlane.ci`, please comment and let us know.
 
-<a href="https://github.com/fastlane/ci/milestones">
-  <img src="docs/assets/github_milestones.png" width="600" />
-</a>
-
 ## Docs
 
 - [VISION.md](VISION.md): Describes the overall vision and idea of this project, with its core principals
