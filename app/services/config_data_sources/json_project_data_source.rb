@@ -168,7 +168,13 @@ module FastlaneCI
     end
 
     def create_project!(
-      name: nil, repo_config: nil, enabled: nil, platform: nil, lane: nil, artifact_provider: nil, job_triggers: nil
+      name: nil,
+      repo_config: nil,
+      enabled: nil,
+      platform: nil,
+      lane: nil,
+      artifact_provider: nil,
+      job_triggers: nil
     )
       projects = projects.clone
       new_project = Project.new(

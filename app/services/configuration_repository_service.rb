@@ -139,11 +139,7 @@ module FastlaneCI
 
       contents_map = client.contents(repo_shortform, path: file_path)
       contents_json =
-        if contents_map[:encoding] == "base64"
-          Base64.decode64(contents_map[:content])
-        else
-          contents_map[:content]
-        end
+        contents_map[:encoding] == "base64" ? Base64.decode64(contents_map[:content]) : contents_map[:content]
       contents = JSON.parse(contents_json)
 
       return contents.kind_of?(Array)

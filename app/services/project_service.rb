@@ -22,7 +22,13 @@ module FastlaneCI
     end
 
     def create_project!(
-      name: nil, repo_config: nil, enabled: nil, platform: nil, lane: nil, artifact_provider: nil, job_triggers: nil
+      name: nil,
+      repo_config: nil,
+      enabled: nil,
+      platform: nil,
+      lane: nil,
+      artifact_provider: nil,
+      job_triggers: nil
     )
       if !repo_config.nil? && repo_config.class > RepoConfig
         raise "repo_config must be configured with an instance of #{RepoConfig.name}"
@@ -92,7 +98,10 @@ module FastlaneCI
       configured_repos = []
 
       projects.each do |project|
-        branches = project.job_triggers.map(&:branch).uniq
+        branches = project.job_triggers
+                          .map(&:branch)
+                          .uniq
+
         branches.each do |branch|
           logger.debug("Ensuring #{project.repo_config.git_url} (branch: #{branch}) is checked out")
           repo = GitRepo.new(

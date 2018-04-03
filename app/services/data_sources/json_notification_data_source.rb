@@ -37,7 +37,8 @@ module FastlaneCI
       JSONProjectDataSource.projects_file_semaphore.synchronize do
         return unless File.exist?(notifications_file_path)
 
-        return JSON.parse(File.read(notifications_file_path)).map(&Notification.method(:from_json!))
+        return JSON.parse(File.read(notifications_file_path))
+                   .map(&Notification.method(:from_json!))
       end
     end
 
