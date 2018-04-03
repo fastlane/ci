@@ -16,6 +16,8 @@ module FastlaneCI
     end
 
     def self.take_off
+      @launch_queue = TaskQueue::TaskQueue.new(name: "fastlane.ci launch queue")
+
       require_fastlane_ci
       verify_app_built
       verify_dependencies
@@ -28,6 +30,9 @@ module FastlaneCI
       configure_thread_abort
       Services.reset_services!
       clone_project_repos
+
+      # order matters here
+      cleanup_old_checkouts
 
       register_available_controllers
       start_github_workers
@@ -47,6 +52,24 @@ module FastlaneCI
       if ENV["WEB_APP"]
         app_exists = File.file?(File.join("public", ".dist", "index.html"))
         raise "The web application is not built. Please build with the Angular CLI and Try Again.\nEx. ng build --deploy-url=\"/.dist\"" unless app_exists
+      end
+    end
+
+    def self.cleanup_old_checkouts
+      return unless ENV["FASTLANE_CI_CLEANUP_OLD_CHECKOUTS"]
+
+      all_projects = Services.config_service.projects(provider_credential: Services.provider_credential)
+
+      # find all projects that are not the fastlane-ci-config
+      non_config_projects = all_projects.select do |project|
+        # don't include fastlane-ci-config
+        # add some protection for accidental directory deletion, if the directory is `.` or `` we'll kills stuff on accident.
+        # so just say if it's > 5 chars long, it's probably an actual ID and not a bug
+        project.id != "fastlane-ci-config" && project.id.to_s.length > 5
+      end
+
+      non_config_projects.each do |project|
+        FileUtils.rm_rf(File.join(File.expand_path("~/.fastlane/ci/"), project.id))
       end
     end
 
@@ -133,8 +156,15 @@ module FastlaneCI
       github_projects = Services.config_service.projects(provider_credential: Services.provider_credential)
       github_service = FastlaneCI::GitHubService.new(provider_credential: Services.provider_credential)
 
-      run_pending_github_builds(projects: github_projects, github_service: github_service)
-      enqueue_builds_for_open_github_prs_with_no_status(projects: github_projects, github_service: github_service)
+      restart_pending_builds_task = TaskQueue::Task.new(work_block: proc {
+        run_pending_github_builds(projects: github_projects, github_service: github_service)
+      })
+      @launch_queue.add_task_async(task: restart_pending_builds_task)
+
+      start_builds_for_prs_with_no_status_builds_task = TaskQueue::Task.new(work_block: proc {
+        enqueue_builds_for_open_github_prs_with_no_status(projects: github_projects, github_service: github_service)
+      })
+      @launch_queue.add_task_async(task: start_builds_for_prs_with_no_status_builds_task)
     end
 
     def self.launch_workers
@@ -203,7 +233,8 @@ module FastlaneCI
             sha: sha,
             github_service: github_service,
             work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
-            git_fork_config: git_fork_config
+            git_fork_config: git_fork_config,
+            trigger: project.find_triggers_of_type(trigger_type: :commit).first
           )
           build_runner.setup(parameters: nil)
           Services.build_runner_service.add_build_runner(build_runner: build_runner)
@@ -244,9 +275,9 @@ module FastlaneCI
 
           git_fork_config = nil
           if open_pr.fork_of_repo?(repo_full_name: project.repo_config.full_name)
-            git_fork_config = GitForkConfig.new(current_sha: sha,
-                                                     branch: matching_open_pr.branch,
-                                                  clone_url: matching_open_pr.clone_url)
+            git_fork_config = GitForkConfig.new(current_sha: open_pr.current_sha,
+                                                     branch: open_pr.branch,
+                                                  clone_url: open_pr.clone_url)
           end
 
           logger.debug("Found sha: #{open_pr.current_sha} in #{open_pr.repo_full_name} missing status, adding build.")
@@ -256,7 +287,8 @@ module FastlaneCI
             sha: open_pr.current_sha,
             github_service: github_service,
             work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
-            git_fork_config: git_fork_config
+            git_fork_config: git_fork_config,
+            trigger: project.find_triggers_of_type(trigger_type: :commit).first
           )
           build_runner.setup(parameters: nil)
           Services.build_runner_service.add_build_runner(build_runner: build_runner)

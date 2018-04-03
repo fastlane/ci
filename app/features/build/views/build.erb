@@ -11,6 +11,30 @@
 
 
 <h1>Build Log <%= build.number %></h1>
+<table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+  <tbody>
+    <tr>
+      <td>Build duration</td><td><%= build.duration.round %> seconds</td>
+    </tr>
+    <tr>
+      <td>Build started</td><td><%= build.timestamp.strftime("%Y%m%dT%H%M%S%z") %></td></tr>
+    </tr>
+    <tr>
+      <td>Job Trigger</td><td><%= build.trigger %></td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <a href="/projects_erb/<%= project.id %>/trigger?sha=<%= build.sha %>" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+          Re-Run for this commit
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+
 
 <code id="log">
   <% if existing_rows.count > 0 %>
