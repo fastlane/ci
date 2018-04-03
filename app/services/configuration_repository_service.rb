@@ -9,6 +9,20 @@ module FastlaneCI
     include FastlaneCI::Logging
     include FastlaneCI::GitHubHandler
 
+    class << self
+      # Loads the octokit cache stack for speed-up calls to github service.
+      # As explained in: https://github.com/octokit/octokit.rb#caching
+      def load_octokit_cache_stack
+        @stack ||= Faraday::RackBuilder.new do |builder|
+          builder.use(Faraday::HttpCache, serializer: Marshal, shared_cache: false)
+          builder.use(Octokit::Response::RaiseError)
+          builder.adapter(Faraday.default_adapter)
+        end
+        return if Octokit.middleware.handlers.include?(Faraday::HttpCache)
+        Octokit.middleware = @stack
+      end
+    end
+
     # @return [Octokit::Client]
     attr_reader :client
 
@@ -16,7 +30,20 @@ module FastlaneCI
     #
     # @param  [ProviderCredential] provider_credential
     def initialize(provider_credential: nil)
+      ConfigurationRepositoryService.load_octokit_cache_stack
       @client = Octokit::Client.new(access_token: provider_credential.api_token)
+      begin
+        if @client.rate_limit!.remaining
+          sleep_time = @client.rate_limit!.resets_in
+          logger.error("Rate Limit exceeded, sleeping for #{sleep_time} seconds")
+          sleep(sleep_time)
+        end
+      rescue Octokit::TooManyRequests => ex
+        logger.error(ex)
+        # For some reason, setting the api token sometimes resets some internal issue with Octokit Client
+        # Rate Limit Exceptions.
+        @client.access_token = provider_credential.api_token
+      end
     end
 
     # Creates a remote repository if it does not already exist, complete with
@@ -118,7 +145,7 @@ module FastlaneCI
         client.contents(repo_shortform, path: file_path)
       end
     rescue Octokit::NotFound
-      client.create_contents(
+      @client.create_contents(
         repo_shortform, file_path, "Add initial #{file_path}", json_string
       )
     rescue Octokit::UnprocessableEntity
