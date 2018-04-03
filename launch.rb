@@ -63,9 +63,9 @@ module FastlaneCI
       # find all projects that are not the fastlane-ci-config
       non_config_projects = all_projects.select do |project|
         # don't include fastlane-ci-config
-        # add some protection for accidental directory deletion, if the directory is `.` or `` we'll kills stuff on accident. 
-        # so just say if it's > 5 chars long, it's probably an actual ID and not a bug 
-        project.id != "fastlane-ci-config" && project.id.to_s.length > 5 
+        # add some protection for accidental directory deletion, if the directory is `.` or `` we'll kills stuff on accident.
+        # so just say if it's > 5 chars long, it's probably an actual ID and not a bug
+        project.id != "fastlane-ci-config" && project.id.to_s.length > 5
       end
 
       non_config_projects.each do |project|
