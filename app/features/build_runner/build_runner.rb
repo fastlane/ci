@@ -91,19 +91,17 @@ module FastlaneCI
     end
 
     def complete_run(start_time:, artifact_paths: [])
-      # Disable due to https://github.com/fastlane/ci/issues/380
-      # artifacts = artifact_paths.map do |artifact|
-      #   Artifact.new(
-      #     type: artifact[:type],
-      #     reference: artifact[:path],
-      #     provider: project.artifact_provider
-      #   )
-      # end.map do |artifact|
-      #   project.artifact_provider.store!(artifact: artifact, build: current_build, project: project)
-      # end
+      artifacts = artifact_paths.map do |artifact|
+        Artifact.new(
+          type: artifact[:type],
+          reference: artifact[:path],
+          provider: project.artifact_provider
+        )
+      end.map do |artifact|
+        project.artifact_provider.store!(artifact: artifact, build: current_build, project: project)
+      end
 
-      # self.current_build.artifacts = artifacts
-      current_build.artifacts = []
+      current_build.artifacts = artifacts
 
       duration = Time.now - start_time
       current_build.duration = duration
@@ -116,6 +114,15 @@ module FastlaneCI
       current_build.duration = duration
       current_build.status = :failure # TODO: also handle failure
       save_build_status!
+    ensure
+      # Make sure to notify the listeners that the build is over
+      new_row(
+        FastlaneCI::BuildRunnerOutputRow.new(
+          type: :last_message,
+          message: nil,
+          time: Time.now
+        )
+      )
     end
 
     def checkout_sha
@@ -215,9 +222,10 @@ module FastlaneCI
     def start
       logger.debug("Starting build runner #{self.class} for #{project.project_name} #{project.id} sha: #{sha} now...")
       start_time = Time.now
-      artifact_handler_block = proc { |artifact_paths|
+
+      artifact_handler_block = proc do |artifact_paths|
         complete_run(start_time: start_time, artifact_paths: artifact_paths)
-      }
+      end
 
       work_block = proc {
         pre_run_action
