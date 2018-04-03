@@ -6,6 +6,7 @@ require "securerandom"
 require "digest"
 require "task_queue"
 require "faraday-http-cache"
+require "fileutils"
 
 require_relative "../logging_module"
 
@@ -40,7 +41,9 @@ module FastlaneCI
   # It is **important** that from the outside you don't access `GitRepoObject.git.something` directly
   # as the auth won't be setup. This system is designed to authenticate the user per action, meaning
   # that each pull, push, fetch etc. is performed using a specific user
+  # rubocop:disable Metrics/ClassLength
   class GitRepo
+    # rubocop:enable Metrics/ClassLength
     include FastlaneCI::Logging
 
     # @return [GitRepoConfig]
@@ -52,6 +55,8 @@ module FastlaneCI
 
     attr_reader :local_folder # where we are keeping the local repo checkout
 
+    attr_reader :notification_service # when we have issues, we need to push them somewhere
+
     # This callback is used when the instance is initialized in async mode, so you can define a proc
     # with the final GitRepo configured.
     #   @example
@@ -61,6 +66,16 @@ module FastlaneCI
     attr_accessor :callback
 
     class << self
+      def pushes_disabled?
+        push_state = ENV["FASTLANE_CI_DISABLE_PUSHES"]
+        return false if push_state.nil?
+
+        push_state = push_state.to_s
+        return false if push_state == "false" || push_state == "0"
+
+        return true
+      end
+
       attr_accessor :git_action_queue
 
       # Loads the octokit cache stack for speed-up calls to github service.
@@ -91,7 +106,8 @@ module FastlaneCI
       provider_credential: nil,
       async_start: false,
       sync_setup_timeout_seconds: 300,
-      callback: nil
+      callback: nil,
+      notification_service:
     )
       GitRepo.load_octokit_cache_stack
       logger.debug("Creating repo in #{local_folder} for a copy of #{git_config.git_url}")
@@ -107,6 +123,7 @@ module FastlaneCI
       @git_config = git_config
       @local_folder = local_folder
       @callback = callback
+      @notification_service = notification_service
 
       # Ok, so now we need to pull the bit of information from the credentials that we know we need for git repos
       case provider_credential.type
@@ -123,36 +140,58 @@ module FastlaneCI
         raise "unsupported credential type: #{provider_credential.type}"
       end
 
-      logger.debug("Adding task to setup repo #{self.git_config.git_url} at: #{local_folder}")
+      logger.debug("Adding task to setup repo #{git_config.git_url} at: #{local_folder}")
 
       setup_task = git_action_with_queue(ensure_block: proc { callback_block(async_start) }) do
-        logger.debug("Starting setup_repo #{self.git_config.git_url}".freeze)
+        logger.debug("Starting setup_repo #{git_config.git_url}".freeze)
         setup_repo
-        logger.debug("Done setup_repo #{self.git_config.git_url}".freeze)
+        logger.debug("Done setup_repo #{git_config.git_url}".freeze)
       end
 
       # if we're starting asynchronously, we can return now.
       if async_start
-        logger.debug("Asynchronously starting up repo: #{self.git_config.git_url}")
+        logger.debug("Asynchronously starting up repo: #{git_config.git_url}")
         return
       end
 
-      logger.debug("Synchronously starting up repo: #{self.git_config.git_url} at: #{local_folder}")
+      logger.debug("Synchronously starting up repo: #{git_config.git_url} at: #{local_folder}")
       now = Time.now.utc
       sleep_timeout = now + sync_setup_timeout_seconds # 10 second startup timeout
 
       while !setup_task.completed && now < sleep_timeout
         time_left = sleep_timeout - now
-        logger.debug("Not setup yet, sleeping (time before timeout: #{time_left}) #{self.git_config.git_url}")
+        logger.debug("Not setup yet, sleeping (time before timeout: #{time_left}) #{git_config.git_url}")
         sleep(2)
         now = Time.now.utc
       end
 
-      if now > sleep_timeout
-        raise "Unable to start git repo #{git_config.git_url} in #{sync_setup_timeout_seconds} seconds"
-      end
+      repo_url = git_config.git_url
+      raise "Unable to start git repo #{repo_url} in #{sync_setup_timeout_seconds} seconds" if now > sleep_timeout
+      logger.debug("Done starting up repo: #{repo_url}")
+    end
 
-      logger.debug("Done starting up repo: #{self.git_config.git_url}")
+    # Message is used to display custom logging in the console.
+    def handle_exception(ex, console_message: nil)
+      unless console_message.nil?
+        logger.error(console_message)
+      end
+      logger.error(ex)
+
+      # No way to notify nicely? Alright, let's die X-(
+      raise ex unless notification_service
+
+      user_unfriendly_message = ex.message.to_s
+      if user_unfriendly_message.contains("unable to access")
+        priority = Notification::PRIORITIES[:urgent]
+        notification_service.create_notification!(
+          priority: priority,
+          name: "Repo access error",
+          message: "Unable to acccess #{git_config.git_url}",
+          details: user_unfriendly_message
+        )
+      else
+        raise ex
+      end
     end
 
     def setup_repo
@@ -184,27 +223,32 @@ module FastlaneCI
               # TODO: move this stuff out of here
               # TODO: In case there are conflicts with remote, we want to decide which way we take.
               # For now, we merge using the 'recursive' strategy.
-              if repo.status.changed.count > 0 || repo.status.added.count > 0 || repo.status.deleted.count > 0 ||
+              if repo.status.changed.count > 0 ||
+                 repo.status.added.count > 0 ||
+                 repo.status.deleted.count > 0 ||
                  repo.status.untracked.count > 0
                 begin
                   repo.add(all: true)
                   repo.commit("Sync changes")
-                  git.push("origin", branch: "master", force: true)
+                  git.push("origin", branch: "master", force: true) unless GitRepo.pushes_disabled?
                 rescue StandardError => ex
-                  logger.error("Error commiting changes to ci-config repo")
-                  logger.error(ex)
+                  handle_exception(ex, console_message: "Error commiting changes to ci-config repo")
                 end
               end
             else
               logger.debug("Resetting #{git_config.git_url} in setup_repo")
-              git.reset_hard
-              logger.debug("Ensuring we're on `master` for #{git_config.git_url} in setup_repo")
-              git.branch("master").checkout
-              logger.debug("Resetting `master` #{git_config.git_url} in setup_repo")
-              git.reset_hard
+              begin
+                git.reset_hard
+                logger.debug("Ensuring we're on `master` for #{git_config.git_url} in setup_repo")
+                git.branch("master").checkout
+                logger.debug("Resetting `master` #{git_config.git_url} in setup_repo")
+                git.reset_hard
 
-              logger.debug("Pulling `master` #{git_config.git_url} in setup_repo")
-              pull
+                logger.debug("Pulling `master` #{git_config.git_url} in setup_repo")
+                pull
+              rescue StandardError => ex
+                handle_exception(ex, console_message: "Error commiting changes to ci-config repo")
+              end
             end
           else
             logger.debug(
@@ -364,7 +408,13 @@ module FastlaneCI
       perform_block(use_global_git_mutex: use_global_git_mutex) do
         logger.info("Starting pull #{git_config.git_url}")
         setup_auth(repo_auth: repo_auth)
-        git.pull
+
+        begin
+          git.pull
+        rescue StandardError => ex
+          handle_exception(ex, console_message: "Error pulling #{git_config.git_url}")
+        end
+
         logger.debug("Done pulling #{git_config.git_url}")
       end
     end
@@ -373,27 +423,47 @@ module FastlaneCI
       perform_block(use_global_git_mutex: use_global_git_mutex) do
         logger.info("Checking out branch: #{branch} from #{git_config.git_url}")
         setup_auth(repo_auth: repo_auth)
-        git.branch(branch).checkout
+
+        begin
+          git.branch(branch).checkout
+        rescue StandardError => ex
+          handle_exception(ex, console_message: "Error checking out #{git_config.git_url}, branch: #{branch}")
+        end
+
         logger.debug("Done checking out branch: #{branch} from #{git_config.git_url}")
       end
     end
 
     def checkout_commit(sha: nil, repo_auth: self.repo_auth, use_global_git_mutex: true)
       perform_block(use_global_git_mutex: use_global_git_mutex) do
-        logger.info("Checking out sha: #{sha} from #{git_config.git_url}")
+        repo_url = git_config.git_url
+        logger.info("Checking out sha: #{sha} from #{repo_url}")
         setup_auth(repo_auth: repo_auth)
-        git.reset_hard(git.gcommit(sha))
-        logger.debug("Done checking out sha: #{sha} from #{git_config.git_url}")
+
+        begin
+          git.reset_hard(git.gcommit(sha))
+        rescue StandardError => ex
+          handle_exception(ex, console_message: "Error resetting and checking out sha: #{sha} from #{repo_url}")
+        end
+
+        logger.debug("Done resetting and checking out sha: #{sha} from #{repo_url}")
       end
     end
 
     # Discard any changes
     def reset_hard!(use_global_git_mutex: true)
       perform_block(use_global_git_mutex: use_global_git_mutex) do
-        logger.debug("Starting reset_hard! #{git.branch.name} in #{git_config.git_url}".freeze)
-        git.reset_hard
-        git.clean(force: true, d: true)
-        logger.debug("Done reset_hard! #{git.branch.name} in #{git_config.git_url}".freeze)
+        repo_url = git_config.git_url
+        logger.debug("Starting reset_hard! #{git.branch.name} in #{repo_url}".freeze)
+
+        begin
+          git.reset_hard
+          git.clean(force: true, d: true)
+        rescue StandardError => ex
+          handle_exception(ex, console_message: "Error resetting and cleaning #{git.branch.name} in #{repo_url}")
+        end
+
+        logger.debug("Done reset_hard! #{git.branch.name} in #{repo_url}".freeze)
       end
     end
 
@@ -418,19 +488,33 @@ module FastlaneCI
           logger.debug("No changes in repo #{git_config.full_name}, skipping commit #{commit_message}")
         else
           git.commit(commit_message)
-          push(use_global_git_mutex: false) if push_after_commit
+          unless GitRepo.pushes_disabled?
+            push(use_global_git_mutex: false) if push_after_commit
+          end
+
           logger.debug("Done commit_changes! #{git_config.full_name} for #{repo_auth.username}")
         end
       end
     end
 
     def push(use_global_git_mutex: true, repo_auth: self.repo_auth)
+      if GitRepo.pushes_disabled?
+        logger.debug("Skipping push to #{git_config.git_url}, pushes are disable")
+        return
+      end
+
       perform_block(use_global_git_mutex: use_global_git_mutex) do
         logger.debug("Pushing to #{git_config.git_url}")
         setup_author(full_name: repo_auth.full_name, username: repo_auth.username)
         self.temporary_storage_path = setup_auth(repo_auth: repo_auth)
         # TODO: how do we handle branches
-        git.push
+
+        begin
+          git.push
+        rescue StandardError => ex
+          handle_exception(ex, console_message: "Error pushing to #{git_config.git_url}")
+        end
+
         logger.debug("Done pushing to #{git_config.git_url}")
       end
     end
@@ -451,7 +535,13 @@ module FastlaneCI
       perform_block(use_global_git_mutex: use_global_git_mutex) do
         logger.debug("Starting fetch #{git_config.git_url}".freeze)
         self.temporary_storage_path = setup_auth(repo_auth: repo_auth)
-        git.remotes.each { |remote| git.fetch(remote) }
+
+        begin
+          git.remotes.each { |remote| git.fetch(remote) }
+        rescue StandardError => ex
+          handle_exception(ex, console_message: "Error fetching each remote from #{git_config.git_url}")
+        end
+
         logger.debug("Done fetching #{git_config.git_url}".freeze)
       end
     end
@@ -463,7 +553,12 @@ module FastlaneCI
         # TODO: make sure it doesn't exist yet
         git.branch(local_branch_name)
         reset_hard!(use_global_git_mutex: false)
-        git.pull(clone_url, branch)
+
+        begin
+          git.pull(clone_url, branch)
+        rescue StandardError => ex
+          handle_exception(ex, console_message: "Error switching to a fork: #{clone_url}, branch: #{branch}")
+        end
       end
     end
 
@@ -504,19 +599,24 @@ module FastlaneCI
       # git_config.id.length > 1 to ensure we're not empty or a space
       if git_config.id.length > 1 && Dir.exist?(existing_repo_for_project)
         logger.debug("Removing existing repo at: #{existing_repo_for_project}")
-        require "fileutils"
+
         # Danger zone
         FileUtils.rm_r(existing_repo_for_project)
       end
 
       self.temporary_storage_path = setup_auth(repo_auth: repo_auth)
       logger.debug("[#{git_config.id}]: Cloning git repo #{git_config.git_url} to #{@local_folder}")
-      Git.clone(
-        git_config.git_url,
-        "", # checkout into the local_folder
-        path: local_folder,
-        recursive: true
-      )
+
+      begin
+        Git.clone(
+          git_config.git_url,
+          "", # checkout into the local_folder
+          path: local_folder,
+          recursive: true
+        )
+      rescue StandardError => ex
+        handle_exception(ex, console_message: "Error cloning #{git_config.git_url} to #{@local_folder}")
+      end
     end
   end
 end

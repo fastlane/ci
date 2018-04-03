@@ -19,12 +19,17 @@ module FastlaneCI
     attr_reader :scheduler
     attr_reader :github_service
 
-    def initialize(provider_credential: nil, project: nil)
+    def initialize(provider_credential: nil, project: nil, notification_service:)
       @trigger_type = FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit]
       @scheduler = WorkerScheduler.new(interval_time: 10)
       @github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
 
-      super(provider_credential: provider_credential, project: project) # This starts the work by calling `work`
+      # This starts the work by calling `work`
+      super(
+        provider_credential: provider_credential,
+        project: project,
+        notification_service: notification_service
+      )
     end
 
     def check_for_new_commits
@@ -61,7 +66,8 @@ module FastlaneCI
         create_and_queue_build_task(
           sha: pr.current_sha,
           trigger: project.find_triggers_of_type(trigger_type: :commit).first,
-          git_fork_config: git_fork_config
+          git_fork_config: git_fork_config,
+          notification_service: notification_service
         )
       end
     end
