@@ -90,13 +90,15 @@ module FastlaneCI
     # @param sync_setup_timeout_seconds [Integer] When in sync setup mode, how many seconds to wait until raise an
     #        exception. (Defaults to 300)
     # @param callback [proc(GitRepo)] When in async setup mode, the proc to be called with the final GitRepo setup.
-    def initialize(git_config: nil,
-                   local_folder: nil,
-                   provider_credential: nil,
-                   async_start: false,
-                   sync_setup_timeout_seconds: 300,
-                   callback: nil,
-                   notification_service:)
+    def initialize(
+      git_config: nil,
+      local_folder: nil,
+      provider_credential: nil,
+      async_start: false,
+      sync_setup_timeout_seconds: 300,
+      callback: nil,
+      notification_service:
+    )
       GitRepo.load_octokit_cache_stack
       logger.debug("Creating repo in #{local_folder} for a copy of #{git_config.git_url}")
 
