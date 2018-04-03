@@ -40,7 +40,9 @@ module FastlaneCI
   # It is **important** that from the outside you don't access `GitRepoObject.git.something` directly
   # as the auth won't be setup. This system is designed to authenticate the user per action, meaning
   # that each pull, push, fetch etc. is performed using a specific user
+  # rubocop:disable Metrics/ClassLength
   class GitRepo
+    # rubocop:enable Metrics/ClassLength
     include FastlaneCI::Logging
 
     # @return [GitRepoConfig]
@@ -61,6 +63,16 @@ module FastlaneCI
     attr_accessor :callback
 
     class << self
+      def pushes_disabled?
+        push_state = ENV["FASTLANE_CI_DISABLE_PUSHES"]
+        return false if push_state.nil?
+
+        push_state = push_state.to_s
+        return false if push_state == "false" || push_state == "0"
+
+        return true
+      end
+
       attr_accessor :git_action_queue
 
       # Loads the octokit cache stack for speed-up calls to github service.
@@ -184,12 +196,14 @@ module FastlaneCI
               # TODO: move this stuff out of here
               # TODO: In case there are conflicts with remote, we want to decide which way we take.
               # For now, we merge using the 'recursive' strategy.
-              if repo.status.changed.count > 0 || repo.status.added.count > 0 || repo.status.deleted.count > 0 ||
+              if repo.status.changed.count > 0 ||
+                 repo.status.added.count > 0 ||
+                 repo.status.deleted.count > 0 ||
                  repo.status.untracked.count > 0
                 begin
                   repo.add(all: true)
                   repo.commit("Sync changes")
-                  git.push("origin", branch: "master", force: true)
+                  git.push("origin", branch: "master", force: true) unless GitRepo.pushes_disabled?
                 rescue StandardError => ex
                   logger.error("Error commiting changes to ci-config repo")
                   logger.error(ex)
@@ -418,13 +432,21 @@ module FastlaneCI
           logger.debug("No changes in repo #{git_config.full_name}, skipping commit #{commit_message}")
         else
           git.commit(commit_message)
-          push(use_global_git_mutex: false) if push_after_commit
+          unless GitRepo.pushes_disabled?
+            push(use_global_git_mutex: false) if push_after_commit
+          end
+
           logger.debug("Done commit_changes! #{git_config.full_name} for #{repo_auth.username}")
         end
       end
     end
 
     def push(use_global_git_mutex: true, repo_auth: self.repo_auth)
+      if GitRepo.pushes_disabled?
+        logger.debug("Skipping push to #{git_config.git_url}, pushes are disable")
+        return
+      end
+
       perform_block(use_global_git_mutex: use_global_git_mutex) do
         logger.debug("Pushing to #{git_config.git_url}")
         setup_author(full_name: repo_auth.full_name, username: repo_auth.username)
