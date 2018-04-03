@@ -54,10 +54,9 @@ module FastlaneCI
       permissions = bucket.test_permissions("storage.objects.create", "storage.objects.get")
 
       unless permissions.include?("storage.objects.create") && permissions.include?("storage.objects.get")
-        raise <<~ERROR
-          The credentials provided by #{File.basename(json_keyfile_path)} are insufficient to perform needed actions by
-          the provider, needed: 'storage.objects.create', 'storage.objects.get' got #{permissions}.
-        ERROR
+        # rubocop:disable Metrics/LineLength
+        raise "The credentials provided by #{File.basename(json_keyfile_path)} are insufficient to perform needed actions by the provider, needed: 'storage.objects.create', 'storage.objects.get' got #{permissions}."
+        # rubocop:enable Metrics/LineLength
       end
     end
 

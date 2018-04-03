@@ -55,7 +55,7 @@ Naming/VariableNumber:
 MultilineBlockChain:
   Enabled: false
 
-Style/MultilineMethodCallIndentation:
+Layout/MultilineMethodCallIndentation:
   EnforcedStyle: aligned
 
 #

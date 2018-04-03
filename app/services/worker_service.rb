@@ -26,10 +26,9 @@ module FastlaneCI
       user_responsible = provider_credential.ci_user
 
       if user_responsible.nil?
-        raise <<~ERROR
-          Unable to start workers for `#{project.project_name}`, no `user_responsible` for given `provider_credential`:
-          #{provider_credential.email}
-        ERROR
+        name = project.project_name
+        email = provider_credential.email
+        raise "Unable to start workers for `#{name}`, no `user_responsible` for given `provider_credential`: #{email}"
       end
 
       workers_key = project_to_workers_dictionary_key(project: project, user_responsible: user_responsible)

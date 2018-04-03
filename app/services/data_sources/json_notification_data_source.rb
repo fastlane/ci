@@ -91,12 +91,9 @@ module FastlaneCI
       else
         @notifications[notification_index] = notification
         self.notifications = @notifications
-        logger.debug(
-          <<~LOG
-            Updating notification #{existing_notification.name}, writing out notifications.json to
-            #{notifications_file_path}
-          LOG
-        )
+        path = notifications_file_path
+        notification_name = existing_notification.name
+        logger.debug("Updating notification #{notification_name}, writing out notifications.json to #{path}")
       end
     end
 

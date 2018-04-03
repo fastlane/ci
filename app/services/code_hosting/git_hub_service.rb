@@ -73,12 +73,8 @@ module FastlaneCI
       end
 
       # we want only the PRs whose latest commit was to one of the branches passed in
-      logger.debug(
-        <<~LOG
-          Returning all open prs from: #{repo_full_name}, branches: #{branches}, pr count:
-          #{all_open_pull_requests.count}
-        LOG
-      )
+      pr_count = all_open_pull_requests.count
+      logger.debug("Returning all open prs from: #{repo_full_name}, branches: #{branches}, pr count: #{pr_count}")
 
       return all_open_pull_requests_on_branch
     end
