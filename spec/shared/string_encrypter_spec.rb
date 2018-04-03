@@ -52,8 +52,7 @@ module FastlaneCI
         fixture_folder = File.join(File.dirname(__FILE__), "fixture")
         encrypted_binary = File.binread(File.join(fixture_folder, "encrypted_hi"))
 
-        expect { StringEncrypter.decode(encrypted_binary, key: "NotTacos") }
-          .to raise_error(OpenSSL::Cipher::CipherError)
+        expect { StringEncrypter.decode(encrypted_binary, key: "NotTacos") }.to raise_error(OpenSSL::Cipher::CipherError)
       end
     end
   end
