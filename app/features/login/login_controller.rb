@@ -86,10 +86,14 @@ module FastlaneCI
 
     # Submit an email and api token
     post "/login_erb/submit" do
-      # check if we already have an account like this, if we do we might need to clean out their old :personal_access_token
+      # check if we already have an account like this, if we do we might need to clean out their old
+      # :personal_access_token
       email = params[:email]
       personal_access_token = params[:personal_access_token]
-      github_provider_credential = FastlaneCI::GitHubProviderCredential.new(email: email, api_token: personal_access_token)
+      github_provider_credential = FastlaneCI::GitHubProviderCredential.new(
+        email: email,
+        api_token: personal_access_token
+      )
       user = session[:user]
 
       if user

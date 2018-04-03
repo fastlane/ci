@@ -13,7 +13,10 @@ module FastlaneCI
         if defined?(self::HOME)
           route = "#{self::HOME}*"
         else
-          message = "\nYou must define a const called `HOME` on #{self} or you must pass the routes you intend to protect to `ensure_logged_in()`\n"
+          message = <<~MESSAGE
+            \nYou must define a const called `HOME` on #{self} or you must pass the routes you intend to protect to
+            `ensure_logged_in()`\n
+          MESSAGE
           raise message
         end
       end
