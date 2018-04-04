@@ -171,7 +171,7 @@ module FastlaneCI
     end
 
     # Message is used to display custom logging in the console.
-    def handle_exception(ex, console_message: nil)
+    def handle_exception(ex, console_message: nil, exception_context: {})
       unless console_message.nil?
         logger.error(console_message)
       end
@@ -181,13 +181,21 @@ module FastlaneCI
       raise ex unless notification_service
 
       user_unfriendly_message = ex.message.to_s
-      if user_unfriendly_message.contains("unable to access")
+      if user_unfriendly_message.include?("unable to access")
         priority = Notification::PRIORITIES[:urgent]
         notification_service.create_notification!(
           priority: priority,
           name: "Repo access error",
           message: "Unable to acccess #{git_config.git_url}",
           details: user_unfriendly_message
+        )
+      elsif user_unfriendly_message.include?("Merge conflict")
+        priority = Notification::PRIORITIES[:urgent]
+        notification_service.create_notification!(
+          priority: priority,
+          name: "Merge conflic",
+          message: "Unable to build #{git_config.git_url}",
+          details: "#{user_unfriendly_message}, context: #{exception_context}"
         )
       else
         raise ex
@@ -482,12 +490,17 @@ module FastlaneCI
         changed = git.status.changed
         added = git.status.added
         deleted = git.status.deleted
-        untracked = git.status.untracked
 
-        if changed.count == 0 && added.count == 0 && deleted.count == 0 && untracked.count == 0
+        if changed.count == 0 && added.count == 0 && deleted.count == 0
           logger.debug("No changes in repo #{git_config.full_name}, skipping commit #{commit_message}")
         else
-          git.commit(commit_message)
+
+          begin
+            git.commit(commit_message)
+          rescue StandardError => ex
+            handle_exception(ex, console_message: "Error committing to #{git_config.git_url}")
+          end
+
           unless GitRepo.pushes_disabled?
             push(use_global_git_mutex: false) if push_after_commit
           end
@@ -556,8 +569,20 @@ module FastlaneCI
 
         begin
           git.pull(clone_url, branch)
+          return true
         rescue StandardError => ex
-          handle_exception(ex, console_message: "Error switching to a fork: #{clone_url}, branch: #{branch}")
+          exception_context = {
+            clone_url: clone_url,
+            branch: branch,
+            sha: sha,
+            local_branch_name: local_branch_name
+          }
+          handle_exception(
+            ex,
+            console_message: "Error switching to a fork: #{clone_url}, branch: #{branch}",
+            exception_context: exception_context
+          )
+          return false
         end
       end
     end
