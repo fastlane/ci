@@ -16,8 +16,9 @@ module FastlaneCI
     end
 
     def add_output_listener!(listener)
-      raise "Invalid listener provider, expected #{FastlaneLog.class.name} got #{listener.class.name}" \
-        unless listener.kind_of?(FastlaneLog)
+      unless listener.kind_of?(FastlaneLog)
+        raise "Invalid listener provider, expected #{FastlaneLog.class.name} got #{listener.class.name}"
+      end
       @output_listeners << listener
     end
 
@@ -109,6 +110,7 @@ module FastlaneCI
     # TODO: Check if we can find a good way to not have to
     #   overwrite all these methods
     def crash!(exception)
+      @output_listeners.each { |listener| listener.error(exception.to_s) }
       each_line_block.call(
         type: :crash,
         message: exception.to_s,
@@ -118,6 +120,7 @@ module FastlaneCI
     end
 
     def user_error!(error_message, options = {})
+      @output_listeners.each { |listener| listener.error(error_message) }
       each_line_block.call(
         type: :user_error,
         message: error_message,
@@ -127,6 +130,7 @@ module FastlaneCI
     end
 
     def shell_error!(error_message, options = {})
+      @output_listeners.each { |listener| listener.error(error_message) }
       each_line_block.call(
         type: :shell_error,
         message: error_message,
@@ -136,6 +140,7 @@ module FastlaneCI
     end
 
     def build_failure!(error_message, options = {})
+      @output_listeners.each { |listener| listener.error(error_message) }
       each_line_block.call(
         type: :build_failure,
         message: error_message,
@@ -145,6 +150,7 @@ module FastlaneCI
     end
 
     def test_failure!(error_message)
+      @output_listeners.each { |listener| listener.error(error_message) }
       each_line_block.call(
         type: :test_failure,
         message: error_message,
@@ -154,6 +160,7 @@ module FastlaneCI
     end
 
     def abort_with_message!(error_message)
+      @output_listeners.each { |listener| listener.error(error_message) }
       each_line_block.call(
         type: :abort,
         message: error_message,

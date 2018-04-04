@@ -71,7 +71,8 @@ module FastlaneCI
     # @return [Project]
     def project(name: nil)
       if project_data_source.project_exist?(name)
-        return project_data_source.projects.detect { |existing_project| existing_project.project_name == name }
+        return project_data_source.projects
+                                  .detect { |existing_project| existing_project.project_name.casecmp(name).zero? }
       end
     end
 

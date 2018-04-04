@@ -5,6 +5,10 @@
     </div>
   </header>
   <script>
+  var valid_name = false;
+  var valid_branch = false;
+  var valid_lane = false;
+  var valid_trigger = false;
   document.addEventListener("DOMContentLoaded", function() {
     document.querySelectorAll("#submit_form")[0].disabled = true;
     document.querySelectorAll("#selected_lane")[0].style.display = "none";
@@ -13,6 +17,7 @@
     document.querySelectorAll("#trigger")[0].style.display = "none";
     document.querySelectorAll("#trigger_selector")[0].style.display = "none";
     document.querySelectorAll("#nightly")[0].style.display = "none";
+    check_existence(document.querySelectorAll("input[name=project_name]")[0].value);
     setInterval(function() { 
       max_dots = 5;
       str = document.querySelectorAll("#loading")[0].querySelector("p").innerHTML;
@@ -56,12 +61,13 @@
             if (lane && platform) {
               document.querySelectorAll("#selected_lane")[0].append(string_to_node('<option value="'+ platform + " " + lane +'">'+ platform + " " + lane +'</option>'));
             } else if (lane && platform === "no_platform") {
-              document.querySelectorAll("#selected_lane")[0].append(string_to_node('<option value="no_platform '+ lane +'">no_platform ' + lane +'</option>'));
+              document.querySelectorAll("#selected_lane")[0].append(string_to_node('<option value="no_platform '+ lane +'">' + lane +'</option>'));
             }
           }
         }
         document.querySelectorAll("#selected_lane")[0].style.display = "";
-        document.querySelectorAll("#lane_to_run")[0].style.display = "";        
+        document.querySelectorAll("#lane_to_run")[0].style.display = "";
+        valid_branch = true;
       } else {
         // We reached our target server, but it returned an error
       }
@@ -77,42 +83,82 @@
   function check_lane() {
     document.querySelectorAll("#trigger")[0].style.display = "";
     document.querySelectorAll("#trigger_selector")[0].style.display = "";
+    valid_lane = true;
   }
   function check_trigger(el) {
     var trigger_value = el.value;
     switch(trigger_value) {
       case "commit":
-        document.querySelectorAll("#submit_form")[0].disabled = false;
+        valid_trigger = true;
         document.querySelectorAll("#nightly")[0].style.display = "none";
         check_nightly(null);
         break;
       case "manual":
-        document.querySelectorAll("#submit_form")[0].disabled = false;
+        valid_trigger = true;
         document.querySelectorAll("#nightly")[0].style.display = "none";
         check_nightly(null);
         break;
       case "nightly":
         document.querySelectorAll("#nightly")[0].style.display = "";
-        document.querySelectorAll("#submit_form")[0].disabled = true;
         check_nightly(document.querySelectorAll("#nightly")[0]);
         break;
     }
-    
   }
   function check_nightly(el) {
     if (el && el.value) {
       if (isFinite(parseInt(document.querySelectorAll("#minute")[0].value)) && isFinite(parseInt(document.querySelectorAll("#hour")[0].value))) {
-        document.querySelectorAll("#submit_form")[0].disabled = false;
+        valid_trigger = true;
       }
       else {
-        document.querySelectorAll("#submit_form")[0].disabled = true;
+        valid_trigger = false;
       }
     } else {
       if (isFinite(parseInt(document.querySelectorAll("#minute")[0].value)) && isFinite(parseInt(document.querySelectorAll("#hour")[0].value))) {
-        document.querySelectorAll("#submit_form")[0].disabled = false;
+        valid_trigger = true;
       }
     }
   }
+  var valid_request = null;
+  function check_existence(value) {
+    if (value) {
+      if (valid_request != null) {
+        valid_request.abort();
+      }
+      valid_request = new XMLHttpRequest();
+      valid_request.timeout = 1000 * 60 * 10; // 10 minutes
+      valid_request.responseType = 'json';
+      valid_request.open('GET', "/projects_erb/" + value + "/valid", true);
+      valid_request.onload = function() {
+        if (valid_request.status >= 200 && valid_request.status < 400) {
+          var data = valid_request.response;
+          if (data["valid"] == false) {
+            document.querySelectorAll("#project_name")[0].classList.add("is-dirty");
+            document.querySelectorAll("#project_name")[0].classList.add("is-invalid");
+            valid_name = false;
+          } else {
+            document.querySelectorAll("#project_name")[0].classList.remove("is-dirty");
+            document.querySelectorAll("#project_name")[0].classList.remove("is-invalid");
+            valid_name = true;
+          }
+        } else {
+          // We reached our target server, but it returned an error
+        }
+      };
+      valid_request.onerror = function() {
+        // There was a connection error of some sort
+      };
+      valid_request.onprogress = function () {
+      };
+      valid_request.send();
+    }
+  }
+  setInterval(function() {
+    if (valid_branch && valid_name && valid_lane && valid_trigger) {
+      document.querySelectorAll("#submit_form")[0].disabled = false;
+    } else {
+      document.querySelectorAll("#submit_form")[0].disabled = true;
+    }
+  }, 100);
   </script>
   
   <%= erb :"../../partials/navigation" %>
@@ -120,9 +166,10 @@
   <main class="mdl-layout__content" style="padding: 40px">
     <form method="POST" action="/projects_erb/<%= repo %>/add">
       <h5>Adding <%= repo %></h5>
-      <div class="mdl-textfield mdl-js-textfield">
-        <input class="mdl-textfield__input" type="text" name="project_name" value="<%= repo %>">
+      <div class="mdl-textfield mdl-js-textfield" id="project_name">
+        <input class="mdl-textfield__input" type="text" name="project_name" value="<%= repo %>" onchange="check_existence(this.value);">
         <label class="mdl-textfield__label" for="project_name">Project Name</label>
+        <span class="mdl-textfield__error">Project Name must be unique</span>
       </div>
       <br />
       <h5>Select a branch</h5>
