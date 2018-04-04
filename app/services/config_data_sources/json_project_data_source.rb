@@ -175,7 +175,7 @@ module FastlaneCI
       artifact_provider: nil,
       job_triggers: nil
     )
-      projects = projects.clone
+      projects_clone = projects.clone
       new_project = Project.new(
         repo_config: repo_config,
         enabled: enabled,
@@ -186,8 +186,8 @@ module FastlaneCI
         job_triggers: job_triggers
       )
       if !project_exist?(new_project.project_name)
-        projects << new_project
-        self.projects = projects
+        projects_clone << new_project
+        self.projects = projects_clone
         logger.debug("Added project #{new_project.project_name} to projects.json in #{json_folder_path}")
         return new_project
       else

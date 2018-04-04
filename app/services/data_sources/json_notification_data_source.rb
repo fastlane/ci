@@ -104,14 +104,16 @@ module FastlaneCI
     # @param  [String] user_id
     # @param  [String] name
     # @param  [String] message
+    # @param  [String] details
     # @return [Notification]
-    def create_notification!(id: nil, priority: nil, type: nil, user_id: nil, name: nil, message: nil)
+    def create_notification!(id: nil, priority: nil, type: nil, user_id: nil, name: nil, message: nil, details: nil)
       new_notification = Notification.new(
         priority: priority,
         type: type,
         user_id: user_id,
         name: name,
-        message: message
+        message: message,
+        details: details
       )
 
       if !notification_exist?(id: new_notification.id)
@@ -150,7 +152,11 @@ module FastlaneCI
       JSONNotificationDataSource.file_semaphore.synchronize do
         @notifications =
           if !File.exist?(notifications_file_path)
-            File.write(notifications_file_path, "[]")
+            notifications_dirname = File.dirname(notifications_file_path)
+            FileUtils.mkdir_p(File.dirname(notifications_file_path)) unless Dir.exist?(notifications_dirname)
+            File.open(File.expand_path(notifications_file_path), "w") do |file|
+              file.write("[]")
+            end
             []
           else
             JSON.parse(File.read(notifications_file_path)).map do |notification_object_hash|
