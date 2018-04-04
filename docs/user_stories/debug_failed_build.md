@@ -4,7 +4,8 @@
 * User has Project with test lane and PR trigger.
 * User is already logged in
 #### User Journey
-1. GitHub notifies user that build failed
+1. User creates PR
+1. User views their PRs failed status
 1. User accesses logs and build outputs
 1. User locates failure and starts fixing failure
 1. User commits fix
@@ -12,13 +13,13 @@
 1. User’s Build passes
 1. User merges PR
 #### Use Case
-1. GitHub updates status on commit to indicate the build failed for that commit
-1. User opens fastlane.ci dashboard
-1. User opens Project for their Repo + branch
-1. User types in their name to filter
-1. User clicks on their Build
-1. User types in App package name or bundle id into filter
-1. User finds stacktrace
+1. User creates PR
+1. fastlane.ci automatically launches a build
+1. Build fails, fastlane.ci updates the PRs status to failed
+1. User loads their PR
+1. User views their PRs failed status
+1. User clicks on PR status and is linked to their Build
+1. User finds failure
 1. User fixes bug in their code
 1. User builds locally
 1. User commits the fix
