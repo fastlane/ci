@@ -68,13 +68,15 @@
 <% end %>
 
 
-<code id="log">
-  <% if existing_rows.to_s.length > 0 %>
-    <%= existing_rows %>
-  <% else %>
-    Loading...
-  <% end %>
-</code>
+<div id="log-container">
+  <code id="log">
+    <% if existing_rows.to_s.length > 0 %>
+      <%= existing_rows %>
+    <% else %>
+      Loading...
+    <% end %>
+  </code>
+</div>
 
 <hr />
 <a href="/projects_erb/<%= project.id %>" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
@@ -127,8 +129,15 @@
 <% end %>
 
 <style type="text/css">
+  #log-container {
+    background-color: rgba(18, 52, 64, 0.97);
+    padding: 15px;
+  }
+  #log {
+    color: white;
+  }
   p.success {
-    color: green;
+    color: rgb(132, 151, 46);
   }
   p.error {
     color: red;
