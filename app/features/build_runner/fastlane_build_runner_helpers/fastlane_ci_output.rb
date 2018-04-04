@@ -83,6 +83,7 @@ module FastlaneCI
     end
 
     def command_output(message)
+      @output_listeners.each { |listener| listener.command_output(message) }
       actual = (message.split("\r").last || "") # as clearing the line will remove the `>` and the time stamp
       actual.split("\n").each do |msg|
         prefix = msg.include?("▸") ? "" : "▸ "
