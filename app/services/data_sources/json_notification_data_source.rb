@@ -104,14 +104,16 @@ module FastlaneCI
     # @param  [String] user_id
     # @param  [String] name
     # @param  [String] message
+    # @param  [String] details
     # @return [Notification]
-    def create_notification!(id: nil, priority: nil, type: nil, user_id: nil, name: nil, message: nil)
+    def create_notification!(id: nil, priority: nil, type: nil, user_id: nil, name: nil, message: nil, details: nil)
       new_notification = Notification.new(
         priority: priority,
         type: type,
         user_id: user_id,
         name: name,
-        message: message
+        message: message,
+        details: details
       )
 
       if !notification_exist?(id: new_notification.id)
