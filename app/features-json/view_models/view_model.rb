@@ -63,7 +63,7 @@ module FastlaneCI
       # Defined by the base_model method.
       # @params [Any] object
       # @return [Hash] object dictionary representation for the ViewModel.
-      def viewmodel_from(object)
+      def viewmodel_from!(object)
         raise "Override base_model(model) in order to use the ViewModel mixin." if @base_model.nil?
         raise "Incorrect object type. Expected #{@base_model}, got #{object.class}" unless object.kind_of?(@base_model)
         if object.respond_to?(:to_object_dictionary)
