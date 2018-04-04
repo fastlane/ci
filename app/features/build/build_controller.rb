@@ -19,6 +19,36 @@ module FastlaneCI
 
     use(FastlaneCI::BuildWebsocketBackend)
 
+    get "#{HOME}/*/artifact/*" do |project_id, build_number, artifact_id|
+      build_number = build_number.to_i
+
+      project = user_project_with_id(project_id: project_id)
+      build = project.builds.find { |b| b.number == build_number }
+
+      artifact = build.artifacts.find { |find_artifact| find_artifact.id == artifact_id }
+
+      if artifact.nil?
+        status(404) # Not foend
+        body("Cannot find artifact")
+        return
+      end
+
+      begin
+        artifact_reference = artifact.provider.retrieve!(artifact: artifact)
+        raise "Artifact not found" if artifact_reference.nil?
+      rescue StandardError
+        status(404) # Not found
+        body("Cannot find artifact")
+        return
+      end
+
+      if File.file?(artifact_reference)
+        send_file(artifact_reference, filename: artifact_reference, type: "Application/octet-stream")
+      else
+        redirect(artifact_reference)
+      end
+    end
+
     get "#{HOME}/*" do |project_id, build_number|
       build_number = build_number.to_i
 
@@ -64,38 +94,6 @@ module FastlaneCI
       }
       erb(:build, locals: locals, layout: FastlaneCI.default_layout)
     end
-
-    get "#{HOME}/artifact/*" do |project_id, build_number, artifact_id|
-
-      build_number = build_number.to_i
-
-      project = user_project_with_id(project_id: project_id)
-      build = project.builds.find { |b| b.number == build_number }
-
-      artifact = build.artifacts.find { |artifact| artifact.id == artifact_id }
-
-      if artifact.nil?
-        status(404) # Not foend
-        body("Cannot find artifact")
-        return
-      end
-
-      begin
-        artifact_reference = artifact.provider.retrieve!(artifact: artifact)
-        raise "Artifact not found" if artifact_reference.nil?
-      rescue StandardError => ex
-        status(404) # Not foend
-        body("Cannot find artifact")
-        return
-      end
-
-      if File.file?(artifact_reference)
-        send_file(artifact_reference)
-      else
-        redirect(artifact_reference)
-      end
-
-    end 
 
     # convert .log files that include the color information as ANSI code
     # back to HTML code that can be rendered by the user's browser
