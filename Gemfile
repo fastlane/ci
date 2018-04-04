@@ -39,9 +39,9 @@ gem "google-cloud-storage", "~> 1.5.0"
 # fastlane dependencies
 # TODO: point to minimum release instead of GitHub once
 # 	we shipped a new release
-gem "fastfile-parser", git: "https://github.com/fastlane/fastfile-parser", ref: "122825d", require: false
+gem "fastfile-parser", git: "https://github.com/fastlane/fastfile-parser", require: false
 gem "fastlane", git: "https://github.com/fastlane/fastlane"
-gem "taskqueue", git: "https://github.com/fastlane/TaskQueue", ref: "5b3f459", require: false
+gem "taskqueue", git: "https://github.com/fastlane/TaskQueue", require: false
 
 group :test, :development do
   gem "coveralls"
