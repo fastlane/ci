@@ -81,6 +81,26 @@ module FastlaneCI
       erb(:new_project, locals: locals, layout: FastlaneCI.default_layout)
     end
 
+    get "#{HOME}/*/valid" do
+      content_type :json
+
+      project_name = params[:splat].first
+
+      if !project_name.nil?
+        if Services.project_service.project(name: project_name).nil?
+          return { valid: true }.to_json
+        else
+          return { valid: false }.to_json
+        end
+      else
+        if project_name.empty?
+          return { valid: false }.to_json
+        else
+          return { valid: true }.to_json
+        end
+      end
+    end
+
     # This is an utility endpoint from where we can retrieve lane information through the front-end using basic JS.
     # This will be reviewed in the future when we have a proper front-end architecture.
     get "#{HOME}/*/lanes" do
