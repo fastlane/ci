@@ -91,6 +91,27 @@ module FastlaneCI
       not_implemented(__method__)
     end
 
+    def fail_build!(start_time:)
+      duration = Time.now - start_time
+      current_build.duration = duration
+      current_build.status = :failure # TODO: also handle failure
+      save_build_status!
+    end
+
+    def run_completed_ensure
+      # Make sure to notify the listeners that the build is over
+      new_row(
+        FastlaneCI::BuildRunnerOutputRow.new(
+          type: :last_message,
+          message: nil,
+          time: Time.now
+        )
+      )
+      # Remove ourselves from the list of active build runners
+      # to let the garbage collector do its thing
+      Services.build_runner_service.remove_build_runner(build_runner: self)
+    end
+
     def complete_run(start_time:, artifact_paths: [])
       artifacts = artifact_paths.map do |artifact|
         Artifact.new(
@@ -111,22 +132,9 @@ module FastlaneCI
       save_build_status!
     rescue StandardError => ex
       logger.error(ex)
-      duration = Time.now - start_time
-      current_build.duration = duration
-      current_build.status = :failure # TODO: also handle failure
-      save_build_status!
+      fail_build!(start_time: start_time)
     ensure
-      # Make sure to notify the listeners that the build is over
-      new_row(
-        FastlaneCI::BuildRunnerOutputRow.new(
-          type: :last_message,
-          message: nil,
-          time: Time.now
-        )
-      )
-      # Remove ourselves from the list of active build runners
-      # to let the garbage collector do its thing
-      Services.build_runner_service.remove_build_runner(build_runner: self)
+      run_completed_ensure
     end
 
     def checkout_sha
@@ -151,13 +159,21 @@ module FastlaneCI
       end
 
       logger.debug("Checking out commit #{sha} from #{project.project_name}")
-      repo.checkout_commit(sha: sha)
+      success = repo.checkout_commit(sha: sha)
+      return success
     end
 
     def pre_run_action
       logger.debug("Running pre_run_action in checkout_sha")
-      checkout_sha
+      success = checkout_sha
+      unless success
+        # TODO: this could be a notification specifically for user interaction
+        logger.debug("Unable to launch build runner because we were unable to checkout the required sha: #{sha}")
+        return false
+      end
+
       setup_build_specific_environment_variables
+      return true
     end
 
     def setup_build_specific_environment_variables
@@ -234,21 +250,28 @@ module FastlaneCI
       logger.debug("Starting build runner #{self.class} for #{project.project_name} #{project.id} sha: #{sha} now...")
       start_time = Time.now
 
-      work_block = proc {
-        pre_run_action
-        run(
-          new_line_block: proc do |current_row|
-            new_row(current_row)
-          end,
-          completion_block: proc do |artifact_paths|
-            complete_run(start_time: start_time, artifact_paths: artifact_paths)
-          end
-        )
-      }
+      work_block = proc do
+        pre_run_success = pre_run_action
 
-      post_run_block = proc {
-        post_run_action
-      }
+        if pre_run_success
+          run(
+            new_line_block: proc do |current_row|
+              new_row(current_row)
+            end,
+            completion_block: proc do |artifact_paths|
+              complete_run(start_time: start_time, artifact_paths: artifact_paths)
+            end
+          )
+        else
+          # Don't even try to build, just fail it now
+          fail_build!(start_time: start_time)
+
+          # Since we're short circuiting, we need to call the ensure block by hand here
+          run_completed_ensure
+        end
+      end
+
+      post_run_block = proc { post_run_action }
 
       # If we have a work_queue, execute on that
       if work_queue
