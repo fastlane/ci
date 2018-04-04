@@ -1,7 +1,10 @@
 # Internal
 require_relative "../../shared/controller_base"
 require_relative "../../services/user_service"
+require_relative "../../services/environment_variable_service"
 require_relative "../../shared/models/github_provider_credential"
+
+require "octokit"
 
 module FastlaneCI
   # Displays CI login, user creation, as well as linking github api tokens, and logging out
@@ -33,8 +36,14 @@ module FastlaneCI
 
     # Login with fastlane.ci credentials
     get "#{HOME}/ci_login" do
+      client = Octokit::Client.new(access_token: FastlaneCI.env.clone_user_api_token)
+
+      unless client.nil?
+        email = client.user[:email]
+      end
       locals = {
-        title: "Login with your fastlane.ci account"
+        title: "Login with your fastlane.ci account",
+        email: email || ""
       }
 
       erb(:login_fastlane_ci, locals: locals, layout: FastlaneCI.default_layout)
