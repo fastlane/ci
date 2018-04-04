@@ -1,1 +1,1 @@
-All tests for fastlane.ci
+All tests for fastlane.ci contained in the `app/` directory.
