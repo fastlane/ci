@@ -152,7 +152,11 @@ module FastlaneCI
       JSONNotificationDataSource.file_semaphore.synchronize do
         @notifications =
           if !File.exist?(notifications_file_path)
-            File.write(notifications_file_path, "[]")
+            notifications_dirname = File.dirname(notifications_file_path)
+            FileUtils.mkdir_p(File.dirname(notifications_file_path)) unless Dir.exist?(notifications_dirname)
+            File.open(File.expand_path(notifications_file_path), "w") do |file|
+              file.write("[]")
+            end
             []
           else
             JSON.parse(File.read(notifications_file_path)).map do |notification_object_hash|
