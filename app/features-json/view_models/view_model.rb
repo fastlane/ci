@@ -63,12 +63,11 @@ module FastlaneCI
       # Defined by the base_model method.
       # @params [Any] object
       # @return [Hash] object dictionary representation for the ViewModel.
-      def viewmodel_from!(object:)
+      def viewmodel_from(object)
         raise "Override base_model(model) in order to use the ViewModel mixin." if @base_model.nil?
         raise "Incorrect object type. Expected #{@base_model}, got #{object.class}" unless object.kind_of?(@base_model)
         if object.respond_to?(:to_object_dictionary)
-          instance_variables = @base_model.instance_variables
-          return object.to_object_dictionary(ignore_instance_variables: instance_variables - included_attributes)
+          return object.to_object_dictionary(ignore_instance_variables: object.instance_variables - included_attributes)
         else
           raise "#{@base_model} does not include JSONConvertible." unless @base_model.include?(JSONConvertible)
         end

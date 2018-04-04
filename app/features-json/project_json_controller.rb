@@ -10,9 +10,7 @@ module FastlaneCI
       current_provider_credential = check_and_get_provider_credential
       current_user_config_service = self.current_user_config_service
       all_projects = current_user_config_service.projects(provider_credential: current_provider_credential)
-      all_projects_views_models = all_projects.map do |project|
-        ProjectSummaryViewModel.viewmodel_from!(object: project)
-      end
+      all_projects_views_models = all_projects.map(&ProjectSummaryViewModel.method(:viewmodel_from))
 
       return all_projects_views_models.to_json
     end
