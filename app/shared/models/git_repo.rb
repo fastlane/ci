@@ -171,7 +171,7 @@ module FastlaneCI
     end
 
     # Message is used to display custom logging in the console.
-    def handle_exception(ex, console_message: nil)
+    def handle_exception(ex, console_message: nil, exception_context: {})
       unless console_message.nil?
         logger.error(console_message)
       end
@@ -188,6 +188,14 @@ module FastlaneCI
           name: "Repo access error",
           message: "Unable to acccess #{git_config.git_url}",
           details: user_unfriendly_message
+        )
+      elsif user_unfriendly_message.include?("Merge conflict")
+        priority = Notification::PRIORITIES[:urgent]
+        notification_service.create_notification!(
+          priority: priority,
+          name: "Merge conflic",
+          message: "Unable to build #{git_config.git_url}",
+          details: "#{user_unfriendly_message}, context: #{exception_context}"
         )
       else
         raise ex
@@ -561,8 +569,20 @@ module FastlaneCI
 
         begin
           git.pull(clone_url, branch)
+          return true
         rescue StandardError => ex
-          handle_exception(ex, console_message: "Error switching to a fork: #{clone_url}, branch: #{branch}")
+          exception_context = {
+            clone_url: clone_url,
+            branch: branch,
+            sha: sha,
+            local_branch_name: local_branch_name
+          }
+          handle_exception(
+            ex,
+            console_message: "Error switching to a fork: #{clone_url}, branch: #{branch}",
+            exception_context: exception_context
+          )
+          return false
         end
       end
     end
