@@ -130,8 +130,10 @@ module FastlaneCI
     end
 
     def checkout_sha
+      pull_before_checkout_success = true
+
       if git_fork_config
-        repo.switch_to_fork(
+        pull_before_checkout_success = repo.switch_to_fork(
           clone_url: git_fork_config.clone_url,
           branch: git_fork_config.branch,
           sha: git_fork_config.current_sha,
@@ -142,6 +144,10 @@ module FastlaneCI
         repo.reset_hard!
         logger.debug("Pulling `master` in checkout_sha")
         repo.pull
+      end
+
+      unless pull_before_checkout_success
+        logger.debug("Unable to pull before checking out #{sha} from #{project.project_name}, attempting checkout")
       end
 
       logger.debug("Checking out commit #{sha} from #{project.project_name}")
