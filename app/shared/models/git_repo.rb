@@ -181,7 +181,7 @@ module FastlaneCI
       raise ex unless notification_service
 
       user_unfriendly_message = ex.message.to_s
-      if user_unfriendly_message.contains("unable to access")
+      if user_unfriendly_message.include?("unable to access")
         priority = Notification::PRIORITIES[:urgent]
         notification_service.create_notification!(
           priority: priority,
@@ -482,12 +482,17 @@ module FastlaneCI
         changed = git.status.changed
         added = git.status.added
         deleted = git.status.deleted
-        untracked = git.status.untracked
 
-        if changed.count == 0 && added.count == 0 && deleted.count == 0 && untracked.count == 0
+        if changed.count == 0 && added.count == 0 && deleted.count == 0
           logger.debug("No changes in repo #{git_config.full_name}, skipping commit #{commit_message}")
         else
-          git.commit(commit_message)
+
+          begin
+            git.commit(commit_message)
+          rescue StandardError => ex
+            handle_exception(ex, console_message: "Error committing to #{git_config.git_url}")
+          end
+
           unless GitRepo.pushes_disabled?
             push(use_global_git_mutex: false) if push_after_commit
           end
