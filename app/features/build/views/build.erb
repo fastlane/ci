@@ -63,14 +63,7 @@
         <tr>
           <td><%= current_artifact.type %></td>
           <td>
-            <% @reference = current_artifact.provider.retrieve!(artifact: current_artifact) %>
-            <% if File.exist?(@reference) %>
-              <a target="_blank" href="file:///<%= @reference %>">Download</a>
-            <% elsif !@reference.nil? %>
-              <a arget="_blank" href="<% @reference %>">Download</a>
-            <% else %>
-              <p>Artifact not found</p>
-            <% end %>
+            <a href="/projects_erb/<%= project.id %>/builds/<%= build.number %>/artifacts/<%= current_artifact.id %>">Download</a>
           </td>
         </tr>
       <% end %>
