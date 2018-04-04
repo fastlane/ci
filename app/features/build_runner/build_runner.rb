@@ -94,7 +94,7 @@ module FastlaneCI
     def fail_build!(start_time:)
       duration = Time.now - start_time
       current_build.duration = duration
-      current_build.status = :failure # TODO: also handle failure
+      current_build.status = :failure
       save_build_status!
     end
 
