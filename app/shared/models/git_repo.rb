@@ -181,6 +181,8 @@ module FastlaneCI
       raise ex unless notification_service
 
       user_unfriendly_message = ex.message.to_s
+
+      # Permission error, or lost interwebs
       if user_unfriendly_message.include?("unable to access")
         priority = Notification::PRIORITIES[:urgent]
         notification_service.create_notification!(
@@ -189,14 +191,29 @@ module FastlaneCI
           message: "Unable to acccess #{git_config.git_url}",
           details: user_unfriendly_message
         )
+
+      # Merge conflict, maybe somebody force-pushed something?
       elsif user_unfriendly_message.include?("Merge conflict")
         priority = Notification::PRIORITIES[:urgent]
         notification_service.create_notification!(
           priority: priority,
-          name: "Merge conflic",
+          name: "Merge conflict",
           message: "Unable to build #{git_config.git_url}",
           details: "#{user_unfriendly_message}, context: #{exception_context}"
         )
+
+      # Object disappeared in current git tree, could have been a force push that now causes SHA  to be missing
+      elsif user_unfriendly_message.include?("Could not parse object")
+        # This happens when there is a force push somewhere and now a previous commit is missing
+        # or a repo is just not up-to-date
+        priority = Notification::PRIORITIES[:urgent]
+        notification_service.create_notification!(
+          priority: priority,
+          name: "Unable to check out sha",
+          message: "Unable to checkout an object from #{git_config.git_url}",
+          details: "#{user_unfriendly_message}, context: #{exception_context}"
+        )
+
       else
         raise ex
       end
@@ -442,19 +459,32 @@ module FastlaneCI
       end
     end
 
-    def checkout_commit(sha: nil, repo_auth: self.repo_auth, use_global_git_mutex: true)
+    def checkout_commit(sha: nil, repo_auth: self.repo_auth, use_global_git_mutex: true, completion_block: nil)
       perform_block(use_global_git_mutex: use_global_git_mutex) do
         repo_url = git_config.git_url
         logger.info("Checking out sha: #{sha} from #{repo_url}")
         setup_auth(repo_auth: repo_auth)
 
+        success = false
         begin
-          git.reset_hard(git.gcommit(sha))
+          git.reset_hard(
+            git.gcommit(sha)
+          )
+          success = true
         rescue StandardError => ex
-          handle_exception(ex, console_message: "Error resetting and checking out sha: #{sha} from #{repo_url}")
-        end
+          exception_context = { sha: sha }
+          handle_exception(
+            ex,
+            console_message: "Error resetting and checking out sha: #{sha} from #{repo_url}",
+            exception_context: exception_context
+          )
+        ensure
+          if success
+            logger.debug("Done resetting and checking out sha: #{sha} from #{repo_url}")
+          end
 
-        logger.debug("Done resetting and checking out sha: #{sha} from #{repo_url}")
+          completion_block.call(success) unless completion_block.nil?
+        end
       end
     end
 
