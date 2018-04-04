@@ -61,7 +61,7 @@
             if (lane && platform) {
               document.querySelectorAll("#selected_lane")[0].append(string_to_node('<option value="'+ platform + " " + lane +'">'+ platform + " " + lane +'</option>'));
             } else if (lane && platform === "no_platform") {
-              document.querySelectorAll("#selected_lane")[0].append(string_to_node('<option value="no_platform '+ lane +'">no_platform ' + lane +'</option>'));
+              document.querySelectorAll("#selected_lane")[0].append(string_to_node('<option value="no_platform '+ lane +'">' + lane +'</option>'));
             }
           }
         }
