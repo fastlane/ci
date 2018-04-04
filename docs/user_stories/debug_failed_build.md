@@ -1,4 +1,4 @@
-### As a developer, with a PR that fails to build, I want to find the root cause so I can fix it and merges
+### As a developer, with a PR that fails to build, I want to find the root cause so I can fix it
 #### User Journey
 1. GitHub notifies user that build failed
 1. User accesses logs
