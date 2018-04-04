@@ -459,7 +459,7 @@ module FastlaneCI
       end
     end
 
-    def checkout_commit(sha: nil, repo_auth: self.repo_auth, use_global_git_mutex: true)
+    def checkout_commit(sha: nil, repo_auth: self.repo_auth, use_global_git_mutex: true, completion_block: nil)
       perform_block(use_global_git_mutex: use_global_git_mutex) do
         repo_url = git_config.git_url
         logger.info("Checking out sha: #{sha} from #{repo_url}")
@@ -478,10 +478,13 @@ module FastlaneCI
             console_message: "Error resetting and checking out sha: #{sha} from #{repo_url}",
             exception_context: exception_context
           )
-        end
+        ensure
+          if success
+            logger.debug("Done resetting and checking out sha: #{sha} from #{repo_url}")
+          end
 
-        logger.debug("Done resetting and checking out sha: #{sha} from #{repo_url}")
-        return success
+          completion_block.call(success) unless completion_block.nil?
+        end
       end
     end
 
