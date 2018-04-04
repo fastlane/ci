@@ -66,7 +66,7 @@ module FastlaneCI
 
     def users=(users)
       JSONUserDataSource.file_semaphore.synchronize do
-        users.each do |user|
+        @users.each do |user|
           # Fist need to serialize the provider credentials and ignore the `ci_user`
           # instance variable. The reasoning is since if you serialize the `user`
           # first, you will call `to_object_map` on the `ci_user`, which holds
