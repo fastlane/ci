@@ -19,7 +19,7 @@ module FastlaneCI
     get "#{HOME}/:project_id" do |project_id|
       # TODO: return NOT_FOUND if there is no project found
       project = user_project_with_id(project_id: project_id)
-      return ProjectViewModel.viewmodel_from(project).to_json
+      return ProjectViewModel.viewmodel_from!(project).to_json
     end
   end
 end

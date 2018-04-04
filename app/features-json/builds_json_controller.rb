@@ -10,7 +10,7 @@ module FastlaneCI
     get HOME do |project_id|
       # TODO: return NOT_FOUND if there is no project found
       project = user_project_with_id(project_id: project_id)
-      builds_views_models = project.builds.map(&BuildSummaryViewModel.method(:viewmodel_from))
+      builds_views_models = project.builds.map(&BuildSummaryViewModel.method(:viewmodel_from!))
 
       return builds_views_models.to_json
     end
@@ -22,7 +22,7 @@ module FastlaneCI
       project = user_project_with_id(project_id: project_id)
       # TODO: return NOT_FOUND if there is no build found
       build = project.builds.find { |b| b.number == build_number }
-      return BuildViewModel.viewmodel_from(build).to_json
+      return BuildViewModel.viewmodel_from!(build).to_json
     end
   end
 end
