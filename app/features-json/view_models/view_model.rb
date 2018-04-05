@@ -1,6 +1,27 @@
 require "../../shared/json_convertible"
 
 module FastlaneCI
+  # Module used to get the attr_accessor, attr_writer and attr_reader associated methods for
+  # a given class, without needing to instanciate it.
+  # Credit: https://stackoverflow.com/a/34440466/4161167
+  # To use it, just call: YourClass::ATTRS.
+  # @return [Array<Symbol>]
+  module MethodTracer
+    TracePoint.trace(:c_call) do |t|
+      if t.method_id.to_s.start_with?("attr_")
+        t.self.extend(MethodTracer)
+
+        methods = t.self::ATTRS ||= []
+        MethodTracer.send(:define_method, :method_added) { |m| methods << m }
+      end
+    end
+
+    TracePoint.trace(:c_return) do |t|
+      if t.method_id.to_s.start_with?("attr_")
+        MethodTracer.send(:remove_method, :method_added)
+      end
+    end
+  end
   # Generic base mixin to create ViewModels from any Model that is JSONConvertible.
   # Used to communicate the backend with the frontend.
   #     @example
@@ -82,7 +103,7 @@ module FastlaneCI
       def included_attributes
         attributes_per_model = {}
         @base_models.each do |model|
-          attributes_per_model[model.to_s] = (model.instance_methods - Class.methods)
+          attributes_per_model[model.to_s] = model::ATTRS
                                              .reject { |method| method.to_s.end_with?("=") }
                                              .map { |method| "@#{method}".to_sym }
         end
