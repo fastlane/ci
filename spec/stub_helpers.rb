@@ -4,7 +4,7 @@ module StubHelpers
   include HelperFunctions
 
   def stub_file_io
-    File.stub(:write)
+    allow(File).to receive(:write)
   end
 
   def stub_git_repos
@@ -22,18 +22,17 @@ module StubHelpers
       full_name: "taquitos fake name",
       auth_token: "fake auth token"
     )
-    FastlaneCI::GitRepo.any_instance.stub(:initialize)
-    FastlaneCI::GitRepo.any_instance.stub(:setup_repo)
-    FastlaneCI::GitRepo.any_instance.stub(:fetch)
-    FastlaneCI::GitRepo.any_instance.stub(:git_config).and_return(fake_git_config)
-    FastlaneCI::GitRepo.any_instance.stub(:repo_auth).and_return(fake_repo_auth)
-    FastlaneCI::GitRepo.any_instance.stub(:clone)
+    allow_any_instance_of(FastlaneCI::GitRepo).to receive(:initialize)
+    allow_any_instance_of(FastlaneCI::GitRepo).to receive(:setup_repo)
+    allow_any_instance_of(FastlaneCI::GitRepo).to receive(:fetch)
+    allow_any_instance_of(FastlaneCI::GitRepo).to receive(:git_config).and_return(fake_git_config)
+    allow_any_instance_of(FastlaneCI::GitRepo).to receive(:repo_auth).and_return(fake_repo_auth)
+    allow_any_instance_of(FastlaneCI::GitRepo).to receive(:clone)
   end
 
   def stub_services
-    FastlaneCI::Services.stub(:ci_config_git_repo_path).and_return(git_repo_path)
-
-    FastlaneCI::Services.stub(:project_service).and_return(
+    allow(FastlaneCI::Services).to receive(:ci_config_git_repo_path).and_return(git_repo_path)
+    allow(FastlaneCI::Services).to receive(:project_service).and_return(
       FastlaneCI::ProjectService.new(
         project_data_source: FastlaneCI::JSONProjectDataSource.create(
           git_repo, user: ci_user
@@ -41,15 +40,14 @@ module StubHelpers
       )
     )
 
-    FastlaneCI::Services.stub(:user_service).and_return(
+    allow(FastlaneCI::Services).to receive(:user_service).and_return(
       FastlaneCI::UserService.new(
         user_data_source: FastlaneCI::JSONUserDataSource.create(git_repo_path)
       )
     )
 
-    FastlaneCI::Services.stub(:ci_user).and_return(ci_user)
-
-    FastlaneCI::Services.stub(:build_service).and_return(
+    allow(FastlaneCI::Services).to receive(:ci_user).and_return(ci_user)
+    allow(FastlaneCI::Services).to receive(:build_service).and_return(
       FastlaneCI::BuildService.new(
         build_data_source: FastlaneCI::JSONBuildDataSource.create(git_repo_path)
       )

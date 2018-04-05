@@ -1,14 +1,12 @@
 GIT
   remote: https://github.com/fastlane/TaskQueue
   revision: 5b3f459be5c451cc9ab25f6819d2eeb67be5e56d
-  ref: 5b3f459
   specs:
     taskqueue (0.0.0)
 
 GIT
   remote: https://github.com/fastlane/fastfile-parser
-  revision: 122825dfb9370a6a2008e2e5ca8613dc6602b45d
-  ref: 122825d
+  revision: 4ee3b130e4d42bd61ee4134708a48e05c00d44b2
   specs:
     fastfile-parser (0.0.0)
       parser (>= 2.4.0.2, < 2.5.0.0)
