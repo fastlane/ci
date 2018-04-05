@@ -27,18 +27,13 @@ describe FastlaneCI::FileWriter do
 
   describe "#write!" do
     it "opens and writes the `file_template` to the `path`" do
-      subject.stub(:file_template) { template_string }
+      allow(subject).to receive(:file_template) { template_string }
 
-      File
-        .should_receive(:write)
+      expect(File)
+        .to receive(:write)
         .with(template_path, template_string)
 
       subject.write!
-    end
-  end
-
-  describe "#file_template" do
-    it "should raise not_implemented(__method__)" do
     end
   end
 end
