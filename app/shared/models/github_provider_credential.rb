@@ -30,19 +30,23 @@ module FastlaneCI
       @id = id || SecureRandom.uuid
       @email = email
       @full_name = full_name
-      @api_token = api_token
       @provider_name = "GitHub"
       @type = PROVIDER_CREDENTIAL_TYPES[:github]
       @remote_host = "github.com"
+      @encrypted_api_token = encrypt_api_token(api_token)
+    end
+
+    def encrypt_api_token(token)
+      if token.nil?
+        return nil
+      else
+        new_encrypted_api_token = StringEncrypter.encode(token)
+        return Base64.encode64(new_encrypted_api_token)
+      end
     end
 
     def api_token=(value)
-      if value.nil?
-        @encrypted_api_token = nil
-      else
-        new_encrypted_api_token = StringEncrypter.encode(value)
-        @encrypted_api_token = Base64.encode64(new_encrypted_api_token)
-      end
+      @encrypted_api_token = encrypt_api_token(value)
     end
 
     def api_token
