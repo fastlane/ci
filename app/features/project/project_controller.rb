@@ -219,7 +219,7 @@ module FastlaneCI
         job_triggers: [
           trigger,
           FastlaneCI::ManualJobTrigger.new(branch: branch)
-        ]
+        ].compact
       )
 
       if !project.nil?
