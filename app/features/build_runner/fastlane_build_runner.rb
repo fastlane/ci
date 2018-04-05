@@ -100,13 +100,35 @@ module FastlaneCI
         # TODO: support projects that don't have a Gemfile defined
         Bundler.with_clean_env do
           # Run fastlane now
-          Fastlane::LaneManager.cruise_lane(
-            platform,
-            lane,
-            parameters,
-            nil,
-            fast_file_path
-          )
+          begin
+            Fastlane::LaneManager.cruise_lane(
+              platform,
+              lane,
+              parameters,
+              nil,
+              fast_file_path
+            )
+          rescue => ex
+            # TODO: refactor this to reduce duplicate code
+            logger.debug("Setting build status to error from fastlane")
+            current_build.status = :failure
+            current_build.description = "Build failed"
+
+            logger.error(ex)
+            logger.error(ex.backtrace)
+
+            new_line_block.call(convert_raw_row_to_object({
+              type: "crash",
+              message: ex.to_s,
+              time: Time.now
+            }))
+            ci_output.output_listeners.each do |listener|
+              listener.error(ex.to_s)
+            end
+            artifacts_paths = gather_build_artifact_paths(loggers: [verbose_log, info_log])
+
+            return
+          end
         end
 
         current_build.status = :success
@@ -118,7 +140,7 @@ module FastlaneCI
         artifacts_paths = gather_build_artifact_paths(loggers: [verbose_log, info_log])
       rescue StandardError => ex
         logger.debug("Setting build status to failure due to exception")
-        current_build.status = :failure
+        current_build.status = :ci_problem
         current_build.description = "fastlane.ci encountered an error, check fastlane.ci logs for more information"
 
         logger.error(ex)
