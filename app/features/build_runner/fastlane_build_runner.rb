@@ -92,16 +92,25 @@ module FastlaneCI
 
         # TODO: the fast_file.runner should probably handle this
         logger.debug("Switching to #{repo.local_folder} to run `fastlane`")
-        # Change over to the repo
-        Dir.chdir(repo.local_folder)
+
+        # Change over to the repo, inside the `fastlane` folder
+        # This is critical to do
+        # As only going into the checked out repo folder will cause the
+        # fastlane code base to look for the Fastfile again, and with it
+        # its configuration files, and with it, cd .. somewhere in the stack
+        # causing the rest to not work
+        # Using the code below, we ensure we're in the `./fastlane` or `./.fastlane`
+        # folder, and all the following code works
+        # This is needed to load other configuration files, and also find Xcode projects
+        Dir.chdir(File.expand_path("..", fast_file_path))
 
         # Make sure to load all the dependencies of the Gemfile
         # TODO: support projects that don't have a Gemfile defined
         Bundler.with_clean_env do
           ENV["FASTLANE_SKIP_DOCS"] = true.to_s
 
-          # Run fastlane now
           begin
+            # Run fastlane now
             Fastlane::LaneManager.cruise_lane(
               platform,
               lane,
