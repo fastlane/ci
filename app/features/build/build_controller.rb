@@ -1,6 +1,7 @@
 require_relative "../../shared/authenticated_controller_base"
 require_relative "./build_websocket_backend"
 require "pathname"
+require "uri"
 
 module FastlaneCI
   # Controller for a single project view. Responsible for updates, triggering builds, and displaying project info
@@ -28,7 +29,7 @@ module FastlaneCI
       artifact = build.artifacts.find { |find_artifact| find_artifact.id == artifact_id }
 
       if artifact.nil?
-        status(404) # Not foend
+        status(404) # Not found
         body("Cannot find artifact")
         return
       end
@@ -42,8 +43,16 @@ module FastlaneCI
         return
       end
 
-      if File.file?(artifact_reference)
-        send_file(artifact_reference, filename: artifact_reference, type: "Application/octet-stream")
+      uri = URI.parse(artifact_reference)
+
+      if uri.scheme.nil?
+        if File.exist?(artifact_reference)
+          send_file(artifact_reference, filename: artifact_reference, type: "Application/octet-stream")
+        else
+          status(404) # Not found
+          body("Cannot find artifact")
+          return
+        end
       else
         redirect(artifact_reference)
       end
