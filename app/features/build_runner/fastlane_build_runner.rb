@@ -77,7 +77,6 @@ module FastlaneCI
       end
 
       FastlaneCore::Globals.verbose = true
-      ENV["FASTLANE_SKIP_DOCS"] = true.to_s
 
       begin
         # TODO: I think we need to clear out the singleton values, such as lane context, and all that jazz
@@ -105,6 +104,8 @@ module FastlaneCI
         # Make sure to load all the dependencies of the Gemfile
         # TODO: support projects that don't have a Gemfile defined
         Bundler.with_clean_env do
+          ENV["FASTLANE_SKIP_DOCS"] = true.to_s
+
           # Run fastlane now
           Fastlane::LaneManager.cruise_lane(
             platform,
