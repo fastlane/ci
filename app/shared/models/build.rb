@@ -10,7 +10,7 @@ module FastlaneCI
       :pending,
       :missing_fastfile,
       :failure,
-      :ci_problem
+      :ci_problem # TODO: this is actually never used right now
     ]
 
     # A reference to the project this build is associated with
