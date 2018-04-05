@@ -5,7 +5,7 @@ People who have downloaded fastlane.ci will need to be able to get up and runnin
 ### Assumptions ###
 - User setting up fastlane.ci has a GitHub account
 - User has a project in GitHub which already uses fastlane
-- Setup is occuring on a dedicated High Sierra Mac
+- Setup is occurring on a dedicated High Sierra Mac
 - User didn't set up fastlane.ci before (no ci-config repo)
 
 ### Results ###
@@ -53,7 +53,7 @@ At the end of the first time setup, the user will have the following outcomes:
 1. Temporary config folder is now turned into git repo and pushed to repo created in previous step
 1. CI clones `fastlane-ci-config` and loads all services
 1. On success, user is now logged into the fastlane.ci
-1. User starts with the [/docs/use_cases/add_project_for_pr_status.md](/docs/use_cases/add_project_for_pr_status.md) flow, that shows a list of all organisations and repos the user has access to
+1. User starts with the [/docs/use_cases/add_project_for_pr_status.md](/docs/use_cases/add_project_for_pr_status.md) flow, that shows a list of all organizations and repos the user has access to
 
 ### Error states ###
 [WIP]
