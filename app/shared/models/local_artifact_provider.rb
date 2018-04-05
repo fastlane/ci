@@ -18,10 +18,10 @@ module FastlaneCI
     # @return [String] The class of the provider
     attr_reader :class_name
 
-    def initialize(root_path: LocalArtifactProvider.default_root_path)
-      @root_path = root_path
+    def initialize
       @class_name = self.class.name.to_s
-      FileUtils.mkdir_p(@root_path) unless File.directory?(@root_path)
+      FileUtils.mkdir_p(LocalArtifactProvider.default_root_path) \
+        unless File.directory?(LocalArtifactProvider.default_root_path)
     end
 
     def store!(artifact:, build:, project:)
@@ -29,7 +29,11 @@ module FastlaneCI
       raise "Build was not provided or wrong type provided" unless build&.is_a?(Build)
       raise "Project was not provided or wrong type provided" unless project&.is_a?(Project)
 
-      root_path = Pathname.new(@root_path) unless @root_path.kind_of?(Pathname)
+      if LocalArtifactProvider.default_root_path.kind_of?(Pathname)
+        root_path = LocalArtifactProvider.default_root_path
+      else
+        root_path = Pathname.new(LocalArtifactProvider.default_root_path)
+      end
 
       artifact_path = root_path.join(project.id, build.number.to_s)
 
@@ -49,19 +53,19 @@ module FastlaneCI
 
       FileUtils.mv(original_artifact_reference, new_artifact_reference.join(file_name))
 
-      artifact.reference = new_artifact_reference.join(file_name)
+      artifact.reference = new_artifact_reference.join(file_name).relative_path_from(root_path).to_s
       artifact.provider = self
       artifact # This is the Artifact that we will store in the build.
     end
 
     def retrieve!(artifact:)
       raise "Artifact to store was not provided or wrong type provided" unless artifact&.is_a?(Artifact)
-
-      unless File.exist?(artifact.reference)
-        raise "#{self.class.name} needs an existing file in #{artifact.reference}, but it was not found"
+      artifact_reference = File.join(LocalArtifactProvider.default_root_path, artifact.reference)
+      unless File.exist?(artifact_reference)
+        raise "#{self.class.name} needs an existing file in #{artifact_reference}, but it was not found"
       end
 
-      return artifact.reference
+      return artifact_reference
     end
   end
 end
