@@ -9,17 +9,19 @@ module FastlaneCI
     # be stored in the log.
     attr_reader :each_line_block
 
+    attr_accessor :output_listeners
+
     def initialize(each_line_block: nil)
       raise "No each_line_block provided" if each_line_block.nil?
       @each_line_block = each_line_block
-      @output_listeners = []
+      self.output_listeners = []
     end
 
     def add_output_listener!(listener)
       unless listener.kind_of?(FastlaneLog)
         raise "Invalid listener provider, expected #{FastlaneLog.class.name} got #{listener.class.name}"
       end
-      @output_listeners << listener
+      output_listeners << listener
     end
 
     #####################################################
@@ -27,7 +29,7 @@ module FastlaneCI
     #####################################################
 
     def error(message)
-      @output_listeners.each { |listener| listener.error(message) }
+      output_listeners.each { |listener| listener.error(message) }
       each_line_block.call(
         type: :error,
         message: message,
@@ -36,7 +38,7 @@ module FastlaneCI
     end
 
     def important(message)
-      @output_listeners.each { |listener| listener.important(message) }
+      output_listeners.each { |listener| listener.important(message) }
       each_line_block.call(
         type: :important,
         message: message,
@@ -45,7 +47,7 @@ module FastlaneCI
     end
 
     def success(message)
-      @output_listeners.each { |listener| listener.success(message) }
+      output_listeners.each { |listener| listener.success(message) }
       each_line_block.call(
         type: :success,
         message: message,
@@ -56,7 +58,7 @@ module FastlaneCI
     # If you're here because you saw the exception: `wrong number of arguments (given 0, expected 1)`
     # that means you're accidentally calling this method instead of a local variable on the stack frame before this
     def message(message)
-      @output_listeners.each { |listener| listener.message(message) }
+      output_listeners.each { |listener| listener.message(message) }
       each_line_block.call(
         type: :message,
         message: message,
@@ -65,7 +67,7 @@ module FastlaneCI
     end
 
     def deprecated(message)
-      @output_listeners.each { |listener| listener.deprecated(message) }
+      output_listeners.each { |listener| listener.deprecated(message) }
       each_line_block.call(
         type: :error,
         message: message,
@@ -74,7 +76,7 @@ module FastlaneCI
     end
 
     def command(message)
-      @output_listeners.each { |listener| listener.command(message) }
+      output_listeners.each { |listener| listener.command(message) }
       each_line_block.call(
         type: :command,
         message: message,
@@ -88,7 +90,7 @@ module FastlaneCI
         prefix = msg.include?("▸") ? "" : "▸ "
         resulting_message = prefix + msg
 
-        @output_listeners.each { |listener| listener.message(resulting_message) }
+        output_listeners.each { |listener| listener.message(resulting_message) }
         each_line_block.call(
           type: :command_output,
           message: resulting_message,
@@ -98,11 +100,11 @@ module FastlaneCI
     end
 
     def verbose(message)
-      @output_listeners.each { |listener| listener.verbose(message) }
+      output_listeners.each { |listener| listener.verbose(message) }
     end
 
     def header(message)
-      @output_listeners.each { |listener| listener.header(message) }
+      output_listeners.each { |listener| listener.header(message) }
       each_line_block.call(
         type: :header,
         message: message,
@@ -113,62 +115,26 @@ module FastlaneCI
     # TODO: Check if we can find a good way to not have to
     #   overwrite all these methods
     def crash!(exception)
-      @output_listeners.each { |listener| listener.error(exception.to_s) }
-      each_line_block.call(
-        type: :crash,
-        message: exception.to_s,
-        time: Time.now
-      )
       raise FastlaneCrash.new, exception.to_s
     end
 
     def user_error!(error_message, options = {})
-      @output_listeners.each { |listener| listener.error(error_message) }
-      each_line_block.call(
-        type: :user_error,
-        message: error_message,
-        time: Time.now
-      )
       super(error_message, options)
     end
 
     def shell_error!(error_message, options = {})
-      @output_listeners.each { |listener| listener.error(error_message) }
-      each_line_block.call(
-        type: :shell_error,
-        message: error_message,
-        time: Time.now
-      )
       super(error_message, options)
     end
 
     def build_failure!(error_message, options = {})
-      @output_listeners.each { |listener| listener.error(error_message) }
-      each_line_block.call(
-        type: :build_failure,
-        message: error_message,
-        time: Time.now
-      )
       super(error_message, options)
     end
 
     def test_failure!(error_message)
-      @output_listeners.each { |listener| listener.error(error_message) }
-      each_line_block.call(
-        type: :test_failure,
-        message: error_message,
-        time: Time.now
-      )
       super(error_message)
     end
 
     def abort_with_message!(error_message)
-      @output_listeners.each { |listener| listener.error(error_message) }
-      each_line_block.call(
-        type: :abort,
-        message: error_message,
-        time: Time.now
-      )
       super(error_message)
     end
 

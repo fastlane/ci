@@ -34,7 +34,6 @@ module FastlaneCI
       @platform = lane_pieces.count > 1 ? lane_pieces.first : nil
       @lane = lane_pieces.last
       @parameters = parameters
-      @encountered_failure_output = false # Did we encounter a row that signaled failure?
     end
 
     # completion_block is called with an array of artifacts
@@ -85,11 +84,6 @@ module FastlaneCI
         logger.info("starting fastlane run lane: #{lane} platform: #{platform}, params: #{parameters} from #{fast_file_path}")
         # rubocop:enable Metrics/LineLength
 
-        # Attach a listener to the output to see if we have a failure. If so, this build failed
-        add_listener(proc do |row|
-          @encountered_failure_output = true if row.did_fail_build?
-        end)
-
         build_output = ["#{fast_file_path}, #{lane} platform: #{platform}, params: #{parameters} from output"]
         # Attach a listener so we can collect the build output and display it all at once
         add_listener(proc do |row|
@@ -107,20 +101,39 @@ module FastlaneCI
           ENV["FASTLANE_SKIP_DOCS"] = true.to_s
 
           # Run fastlane now
-          Fastlane::LaneManager.cruise_lane(
-            platform,
-            lane,
-            parameters,
-            nil,
-            fast_file_path
-          )
+          begin
+            Fastlane::LaneManager.cruise_lane(
+              platform,
+              lane,
+              parameters,
+              nil,
+              fast_file_path
+            )
+          rescue StandardError => ex
+            # TODO: refactor this to reduce duplicate code
+            logger.debug("Setting build status to error from fastlane")
+            current_build.status = :failure
+            current_build.description = "Build failed"
+
+            logger.error(ex)
+            logger.error(ex.backtrace)
+
+            new_line_block.call(convert_raw_row_to_object({
+              type: "crash",
+              message: ex.to_s,
+              time: Time.now
+            }))
+            ci_output.output_listeners.each do |listener|
+              listener.error(ex.to_s)
+            end
+            artifacts_paths = gather_build_artifact_paths(loggers: [verbose_log, info_log])
+
+            return
+          end
         end
 
-        if @encountered_failure_output
-          current_build.status = :failure
-        else
-          current_build.status = :success
-        end
+        current_build.status = :success
+        current_build.description = "All green"
 
         logger.info("fastlane run complete")
         logger.debug(build_output.join("\n").to_s)
@@ -133,6 +146,22 @@ module FastlaneCI
 
         logger.error(ex)
         logger.error(ex.backtrace)
+
+        # Catching the exception with this rescue block is really important,
+        # as we also need to notify the listeners about it
+        # see https://github.com/fastlane/ci/issues/583 for more details
+        # notify all interested parties here
+        # TODO: the line below could be improved
+        #   right now we're just setting everything to `crash`
+        #   to indicate this is causes a build failure
+        new_line_block.call(convert_raw_row_to_object({
+          type: "crash",
+          message: ex.to_s,
+          time: Time.now
+        }))
+        ci_output.output_listeners.each do |listener|
+          listener.error(ex.to_s)
+        end
 
         artifacts_paths = gather_build_artifact_paths(loggers: [verbose_log, info_log])
       ensure
