@@ -27,10 +27,12 @@ module FastlaneCI
       # Create random folder for checkout, prefixed with `manual_build`
       checkout_folder = File.join(File.expand_path(project.local_repo_path), "manual_build_#{SecureRandom.uuid}")
       # TODO: This should be hidden in a service
-      repo = FastlaneCI::GitRepo.new(git_config: project.repo_config,
-                                   local_folder: checkout_folder,
-                            provider_credential: current_github_provider_credential,
-                           notification_service: FastlaneCI::Services.notification_service)
+      repo = FastlaneCI::GitRepo.new(
+        git_config: project.repo_config,
+        local_folder: checkout_folder,
+        provider_credential: current_github_provider_credential,
+        notification_service: FastlaneCI::Services.notification_service
+      )
       current_sha ||= repo.most_recent_commit.sha
       manual_triggers_allowed = project.job_triggers.any? do |trigger|
         trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual]
@@ -119,11 +121,13 @@ module FastlaneCI
       repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
 
       dir = Dir.mktmpdir
-      repo = FastlaneCI::GitRepo.new(git_config: repo_config,
-                                    local_folder: dir,
-                                    provider_credential: provider_credential,
-                                    async_start: false,
-                                    notification_service: FastlaneCI::Services.notification_service)
+      repo = FastlaneCI::GitRepo.new(
+        git_config: repo_config,
+        local_folder: dir,
+        provider_credential: provider_credential,
+        async_start: false,
+        notification_service: FastlaneCI::Services.notification_service
+      )
 
       fastfile = FastlaneCI::FastfilePeeker.peek(
         git_repo: repo,
@@ -226,7 +230,8 @@ module FastlaneCI
           git_config: repo_config,
           provider_credential: provider_credential,
           local_folder: project.local_repo_path,
-          async_start: false
+          async_start: false,
+          notification_service: FastlaneCI::Services.notification_service
         )
 
         repo.checkout_branch(branch: branch)
