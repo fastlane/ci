@@ -25,6 +25,7 @@
 - **Sensible defaults**: If something can be automatically figured out by `fastlane.ci`, it should be
 - **Easy permissions**: Instead of manually managing an extra layer of permission, `fastlane.ci` just uses GitHub
 - **Focus on the most established toolings**: git, GitHub and Xcode
+- **No build steps**: `fastlane.ci` will never allow you to add "build steps", instead, all automation is done via _fastlane_
 
 ## Long-term goals
 
