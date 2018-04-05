@@ -84,12 +84,6 @@ module FastlaneCI
         logger.info("starting fastlane run lane: #{lane} platform: #{platform}, params: #{parameters} from #{fast_file_path}")
         # rubocop:enable Metrics/LineLength
 
-        build_output = ["#{fast_file_path}, #{lane} platform: #{platform}, params: #{parameters} from output"]
-        # Attach a listener so we can collect the build output and display it all at once
-        add_listener(proc do |row|
-          build_output << "#{row.time}: #{row.message}"
-        end)
-
         # TODO: the fast_file.runner should probably handle this
         logger.debug("Switching to #{repo.local_folder} to run `fastlane`")
 
@@ -143,9 +137,7 @@ module FastlaneCI
 
         current_build.status = :success
         current_build.description = "All green"
-
         logger.info("fastlane run complete")
-        logger.debug(build_output.join("\n").to_s)
 
         artifacts_paths = gather_build_artifact_paths(loggers: [verbose_log, info_log])
       rescue StandardError => ex
