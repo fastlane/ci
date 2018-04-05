@@ -87,6 +87,9 @@ module FastlaneCI
 
       # Return async Rack response
       return ws.rack_response
+    rescue => ex
+      logger.error("Error in #{self.class} middleware: #{ex}")
+      logger.error(ex.backtrace.join("\n"))
     end
   end
 end
