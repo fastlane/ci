@@ -57,7 +57,7 @@ Right now, `fastlane.ci` is in Alpha, we'd love for you to give it a try. Gettin
 1. Open the Terminal on the Mac you want to run as `fastlane.ci`
 1. `git clone https://github.com/fastlane/ci`
 1. `cd ci`
-1. `gem install bundle`
+1. `gem install bundler`
 1. `bundle install`
 1. `bundle exec rackup -p 8080 --env production`
 1. Open [localhost:8080](http://localhost:8080/) in your web browser
