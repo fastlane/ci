@@ -102,7 +102,7 @@ module FastlaneCI
 
       # An array of the included attributes of the base_model to be included in the ViewModel.
       # @return [Array<Symbol>] the included attributes for the given ViewModel. Defaults to all attributes.
-      # Defaults to all attr_accessor, attr_writer and attr_reader properties.
+      # Defaults to all attr_accessor and attr_reader properties.
       def included_attributes
         attributes_per_model = {}
         _base_models.each do |model|
