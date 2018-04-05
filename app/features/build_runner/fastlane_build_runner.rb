@@ -110,6 +110,7 @@ module FastlaneCI
         end
 
         current_build.status = :success
+        current_build.description = "All green"
 
         logger.info("fastlane run complete")
         logger.debug(build_output.join("\n").to_s)
