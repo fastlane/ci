@@ -1,4 +1,5 @@
 require_relative "../shared/authenticated_controller_base"
+require_relative "./view_models/project_summary_view_model"
 
 module FastlaneCI
   # Controller for providing all data relating to projects
@@ -10,7 +11,11 @@ module FastlaneCI
       current_user_config_service = self.current_user_config_service
       all_projects = current_user_config_service.projects(provider_credential: current_provider_credential)
 
-      return all_projects.to_json
+      all_projects_view_models = all_projects.map do |project|
+        ProjectSummaryViewModel.new(project: project, latest_build: project.builds.first)
+      end
+
+      return all_projects_view_models.to_json
     end
   end
 end
