@@ -124,7 +124,8 @@ module FastlaneCI
         logger.error(ex)
         logger.error(ex.backtrace)
 
-        # Catching the exception with this rescue block is really important, as we also need to notify the listeners about it
+        # Catching the exception with this rescue block is really important,
+        # as we also need to notify the listeners about it
         # see https://github.com/fastlane/ci/issues/583 for more details
         # notify all interested parties here
         # TODO: the line below could be improved
