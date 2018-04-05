@@ -15,16 +15,13 @@ module FastlaneCI
       end
     end
 
-    # @return [Pathname]
-    attr_accessor :root_path
-
     # @return [String] The class of the provider
     attr_reader :class_name
 
     def initialize(root_path: LocalArtifactProvider.default_root_path)
-      self.root_path = root_path
+      @root_path = root_path
       @class_name = self.class.name.to_s
-      FileUtils.mkdir_p(root_path) unless File.directory?(root_path)
+      FileUtils.mkdir_p(@root_path) unless File.directory?(@root_path)
     end
 
     def store!(artifact:, build:, project:)
@@ -32,7 +29,7 @@ module FastlaneCI
       raise "Build was not provided or wrong type provided" unless build&.is_a?(Build)
       raise "Project was not provided or wrong type provided" unless project&.is_a?(Project)
 
-      self.root_path = Pathname.new(root_path) unless root_path.kind_of?(Pathname)
+      root_path = Pathname.new(@root_path) unless @root_path.kind_of?(Pathname)
 
       artifact_path = root_path.join(project.id, build.number.to_s)
 
