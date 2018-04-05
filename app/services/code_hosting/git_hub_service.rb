@@ -17,6 +17,16 @@ module FastlaneCI
       attr_accessor :status_context_prefix
     end
 
+    def remote_status_updates_disabled?
+      disable_status_update = ENV["FASTLANE_CI_DISABLE_REMOTE_STATUS_UPDATE"]
+      return false if disable_status_update.nil?
+
+      disable_status_update = disable_status_update.to_s
+      return false if disable_status_update == "false" || disable_status_update == "0"
+
+      return true
+    end
+
     GitHubService.status_context_prefix = "fastlane.ci: "
 
     # The email is actually optional for API access
@@ -114,20 +124,26 @@ module FastlaneCI
       updated_commits = []
 
       open_pr_commits.each do |open_pull_request|
+        sha = open_pull_request.current_sha
+        repo_full_name = open_pull_request.repo_full_name
         statuses = statuses_for_commit_sha(
-          repo_full_name: open_pull_request.repo_full_name,
-          sha: open_pull_request.current_sha
+          repo_full_name: repo_full_name,
+          sha: sha
         )
-
         next unless statuses.count == 0
 
-        set_build_status!(
-          repo: open_pull_request.repo_full_name,
-          sha: open_pull_request.current_sha,
-          state: "pending",
-          status_context: status_context
-        )
-        updated_commits << open_pull_request.current_sha
+        if remote_status_updates_disabled?
+          logger.debug("Remote status updates are disabled, remote status not updated for #{repo_full_name}, #{sha}")
+        else
+          set_build_status!(
+            repo: repo_full_name,
+            sha: sha,
+            state: "pending",
+            status_context: status_context
+          )
+        end
+
+        updated_commits << sha
       end
 
       return updated_commits
@@ -190,12 +206,17 @@ module FastlaneCI
       # this needs to be synchronous because we're doing it during initialization of our build runner
       state_details = target_url.nil? ? "#{repo}, sha #{sha}" : target_url
       logger.debug("Setting status #{state} -> #{status_context} on #{state_details}")
-      github_action do
-        client.create_status(repo, sha, state, {
-          target_url: target_url,
-          description: description,
-          context: status_context
-        })
+
+      if remote_status_updates_disabled?
+        logger.debug("Remote status updates are disabled, remote build status not updated.")
+      else
+        github_action do
+          client.create_status(repo, sha, state, {
+            target_url: target_url,
+            description: description,
+            context: status_context
+          })
+        end
       end
     rescue StandardError => ex
       logger.error(ex)

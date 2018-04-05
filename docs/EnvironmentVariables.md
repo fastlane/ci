@@ -26,6 +26,8 @@ During the normal operation of fastlane.ci, you'll need a few values. Some value
 
 `FASTLANE_CI_DISABLE_PUSHES` - Sometimes we just want to commit and not push to remote. Useful when debugging your ci config using the same config as your production setup.
 
+`FASTLANE_CI_DISABLE_REMOTE_STATUS_UPDATE` - Disable changing the status of a commit on the remote source, e.g. when something fails, don't set GitHub commit to `:failed`. Primarily useful when debugging your ci config when using the same config as your production setup.
+
 ## Tips and tricks
 **Here's what @taquitos has in his `.bash_profile`:**
 
