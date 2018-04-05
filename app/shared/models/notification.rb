@@ -112,7 +112,9 @@ module FastlaneCI
     # @raise [StandardError]
     def validate_initialization_params!
       validate_priority!
-      validate_type!
+
+      # TODO: enable validate_type! when we decide that we need it
+      # validate_type!
     end
 
     # Validates the priority of the notification is in the `PRIORITIES` enum

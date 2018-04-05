@@ -18,6 +18,7 @@ module FastlaneCI
           logger.debug("User is not yet onboarded. Directing them to `/onboarding`")
           redirect("/onboarding_erb")
         elsif route.start_with?("/onboarding_erb") && Services.onboarding_service.correct_setup?
+          session[:user] = nil # Cleanup user's session, to enforce reloading the access tokens.
           redirect("/")
         else
           logger.debug("User is onboarded, accessing #{route}")
