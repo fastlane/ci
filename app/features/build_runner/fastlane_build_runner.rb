@@ -108,7 +108,7 @@ module FastlaneCI
               nil,
               fast_file_path
             )
-          rescue => ex
+          rescue StandardError => ex
             # TODO: refactor this to reduce duplicate code
             logger.debug("Setting build status to error from fastlane")
             current_build.status = :failure
