@@ -1,14 +1,12 @@
 GIT
   remote: https://github.com/fastlane/TaskQueue
   revision: 5b3f459be5c451cc9ab25f6819d2eeb67be5e56d
-  ref: 5b3f459
   specs:
     taskqueue (0.0.0)
 
 GIT
   remote: https://github.com/fastlane/fastfile-parser
-  revision: 122825dfb9370a6a2008e2e5ca8613dc6602b45d
-  ref: 122825d
+  revision: 4ee3b130e4d42bd61ee4134708a48e05c00d44b2
   specs:
     fastfile-parser (0.0.0)
       parser (>= 2.4.0.2, < 2.5.0.0)
@@ -16,9 +14,9 @@ GIT
 
 GIT
   remote: https://github.com/fastlane/fastlane
-  revision: 7ee705adc437a4ee3ca6038de368f5833f0c06fc
+  revision: 6b392e8e019d0a8449f3b085b1d8e6c63fe10c69
   specs:
-    fastlane (2.88.0)
+    fastlane (2.89.0)
       CFPropertyList (>= 2.3, < 4.0.0)
       addressable (>= 2.3, < 3.0.0)
       babosa (>= 1.0.2, < 2.0.0)
@@ -43,7 +41,7 @@ GIT
       public_suffix (~> 2.0.0)
       rubyzip (>= 1.1.0, < 2.0.0)
       security (= 0.1.3)
-      simctl (~> 1.6)
+      simctl (~> 1.6.3)
       slack-notifier (>= 2.0.0, < 3.0.0)
       terminal-notifier (>= 1.6.2, < 2.0.0)
       terminal-table (>= 1.4.5, < 2.0.0)
@@ -161,7 +159,7 @@ GEM
     multi_xml (0.6.0)
     multipart-post (2.0.0)
     mustermann (1.0.2)
-    nanaimo (0.2.4)
+    nanaimo (0.2.5)
     naturally (2.1.0)
     octokit (4.8.0)
       sawyer (~> 0.8.0, >= 0.5.3)
@@ -228,7 +226,7 @@ GEM
       faraday (~> 0.9)
       jwt (>= 1.5, < 3.0)
       multi_json (~> 1.10)
-    simctl (1.6.2)
+    simctl (1.6.3)
       CFPropertyList
       naturally
     simplecov (0.14.1)
