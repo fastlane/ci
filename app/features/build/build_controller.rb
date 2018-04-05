@@ -23,7 +23,10 @@ module FastlaneCI
       build_number = build_number.to_i
 
       project = user_project_with_id(project_id: project_id)
+      raise "Project #{project_id} not found" if project.nil?
+
       build = project.builds.find { |b| b.number == build_number }
+      raise "Build #{build_number} not found for project #{project.project_name} (#{project_id})" if build.nil?
 
       # Fetch all the active runners, and see if there is one WIP
       current_build_runner = Services.build_runner_service.find_build_runner(
