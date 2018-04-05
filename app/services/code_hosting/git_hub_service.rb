@@ -1,6 +1,7 @@
+require_relative "../../shared/logging_module"
+require_relative "../../shared/github_handler"
 require_relative "code_hosting_service"
 require_relative "github_open_pr"
-require_relative "../../shared/logging_module"
 
 require "set"
 require "octokit"
@@ -9,8 +10,10 @@ module FastlaneCI
   # Data source that interacts with GitHub
   class GitHubService < CodeHostingService
     include FastlaneCI::Logging
+    include FastlaneCI::GitHubHandler
 
     class << self
+      include FastlaneCI::GitHubHandler
       attr_accessor :status_context_prefix
     end
 
@@ -29,7 +32,11 @@ module FastlaneCI
 
     def self.token_scope_validation_error(token)
       required = "repo"
-      scopes = Octokit::Client.new.scopes(token)
+      scopes = []
+
+      github_action do
+        scopes = Octokit::Client.new.scopes(token)
+      end
 
       if scopes.include?(required)
         return nil
@@ -55,13 +62,16 @@ module FastlaneCI
     # returns all open pull requests on given repo
     # branches should be nil if you want all branches to be considered
     def open_pull_requests(repo_full_name: nil, branches: nil)
-      all_open_pull_requests = client.pull_requests(repo_full_name, state: "open").map do |pr|
-        GitHubOpenPR.new(
-          current_sha: pr.head.sha,
-          branch: pr.head.ref,
-          repo_full_name: pr.head.repo.full_name,
-          clone_url: pr.head.repo.clone_url
-        )
+      all_open_pull_requests = []
+      github_action do
+        all_open_pull_requests = client.pull_requests(repo_full_name, state: "open").map do |pr|
+          GitHubOpenPR.new(
+            current_sha: pr.head.sha,
+            branch: pr.head.ref,
+            repo_full_name: pr.head.repo.full_name,
+            clone_url: pr.head.repo.clone_url
+          )
+        end
       end
 
       # if no specific branch, return all open prs
@@ -84,7 +94,11 @@ module FastlaneCI
     #       This has to wait for now, until we decide how we separate them for each project, as multiple projects
     #       can run builds for one repo
     def statuses_for_commit_sha(repo_full_name: nil, sha: nil)
-      all_statuses = client.statuses(repo_full_name, sha)
+      all_statuses = []
+
+      github_action do
+        all_statuses = client.statuses(repo_full_name, sha)
+      end
 
       only_ci_statuses = all_statuses.select do |status|
         status.context.start_with?(GitHubService.status_context_prefix)
@@ -120,23 +134,31 @@ module FastlaneCI
     end
 
     def recent_commits(repo_full_name:, branch:, since_time_utc:)
-      client.commits_since(repo_full_name, since_time_utc, branch)
+      github_action do
+        next client.commits_since(repo_full_name, since_time_utc, branch)
+      end
     end
 
     # TODO: parse those here or in service layer?
     def repos
-      client.repos({}, query: { sort: "asc" })
+      github_action do
+        next client.repos({}, query: { sort: "asc" })
+      end
     end
 
     # @return [Array<String>] names of the branches for the given repo
     def branch_names(repo:)
-      client.branches(repo).map(&:name)
+      github_action do
+        next client.branches(repo).map(&:name)
+      end
     end
 
     # Does the client with the associated credentials have access to the specified repo?
     # @repo [String] Repo URL as string
     def access_to_repo?(repo_url: nil)
-      client.repository?(repo_url.sub("https://github.com/", ""))
+      github_action do
+        next client.repository?(repo_url.sub("https://github.com/", ""))
+      end
     end
 
     # The `target_url`, `description` and `context` parameters are optional
@@ -168,16 +190,15 @@ module FastlaneCI
       # this needs to be synchronous because we're doing it during initialization of our build runner
       state_details = target_url.nil? ? "#{repo}, sha #{sha}" : target_url
       logger.debug("Setting status #{state} -> #{status_context} on #{state_details}")
-      client.create_status(repo, sha, state, {
-        target_url: target_url,
-        description: description,
-        context: status_context
-      })
+      github_action do
+        client.create_status(repo, sha, state, {
+          target_url: target_url,
+          description: description,
+          context: status_context
+        })
+      end
     rescue StandardError => ex
       logger.error(ex)
-      # TODO: how do we handle GitHub errors
-      # In this case `create_status` will cause an exception
-      # if the user doesn't have write permission for the repo
       raise ex
     end
   end
