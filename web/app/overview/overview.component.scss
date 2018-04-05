@@ -19,3 +19,14 @@
         }
     }
 }
+
+.fci-overview-project-list {
+    padding: 0;
+    .mat-nav-list {
+        padding: 0;
+    }
+    .mat-card {
+        padding: 0;
+        margin-bottom: 14px;
+    }
+}
