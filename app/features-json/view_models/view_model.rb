@@ -91,18 +91,21 @@ module FastlaneCI
 
     # Add this as Class Methods.
     module ClassMethods
+      attr_reader :_base_models
+
       # Required method to be called overriden by the created ViewModel
       # in order to indicate which class is the Model from which we are creating the ViewModel form.
       # @param [Class] models
       def base_models(*models)
-        @base_models = models
+        @_base_models = models
       end
 
       # An array of the included attributes of the base_model to be included in the ViewModel.
       # @return [Array<Symbol>] the included attributes for the given ViewModel. Defaults to all attributes.
+      # Defaults to all attr_accessor, attr_writer and attr_reader properties.
       def included_attributes
         attributes_per_model = {}
-        @base_models.each do |model|
+        _base_models.each do |model|
           attributes_per_model[model.to_s] = model::ATTRS
                                              .reject { |method| method.to_s.end_with?("=") }
                                              .map { |method| "@#{method}".to_sym }
@@ -126,9 +129,10 @@ module FastlaneCI
       private
 
       def _viewmodel_from(object)
-        raise "Override base_model(model) in order to use the ViewModel mixin." if @base_models.nil?
-        raise "Incorrect object type. Expected #{@base_models}, got #{object.class}" \
-          unless @base_models.any? { |base_model| object.kind_of?(base_model) }
+        raise "Override base_model(model) in order to use the ViewModel mixin." if _base_models.nil?
+        unless _base_models.any? { |base_model| object.kind_of?(base_model) }
+          raise "Incorrect object type. Expected #{_base_models}, got #{object.class}"
+        end
         if object.respond_to?(:to_object_dictionary)
           return object.to_object_dictionary(included_attributes[object.class.to_s])
         else
