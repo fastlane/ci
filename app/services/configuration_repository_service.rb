@@ -1,10 +1,13 @@
 require "json"
+require_relative "../shared/logging_module"
+require_relative "../shared/github_handler"
 
 module FastlaneCI
   # Provides operations to create and mutate the FastlaneCI configuration
   # repository
   class ConfigurationRepositoryService
     include FastlaneCI::Logging
+    include FastlaneCI::GitHubHandler
 
     # @return [Octokit::Client]
     attr_reader :client
@@ -19,10 +22,12 @@ module FastlaneCI
     # Creates a remote repository if it does not already exist, complete with
     # the expected remote files `user.json` and `projects.json`
     def create_private_remote_configuration_repo
-      # TODO: Handle the common case of when provided account can't create a new private repo
-      client.create_repository(repo_name, private: true) unless configuration_repository_exists?
-      create_remote_json_file("users.json", json_string: serialized_users)
-      create_remote_json_file("projects.json")
+      github_action do
+        # TODO: Handle the common case of when provided account can't create a new private repo
+        client.create_repository(repo_name, private: true) unless configuration_repository_exists?
+        create_remote_json_file("users.json", json_string: serialized_users)
+        create_remote_json_file("projects.json")
+      end
     end
 
     # Returns `true` if the configuration repository is in proper format:
@@ -58,8 +63,9 @@ module FastlaneCI
     def configuration_repository_exists?
       # Return cached true value, if it was successful, otherwise keep checking because it might have been fixed
       return @config_repo_exists unless @config_repo_exists.nil? || (@config_repo_exists == false)
-
-      @config_repo_exists = client.repository?(repo_shortform)
+      github_action do
+        @config_repo_exists = client.repository?(repo_shortform)
+      end
       return @config_repo_exists
     end
 
@@ -108,7 +114,9 @@ module FastlaneCI
     # @raise  [Octokit::UnprocessableEntity] when file already exists
     # @param  [String] file_path
     def create_remote_json_file(file_path, json_string: "[]")
-      client.contents(repo_shortform, path: file_path)
+      github_action do
+        client.contents(repo_shortform, path: file_path)
+      end
     rescue Octokit::NotFound
       client.create_contents(
         repo_shortform, file_path, "Add initial #{file_path}", json_string
@@ -134,7 +142,10 @@ module FastlaneCI
       return false unless configuration_repository_exists?
       logger.debug("Checking that #{repo_shortform}/#{file_path} is a json array")
 
-      contents_map = client.contents(repo_shortform, path: file_path)
+      contents_map = {}
+      github_action do
+        contents_map = client.contents(repo_shortform, path: file_path)
+      end
       contents_json =
         contents_map[:encoding] == "base64" ? Base64.decode64(contents_map[:content]) : contents_map[:content]
       contents = JSON.parse(contents_json)
