@@ -191,7 +191,8 @@ module FastlaneCI
       when FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit]
         trigger = FastlaneCI::CommitJobTrigger.new(branch: branch)
       when FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual]
-        trigger = FastlaneCI::ManualJobTrigger.new(branch: branch)
+        logger.debug("Manual trigger selected - this is enabled by default")
+        # Nothing to do here, manual trigger is added by default
       when FastlaneCI::JobTrigger::TRIGGER_TYPE[:nightly]
         trigger = FastlaneCI::NightlyJobTrigger.new(branch: branch, hour: hour.to_i, minute: minute.to_i)
       else
@@ -210,7 +211,10 @@ module FastlaneCI
         lane: lane.split(" ").last,
         # TODO: Until we make a proper interface to attach JobTriggers to a Project, let's add a manual one for the
         # selected branch.
-        job_triggers: [trigger]
+        job_triggers: [
+          trigger,
+          FastlaneCI::ManualJobTrigger.new(branch: branch)
+        ]
       )
 
       if !project.nil?
