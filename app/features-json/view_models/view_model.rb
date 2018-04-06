@@ -35,6 +35,10 @@ module FastlaneCI
   #           self.attribute = "hello"
   #           self.other_attribute = "world"
   #         end
+  #
+  #         def one_method(arg: "Hello", other_arg: "World")
+  #           return [arg, other_arg].join(" ")
+  #         end
   #       end
   #
   #       class KlassViewModel
@@ -73,13 +77,26 @@ module FastlaneCI
   #        class KlassViewModel
   #         include ViewModel
   #         base_models(KlassModel, OtherKlassModel)
+  #
+  #         def self.args_for_method(method)
+  #           case method
+  #             when :one_method
+  #               return { arg: "Foo", other_arg: "Bar" }
+  #             end
+  #           end
+  #         end
   #        end
   #
   #        k = KlassModel.new
   #        o = OtherKlassModel.new
   #        viewmodel = KlassViewModel.viewmodel_from!(k, o)
-  #        puts viewmodel # => { "KlassModel"=> { "attribute" => "hello", "other_attribute" => "world" },
-  #                              "OtherKlassModel"=> { "another_attribute" => "foo", "other_other_attribute" => "bar" }
+  #        puts viewmodel # => { "KlassModel"=> { "attribute" => "hello",
+  #                                               "other_attribute" => "world",
+  #                                               "one_method"=> "Foo Bar"
+  #                                             },
+  #                              "OtherKlassModel"=> { "another_attribute" => "foo",
+  #                                                    "other_other_attribute" => "bar"
+  #                                                  }
   #                            }
   #
   module ViewModel
@@ -101,7 +118,7 @@ module FastlaneCI
       end
 
       # An array of the included attributes of the base_model to be included in the ViewModel.
-      # @return [Array<Symbol>] the included attributes for the given ViewModel. Defaults to all attributes.
+      # @return [Array<Symbol>] the included attributes for the given ViewModel.
       # Defaults to all attr_accessor and attr_reader properties.
       def included_attributes
         attributes_per_model = {}
@@ -113,6 +130,26 @@ module FastlaneCI
         return attributes_per_model
       end
 
+      # An array of the included methods of the base_model to be included in the ViewModel.
+      # @return [Array<Symbol>] the included methods for the given ViewModel. Defaults to all methods.
+      def included_methods
+        methods_per_model = {}
+        _base_models.each do |model|
+          methods_per_model[model.to_s] = (model.instance_methods - model::ATTRS - Class.instance_methods)
+                                          .map(&:to_sym)
+        end
+        return methods_per_model
+      end
+
+      # Required method
+      # It receives each method defined by #included_methods and expects a return type matching the
+      # expected method's parameters.
+      # @param [Symbol] method
+      # @return [Any] parameters for the given `method` name.
+      def args_for_method(method)
+        not_implemented(__method__)
+      end
+
       # Creates the ViewModel (in shape of a Hash) from a given object of a certain class type.
       # Defined by the base_model method.
       # @params [Any] objects
@@ -121,15 +158,33 @@ module FastlaneCI
       def viewmodel_from!(*objects)
         viewmodel = {}
         objects.each do |object|
-          viewmodel[object.class.to_s] = _viewmodel_from(object)
+          viewmodel[object.class.to_s] = viewmodel_from_attributes(object).merge(viewmodel_from_methods(object))
         end
         return viewmodel
       end
 
       private
 
-      def _viewmodel_from(object)
-        raise "Override base_model(model) in order to use the ViewModel mixin." if _base_models.nil?
+      def viewmodel_from_methods(object)
+        raise "Override base_models(*model) in order to use the ViewModel mixin." if _base_models.nil?
+        unless _base_models.any? { |base_model| object.kind_of?(base_model) }
+          raise "Incorrect object type. Expected #{_base_models}, got #{object.class}"
+        end
+        return_values = {}
+        included_methods.each do |method|
+          return_value = object.send(method, args_for_method(method))
+          # By default, we try to encode the return value from the method to JSON, if not,
+          # is the user's responsibility to make sure that the return value is JSON-encodable.
+          if return_value.class.include?(JSONConvertible)
+            return_value = return_value.to_object_dictionary
+          end
+          return_values[method.to_s] = return_value
+        end
+        return return_values
+      end
+
+      def viewmodel_from_attributes(object)
+        raise "Override base_models(*models) in order to use the ViewModel mixin." if _base_models.nil?
         unless _base_models.any? { |base_model| object.kind_of?(base_model) }
           raise "Incorrect object type. Expected #{_base_models}, got #{object.class}"
         end
