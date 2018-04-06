@@ -115,7 +115,7 @@ module FastlaneCI
       )
 
       github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
-      selected_repo = github_service.repos.detect { |repo| repo_name == repo.name && org = repo.owner }
+      selected_repo = github_service.repos.detect { |repo| repo_name == repo.name && org == repo.owner }
       raise "Could not find repo, make sure to have access" if selected_repo.nil?
 
       repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
