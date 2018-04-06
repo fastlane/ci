@@ -32,8 +32,9 @@ describe('DataService', () => {
       expect(projects[0].name).toBe('the coolest project');
       expect(projects[0].lane).toBe('ios test');
       expect(projects[1].latestStatus).toBe(BuildStatus.SUCCESS);
-      expect(projects[1].lane).toBe('this project is okay');
-      expect(projects[2].latestDate).toBe('this project needs some work');
+      expect(projects[1].lane).toBe('ios release');
+      expect(projects[2].latestDate.getTime())
+          .toBe(1522883518000);  // 2018-04-04 16:11:58 -0700
       expect(projects[2].latestStatus).toBe(BuildStatus.FAILED);
     });
   });
