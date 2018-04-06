@@ -115,27 +115,25 @@ module FastlaneCI
       )
 
       github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
-      selected_repo = github_service.repos.detect { |repo| repo_name == repo.name && org == repo.owner }
+
+      selected_repo = github_service.repos.detect do |repo|
+        repo_name == repo[:name] &&
+          org == repo[:owner][:login]
+      end
       raise "Could not find repo, make sure to have access" if selected_repo.nil?
 
-      repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
-
-      dir = Dir.mktmpdir
-      repo = FastlaneCI::GitRepo.new(
-        git_config: repo_config,
-        local_folder: dir,
+      fastfile_peeker = FastlaneCI::FastfilePeeker.new(
         provider_credential: provider_credential,
-        async_start: false,
         notification_service: FastlaneCI::Services.notification_service
       )
+      repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
 
-      fastfile = FastlaneCI::FastfilePeeker.peek(
-        git_repo: repo,
-        branch: branch
-      )
+      fastfile = fastfile_peeker.fastfile_from_github(repo_full_name: repo_config.full_name, sha_or_branch: branch)
+      if fastfile.nil?
+        fastfile = fastfile_peeker.fastfile_from_repo(repo_config: repo_config, branch: branch)
+      end
 
       fastfile_config = {}
-
       # The fastfile.tree might have (for now) nil keys due to lanes being outside of
       # a platform itself. So we take that nil key and transform it into a generic :no_platform
       # key.
@@ -158,7 +156,11 @@ module FastlaneCI
       )
 
       github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
-      selected_repo = github_service.repos.detect { |repo| repo_name == repo.name && org = repo.owner }
+
+      selected_repo = github_service.repos.detect do |repo|
+        repo_name == repo[:name] &&
+          org == repo[:owner][:login]
+      end
 
       # We need to check whether we can checkout the project without issues.
       # So a new project is created with default settings so we can fetch it.
@@ -181,7 +183,11 @@ module FastlaneCI
       )
 
       github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
-      selected_repo = github_service.repos.detect { |repo| repo_name == repo.name && org = repo.owner }
+
+      selected_repo = github_service.repos.detect do |repo|
+        repo_name == repo[:name] &&
+          org == repo[:owner][:login]
+      end
 
       repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
 

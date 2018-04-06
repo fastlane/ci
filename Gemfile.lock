@@ -6,7 +6,7 @@ GIT
 
 GIT
   remote: https://github.com/fastlane/fastfile-parser
-  revision: 4ee3b130e4d42bd61ee4134708a48e05c00d44b2
+  revision: a9707d87eb6bfdc74c9fc3125f7eec917c8c1e49
   specs:
     fastfile-parser (0.0.0)
       parser (>= 2.4.0.2, < 2.5.0.0)
@@ -14,7 +14,7 @@ GIT
 
 GIT
   remote: https://github.com/fastlane/fastlane
-  revision: 6b392e8e019d0a8449f3b085b1d8e6c63fe10c69
+  revision: c579921dcf7a95ea30c4f947e39c66fa64810354
   specs:
     fastlane (2.89.0)
       CFPropertyList (>= 2.3, < 4.0.0)
