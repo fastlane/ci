@@ -13,9 +13,10 @@ module FastlaneCI
     include FastlaneCI::GitHubHandler
 
     class << self
-      include FastlaneCI::GitHubHandler
       attr_accessor :status_context_prefix
     end
+
+    GitHubService.status_context_prefix = "fastlane.ci: "
 
     def remote_status_updates_disabled?
       disable_status_update = ENV["FASTLANE_CI_DISABLE_REMOTE_STATUS_UPDATE"]
@@ -26,8 +27,6 @@ module FastlaneCI
 
       return true
     end
-
-    GitHubService.status_context_prefix = "fastlane.ci: "
 
     # The email is actually optional for API access
     # However we ask for the email on login, as we also plan on doing commits for the user
