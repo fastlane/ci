@@ -3,7 +3,7 @@ import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import {map} from 'rxjs/operators';
 
-import {Project, ProjectResponse} from '../models/project';
+import {ProjectSummary, ProjectSummaryResponse} from '../models/project_summary';
 
 // Data server is currently locally hosted.
 const HOSTNAME = '/data';
@@ -12,9 +12,9 @@ const HOSTNAME = '/data';
 export class DataService {
   constructor(private http: HttpClient) {}
 
-  getProjects(): Observable<Project[]> {
+  getProjects(): Observable<ProjectSummary[]> {
     const url = `${HOSTNAME}/projects`;
-    return this.http.get<ProjectResponse[]>(url).pipe(
-        map((projects) => projects.map((project) => new Project(project))));
+    return this.http.get<ProjectSummaryResponse[]>(url).pipe(map(
+        (projects) => projects.map((project) => new ProjectSummary(project))));
   }
 }
