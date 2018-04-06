@@ -6,12 +6,12 @@ describe FastlaneCI::GitHubHandler do
     include FastlaneCI::GitHubHandler
   end
 
-  it "adds handler methods to on instances of a class" do
+  it "adds handler methods on instances of a class" do
     test_class = TestClass.new
     expect(test_class).to respond_to(:github_action)
   end
 
-  it "adds handler methods to as static methods of a class" do
+  it "adds handler methods as static methods of a class" do
     expect(TestClass).to respond_to(:github_action)
   end
 end
