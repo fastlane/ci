@@ -106,9 +106,12 @@
       }
       var data = JSON.parse(message.data)
       if (data["html"]) {
+        var mainView = document.getElementById("main");
+        var needsToScrollToBottom = mainView.offsetHeight + mainView.scrollTop == mainView.scrollHeight;
         document.getElementById("log").innerHTML += data["html"]
-        var mainView = document.getElementById("main")
-        mainView.scrollTo(0, mainView.scrollHeight)
+        if (needsToScrollToBottom) {
+          mainView.scrollTo(0, mainView.scrollHeight);
+        }
       }
       if (data["type"] == "last_message") {
         console.log("Last message received - reloading page")
