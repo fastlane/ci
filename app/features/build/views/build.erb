@@ -62,7 +62,9 @@
       <% build.artifacts.each do |current_artifact| %>
         <tr>
           <td><%= current_artifact.type %></td>
-          <td><%= current_artifact.provider.retrieve!(artifact: current_artifact) %></td>
+          <td>
+            <a href="/projects_erb/<%= project.id %>/builds/<%= build.number %>/artifact/<%= current_artifact.id %>">Download</a>
+          </td>
         </tr>
       <% end %>
     </tbody>

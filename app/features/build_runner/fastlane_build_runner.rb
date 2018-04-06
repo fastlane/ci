@@ -204,7 +204,7 @@ module FastlaneCI
       loggers.each do |current_logger|
         next unless File.exist?(current_logger.file_path)
         artifact_paths << {
-          type: "log",
+          type: File.basename(current_logger.file_path),
           path: File.expand_path(current_logger.file_path)
         }
       end

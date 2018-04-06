@@ -1,6 +1,7 @@
 require_relative "../../shared/authenticated_controller_base"
 require_relative "./build_websocket_backend"
 require "pathname"
+require "uri"
 
 module FastlaneCI
   # Controller for a single project view. Responsible for updates, triggering builds, and displaying project info
@@ -18,6 +19,44 @@ module FastlaneCI
     }
 
     use(FastlaneCI::BuildWebsocketBackend)
+
+    get "#{HOME}/*/artifact/*" do |project_id, build_number, artifact_id|
+      build_number = build_number.to_i
+
+      project = user_project_with_id(project_id: project_id)
+      build = project.builds.find { |b| b.number == build_number }
+
+      artifact = build.artifacts.find { |find_artifact| find_artifact.id == artifact_id }
+
+      if artifact.nil?
+        status(404) # Not found
+        body("Cannot find artifact")
+        return
+      end
+
+      begin
+        artifact_reference = artifact.provider.retrieve!(artifact: artifact)
+        raise "Artifact not found" if artifact_reference.nil?
+      rescue StandardError
+        status(404) # Not found
+        body("Cannot find artifact")
+        return
+      end
+
+      uri = URI.parse(artifact_reference)
+
+      if uri.scheme.nil?
+        if File.exist?(artifact_reference)
+          send_file(artifact_reference, filename: artifact_reference, type: "Application/octet-stream")
+        else
+          status(404) # Not found
+          body("Cannot find artifact")
+          return
+        end
+      else
+        redirect(artifact_reference)
+      end
+    end
 
     get "#{HOME}/*" do |project_id, build_number|
       build_number = build_number.to_i
@@ -41,7 +80,7 @@ module FastlaneCI
         # if the server was restarted, we're gonna end here in this code block
         build_log_artifact = build.artifacts.find do |current_artifact|
           # We can improve the detection in the future, to actually mark an artifact as "default output"
-          current_artifact.type == "log" && current_artifact.reference.end_with?("fastlane.log")
+          current_artifact.type.include?("log") && current_artifact.reference.end_with?("fastlane.log")
         end
 
         if build_log_artifact
