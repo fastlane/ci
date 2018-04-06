@@ -15,9 +15,9 @@ module FastlaneCI
     # if you're using this with the fastfile parser, you need to use `relative: false`
     def self.search_path(path:, relative_path: false)
       # First assume the fastlane directory and its file is in the root of the project
-      fastfiles = Dir[File.join(path, "fastlane/Fastfile")]
+      fastfiles = Dir.glob(File.join(path, "fastlane/Fastfile"), File::FNM_CASEFOLD)
       # If not, it might be in a subfolder
-      fastfiles = Dir[File.join(path, "**/fastlane/Fastfile")] if fastfiles.count == 0
+      fastfiles = Dir.glob(File.join(path, "**/fastlane/Fastfile"), File::FNM_CASEFOLD) if fastfiles.count == 0
 
       if fastfiles.count > 1
         logger.error("Ugh, multiple Fastfiles found, we're gonna have to build a selection in the future")
@@ -25,7 +25,9 @@ module FastlaneCI
       end
 
       if fastfiles.count == 0
+        directory_contents = Dir[File.expand_path(path)].join("\n")
         logger.error("No Fastfile found at #{path}/fastlane/Fastfile, or any descendants")
+        logger.error("Directory contents: #{directory_contents}")
       else
         fastfile_path = fastfiles.first
         if relative_path
