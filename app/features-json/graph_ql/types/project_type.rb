@@ -1,3 +1,5 @@
+require_relative "./job_trigger_type"
+
 require "graphql"
 
 module FastlaneCI
@@ -12,6 +14,7 @@ module FastlaneCI
       field :enabled, types.Boolean
       field :platform, types.String
       field :lane, types.String
+      field :job_triggers, types[Types::JobTriggerType]
     end
   end
 end
