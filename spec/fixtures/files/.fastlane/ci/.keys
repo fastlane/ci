@@ -1,0 +1,18 @@
+# Randomly generated key, that's used to encrypt the user passwords
+FASTLANE_CI_ENCRYPTION_KEY='encryption_key'
+
+# The email address of your fastlane CI bot account
+FASTLANE_CI_USER='ci_user@gmail.com'
+
+# The encrypted API token of your fastlane CI bot account
+FASTLANE_CI_PASSWORD='ci_bot_password'
+
+# The git URL (https) for the configuration repo
+FASTLANE_CI_REPO_URL='https://github.com/user_name/new_repo_name'
+
+# Needed just for the first startup of fastlane.ci:
+# The email address used for the intial clone for the config repo
+FASTLANE_CI_INITIAL_CLONE_EMAIL='clone_user@gmail.com'
+
+# The API token used for the initial clone for the config repo
+FASTLANE_CI_INITIAL_CLONE_API_TOKEN='api_token'
