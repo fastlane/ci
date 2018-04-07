@@ -6,6 +6,7 @@ describe FastlaneCI::EnvironmentVariableService do
     before(:each) do
       allow(Dir).to receive(:home).and_return("/path/to/home")
     end
+
     it "has correct file path" do
       expect(FastlaneCI::EnvironmentVariableService.new.keys_file_path).to eq("/path/to/home/.fastlane/ci/.keys")
     end

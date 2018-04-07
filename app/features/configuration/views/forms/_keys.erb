@@ -1,4 +1,4 @@
-<form method="POST" action="/configuration/keys">
+<form method="POST" action="/configuration_erb/keys">
   <ul class="mdc-list mdc-list--dense demo-list" style="list-style: none">
     <li class="mdc-list-item">
       <div class="mdl-textfield mdl-js-textfield">
@@ -34,7 +34,7 @@
         <input
             id="ci_user_password"
             class="mdl-textfield__input"
-            type="text"
+            type="password"
             name="ci_user_password"
             value="<%= keys[:ci_user_password] %>"
             placeholder="Your GitHub bot's password"

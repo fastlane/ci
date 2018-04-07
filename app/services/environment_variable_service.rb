@@ -19,6 +19,7 @@ module FastlaneCI
       }
     )
       non_nil_new_env_variables = locals.reject { |_k, v| v.nil? }
+                                        .each_with_object({}) { |(k, v), hash| hash[k.to_sym] = v }
       new_environment_variables = FastlaneCI.env.all.merge(non_nil_new_env_variables)
       KeysWriter.new(path: keys_file_path, locals: new_environment_variables).write!
       reload_dot_env!
