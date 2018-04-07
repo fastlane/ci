@@ -4,6 +4,7 @@ require_relative "app/shared/logging_module"
 require_relative "app/shared/models/job_trigger"
 require_relative "app/shared/models/git_fork_config"
 require_relative "app/shared/models/git_repo" # for GitRepo.git_action_queue
+require_relative "app/features-json/graph_ql/schema"
 
 module FastlaneCI
   # Launch is responsible for spawning up the whole
@@ -32,6 +33,9 @@ module FastlaneCI
 
       # order matters here
       cleanup_old_checkouts
+
+      # Start the GraphQL schema
+      FastlaneCI::GraphQLSchema.schema
 
       register_available_controllers
       start_github_workers
