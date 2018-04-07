@@ -4,13 +4,9 @@
       <span class="mdl-layout__title"><%= title %></span>
       <div class="mdl-layout-spacer"></div>
       <% if project.job_triggers.any? { |job_trigger| job_trigger.kind_of?(FastlaneCI::ManualJobTrigger) } %>
-        <a href="/projects_erb/<%= project.id %>/trigger" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-          Trigger Job Now
-        </a>
+          <%= erb :"../../partials/trigger_job_button", locals: { project: project, build: nil, disabled: false } %>
       <% else %>
-        <a class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent mdl-button--disabled">
-          Trigger Job Now
-        </a>
+          <%= erb :"../../partials/trigger_job_button", locals: { project: project, build: nil, disabled: true } %>
       <% end %>
     </div>
     <div class="mdl-layout__tab-bar mdl-js-ripple-effect">

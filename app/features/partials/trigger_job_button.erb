@@ -1,0 +1,11 @@
+<form method="POST" action="/projects_erb/<%= project.id %>/trigger">
+  <% if build %>
+    <input id="sha" type="hidden" name="sha" value="<%= build.sha %>" />
+  <% end %>
+  <input
+    class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+    type="submit"
+    <%= "disabled" if disabled %>
+    value="<%= build ? "Re-Run for this commit" : "Trigger Job Now" %>"
+  />
+</form>
