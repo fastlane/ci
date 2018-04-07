@@ -1,5 +1,3 @@
-require_relative "../../../services/services"
-
 require "graphql"
 
 module FastlaneCI
