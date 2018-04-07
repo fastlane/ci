@@ -25,7 +25,11 @@
       <td>Job Trigger</td><td><%= build.trigger %></td>
     </tr>
     <tr>
-      <td>Sha</td><td><%= build.sha %></td>
+      <td>Sha</td><td>
+      <a href="<%= build.link_to_remote_commit %>" target="_blank" class="commit-sha">
+        <%= build.sha %>
+      </a>
+      </td>
     </tr>
     <% if build.description.to_s.length > 0 %>
       <tr>

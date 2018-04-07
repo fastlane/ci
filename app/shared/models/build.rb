@@ -73,5 +73,9 @@ module FastlaneCI
       raise "Invalid build status '#{new_value}'" unless BUILD_STATUSES.include?(new_value)
       @status = new_value
     end
+
+    def link_to_remote_commit
+      project.repo_config.link_to_remote_commit(sha)
+    end
   end
 end

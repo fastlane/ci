@@ -28,5 +28,10 @@ module FastlaneCI
       @name = name
       @hidden = hidden
     end
+
+    # Public link to remote commit
+    def link_to_remote_commit(sha)
+      not_implemented(__method__)
+    end
   end
 end

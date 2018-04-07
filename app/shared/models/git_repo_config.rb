@@ -39,5 +39,9 @@ module FastlaneCI
       )
       return repo_config
     end
+
+    def link_to_remote_commit(sha)
+      "https://github.com/#{full_name}/commit/#{sha}"
+    end
   end
 end
