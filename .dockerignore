@@ -1,0 +1,9 @@
+# Added by fastlane.ci team
+.keys
+!/spec/fixtures/files/.fastlane/ci/.keys
+fastlane.log
+fastlane.verbose.log
+public/.dist/*
+**/node_modules/*
+package-lock.json
+npm-debug.log
