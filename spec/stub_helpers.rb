@@ -7,6 +7,10 @@ module StubHelpers
     allow(File).to receive(:write)
   end
 
+  def stub_environment_variables
+    allow_any_instance_of(FastlaneCI::EnvironmentVariables).to receive(:all).and_return(environment_variables)
+  end
+
   def stub_git_repos
     fake_git_config = FastlaneCI::GitRepoConfig.new(
       id: "Fake id",

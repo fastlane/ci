@@ -24,4 +24,15 @@ module HelperFunctions
       provider_credentials: [provider_credential]
     )
   end
+
+  def environment_variables
+    return {
+      encryption_key: "encryption_key",
+      ci_user_email: "ci_user_email@gmail.com",
+      ci_user_password: "ci_user_password",
+      repo_url: "https://github.com/user_name/repo_name",
+      clone_user_email: "clone_user@gmail.com",
+      clone_user_api_token: "clone_user_api_token"
+    }
+  end
 end
