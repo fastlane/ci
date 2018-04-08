@@ -10,8 +10,8 @@
   <h5>Lane to run</h5>
   <p><code>Fastfile</code> located at path <code><%= fastfile_path %></code></p>
   <select name="selected_lane">
-    <% Array(available_lanes).each do |current_lane| %>
-      <option value="<%= current_lane %>"><%= current_lane %></option>
+    <% available_lanes.each do |lane| %>
+      <option value="<%= lane[:name] %>"><%= lane[:display_name] %></option>
     <% end %>
   </select>
   <br />
@@ -20,5 +20,5 @@
 </form>
 
 <% if fastfile_parser %>
-  <%= erb(:"../../fastfile_editor/views/fastfile", locals: { fastfile_parser: fastfile_parser, fastfile_path: fastfile_path }) %>
+  <%= erb(:"../../fastfile_editor/views/fastfile", locals: { available_lanes: available_lanes, fastfile_path: fastfile_path }) %>
 <% end %>

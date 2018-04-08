@@ -97,11 +97,10 @@ module FastlaneCI
       contents = fastfile_from_contents_map(contents_map)
       if contents.nil?
         logger.debug("Checking out repo and searching for fastfile in #{repo_full_name}")
-
-      else
-        fastfile = Fastlane::FastfileParser.new(file_content: contents)
-        return fastfile
+        return nil
       end
+
+      return Fastlane::FastfileParser.new(file_content: contents)
     end
   end
 end

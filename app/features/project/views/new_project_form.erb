@@ -53,18 +53,15 @@
     request.open('GET', "/projects_erb/<%= repo %>/" + el.value + "/lanes", true);
     request.onload = function() {
       if (request.status >= 200 && request.status < 400) {
-        var data = request.response;
+        var lanes = request.response;
         document.querySelectorAll("#loading")[0].style.display = "none";
         document.querySelectorAll("#selected_lane")[0].appendChild(string_to_node("<option disabled selected value>Select a lane</option>"));
-        for (var platform in data) {
-          for (var lane in data[platform]) {
-            if (lane && platform) {
-              document.querySelectorAll("#selected_lane")[0].append(string_to_node('<option value="'+ platform + " " + lane +'">'+ platform + " " + lane +'</option>'));
-            } else if (lane && platform === "no_platform") {
-              document.querySelectorAll("#selected_lane")[0].append(string_to_node('<option value="no_platform '+ lane +'">' + lane +'</option>'));
-            }
-          }
-        }
+        lanes.forEach(function (lane) {
+            var name = lane["display_name"];
+            var id = lane["platform"] + " " + lane["name"];
+            document.querySelectorAll("#selected_lane")[0].append(string_to_node('<option value="'+ id +'">'+ name +'</option>'));
+        });
+
         document.querySelectorAll("#selected_lane")[0].style.display = "";
         document.querySelectorAll("#lane_to_run")[0].style.display = "";
         valid_branch = true;
@@ -185,7 +182,7 @@
         <br />
         <p>Loading...</p>
       </div>
-      <select name="selected_lane", id="selected_lane" onchange="check_lane()">
+      <select name="selected_lane" id="selected_lane" onchange="check_lane()">
       </select>
       <br />
       <h5 id="trigger">Select trigger</h5>
