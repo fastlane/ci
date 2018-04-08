@@ -272,7 +272,8 @@ module FastlaneCI
       fastfile_parser.tree.each do |platform, value|
         value.each do |lane_name, lane_content|
           if lane_name.to_s.empty? ||
-              lane_name.to_s.end_with?("_block_")
+              lane_name.to_s.end_with?("_block_") ||
+              lane_content[:private] == true
             next
           end
 
