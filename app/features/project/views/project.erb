@@ -4,9 +4,9 @@
       <span class="mdl-layout__title"><%= title %></span>
       <div class="mdl-layout-spacer"></div>
       <% if project.job_triggers.any? { |job_trigger| job_trigger.kind_of?(FastlaneCI::ManualJobTrigger) } %>
-          <%= erb :"../../partials/trigger_job_button", locals: { project: project, build: nil, disabled: false } %>
+          <%= erb :"../../global/trigger_job_button", locals: { project: project, build: nil, disabled: false } %>
       <% else %>
-          <%= erb :"../../partials/trigger_job_button", locals: { project: project, build: nil, disabled: true } %>
+          <%= erb :"../../global/trigger_job_button", locals: { project: project, build: nil, disabled: true } %>
       <% end %>
     </div>
     <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
