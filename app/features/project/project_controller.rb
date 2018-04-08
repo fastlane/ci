@@ -126,12 +126,15 @@ module FastlaneCI
       )
       repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
 
-      fastfile_parser = fastfile_peeker.fastfile_from_github(repo_full_name: repo_config.full_name, sha_or_branch: branch)
+      fastfile_parser = fastfile_peeker.fastfile_from_github(
+        repo_full_name: repo_config.full_name,
+        sha_or_branch: branch
+      )
       if fastfile_parser.nil?
         fastfile_parser = fastfile_peeker.fastfile_from_repo(repo_config: repo_config, branch: branch)
       end
 
-      fetch_lanes(fastfile_parser).to_json
+      fetch_available_lanes(fastfile_parser).to_json
     end
 
     get "#{HOME}/*/add" do
@@ -251,7 +254,7 @@ module FastlaneCI
       if File.directory?(project_path)
         fastfile_path = FastlaneCI::FastfileFinder.search_path(path: project_path)
         fastfile_parser = Fastlane::FastfileParser.new(path: fastfile_path)
-        available_lanes = fetch_lanes(fastfile_parser)
+        available_lanes = fetch_available_lanes(fastfile_parser)
 
         relative_fastfile_path = Pathname.new(fastfile_path).relative_path_from(Pathname.new(project_path))
 
@@ -262,24 +265,23 @@ module FastlaneCI
       erb(:project, locals: locals, layout: FastlaneCI.default_layout)
     end
 
-    # TODO: Move this
-    def fetch_lanes(fastfile_parser)
+    def fetch_available_lanes(fastfile_parser)
       # we don't want to show `_before_all_block_`, `_after_all_block_` and `_error_block_`
       # or a private lane as an available lane
       lanes = []
       fastfile_parser.tree.each do |platform, value|
         value.each do |lane_name, lane_content|
           if lane_name.to_s.empty? ||
-              lane_name.to_s.end_with?("_block_") ||
-              lane_content[:private] == true
+             lane_name.to_s.end_with?("_block_") ||
+             lane_content[:private] == true
             next
           end
 
           lanes << {
-              :platform => platform.nil? ? :no_platform : platform,
-              :name => lane_name,
-              :display_name => [platform, lane_name].compact.join(" "),
-              :content => lane_content
+              platform: platform.nil? ? :no_platform : platform,
+              name: lane_name,
+              display_name: [platform, lane_name].compact.join(" "),
+              content: lane_content
           }
         end
       end
