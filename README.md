@@ -59,8 +59,23 @@ Right now, `fastlane.ci` is in Alpha, we'd love for you to give it a try. Gettin
 1. `cd ci`
 1. `gem install bundler`
 1. `bundle install`
-1. `bundle exec rackup -p 8080 --env production`
-1. Open [localhost:8080](http://localhost:8080/) in your web browser
+1. `bundle exec rake prod`
+1. Up at running at [localhost:8080](http://localhost:8080/)
+
+## Using `fastlane.ci` with Docker
+
+Currently, Docker deployment is for Linux projects only.
+
+1. [Install Docker](https://docs.docker.com/install/)
+1. Open the Terminal on the Mac or on a Linux you want to run as `fastlane.ci`
+1. `git clone https://github.com/fastlane/ci`
+1. `cd ci`
+1. `docker-compose up`
+1. Up at running at [localhost:8080](http://localhost:8080/)
+
+### Configure `fastlane.ci`
+
+1. Visit [localhost:8080](http://localhost:8080/)
 1. Follow the onboarding instructions in your browser. In particular you'll have to create a separate GitHub account that will be used for all bot activities
 
 ## Development installation
@@ -72,7 +87,7 @@ Run the rake task: `rake devbootstrap`.
 ## Local development
 
 ```
-bundle exec rackup -p 8080 --env development
+bundle exec rake dev
 ```
 
 Visit [localhost:8080](http://localhost:8080/) to open the login

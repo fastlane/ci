@@ -2,6 +2,10 @@ task :dev do
   sh "bundle exec rackup -p 8080 --env development"
 end
 
+task :prod do
+  sh "bundle exec rackup -p 8080 --env production"
+end
+
 task :devbootstrap do
   sh "bundle install"
   sh "npm install"
