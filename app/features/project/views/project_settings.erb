@@ -9,7 +9,7 @@
   <p><code><%= project.repo_config.git_url %></code></p>
   <h5>Lane to run</h5>
   <p><code>Fastfile</code> located at path <code><%= fastfile_path %></code></p>
-  <select name="selected_lane">
+  <select id="selected_lane" name="selected_lane">
     <% available_lanes.each do |lane| %>
       <option value="<%= lane[:name] %>"><%= lane[:display_name] %></option>
     <% end %>
@@ -18,6 +18,12 @@
   <br />
   <input class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" type="submit" title="Save">
 </form>
+
+<script>
+    function select_lane(value) {
+        document.getElementById('selected_lane').value = value
+    }
+</script>
 
 <% if fastfile_parser %>
   <%= erb(:"../../fastfile_editor/views/fastfile", locals: { available_lanes: available_lanes, fastfile_path: fastfile_path }) %>
