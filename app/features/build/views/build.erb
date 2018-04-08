@@ -37,9 +37,7 @@
     </tr>
     <tr>
       <td colspan="2">
-        <a href="/projects_erb/<%= project.id %>/trigger?sha=<%= build.sha %>" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-          Re-Run for this commit
-        </a>
+        <%= erb :"../../partials/trigger_job_button", locals: { project: project, build: build, disabled: false } %>
       </td>
     </tr>
   </tbody>

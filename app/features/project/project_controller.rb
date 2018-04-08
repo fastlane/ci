@@ -14,9 +14,7 @@ module FastlaneCI
 
     # Note: The order IS important for Sinatra, so this has to be
     # above the other URL
-    #
-    # TODO: this should actually be a POST request
-    get "#{HOME}/:project_id/trigger" do
+    post "#{HOME}/:project_id/trigger" do
       project_id = params[:project_id]
       # passing a specific sha is optional, so this might be nil
       current_sha = params[:sha] if params[:sha].to_s.length > 0
