@@ -2,7 +2,7 @@ require_relative "project_data_source"
 require_relative "../data_sources/json_data_source"
 require_relative "../../shared/json_convertible"
 require_relative "../../shared/models/git_repo"
-require_relative "../../shared/models/git_repo_config"
+require_relative "../../shared/models/git_hub_repo_config"
 require_relative "../../shared/models/job_trigger"
 require_relative "../../shared/models/project"
 require_relative "../../shared/models/user"
@@ -20,7 +20,7 @@ module FastlaneCI
     include FastlaneCI::JSONConvertible
 
     def self.attribute_to_type_map
-      return { :@repo_config => GitRepoConfig }
+      return { :@repo_config => GitHubRepoConfig }
     end
 
     def self.map_enumerable_type(enumerable_property_name: nil, current_json_object: nil)
@@ -63,8 +63,8 @@ module FastlaneCI
     end
   end
 
-  # Mixin for GitRepoConfig to enable some basic JSON marshalling and unmarshalling
-  class GitRepoConfig
+  # Mixin for GitHubRepoConfig to enable some basic JSON marshalling and unmarshalling
+  class GitHubRepoConfig
     include FastlaneCI::JSONConvertible
   end
 
@@ -156,7 +156,7 @@ module FastlaneCI
         path = git_repo.file_path("repos.json")
         return [] unless File.exist?(path)
 
-        saved_git_repos = JSON.parse(File.read(path)).map(&GitRepoConfig.method(:from_json!))
+        saved_git_repos = JSON.parse(File.read(path)).map(&RepoConfig.method(:from_json!))
         return saved_git_repos
       end
     end

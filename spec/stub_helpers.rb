@@ -12,7 +12,7 @@ module StubHelpers
   end
 
   def stub_git_repos
-    fake_git_config = FastlaneCI::GitRepoConfig.new(
+    fake_git_config = FastlaneCI::GitHubRepoConfig.new(
       id: "Fake id",
       git_url: "Not a real url",
       description: "Fake git repo config",

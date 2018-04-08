@@ -52,11 +52,11 @@ module FastlaneCI
       return File.expand_path("~/.fastlane/ci/fastlane-ci-config")
     end
 
-    # Setup the fastlane.ci GitRepoConfig
+    # Setup the fastlane.ci GitHubRepoConfig
     #
-    # @return [GitRepoConfig]
+    # @return [GitHubRepoConfig]
     def self.ci_config_repo
-      @_ci_config_repo ||= GitRepoConfig.new(
+      @_ci_config_repo ||= GitHubRepoConfig.new(
         id: "fastlane-ci-config",
         git_url: FastlaneCI.env.repo_url,
         description: "Contains the fastlane.ci configuration",

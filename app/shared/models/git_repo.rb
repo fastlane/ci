@@ -46,7 +46,7 @@ module FastlaneCI
     # rubocop:enable Metrics/ClassLength
     include FastlaneCI::Logging
 
-    # @return [GitRepoConfig]
+    # @return [RepoConfig]
     attr_accessor :git_config
     # @return [GitRepoAuth]
     attr_accessor :repo_auth # whatever pieces of information that can change between git users

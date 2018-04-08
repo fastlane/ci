@@ -11,7 +11,7 @@ module FastlaneCI
   class Project
     include FastlaneCI::Logging
 
-    # @return [GitRepoConfig] URL to the Git repo
+    # @return [RepoConfig] Repo configuration
     attr_accessor :repo_config
 
     # @return [String] Name of the project, also shows up in status as "fastlane.ci: #{project_name}"

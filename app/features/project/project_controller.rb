@@ -124,7 +124,7 @@ module FastlaneCI
         provider_credential: provider_credential,
         notification_service: FastlaneCI::Services.notification_service
       )
-      repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
+      repo_config = GitHubRepoConfig.from_octokit_repo!(repo: selected_repo)
 
       fastfile = fastfile_peeker.fastfile_from_github(repo_full_name: repo_config.full_name, sha_or_branch: branch)
       if fastfile.nil?
@@ -162,7 +162,7 @@ module FastlaneCI
 
       # We need to check whether we can checkout the project without issues.
       # So a new project is created with default settings so we can fetch it.
-      repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
+      repo_config = GitHubRepoConfig.from_octokit_repo!(repo: selected_repo)
 
       locals = {
         title: "Add new project",
@@ -187,7 +187,7 @@ module FastlaneCI
           org == repo[:owner][:login]
       end
 
-      repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
+      repo_config = GitHubRepoConfig.from_octokit_repo!(repo: selected_repo)
 
       lane = params["selected_lane"]
       project_name = params["project_name"]
