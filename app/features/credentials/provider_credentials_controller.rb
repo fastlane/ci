@@ -11,11 +11,6 @@ module FastlaneCI
   class ProviderCredentialsController < AuthenticatedControllerBase
     HOME = "/provider_credentials_erb"
 
-    get HOME do
-      locals = { title: "Provider Credentials" }
-      erb(:provider_credentials, locals: locals, layout: FastlaneCI.default_layout)
-    end
-
     post "#{HOME}/create" do
       if valid_params?(params, post_parameter_list_for_validation) &&
          user_exists_with_id?(params[:user_id])

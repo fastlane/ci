@@ -8,11 +8,6 @@ module FastlaneCI
   class UsersController < AuthenticatedControllerBase
     HOME = "/users_erb"
 
-    get HOME do
-      locals = { title: "Users" }
-      erb(:users, locals: locals, layout: FastlaneCI.default_layout)
-    end
-
     # When the `/users/create` form is submitted:
     #
     # - creates a user if the locals are valid
@@ -33,8 +28,7 @@ module FastlaneCI
       if valid_params?(params, post_parameter_list_for_validation)
         new_user = User.new(
           id: params[:id],
-          email: params[:email],
-          password: params[:password]
+          email: params[:email]
         )
 
         Services.user_service.update_user!(new_user)
@@ -70,7 +64,7 @@ module FastlaneCI
 
     # @return [Set[Symbol]]
     def post_parameter_list_for_validation
-      return Set.new(%w(id email password_hash))
+      return Set.new(%w(id email))
     end
   end
 end
