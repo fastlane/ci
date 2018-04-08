@@ -17,24 +17,12 @@ module FastlaneCI
     # @param  [ProviderCredential] provider_credential
     def initialize(provider_credential: nil)
       @client = Octokit::Client.new(access_token: provider_credential.api_token)
-      begin
-        if client.rate_limit!.remaining.zero?
-          sleep_time = client.rate_limit!.resets_in
-          logger.error("Rate Limit exceeded, sleeping for #{sleep_time} seconds")
-          sleep(sleep_time)
-        end
-      rescue Octokit::TooManyRequests => ex
-        logger.error(ex)
-        raise ex
-      rescue Octokit::Unauthorized => ex # Maybe the token does not give access to rate limits.
-        logger.error(ex)
-      end
     end
 
     # Creates a remote repository if it does not already exist, complete with
     # the expected remote files `user.json` and `projects.json`
     def create_private_remote_configuration_repo
-      github_action do
+      github_action(client) do
         # TODO: Handle the common case of when provided account can't create a new private repo
         client.create_repository(repo_name, private: true) unless configuration_repository_exists?
         create_remote_json_file("users.json", json_string: serialized_users)
@@ -75,7 +63,7 @@ module FastlaneCI
     def configuration_repository_exists?
       # Return cached true value, if it was successful, otherwise keep checking because it might have been fixed
       return @config_repo_exists unless @config_repo_exists.nil? || (@config_repo_exists == false)
-      github_action do
+      github_action(client) do
         @config_repo_exists = client.repository?(repo_shortform)
       end
       return @config_repo_exists
@@ -126,7 +114,7 @@ module FastlaneCI
     # @raise  [Octokit::UnprocessableEntity] when file already exists
     # @param  [String] file_path
     def create_remote_json_file(file_path, json_string: "[]")
-      github_action do
+      github_action(client) do
         client.contents(repo_shortform, path: file_path)
       end
     rescue Octokit::NotFound
@@ -155,7 +143,7 @@ module FastlaneCI
       logger.debug("Checking that #{repo_shortform}/#{file_path} is a json array")
 
       contents_map = {}
-      github_action do
+      github_action(client) do
         contents_map = client.contents(repo_shortform, path: file_path)
       end
       contents_json =

@@ -39,8 +39,22 @@ module FastlaneCI
       klass.extend(self)
     end
 
-    def github_action(&block)
+    def github_action(client, &block)
       retry_count ||= 0
+      if client.kind_of?(Octokit::Client)
+        begin
+          if client.rate_limit!.remaining.zero?
+            sleep_time = client.rate_limit!.resets_in
+            logger.debug("Rate Limit exceeded, sleeping for #{sleep_time} seconds")
+            sleep(sleep_time)
+          end
+        rescue Octokit::TooManyRequests => ex
+          logger.error(ex)
+          raise ex
+        rescue Octokit::Unauthorized => ex # Maybe the token does not give access to rate limits.
+          logger.error(ex)
+        end
+      end
       begin
         return block.call
       rescue Octokit::ServerError => ex
