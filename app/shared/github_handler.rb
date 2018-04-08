@@ -34,6 +34,11 @@ module FastlaneCI
   # TODO: handle if the user doesn't have write permission and they are trying to do some writing
   module GitHubHandler
     include FastlaneCI::Logging
+
+    def self.included(klass)
+      klass.extend(self)
+    end
+
     def github_action(&block)
       retry_count ||= 0
       begin
