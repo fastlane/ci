@@ -245,7 +245,6 @@ module FastlaneCI
         project: project,
         title: "Project #{project.project_name}",
         available_lanes: nil,
-        fastfile_parser: nil,
         fastfile_path: nil
       }
 
@@ -257,7 +256,6 @@ module FastlaneCI
         relative_fastfile_path = Pathname.new(fastfile_path).relative_path_from(Pathname.new(project_path))
 
         locals[:available_lanes] = available_lanes
-        locals[:fastfile_parser] = fastfile_parser
         locals[:fastfile_path] = relative_fastfile_path
       end
 

@@ -25,6 +25,6 @@
     }
 </script>
 
-<% if fastfile_parser %>
+<% if available_lanes %>
   <%= erb(:"../../fastfile_editor/views/fastfile", locals: { available_lanes: available_lanes, fastfile_path: fastfile_path }) %>
 <% end %>
