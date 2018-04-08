@@ -17,18 +17,6 @@ module FastlaneCI
     # @param  [ProviderCredential] provider_credential
     def initialize(provider_credential: nil)
       @client = Octokit::Client.new(access_token: provider_credential.api_token)
-      begin
-        if client.rate_limit!.remaining.zero?
-          sleep_time = client.rate_limit!.resets_in
-          logger.error("Rate Limit exceeded, sleeping for #{sleep_time} seconds")
-          sleep(sleep_time)
-        end
-      rescue Octokit::TooManyRequests => ex
-        logger.error(ex)
-        raise ex
-      rescue Octokit::Unauthorized => ex # Maybe the token does not give access to rate limits.
-        logger.error(ex)
-      end
     end
 
     # Creates a remote repository if it does not already exist, complete with
