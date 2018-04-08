@@ -40,6 +40,7 @@ module FastlaneCI
     end
 
     def github_action(client, &block)
+      # `retry` retains the variables through iterations so we assign to 0 the first time.
       retry_count ||= 0
       if client.kind_of?(Octokit::Client)
         begin
