@@ -5,6 +5,7 @@ require_relative "./build_runner"
 require_relative "../../shared/fastfile_finder"
 
 require "tmpdir"
+require "bundler"
 
 module FastlaneCI
   # Represents the build runner responsible for loading and running
@@ -96,12 +97,32 @@ module FastlaneCI
         # Using the code below, we ensure we're in the `./fastlane` or `./.fastlane`
         # folder, and all the following code works
         # This is needed to load other configuration files, and also find Xcode projects
-        Dir.chdir(File.expand_path("..", fast_file_path))
 
-        # Make sure to load all the dependencies of the Gemfile
-        # TODO: support projects that don't have a Gemfile defined
-        Bundler.with_clean_env do
+        # We call the safe (because is synchronized) Bundler's `chdir` and
+        # install all the dependencies, if any.
+        Bundler::SharedHelpers.chdir(File.expand_path("..", fast_file_path)) do
           ENV["FASTLANE_SKIP_DOCS"] = true.to_s
+
+          begin
+            options = {}
+            options[:local] = true if Bundler.app_cache.exist?
+
+            Bundler::Plugin.gemfile_install(Bundler.default_gemfile) if Bundler.feature_flag.plugins?
+
+            definition = Bundler.definition
+            definition.validate_runtime!
+
+            Bundler::Installer.install(Bundler.root, definition, options)
+            Bundler.load.cache if Bundler.app_cache.exist? && !Bundler.frozen_bundle?
+            # rubocop:disable Metrics/LineLength
+            logger.info("Bundle complete! #{definition.dependencies.count} Gemfile dependencies, installed #{definition.specs.count} gems.")
+            # rubocop:enable Metrics/LineLength
+          rescue Bundler::GemfileNotFound => ex
+            logger.info(ex)
+          rescue StandardError => ex
+            logger.error(ex)
+            logger.error(ex.backtrace)
+          end
 
           begin
             # Run fastlane now
