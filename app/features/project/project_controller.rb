@@ -115,10 +115,14 @@ module FastlaneCI
       github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
 
       selected_repo = github_service.repos.detect do |repo|
+        logger.debug("Looking for: #{repo_name} under (#{org}) found #{repo[:name]}, under #{repo[:owner][:login]}")
         repo_name == repo[:name] &&
           org == repo[:owner][:login]
       end
-      raise "Could not find repo, make sure to have access" if selected_repo.nil?
+
+      if selected_repo.nil?
+        raise "Could not find repo, check that your github token has access to repo: #{repo_name}, org/owner: #{org}"
+      end
 
       fastfile_peeker = FastlaneCI::FastfilePeeker.new(
         provider_credential: provider_credential,
