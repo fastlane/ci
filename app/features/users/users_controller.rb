@@ -8,6 +8,11 @@ module FastlaneCI
   class UsersController < AuthenticatedControllerBase
     HOME = "/users_erb"
 
+    get HOME do
+      locals = { title: "Users" }
+      erb(:users, locals: locals, layout: FastlaneCI.default_layout)
+    end
+
     # When the `/users/create` form is submitted:
     #
     # - creates a user if the locals are valid

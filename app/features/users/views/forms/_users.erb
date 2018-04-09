@@ -1,0 +1,9 @@
+<td><%= user.email %></td>
+
+<td>
+  <ul>
+  <% user.provider_credentials.each do |credential| %>
+    - <%= credential.full_name %>
+  <% end %>
+  </ul>
+</td>
