@@ -35,7 +35,7 @@ module FastlaneCI
       end
 
       @project_full_name =
-        if project.repo_config.kind_of?(FastlaneCI::GitRepoConfig) &&
+        if project.repo_config.kind_of?(FastlaneCI::GitHubRepoConfig) &&
            !project.repo_config.full_name.nil?
           project.repo_config.full_name
         else

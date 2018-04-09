@@ -4,7 +4,7 @@ module HelperFunctions
   end
 
   def git_repo
-    FastlaneCI::GitRepoConfig.new(
+    FastlaneCI::GitHubRepoConfig.new(
       id: "fastlane-ci-config",
       git_url: "https://github.com/fake_user/fake_config",
       description: "Contains the fastlane.ci configuration",

@@ -4,7 +4,7 @@ require_relative "provider_credential"
 
 module FastlaneCI
   # Contains the metadata about a git repo
-  class GitRepoConfig < RepoConfig
+  class GitHubRepoConfig < RepoConfig
     include FastlaneCI::Logging
 
     # GitHub full_name, like fastlane/ci (vs just `ci`)
@@ -31,13 +31,17 @@ module FastlaneCI
     end
 
     def self.from_octokit_repo!(repo: nil)
-      repo_config = GitRepoConfig.new(
+      repo_config = GitHubRepoConfig.new(
         git_url: repo[:html_url],
         description: repo[:description],
         name: repo[:name],
         full_name: repo[:full_name]
       )
       return repo_config
+    end
+
+    def link_to_remote_commit(sha)
+      "https://github.com/#{full_name}/commit/#{sha}"
     end
   end
 end
