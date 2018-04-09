@@ -126,24 +126,15 @@ module FastlaneCI
       )
       repo_config = GitRepoConfig.from_octokit_repo!(repo: selected_repo)
 
-      fastfile = fastfile_peeker.fastfile_from_github(repo_full_name: repo_config.full_name, sha_or_branch: branch)
-      if fastfile.nil?
-        fastfile = fastfile_peeker.fastfile_from_repo(repo_config: repo_config, branch: branch)
+      fastfile_parser = fastfile_peeker.fastfile_from_github(
+        repo_full_name: repo_config.full_name,
+        sha_or_branch: branch
+      )
+      if fastfile_parser.nil?
+        fastfile_parser = fastfile_peeker.fastfile_from_repo(repo_config: repo_config, branch: branch)
       end
 
-      fastfile_config = {}
-      # The fastfile.tree might have (for now) nil keys due to lanes being outside of
-      # a platform itself. So we take that nil key and transform it into a generic :no_platform
-      # key.
-      fastfile.tree.each_key do |key|
-        if key.nil?
-          fastfile_config[:no_platform] = fastfile.tree[key]
-        else
-          fastfile_config[key.to_sym] = fastfile.tree[key]
-        end
-      end
-
-      fastfile_config.to_json
+      fetch_available_lanes(fastfile_parser).to_json
     end
 
     get "#{HOME}/*/add" do
@@ -257,23 +248,44 @@ module FastlaneCI
         project: project,
         title: "Project #{project.project_name}",
         available_lanes: nil,
-        fastfile_parser: nil,
         fastfile_path: nil
       }
 
       if File.directory?(project_path)
         fastfile_path = FastlaneCI::FastfileFinder.search_path(path: project_path)
         fastfile_parser = Fastlane::FastfileParser.new(path: fastfile_path)
-        available_lanes = fastfile_parser.available_lanes
+        available_lanes = fetch_available_lanes(fastfile_parser)
 
         relative_fastfile_path = Pathname.new(fastfile_path).relative_path_from(Pathname.new(project_path))
 
         locals[:available_lanes] = available_lanes
-        locals[:fastfile_parser] = fastfile_parser
         locals[:fastfile_path] = relative_fastfile_path
       end
 
       erb(:project, locals: locals, layout: FastlaneCI.default_layout)
+    end
+
+    def fetch_available_lanes(fastfile_parser)
+      # we don't want to show `_before_all_block_`, `_after_all_block_` and `_error_block_`
+      # or a private lane as an available lane
+      lanes = []
+      fastfile_parser.tree.each do |platform, value|
+        value.each do |lane_name, lane_content|
+          if lane_name.to_s.empty? ||
+             lane_name.to_s.end_with?("_block_") ||
+             lane_content[:private] == true
+            next
+          end
+
+          lanes << {
+              platform: platform.nil? ? :no_platform : platform,
+              name: lane_name,
+              display_name: [platform, lane_name].compact.join(" "),
+              content: lane_content
+          }
+        end
+      end
+      return lanes
     end
   end
 end

@@ -3,9 +3,11 @@
 
 <p><code>Fastfile</code> located at path <code><%= fastfile_path %></code></p>
 <div id="lanes">
-	<% fastfile_parser.all_lanes_flat(ignore_actions_outside_of_lanes: true).each do |full_lane_name, lane_content| %>
+	<% available_lanes.each do |lane| %>
+    <% lane_content = lane[:content] %>
+    <% full_lane_name = lane[:display_name] %>
 		<div class="laneColumn">
-			<button type="button" id="lane-<%= full_lane_name %>" lane="<%= full_lane_name %>" onclick="alert('This button doesnt actually do anything yet, but soon you will be able to select the lane using it')"><%= full_lane_name %></button>
+			<button type="button" id="<%= lane[:name] %>" lane="<%= full_lane_name %>" onclick="select_lane(this.id);"><%= full_lane_name %></button>
 
 			<% if lane_content[:description].join("").length > 0 %>
 				<div class="laneDescription">
