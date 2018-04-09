@@ -78,7 +78,7 @@ module FastlaneCI
 
     def fastfile_from_github(repo_full_name: nil, sha_or_branch:)
       path = "fastlane/Fastfile"
-      logger.debug("Checking for fastfile in #{repo_full_name}/#{path}")
+      logger.debug("Checking GitHub repo for fastfile in #{repo_full_name}/#{path}")
       contents_map = remote_file_contents_map(
         repo_full_name: repo_full_name,
         sha_or_branch: sha_or_branch,
