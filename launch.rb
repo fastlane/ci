@@ -29,7 +29,6 @@ module FastlaneCI
       write_configuration_directories
       configure_thread_abort
       Services.reset_services!
-      clone_project_repos
 
       # order matters here
       cleanup_old_checkouts
@@ -136,15 +135,6 @@ module FastlaneCI
       require_relative "app/features-json/project_json_controller"
 
       FastlaneCI::FastlaneApp.use(FastlaneCI::ProjectJSONController)
-    end
-
-    def self.clone_project_repos
-      return unless Services.onboarding_service.correct_setup?
-
-      FastlaneCI::Services.project_service.update_project_repos(
-        provider_credential: Services.provider_credential,
-        notification_service: Services.notification_service
-      )
     end
 
     def self.start_github_workers

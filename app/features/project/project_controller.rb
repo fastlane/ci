@@ -1,5 +1,6 @@
 require_relative "../../shared/authenticated_controller_base"
 require_relative "../../shared/models/git_repo"
+require_relative "../../shared/models/git_hub_repo_config"
 require_relative "../../shared/fastfile_peeker"
 require_relative "../../shared/fastfile_finder"
 

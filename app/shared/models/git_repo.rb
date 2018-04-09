@@ -160,7 +160,7 @@ module FastlaneCI
 
       while !setup_task.completed && now < sleep_timeout
         time_left = sleep_timeout - now
-        logger.debug("Not setup yet, sleeping (time before timeout: #{time_left}) #{git_config.git_url}")
+        logger.debug("Not setup yet, sleeping (time before timeout: #{time_left.round}) #{git_config.git_url}")
         sleep(2)
         now = Time.now.utc
       end

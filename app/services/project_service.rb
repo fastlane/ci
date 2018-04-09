@@ -97,30 +97,6 @@ module FastlaneCI
       return project_data_source.projects
     end
 
-    # Ensure we have the projects checked out that we need
-    # Returns all repos setup
-    def update_project_repos(provider_credential: nil, notification_service:)
-      configured_repos = []
-
-      projects.each do |project|
-        branches = project.job_triggers
-                          .map(&:branch)
-                          .uniq
-
-        branches.each do |branch|
-          logger.debug("Ensuring #{project.repo_config.git_url} (branch: #{branch}) is checked out")
-          repo = GitRepo.new(
-            git_config: project.repo_config,
-            provider_credential: provider_credential,
-            local_folder: File.join(project.local_repo_path, branch),
-            async_start: false,
-            notification_service: notification_service
-          )
-          configured_repos << repo
-        end
-      end
-    end
-
     def delete_project!(project: nil)
       project_data_source.delete_project!(project: project)
       commit_repo_changes!(message: "Deleted project #{project.project_name}.")
