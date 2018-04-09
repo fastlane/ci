@@ -74,6 +74,9 @@ module FastlaneCI
       all_open_pull_requests = []
       github_action do
         all_open_pull_requests = client.pull_requests(repo_full_name, state: "open").map do |pr|
+          # This can happen, not sure why, seems to do with other people's forks, maybe they don't exist?
+          next if pr.head.repo.nil?
+
           GitHubOpenPR.new(
             current_sha: pr.head.sha,
             branch: pr.head.ref,
