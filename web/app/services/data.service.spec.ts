@@ -1,6 +1,8 @@
 import {HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
 import {fakeAsync, TestBed, tick} from '@angular/core/testing';
 
+import {BuildStatus} from '../common/constants';
+
 import {DataService} from './data.service';
 import {mockProjectListResponse} from './test_helpers/mock_project_response';
 
@@ -28,8 +30,12 @@ describe('DataService', () => {
 
       expect(projects.length).toBe(3);
       expect(projects[0].name).toBe('the coolest project');
-      expect(projects[1].name).toBe('this project is okay');
-      expect(projects[2].name).toBe('this project needs some work');
+      expect(projects[0].lane).toBe('ios test');
+      expect(projects[1].latestStatus).toBe(BuildStatus.SUCCESS);
+      expect(projects[1].lane).toBe('ios release');
+      expect(projects[2].latestDate.getTime())
+          .toBe(1522883518000);  // 2018-04-04 16:11:58 -0700
+      expect(projects[2].latestStatus).toBe(BuildStatus.FAILED);
     });
   });
 });

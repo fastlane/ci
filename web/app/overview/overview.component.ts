@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 
-import {Project} from '../models/project';
+import {ProjectSummary} from '../models/project_summary';
 import {DataService} from '../services/data.service';
 
 @Component({
@@ -10,7 +10,7 @@ import {DataService} from '../services/data.service';
 })
 export class OverviewComponent implements OnInit {
   isLoading = true;
-  projects: Project[];
+  projects: ProjectSummary[];
   constructor(private readonly dataService: DataService) {}
 
   ngOnInit() {
