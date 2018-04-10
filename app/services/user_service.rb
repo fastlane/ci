@@ -61,6 +61,10 @@ module FastlaneCI
       return success
     end
 
+    def delete_user!(user: nil)
+      user_data_source.delete_user!(user: user)
+    end
+
     # @return [User]
     def find_user(id: nil)
       return user_data_source.find_user(id: id)

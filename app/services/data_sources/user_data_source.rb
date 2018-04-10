@@ -21,6 +21,11 @@ module FastlaneCI
       not_implemented(__method__)
     end
 
+    # Deletes the user
+    def delete_user!(user: nil)
+      not_implemented(__method__)
+    end
+
     # Creates and returns a user if one doesn't already exist, otherwise fails and returns nil
     def create_user!(id: nil, email: nil, password: nil, provider_credentials: [])
       not_implemented(__method__)
