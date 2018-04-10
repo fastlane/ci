@@ -131,7 +131,7 @@ module FastlaneCI
 
     # TODO: this isn't threadsafe
     def update_user!(user: nil)
-      user_index, existing_user = find_user_index_and_existing_user
+      user_index, existing_user = find_user_index_and_existing_user(user: user)
 
       if existing_user.nil?
         logger.debug("Couldn't update user #{user.email} because they don't exist")
@@ -146,7 +146,7 @@ module FastlaneCI
     end
 
     def delete_user!(user: nil)
-      user_index, existing_user = find_user_index_and_existing_user
+      user_index, existing_user = find_user_index_and_existing_user(user: user)
 
       if existing_user.nil?
         logger.debug("Couldn't delete user #{user.email} because they don't exist")
@@ -189,9 +189,10 @@ module FastlaneCI
 
     # Finds the index of the user, and returns an existing `user` if they exist
     #
+    # @param  [User] `user` a user to lookup by `user.email`
     # @return [Integer] `user_index` in the `users` array
     # @return [User] `existing_user` in the `users.json` file
-    def find_user_index_and_existing_user
+    def find_user_index_and_existing_user(user:)
       users.each.with_index do |old_user, index|
         return [index, old_user] if old_user.email.casecmp(user.email.downcase).zero?
       end
