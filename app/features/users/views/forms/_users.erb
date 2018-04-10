@@ -1,67 +1,9 @@
-<form method="POST" action="users/<%= action %>">
-  <td>
-    <code>id=<%= user.id %></code>
-    <input type="hidden" name="id" value=<%= user.id %>>
-    <input
-      id="id"
-      class="mdl-textfield__input"
-      type="hidden"
-      name="id"
-      value="<%= user.id %>"
-    />
-  </td>
+<td><%= user.email %></td>
 
-  <td>
-    <input
-      id="email"
-      class="mdl-textfield__input"
-      type="text"
-      name="email"
-      value="<%= user.email %>"
-      placeholder="User's email"
-    />
-  </td>
-
-  <td>
-    <input
-      id="password_hash"
-      class="mdl-textfield__input"
-      type="text"
-      name="password_hash"
-      value="<%= user.password_hash %>"
-      placeholder="User's password hash"
-    />
-  </td>
-
-  <td>
-    <table>
-      <thead>
-        <tr>
-          <th><i>id</i></th>
-          <th><i>Full Name</i></th>
-          <th></th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <% user.provider_credentials.each do |credential| %>
-          <tr>
-            <td><%= credential.id %></td>
-            <td><%= credential.full_name %></td>
-            <td>
-              <a href="/provider_credentials_erb"><%= action.capitalize %></a>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </td>
-
-  <td>
-    <input
-      class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
-      type="submit"
-      value="<%= action.capitalize %> user"
-    />
-  </td>
-</form>
+<td>
+  <ul>
+  <% user.provider_credentials.each do |credential| %>
+    - <%= credential.full_name %>
+  <% end %>
+  </ul>
+</td>

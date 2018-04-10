@@ -33,8 +33,7 @@ module FastlaneCI
       if valid_params?(params, post_parameter_list_for_validation)
         new_user = User.new(
           id: params[:id],
-          email: params[:email],
-          password: params[:password]
+          email: params[:email]
         )
 
         Services.user_service.update_user!(new_user)
@@ -70,7 +69,7 @@ module FastlaneCI
 
     # @return [Set[Symbol]]
     def post_parameter_list_for_validation
-      return Set.new(%w(id email password_hash))
+      return Set.new(%w(id email))
     end
   end
 end
