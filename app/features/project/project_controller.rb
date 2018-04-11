@@ -252,7 +252,7 @@ module FastlaneCI
       locals = {
         project: project,
         title: "Project #{project.project_name}",
-        available_lanes: nil,
+        available_lanes: [],
         fastfile_path: nil
       }
 
