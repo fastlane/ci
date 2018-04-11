@@ -42,6 +42,19 @@ module FastlaneCI
       redirect(HOME)
     end
 
+    # Deletes a user existing in the configuration repository `users.json`
+    post "#{HOME}/delete/*" do |user_id|
+      user = Services.user_service.find_user(id: user_id)
+
+      if !user.nil?
+        Services.user_service.delete_user!(user: user)
+      else
+        logger.debug("User not deleted, since user with `id` #{user_id} does not exist.")
+      end
+
+      redirect(back)
+    end
+
     private
 
     #####################################################
