@@ -194,7 +194,7 @@ module FastlaneCI
     # @return [User] `existing_user` in the `users.json` file
     def find_user_index_and_existing_user(user:)
       users.each.with_index do |old_user, index|
-        return [index, old_user] if old_user.email.casecmp(user.email.downcase).zero?
+        return [index, old_user] if old_user.id == user.id
       end
 
       return [nil, nil]
