@@ -127,8 +127,7 @@ module FastlaneCI
     # 3) If the data is not valid, display an error message
     post "#{HOME}/initial_clone_user" do
       if valid_params?(params, post_parameter_list_for_clone_user_validation)
-        api_token = params[:clone_user_api_token]
-        api_token.strip!
+        api_token = params[:clone_user_api_token].strip
         if api_token.length != 40
           error_message = "Invalid API token, please ensure you entered an API token and not a password"
           session[:message] = error_message
