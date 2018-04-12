@@ -24,8 +24,7 @@ module FastlaneCI
     # @param  [ProviderCredential] provider_credential
     def initialize(provider_credential: nil)
       @clone_user_client = Octokit::Client.new(access_token: provider_credential.api_token)
-      # TODO: need to think about how we wish to handle bot authentication to automate this
-      @bot_user_client = nil
+      @bot_user_client = Octokit::Client.new(access_token: FastlaneCI.env.ci_user_api_token)
     end
 
     # Creates a remote repository if it does not already exist, complete with
@@ -72,7 +71,7 @@ module FastlaneCI
     # @return [Boolean] If the user was added successfully
     def add_bot_user_as_collaborator
       invitation_id = invite_bot_user_to_configuration_repository
-      return accept_invitation_as_bot_user(invitation_id) if invitation_id
+      return accept_invitation_to_repository_as_bot_user(invitation_id) if invitation_id
     end
 
     # Returns `true` if the remote configuration repository exists

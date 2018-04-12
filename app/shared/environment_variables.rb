@@ -11,6 +11,7 @@ module FastlaneCI
         encryption_key: encryption_key,
         ci_user_email: ci_user_email,
         ci_user_password: ci_user_password,
+        ci_user_api_token: ci_user_api_token,
         repo_url: repo_url,
         clone_user_email: initial_clone_email,
         clone_user_api_token: clone_user_api_token
@@ -30,6 +31,11 @@ module FastlaneCI
     # The password for your fastlane CI bot account
     def ci_user_password
       ENV["FASTLANE_CI_PASSWORD"]
+    end
+
+    # The API token used for the bot account
+    def ci_user_api_token
+      ENV["FASTLANE_CI_BOT_API_TOKEN"]
     end
 
     # The git URL (https) for the configuration repo

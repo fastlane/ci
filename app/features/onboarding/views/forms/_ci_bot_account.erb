@@ -50,6 +50,30 @@
         placeholder="Your GitHub bot's password"
       />
     </div>
+
+    <li>
+      Create a personal access token <a href="https://github.com/settings/tokens/new">
+      on GitHub</a> with <code>repo</code> permissions on your GitHub bot account:
+
+      <img src="../images/github_access_token.png" width="60%">
+    </li>
+
+
+    <li>Enter your bot user's API Token:</li>
+
+    <div class="mdl-textfield mdl-js-textfield">
+      <label for="input"><code>FASTLANE_CI_BOT_API_TOKEN</code></label>
+      <input
+          id="ci_user_api_token"
+          class="mdl-textfield__input"
+          type="password"
+          maxlength="40"
+          value="<%= keys[:ci_user_api_token] %>"
+          minlength="40"
+          name="ci_user_api_token"
+          placeholder="Your GitHub bot's API token"
+      />
+    </div>
   </ol>
 
   <input
