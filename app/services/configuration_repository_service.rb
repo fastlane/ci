@@ -9,22 +9,31 @@ module FastlaneCI
     include FastlaneCI::Logging
     include FastlaneCI::GitHubHandler
 
+    # An octokit client authenticated with the clone user's API token
+    #
     # @return [Octokit::Client]
-    attr_reader :client
+    attr_reader :clone_user_client
+
+    # An octokit client authenticated with the bot user's API token
+    #
+    # @return [Octokit::Client]
+    attr_reader :bot_user_client
 
     # Instantiates new `ConfigurationRepositoryService` class
     #
     # @param  [ProviderCredential] provider_credential
     def initialize(provider_credential: nil)
-      @client = Octokit::Client.new(access_token: provider_credential.api_token)
+      @clone_user_client = Octokit::Client.new(access_token: provider_credential.api_token)
+      # TODO: need to think about how we wish to handle bot authentication to automate this
+      @bot_user_client = nil
     end
 
     # Creates a remote repository if it does not already exist, complete with
     # the expected remote files `user.json` and `projects.json`
     def create_private_remote_configuration_repo
-      github_action(client) do
+      github_action(clone_user_client) do
         # TODO: Handle the common case of when provided account can't create a new private repo
-        client.create_repository(repo_name, private: true) unless configuration_repository_exists?
+        clone_user_client.create_repository(repo_name, private: true) unless configuration_repository_exists?
         create_remote_json_file("users.json", json_string: serialized_users)
         create_remote_json_file("projects.json")
       end
@@ -57,19 +66,70 @@ module FastlaneCI
       return valid
     end
 
+    # Adds the bot user as a collaborator to the fastlane.ci configuration
+    # repository
+    #
+    # @return [Boolean] If the user was added successfully
+    def add_bot_user_as_collaborator
+      invitation_id = invite_bot_user_to_configuration_repository
+      return accept_invitation_as_bot_user(invitation_id) if invitation_id
+    end
+
     # Returns `true` if the remote configuration repository exists
     #
     # @return [Boolean]
     def configuration_repository_exists?
       # Return cached true value, if it was successful, otherwise keep checking because it might have been fixed
       return @config_repo_exists unless @config_repo_exists.nil? || (@config_repo_exists == false)
-      github_action(client) do
-        @config_repo_exists = client.repository?(repo_shortform)
+      github_action(clone_user_client) do
+        @config_repo_exists = clone_user_client.repository?(repo_shortform)
       end
       return @config_repo_exists
     end
 
     private
+
+    # Adds the bot user as a collaborator to the fastlane.ci configuration
+    # repository
+    #
+    # @return [Integer] `invitation.id`
+    def invite_bot_user_to_configuration_repository
+      # TODO: return if bot_user == clone_user
+
+      logger.debug("Adding the bot user as a collaborator for #{repo_shortform}.")
+
+      github_action(clone_user_client) do
+        invitation = clone_user_client.invite_user_to_repository(repo_shortform, "andrews-bot")
+
+        if invitation
+          logger.debug("Added bot user as collaborator for #{repo_shortform}.")
+          return invitation.id
+        else
+          logger.error("ERROR: Couldn't add bot user as collaborator for #{repo_shortform}.")
+          return nil
+        end
+      end
+    end
+
+    # Accepts the invitation to the fastlane.ci repository as the bot user
+    #
+    # @param  [Integer] invitation_id
+    # @return [Boolean] `true` if the invitation was successfully accepted
+    def accept_invitation_to_repository_as_bot_user(invitation_id)
+      logger.debug("Accepting invitation as bot user for #{repo_shortform}.")
+
+      github_action(bot_user_client) do
+        bot_accepted = bot_user_client.accept_repository_invitation(invitation_id)
+
+        if bot_accepted
+          logger.debug("Bot user accepted invitation to #{repo_shortform}.")
+        else
+          logger.error("ERROR: Bot user didn't accept invitation to #{repo_shortform}.")
+        end
+
+        return bot_accepted
+      end
+    end
 
     # Serializes CI user and its provider credentials to a JSON format.
     #
@@ -114,11 +174,11 @@ module FastlaneCI
     # @raise  [Octokit::UnprocessableEntity] when file already exists
     # @param  [String] file_path
     def create_remote_json_file(file_path, json_string: "[]")
-      github_action(client) do
-        client.contents(repo_shortform, path: file_path)
+      github_action(clone_user_client) do
+        clone_user_client.contents(repo_shortform, path: file_path)
       end
     rescue Octokit::NotFound
-      client.create_contents(
+      clone_user_client.create_contents(
         repo_shortform, file_path, "Add initial #{file_path}", json_string
       )
     rescue Octokit::UnprocessableEntity
@@ -143,8 +203,8 @@ module FastlaneCI
       logger.debug("Checking that #{repo_shortform}/#{file_path} is a json array")
 
       contents_map = {}
-      github_action(client) do
-        contents_map = client.contents(repo_shortform, path: file_path)
+      github_action(clone_user_client) do
+        contents_map = clone_user_client.contents(repo_shortform, path: file_path)
       end
       contents_json =
         contents_map[:encoding] == "base64" ? Base64.decode64(contents_map[:content]) : contents_map[:content]
