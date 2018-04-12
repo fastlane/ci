@@ -76,7 +76,7 @@ module FastlaneCI
         return true
       end
 
-      attr_accessor :git_action_queue
+      attr_reader :git_action_queue
 
       # Loads the octokit cache stack for speed-up calls to github service.
       # As explained in: https://github.com/octokit/octokit.rb#caching
@@ -91,7 +91,7 @@ module FastlaneCI
       end
     end
 
-    GitRepo.git_action_queue = TaskQueue::TaskQueue.new(name: "GitRepo task queue")
+    @git_action_queue = TaskQueue::TaskQueue.new(name: "GitRepo task queue")
 
     # Initializer for GitRepo class
     # @param git_config [GitConfig]

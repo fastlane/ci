@@ -43,4 +43,16 @@
     </a>
 
   </main>
+  <p type="text" 
+     class="mdl-layout__content"
+     readonly="true"
+     style="font-size: .73em; font-weight: bold; padding: 40px">
+    <% if defined?(server_version) && server_version %>
+      server-version: 
+      <a href="https://github.com/fastlane/ci/commit/<%= server_version %>" 
+         target="_blank">
+        <%= server_version %>
+      </a>
+    <% end %>
+  </p>
 </div>
