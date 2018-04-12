@@ -1,5 +1,7 @@
-import {DOCUMENT} from '@angular/common';
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
+
+import {ProjectSummary, ProjectSummaryResponse} from '../models/project_summary';
+import {DataService} from '../services/data.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -8,10 +10,15 @@ import {Component, Inject, OnInit} from '@angular/core';
 })
 
 export class DashboardComponent implements OnInit {
-  constructor(@Inject(DOCUMENT) private document: any) {
-    this.document.location.href =
-        `${this.document.location.origin}/dashboard_erb`
-  }
+  readonly DISPLAYED_COLUMNS: string[] = ['name', 'latestBuild', 'lane'];
+  isLoading = true;
+  projects: ProjectSummary[];
+  constructor(private readonly dataService: DataService) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.dataService.getProjects().subscribe((projects) => {
+      this.projects = projects;
+      this.isLoading = false;
+    });
+  }
 }
