@@ -107,7 +107,8 @@ module FastlaneCI
     get "#{HOME}/*/lanes" do
       content_type :json
 
-      org, repo_name, branch, = params[:splat].first.split("/")
+      org, repo_name, *branch_parts = params[:splat].first.split("/")
+      branch = branch_parts.join("/")
 
       provider_credential = check_and_get_provider_credential(
         type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
