@@ -17,7 +17,8 @@ module FastlaneCI
       locals = {
         projects_with_access: projects_with_access,
         projects_without_access: [], # we don't expose an API for this, yet
-        title: "Dashboard"
+        title: "Dashboard",
+        server_version: FastlaneCI.server_version
       }
       erb(:dashboard, locals: locals, layout: FastlaneCI.default_layout)
     end
