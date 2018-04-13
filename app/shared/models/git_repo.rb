@@ -52,7 +52,8 @@ module FastlaneCI
     attr_accessor :repo_auth # whatever pieces of information that can change between git users
 
     attr_accessor :temporary_storage_path
-    attr_accessor :credential_scope
+
+    attr_reader :credential_scope
 
     attr_reader :local_folder # where we are keeping the local repo checkout
 
@@ -397,7 +398,7 @@ module FastlaneCI
 
       # we don't have a git repo yet, we have no choice and must use global
       # TODO: check if we find a better way for the initial clone to work without setting system global state
-      self.credential_scope = File.directory?(File.join(local_folder, ".git")) ? "local" : "global"
+      @credential_scope = File.directory?(File.join(local_folder, ".git")) ? "local" : "global"
 
       # rubocop:disable Metrics/LineLength
       use_credentials_command = "git config --#{credential_scope} credential.helper 'store --file #{temporary_storage_path.shellescape}' #{local_folder}"
