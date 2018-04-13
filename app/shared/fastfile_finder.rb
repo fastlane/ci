@@ -30,7 +30,7 @@ module FastlaneCI
       end
 
       # return the Fastfile at path/fastlane/Fastfile if present, otherwise the first one found
-      fastfile_path = fastfiles.find { |current_path| current_path == "#{path}/fastlane/Fastfile" } || fastfiles.first
+      fastfile_path = fastfiles.find { |current_path| current_path.downcase == "#{path}/fastlane/fastfile" } || fastfiles.first
       if relative_path
         fastfile_path = Pathname.new(fastfile_path).relative_path_from(Pathname.new(path))
       end

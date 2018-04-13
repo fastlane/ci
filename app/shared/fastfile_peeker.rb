@@ -95,7 +95,7 @@ module FastlaneCI
                   .select { |resource| resource[:path].end_with?("Fastfile") }
                   .map { |resource| resource[:path] }
 
-      fastfile_path = fastfiles.find { |current_path| current_path == "fastlane/Fastfile" } || fastfiles.first
+      fastfile_path = fastfiles.find { |current_path| current_path.downcase == "fastlane/fastfile" } || fastfiles.first
 
       contents_map = remote_file_contents_map(
         repo_full_name: repo_full_name,
