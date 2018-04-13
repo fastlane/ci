@@ -14,5 +14,5 @@ end
 lane :tslint do
   desc "TSLint the whole project to ensure no style violations"
   sh("cd ..;npm install")
-  sh("cd ..;./node_modules/tslint/bin/tslint './web/**/*.ts'")
+  sh("cd ..;npm run lint")
 end
