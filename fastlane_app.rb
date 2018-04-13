@@ -61,11 +61,6 @@ module FastlaneCI
         end
       end
 
-      # Adds support for JSON request bodies.
-      # The Rack parameter hash is populated by deserializing the JSON data provided
-      # in the request body when the Content-Type is application/json.
-      use(Rack::PostBodyContentTypeParser)
-
       post "/graphql" do
         result = FastlaneCI::GraphQLSchema.schema.execute(
           params[:query],
