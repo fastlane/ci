@@ -12,8 +12,15 @@ changed_files = `git status --porcelain`
 
 exit(0) if changed_files.empty?
 
-exit(0) if system("rubocop #{changed_files}")
+unless system("rubocop #{changed_files}")
+  puts("\n\n💥 Fix ruby linting errors with `rubocop -a` and stage changed, or bypass hook with `git commit --no-verify`")
+  exit($?.exitstatus)
+end
 
-puts("\n\n💥 Fix linting errors with `rubocop -a` and stage changed, or bypass hook with `git commit --no-verify`")
+unless system("npm run lint")
+  puts("\n\n💥 Fix js linting errors with `npm run lintfix` and stage changed, or bypass hook with `git commit --no-verify`")
+  exit($?.exitstatus)
+end
 
-exit($?.exitstatus)
+exit(0)
+
