@@ -5,7 +5,7 @@ During the normal operation of fastlane.ci, you'll need a few values. Some value
 
 `FASTLANE_CI_ENCRYPTION_KEY="key"` - Arbitrary key you decide. This will be used for password encryption. **Note: Do not change after selecting a key value, otherwise there will be decoding issues.**
 
-`FASTLANE_CI_USER="email@bot.com"` - Email address of the fastlane CI bot account you want to use to update all your commit statuses.
+`FASTLANE_CI_BOT_API_TOKEN="token"` - API token used to make contributions from `fastlane.ci` to your subscribed projects on behalf of the `fastlane.ci` bot user.
 
 `FASTLANE_CI_PASSWORD="password"` - Password of your fastlane CI bot account.
 
