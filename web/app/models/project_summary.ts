@@ -1,4 +1,4 @@
-import {BuildStatus, FastlaneStatus, fastlaneStatusToEnum} from '../common/constants'
+import {BuildStatus, FastlaneStatus, fastlaneStatusToEnum} from '../common/constants';
 
 export interface ProjectSummaryResponse {
   id: string;
