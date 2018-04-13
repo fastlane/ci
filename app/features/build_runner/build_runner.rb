@@ -283,8 +283,16 @@ module FastlaneCI
       else
         # No work queue? Just call the block then
         logger.debug("Not using a workqueue for build runner #{self.class}, this is probably a bug")
-        work_block.call
-        post_run_block.call
+
+        begin
+          work_block.call
+        rescue StandardError => ex
+          logger.error(ex)
+        ensure
+          # this is already called in an ensure block if we're using a workqueue to execute it
+          # so no need to wrap the task queue's version of `post_run_block`
+          post_run_block.call
+        end
       end
     end
 
