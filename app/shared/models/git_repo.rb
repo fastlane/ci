@@ -52,6 +52,7 @@ module FastlaneCI
     attr_accessor :repo_auth # whatever pieces of information that can change between git users
 
     attr_accessor :temporary_storage_path
+    attr_accessor :credential_scope
 
     attr_reader :local_folder # where we are keeping the local repo checkout
 
@@ -394,18 +395,19 @@ module FastlaneCI
         ""
       ].join("\n")
 
-      scope = "local"
+      self.credential_scope = "local"
 
       unless File.directory?(File.join(local_folder, ".git"))
         # we don't have a git repo yet, we have no choice
         # TODO: check if we find a better way for the initial clone to work without setting system global state
-        scope = "global"
+        self.credential_scope = "global"
       end
-      use_credentials_command = <<~COMMAND
-        git config --#{scope} credential.helper 'store --file #{temporary_storage_path.shellescape}' #{local_folder}
-      COMMAND
 
-      # Uncomment if you want to debug git credential stuff, keeping it commented out because it's very noisey
+      # rubocop:disable Metrics/LineLength
+      use_credentials_command = "git config --#{credential_scope} credential.helper 'store --file #{temporary_storage_path.shellescape}' #{local_folder}"
+      # rubocop:enable Metrics/LineLength
+
+      # Uncomment next line if you want to debug git credential stuff, it's very noisey
       # logger.debug("Setting credentials for #{git_config.git_url} with command: #{use_credentials_command}")
       cmd = TTY::Command.new(printer: :quiet)
       cmd.run(store_credentials_command, input: content)
@@ -413,10 +415,18 @@ module FastlaneCI
       return temporary_storage_path
     end
 
+    # any calls to this should be balanced with any calls to set_auth
     def unset_auth
       return unless temporary_storage_path.kind_of?(String)
       # TODO: Also auto-clean those files from time to time, on server re-launch maybe, or background worker
       FileUtils.rm(temporary_storage_path) if File.exist?(temporary_storage_path)
+
+      clear_credentials_command = "git config --#{credential_scope} --replace-all credential.helper \"\""
+
+      # Uncomment next line if you want to debug git credential stuff, it's very noisey
+      # logger.debug("Clearing credentials for #{git_config.git_url} with command: #{clear_credentials_command}")
+      cmd = TTY::Command.new(printer: :quiet)
+      cmd.run(clear_credentials_command)
     end
 
     def perform_block(use_global_git_mutex: true, &block)
