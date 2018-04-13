@@ -8,6 +8,7 @@ end
 
 task :devbootstrap do
   sh "bundle install"
+  sh("brew install node") unless sh("npm -v")
   sh "npm install"
   sh "ln -sf ../../.pre-commit .git/hooks/pre-commit"
 end
