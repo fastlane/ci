@@ -10,6 +10,7 @@ require_relative "app/shared/logging_module"
 require_relative "app/shared/environment_variables"
 require_relative "app/shared/fastlane_ci_error" # TODO: move somewhere else
 require_relative "app/features/build_runner/build_runner"
+require_relative "app/features-json/graph_ql/schema"
 
 # All things fastlane ci related go in this module
 module FastlaneCI
@@ -58,6 +59,20 @@ module FastlaneCI
         else
           redirect("/login_erb")
         end
+      end
+
+      # Adds support for JSON request bodies.
+      # The Rack parameter hash is populated by deserializing the JSON data provided
+      # in the request body when the Content-Type is application/json.
+      use(Rack::PostBodyContentTypeParser)
+
+      post "/graphql" do
+        result = FastlaneCI::GraphQLSchema.schema.execute(
+          params[:query],
+          variables: params[:variables],
+          context: { current_user: session[:user] }
+        )
+        json result
       end
 
       get "/favico.ico" do
