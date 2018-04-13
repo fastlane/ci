@@ -81,7 +81,7 @@ describe FastlaneCI::EnvironmentVariableService do
       "ci_user_password": nil,
       "ci_user_api_token": nil,
       "repo_url": "https://github.com/user_name/new_repo_name",
-      "clone_user_api_token": nil
+      "initial_onboarding_user_api_token": nil
     }
   end
 
@@ -91,7 +91,7 @@ describe FastlaneCI::EnvironmentVariableService do
       ci_user_password: "ci_user_password",
       ci_user_api_token: nil,
       repo_url: "https://github.com/user_name/new_repo_name",
-      clone_user_api_token: "clone_user_api_token"
+      initial_onboarding_user_api_token: "initial_onboarding_user_api_token"
     }
   end
 end

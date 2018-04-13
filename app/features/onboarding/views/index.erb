@@ -35,8 +35,8 @@
           <li><code>FASTLANE_CI_PASSWORD</code></li>
         <% end %>
 
-        <% if !has_clone_user_api_token? %>
-          <li><code>FASTLANE_CI_INITIAL_CLONE_API_TOKEN</code></li>
+        <% if !has_initial_onboarding_user_api_token? %>
+          <li><code>FASTLANE_CI_INITIAL_ONBOARDING_USER_API_TOKEN</code></li>
         <% end %>
 
         <% if !has_remote_github_repo? %>

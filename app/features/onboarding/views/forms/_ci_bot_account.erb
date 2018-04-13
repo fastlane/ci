@@ -8,8 +8,14 @@
 
   <p>
     To properly setup the bot account, <code>fastlane.ci</code> requires
-    two configuration envorinment variables: <code>FASTLANE_CI_USER</code>
+    two configuration envorinment variables: <code>FASTLANE_CI_BOT_API_TOKEN</code>
     and <code>FASTLANE_CI_PASSWORD</code>.
+  </p>
+
+  <p>
+    The user associated with this API token will be responsible for updating the
+    private <code>fastlane.ci</code> configuration repository created after the
+    onboarding process.
   </p>
 
   <p>
@@ -85,7 +91,7 @@
 </form>
 
 <!-- Progress to the next page -->
-<form method="GET" action="/onboarding_erb/initial_clone_user">
+<form method="GET" action="/onboarding_erb/initial_onboarding_user">
   <input
     class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
     type="submit"

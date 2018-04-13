@@ -9,10 +9,10 @@ module FastlaneCI
     include FastlaneCI::Logging
     include FastlaneCI::GitHubHandler
 
-    # An octokit client authenticated with the clone user's API token
+    # An octokit client authenticated with the onboarding user's API token
     #
     # @return [Octokit::Client]
-    attr_reader :clone_user_client
+    attr_reader :onboarding_user_client
 
     # An octokit client authenticated with the bot user's API token
     #
@@ -23,19 +23,22 @@ module FastlaneCI
     #
     # @param  [ProviderCredential] provider_credential
     def initialize(provider_credential: nil)
-      @clone_user_client = Octokit::Client.new(access_token: provider_credential.api_token)
+      @onboarding_user_client = Octokit::Client.new(access_token: provider_credential.api_token)
       @bot_user_client = Octokit::Client.new(access_token: FastlaneCI.env.ci_user_api_token)
     end
 
-    # Creates a remote repository if it does not already exist, complete with
-    # the expected remote files `user.json` and `projects.json`
-    def create_private_remote_configuration_repo
-      github_action(clone_user_client) do
-        # TODO: Handle the common case of when provided account can't create a new private repo
-        clone_user_client.create_repository(repo_name, private: true) unless configuration_repository_exists?
-        create_remote_json_file("users.json", json_string: serialized_users)
-        create_remote_json_file("projects.json")
-      end
+    # Sets up the `fastlane.ci` configuration repository, with the necessary
+    # configuration files
+    #
+    #   i.   Creates the remote repository
+    #   ii.  Adds the bot user as a collaborator and accepts the invitation as
+    #        the bot user
+    #   iii. Creates the necessary remote configuration files as the bot user
+    #
+    def setup_private_configuration_repo
+      create_private_remote_configuration_repo
+      add_bot_user_as_collaborator
+      create_remote_configuration_files
     end
 
     # Returns `true` if the configuration repository is in proper format:
@@ -65,20 +68,6 @@ module FastlaneCI
       return valid
     end
 
-    # Adds the bot user as a collaborator to the fastlane.ci configuration
-    # repository
-    #
-    # @return [Boolean] If the user was added successfully
-    def add_bot_user_as_collaborator
-      invitation_id = invite_bot_user_to_configuration_repository
-
-      if invitation_id
-        return accept_invitation_to_repository_as_bot_user(invitation_id)
-      else
-        raise "Could not add bot user as a collaborator. Invitation was not sent to collaborate on #{repo_shortform}."
-      end
-    end
-
     # Returns `true` if the remote configuration repository exists
     #
     # @return [Boolean]
@@ -95,17 +84,55 @@ module FastlaneCI
 
     private
 
+    # Creates a remote repository if it does not already exist as the onboarding
+    # user
+    def create_private_remote_configuration_repo
+      logger.debug("Creating private remote configuration repository #{repo_shortform}.")
+
+      github_action(onboarding_user_client) do
+        # TODO: Handle the common case of when provided account can't create a new private repo
+        onboarding_user_client.create_repository(repo_name, private: true) unless configuration_repository_exists?
+      end
+    end
+
+    # Adds the bot user as a collaborator to the fastlane.ci configuration
+    # repository
+    #
+    # @return [Boolean] If the user was added successfully
+    def add_bot_user_as_collaborator
+      github_action(onboarding_user_client) do
+        logger.debug("Bot user is already a collaborator to #{repo_shortform}, not adding as collaborator.")
+        return true if onboarding_user_client.collaborator?(repo_shortform, bot_user_login)
+      end
+
+      logger.debug("Adding bot user as collaborator to #{repo_shortform}.")
+
+      invitation_id = invite_bot_user_to_configuration_repository
+
+      if invitation_id.nil?
+        return accept_invitation_to_repository_as_bot_user(invitation_id)
+      else
+        raise "Could not add bot user as a collaborator. Invitation was not sent to collaborate on #{repo_shortform}."
+      end
+    end
+
+    # Creates the `users.json` and `projects.json` configuration files to the
+    # remote configuration repository as the bot user
+    def create_remote_configuration_files
+      logger.debug("Creating remote configuration files `users.json` and `projects.json`")
+      create_remote_json_file("users.json", json_string: serialized_users)
+      create_remote_json_file("projects.json")
+    end
+
     # Adds the bot user as a collaborator to the fastlane.ci configuration
     # repository
     #
     # @return [Integer] `invitation.id`
     def invite_bot_user_to_configuration_repository
-      return if bot_user_email == initial_clone_user_email
-
       logger.debug("Adding the bot user as a collaborator for #{repo_shortform}.")
 
-      github_action(clone_user_client) do
-        invitation = clone_user_client.invite_user_to_repository(repo_shortform, "andrews-bot")
+      github_action(onboarding_user_client) do
+        invitation = onboarding_user_client.invite_user_to_repository(repo_shortform, bot_user_login)
 
         if invitation
           logger.debug("Added bot user as collaborator for #{repo_shortform}.")
@@ -154,9 +181,9 @@ module FastlaneCI
           password_hash: BCrypt::Password.create(FastlaneCI.env.ci_user_password),
           provider_credentials: [
             FastlaneCI::GitHubProviderCredential.new(
-              email: initial_clone_user_email,
-              api_token: FastlaneCI.env.clone_user_api_token,
-              full_name: "Clone User credentials"
+              email: initial_onboarding_user_email,
+              api_token: FastlaneCI.env.initial_onboarding_user_api_token,
+              full_name: "Initial Onboarding User credentials"
             )
           ]
         )
@@ -180,11 +207,11 @@ module FastlaneCI
     # @raise  [Octokit::UnprocessableEntity] when file already exists
     # @param  [String] file_path
     def create_remote_json_file(file_path, json_string: "[]")
-      github_action(clone_user_client) do
-        clone_user_client.contents(repo_shortform, path: file_path)
+      github_action(bot_user_client) do
+        bot_user_client.contents(repo_shortform, path: file_path)
       end
     rescue Octokit::NotFound
-      clone_user_client.create_contents(
+      bot_user_client.create_contents(
         repo_shortform, file_path, "Add initial #{file_path}", json_string
       )
     rescue Octokit::UnprocessableEntity
@@ -209,8 +236,8 @@ module FastlaneCI
       logger.debug("Checking that #{repo_shortform}/#{file_path} is a json array")
 
       contents_map = {}
-      github_action(clone_user_client) do
-        contents_map = clone_user_client.contents(repo_shortform, path: file_path)
+      github_action(bot_user_client) do
+        contents_map = bot_user_client.contents(repo_shortform, path: file_path)
       end
       contents_json =
         contents_map[:encoding] == "base64" ? Base64.decode64(contents_map[:content]) : contents_map[:content]
@@ -236,6 +263,15 @@ module FastlaneCI
     # @!group String Helpers
     #####################################################
 
+    # The login of the fastlane.ci bot account
+    #
+    # @return [String]
+    def bot_user_login
+      github_action(bot_user_client) do
+        return bot_user_client.login
+      end
+    end
+
     # The email of the fastlane.ci bot account
     #
     # @return [String]
@@ -245,12 +281,12 @@ module FastlaneCI
       end
     end
 
-    # The email of the initial clone user
+    # The email of the initial onboarding user
     #
     # @return [String]
-    def initial_clone_user_email
-      github_action(clone_user_client) do
-        return clone_user_client.emails.find(&:primary).email
+    def initial_onboarding_user_email
+      github_action(onboarding_user_client) do
+        return onboarding_user_client.emails.find(&:primary).email
       end
     end
 
@@ -262,7 +298,7 @@ module FastlaneCI
       return FastlaneCI.env.repo_url.split("/").last
     end
 
-    # The short-form of the configuration repository URL `ueser/repo`
+    # The short-form of the configuration repository URL `user/repo`
     #
     # @return [String]
     def repo_shortform

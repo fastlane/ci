@@ -14,7 +14,7 @@ module FastlaneCI
         ci_user_password: nil,
         ci_user_api_token: nil,
         repo_url: nil,
-        clone_user_api_token: nil
+        initial_onboarding_user_api_token: nil
       }
     )
       non_nil_new_env_variables = locals.reject { |_k, v| v.nil? }

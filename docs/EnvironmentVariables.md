@@ -11,7 +11,7 @@ During the normal operation of fastlane.ci, you'll need a few values. Some value
 
 `FASTLANE_CI_REPO_URL="https://github.com/your-name/your-ci-config"` - Git URL (https) for the configuration repo you wish the server to use.
 
-`FASTLANE_CI_INITIAL_CLONE_API_TOKEN="token"` - API token used for the initial clone for the config repo. **Note: needed just for the first startup of fastlane.ci**.
+`FASTLANE_CI_INITIAL_ONBOARDING_USER_API_TOKEN="token"` - API token used to create and invite the bot user to the `fastlane.ci` configuration repository. **Note: needed just for the first startup of fastlane.ci**.
 
 ## Development focused
 `FASTLANE_CI_SKIP_WORKER_LAUNCH` - Don’t launch workers on startup. Useful if you’re debugging UI things or manual processes that don’t need workers.

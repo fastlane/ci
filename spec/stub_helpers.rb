@@ -13,7 +13,7 @@ module StubHelpers
     allow_any_instance_of(FastlaneCI::EnvironmentVariables).to receive(:ci_user_password).and_return("ci_user_password")
     allow_any_instance_of(FastlaneCI::EnvironmentVariables).to receive(:ci_user_api_token).and_return("bot_user_api_token")
     allow_any_instance_of(FastlaneCI::EnvironmentVariables).to receive(:repo_url).and_return("https://github.com/user_name/repo_name")
-    allow_any_instance_of(FastlaneCI::EnvironmentVariables).to receive(:clone_user_api_token).and_return("clone_user_api_token")
+    allow_any_instance_of(FastlaneCI::EnvironmentVariables).to receive(:initial_onboarding_user_api_token).and_return("initial_onboarding_user_api_token")
   end
 
   def stub_git_repos

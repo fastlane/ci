@@ -21,8 +21,11 @@ module FastlaneCI
         # The git URL (https) for the configuration repo
         FASTLANE_CI_REPO_URL='#{locals[:repo_url]}'
 
-        # The API token used for the initial clone for the config repo
-        FASTLANE_CI_INITIAL_CLONE_API_TOKEN='#{locals[:clone_user_api_token]}'
+        # The API token for initial onboarding. It's responsible for creating
+        # the remote `fastlane.ci` configuration repository, and inviting the
+        # bot user to the corresponding repository so it may perform actions on
+        # it
+        FASTLANE_CI_INITIAL_ONBOARDING_USER_API_TOKEN='#{locals[:initial_onboarding_user_api_token]}'
       FILE
     end
   end

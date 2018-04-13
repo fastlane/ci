@@ -12,7 +12,7 @@ module FastlaneCI
         ci_user_password: ci_user_password,
         ci_user_api_token: ci_user_api_token,
         repo_url: repo_url,
-        clone_user_api_token: clone_user_api_token
+        initial_onboarding_user_api_token: initial_onboarding_user_api_token
       }
     end
 
@@ -37,8 +37,8 @@ module FastlaneCI
     end
 
     # The API token used for the initial clone for the config repo
-    def clone_user_api_token
-      ENV["FASTLANE_CI_INITIAL_CLONE_API_TOKEN"]
+    def initial_onboarding_user_api_token
+      ENV["FASTLANE_CI_INITIAL_ONBOARDING_USER_API_TOKEN"]
     end
   end
 end

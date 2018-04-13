@@ -30,7 +30,7 @@ module HelperFunctions
       encryption_key: "encryption_key",
       ci_user_password: "ci_user_password",
       repo_url: "https://github.com/user_name/repo_name",
-      clone_user_api_token: "clone_user_api_token"
+      initial_onboarding_user_api_token: "initial_onboarding_user_api_token"
     }
   end
 end
