@@ -71,7 +71,12 @@ module FastlaneCI
     # @return [Boolean] If the user was added successfully
     def add_bot_user_as_collaborator
       invitation_id = invite_bot_user_to_configuration_repository
-      return accept_invitation_to_repository_as_bot_user(invitation_id) if invitation_id
+
+      if invitation_id
+        return accept_invitation_to_repository_as_bot_user(invitation_id)
+      else
+        raise "Could not add bot user as a collaborator. Invitation was not sent to collaborate on #{repo_shortform}."
+      end
     end
 
     # Returns `true` if the remote configuration repository exists
@@ -80,9 +85,11 @@ module FastlaneCI
     def configuration_repository_exists?
       # Return cached true value, if it was successful, otherwise keep checking because it might have been fixed
       return @config_repo_exists unless @config_repo_exists.nil? || (@config_repo_exists == false)
-      github_action(clone_user_client) do
-        @config_repo_exists = clone_user_client.repository?(repo_shortform)
+
+      github_action(bot_user_client) do
+        @config_repo_exists = bot_user_client.repository?(repo_shortform)
       end
+
       return @config_repo_exists
     end
 
@@ -93,7 +100,7 @@ module FastlaneCI
     #
     # @return [Integer] `invitation.id`
     def invite_bot_user_to_configuration_repository
-      # TODO: return if bot_user == clone_user
+      return if bot_user_email == initial_clone_user_email
 
       logger.debug("Adding the bot user as a collaborator for #{repo_shortform}.")
 
