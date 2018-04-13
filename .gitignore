@@ -1,5 +1,6 @@
 # Added by fastlane.ci team
 .keys
+.ruby-version
 !/spec/fixtures/files/.fastlane/ci/.keys
 fastlane.log
 fastlane.verbose.log
