@@ -17,6 +17,18 @@ module FastlaneCI
       @client = Octokit::Client.new(access_token: @provider_credential.api_token)
     end
 
+    def fastfile(repo_config:, sha_or_branch:)
+      fastfile_parser = fastfile_from_github(
+        repo_full_name: repo_config.full_name,
+        sha_or_branch: sha_or_branch
+      )
+      if fastfile_parser.nil?
+        logger.debug("Checking out repo and searching for fastfile in #{repo_config.full_name}")
+        fastfile_parser = fastfile_from_repo(repo_config: repo_config, branch: sha_or_branch)
+      end
+      return fastfile_parser
+    end
+
     # For a given repo, and some state associated with it (a branch or a commit sha) retrieve the FastfileParser
     # instance and return it.
     # @param [GitRepo] git_repo
@@ -52,6 +64,8 @@ module FastlaneCI
       end
     end
 
+    private
+
     def fastfile_from_contents_map(contents_map)
       github_action(@client) do
         return nil if contents_map.nil?
@@ -64,12 +78,12 @@ module FastlaneCI
       end
     end
 
-    def remote_tree(repo_full_name:, sha_or_branch:)
+    def remote_paths(repo_full_name:, sha_or_branch:)
       github_action(@client) do
         begin
           logger.debug("Checking for fastfile in #{repo_full_name}")
           result = @client.tree(repo_full_name, sha_or_branch, { recursive: true })
-          return result[:tree] || []
+          return result[:tree].map { |resource| resource[:path] } || []
         rescue Octokit::NotFound
           return []
         end
@@ -89,13 +103,9 @@ module FastlaneCI
     end
 
     def fastfile_from_github(repo_full_name: nil, sha_or_branch:)
-      tree = remote_tree(repo_full_name: repo_full_name, sha_or_branch: sha_or_branch)
+      paths = remote_paths(repo_full_name: repo_full_name, sha_or_branch: sha_or_branch)
 
-      fastfiles = tree
-                  .select { |resource| resource[:path].end_with?("Fastfile") }
-                  .map { |resource| resource[:path] }
-
-      fastfile_path = fastfiles.find { |current_path| current_path.downcase == "fastlane/fastfile" } || fastfiles.first
+      fastfile_path = FastfileFinder.find_prioritary_fastfile_path(paths: paths)
 
       contents_map = remote_file_contents_map(
         repo_full_name: repo_full_name,
