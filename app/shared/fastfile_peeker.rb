@@ -64,11 +64,23 @@ module FastlaneCI
       end
     end
 
+    def remote_tree(repo_full_name:, sha_or_branch:)
+      github_action(@client) do
+        begin
+          logger.debug("Checking for fastfile in #{repo_full_name}")
+          result = @client.tree(repo_full_name, sha_or_branch, { recursive: true })
+          return result[:tree] || []
+        rescue Octokit::NotFound
+          return []
+        end
+      end
+    end
+
     def remote_file_contents_map(repo_full_name: nil, sha_or_branch:, path:)
       github_action(@client) do
         begin
           logger.debug("Checking for fastfile in #{repo_full_name}/fastlane/Fastfile")
-          contents_map = @client.contents(repo_full_name, path: "fastlane/Fastfile", ref: sha_or_branch)
+          contents_map = @client.contents(repo_full_name, path: path, ref: sha_or_branch)
           return contents_map
         rescue Octokit::NotFound
           return nil
@@ -77,28 +89,20 @@ module FastlaneCI
     end
 
     def fastfile_from_github(repo_full_name: nil, sha_or_branch:)
-      path = "fastlane/Fastfile"
-      logger.debug("Checking GitHub repo for fastfile in #{repo_full_name}/#{path}")
+      tree = remote_tree(repo_full_name: repo_full_name, sha_or_branch: sha_or_branch)
+
+      fastfiles = tree
+                  .select { |resource| resource[:path].end_with?("Fastfile") }
+                  .map { |resource| resource[:path] }
+
+      fastfile_path = fastfiles.find { |current_path| current_path == "fastlane/Fastfile" } || fastfiles.first
+
       contents_map = remote_file_contents_map(
         repo_full_name: repo_full_name,
         sha_or_branch: sha_or_branch,
-        path: path
+        path: fastfile_path
       )
-      if contents_map.nil?
-        path = "Fastlane/Fastfile"
-        logger.debug("fastfile not at default path, checking for fastfile in #{repo_full_name}/#{path}")
-        contents_map = remote_file_contents_map(
-          repo_full_name: repo_full_name,
-          sha_or_branch: sha_or_branch,
-          path: path
-        )
-      end
-
       contents = fastfile_from_contents_map(contents_map)
-      if contents.nil?
-        logger.debug("Checking out repo and searching for fastfile in #{repo_full_name}")
-        return nil
-      end
 
       return Fastlane::FastfileParser.new(file_content: contents)
     end

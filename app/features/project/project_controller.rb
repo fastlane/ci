@@ -137,6 +137,7 @@ module FastlaneCI
         sha_or_branch: branch
       )
       if fastfile_parser.nil?
+        logger.debug("Checking out repo and searching for fastfile in #{repo_full_name}")
         fastfile_parser = fastfile_peeker.fastfile_from_repo(repo_config: repo_config, branch: branch)
       end
 
