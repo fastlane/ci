@@ -12,9 +12,6 @@ module FastlaneCI
         # Randomly generated key, that's used to encrypt the user passwords
         FASTLANE_CI_ENCRYPTION_KEY='#{locals[:encryption_key]}'
 
-        # The email address of your fastlane CI bot account
-        FASTLANE_CI_USER='#{locals[:ci_user_email]}'
-
         # The password for your CI bot account
         FASTLANE_CI_PASSWORD='#{locals[:ci_user_password]}'
 

@@ -23,43 +23,23 @@
         Create an account</a> for your <code>fastlane.ci</code> bot on GitHub.
     </li>
 
-    <li>Enter your bot user account email:</li>
-
-    <div class="mdl-textfield mdl-js-textfield">
-      <label for="input"><code>FASTLANE_CI_USER</code></label>
-      <input
-        id="ci_user_email"
-        class="mdl-textfield__input"
-        type="text"
-        name="ci_user_email"
-        value="<%= keys[:ci_user_email] %>"
-        placeholder="your_github_bot_email@gmail.com"
-      />
-    </div>
-
-    <li>Enter your bot user account password:</li>
-
-    <div class="mdl-textfield mdl-js-textfield">
-      <label for="input"><code>FASTLANE_CI_PASSWORD</code></label>
-      <input
-        id="ci_user_password"
-        class="mdl-textfield__input"
-        type="password"
-        name="ci_user_password"
-        value="<%= keys[:ci_user_password] %>"
-        placeholder="Your GitHub bot's password"
-      />
-    </div>
-
     <li>
       Create a personal access token <a href="https://github.com/settings/tokens/new">
-      on GitHub</a> with <code>repo</code> permissions on your GitHub bot account:
+      on GitHub</a> with all <code>repo</code> permissions, and the
+      <code>user:email</code> permission on your GitHub bot account:
 
-      <img src="../images/github_access_token.png" width="60%">
+      <img src="../images/github_access_token_repos.png" width="60%">
+      <img src="../images/github_access_token_user_email.png" width="65%">
     </li>
 
+    <li>
+      <p>Enter your bot user's API Token:</p>
 
-    <li>Enter your bot user's API Token:</li>
+      <small>
+        NOTE: <code>fastlane.ci</code> will use the primary email associated with
+        this API token as the email for the initial account it creates for you.
+      </small>
+    </li>
 
     <div class="mdl-textfield mdl-js-textfield">
       <label for="input"><code>FASTLANE_CI_BOT_API_TOKEN</code></label>
@@ -72,6 +52,27 @@
           minlength="40"
           name="ci_user_api_token"
           placeholder="Your GitHub bot's API token"
+      />
+    </div>
+
+    <li>
+      <p>Enter your bot user account password:</p>
+
+      <small>
+        NOTE: <code>fastlane.ci</code> will use this as the password for the
+        initial account it creates for you.
+      </small>
+    </li>
+
+    <div class="mdl-textfield mdl-js-textfield">
+      <label for="input"><code>FASTLANE_CI_PASSWORD</code></label>
+      <input
+        id="ci_user_password"
+        class="mdl-textfield__input"
+        type="password"
+        name="ci_user_password"
+        value="<%= keys[:ci_user_password] %>"
+        placeholder="Your GitHub bot's password"
       />
     </div>
   </ol>

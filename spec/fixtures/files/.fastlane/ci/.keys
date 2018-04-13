@@ -1,9 +1,6 @@
 # Randomly generated key, that's used to encrypt the user passwords
 FASTLANE_CI_ENCRYPTION_KEY='encryption_key'
 
-# The email address of your fastlane CI bot account
-FASTLANE_CI_USER='ci_user@gmail.com'
-
 # The password for your CI bot account
 FASTLANE_CI_PASSWORD='ci_bot_password'
 

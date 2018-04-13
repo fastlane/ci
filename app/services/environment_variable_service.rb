@@ -11,7 +11,6 @@ module FastlaneCI
     def write_keys_file!(
       locals: {
         encryption_key: nil,
-        ci_user_email: nil,
         ci_user_password: nil,
         ci_user_api_token: nil,
         repo_url: nil,

@@ -27,16 +27,12 @@
           <li><code>FASTLANE_CI_ENCRYPTION_KEY</code></li>
         <% end %>
 
-        <% if !has_ci_user_email? %>
-          <li><code>FASTLANE_CI_USER</code></li>
+        <% if !has_ci_user_api_token? %>
+          <li><code>FASTLANE_CI_BOT_API_TOKEN</code></li>
         <% end %>
 
         <% if !has_ci_user_password? %>
           <li><code>FASTLANE_CI_PASSWORD</code></li>
-        <% end %>
-
-        <% if !has_ci_user_api_token? %>
-          <li><code>FASTLANE_CI_BOT_API_TOKEN</code></li>
         <% end %>
 
         <% if !has_clone_user_api_token? %>

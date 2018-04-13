@@ -143,7 +143,7 @@ module FastlaneCI
     def serialized_users
       users = [
         User.new(
-          email: FastlaneCI.env.ci_user_email,
+          email: bot_user_email,
           password_hash: BCrypt::Password.create(FastlaneCI.env.ci_user_password),
           provider_credentials: [
             FastlaneCI::GitHubProviderCredential.new(
@@ -229,14 +229,21 @@ module FastlaneCI
     # @!group String Helpers
     #####################################################
 
+    # The email of the fastlane.ci bot account
+    #
+    # @return [String]
+    def bot_user_email
+      github_action(bot_user_client) do
+        return bot_user_client.emails.find(&:primary).email
+      end
+    end
+
     # The email of the initial clone user
     #
     # @return [String]
     def initial_clone_user_email
-      @clone_user_email ||= begin
-        github_action(clone_user_client) do
-          return clone_user_client.emails.find(&:primary).email
-        end
+      github_action(clone_user_client) do
+        return clone_user_client.emails.find(&:primary).email
       end
     end
 

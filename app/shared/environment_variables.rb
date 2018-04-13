@@ -9,7 +9,6 @@ module FastlaneCI
     def all
       {
         encryption_key: encryption_key,
-        ci_user_email: ci_user_email,
         ci_user_password: ci_user_password,
         ci_user_api_token: ci_user_api_token,
         repo_url: repo_url,
@@ -20,11 +19,6 @@ module FastlaneCI
     # Randomly generated key, that's used to encrypt the user passwords
     def encryption_key
       ENV["FASTLANE_CI_ENCRYPTION_KEY"]
-    end
-
-    # The email address for your fastlane CI bot account
-    def ci_user_email
-      ENV["FASTLANE_CI_USER"]
     end
 
     # The password for your fastlane CI bot account

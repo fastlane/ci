@@ -31,7 +31,7 @@ module FastlaneCI
     end
 
     get "#{HOME}/ci_bot_account" do
-      @progress = true if has_ci_user_email? && has_ci_user_password? && has_ci_user_api_token?
+      @progress = true if has_ci_user_password? && has_ci_user_api_token?
       locals = { title: "Onboarding", variables: {} }
       erb(:ci_bot_account, locals: locals, layout: FastlaneCI.default_layout)
     end
@@ -104,7 +104,6 @@ module FastlaneCI
           values:<br />
 
           <ul>
-            <li>FASTLANE_CI_USER=#{params[:ci_user_email]}</li>
             <li>FASTLANE_CI_PASSWORD=#{params[:ci_user_password]}</li>
           </ul>
         HTML
@@ -245,11 +244,6 @@ module FastlaneCI
     end
 
     # @return [Boolean]
-    def has_ci_user_email?
-      return not_nil_and_not_empty?(FastlaneCI.env.ci_user_email)
-    end
-
-    # @return [Boolean]
     def has_ci_user_password?
       return not_nil_and_not_empty?(FastlaneCI.env.ci_user_password)
     end
@@ -286,7 +280,7 @@ module FastlaneCI
 
     # @return [Set[String]]
     def post_parameter_list_for_ci_bot_user_validation
-      return Set.new(%w(ci_user_email ci_user_password ci_user_api_token))
+      return Set.new(%w(ci_user_password ci_user_api_token))
     end
 
     # @return [Set[String]]
