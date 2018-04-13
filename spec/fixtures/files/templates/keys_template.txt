@@ -13,9 +13,5 @@ FASTLANE_CI_BOT_API_TOKEN='bot_api_token'
 # The git URL (https) for the configuration repo
 FASTLANE_CI_REPO_URL='https://github.com/user/repo'
 
-# Needed just for the first startup of fastlane.ci:
-# The email address used for the intial clone for the config repo
-FASTLANE_CI_INITIAL_CLONE_EMAIL='clone_user_email'
-
 # The API token used for the initial clone for the config repo
 FASTLANE_CI_INITIAL_CLONE_API_TOKEN='clone_user_api_token'

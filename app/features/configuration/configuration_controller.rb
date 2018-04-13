@@ -64,7 +64,7 @@ module FastlaneCI
     def post_parameter_list_for_validation
       return Set.new(
         %w(encryption_key ci_user_email ci_user_password ci_user_api_token
-           repo_url clone_user_email clone_user_api_token)
+           repo_url clone_user_api_token)
       )
     end
   end

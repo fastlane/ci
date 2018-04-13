@@ -80,8 +80,8 @@ describe FastlaneCI::EnvironmentVariableService do
       "encryption_key": "some_new_key",
       "ci_user_email": nil,
       "ci_user_password": nil,
+      "ci_user_api_token": nil,
       "repo_url": "https://github.com/user_name/new_repo_name",
-      "clone_user_email": nil,
       "clone_user_api_token": nil
     }
   end
@@ -91,8 +91,8 @@ describe FastlaneCI::EnvironmentVariableService do
       encryption_key: "some_new_key",
       ci_user_email: "ci_user_email@gmail.com",
       ci_user_password: "ci_user_password",
+      ci_user_api_token: nil,
       repo_url: "https://github.com/user_name/new_repo_name",
-      clone_user_email: "clone_user@gmail.com",
       clone_user_api_token: "clone_user_api_token"
     }
   end

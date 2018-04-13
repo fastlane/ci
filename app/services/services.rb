@@ -30,6 +30,7 @@ module FastlaneCI
       @_configuration_git_repo = nil
       @_ci_user = nil
       @_provider_credential = nil
+      @_clone_user_client = nil
 
       # Reset services
       @_project_service = nil
@@ -103,7 +104,7 @@ module FastlaneCI
     # @return [GitHubProviderCredential]
     def self.provider_credential
       @_provider_credential ||= GitHubProviderCredential.new(
-        email: FastlaneCI.env.initial_clone_email,
+        email: clone_user_client.user.email,
         api_token: FastlaneCI.env.clone_user_api_token
       )
     end
@@ -184,6 +185,10 @@ module FastlaneCI
 
     def self.onboarding_service
       @_onboarding_service ||= FastlaneCI::OnboardingService.new
+    end
+
+    def self.clone_user_client
+      @_clone_user_client ||= Octokit::Client.new(access_token: FastlaneCI.env.clone_user_api_token)
     end
   end
 end

@@ -37,7 +37,7 @@ module FastlaneCI
     end
 
     get "#{HOME}/initial_clone_user" do
-      @progress = true if has_clone_user_email? && has_clone_user_api_token?
+      @progress = true if has_clone_user_api_token?
       locals = { title: "Onboarding", variables: {} }
       erb(:initial_clone_user, locals: locals, layout: FastlaneCI.default_layout)
     end
@@ -154,7 +154,6 @@ module FastlaneCI
             configuration values:
 
             <ul>
-              <li>FASTLANE_CI_INITIAL_CLONE_EMAIL='#{params[:clone_user_email]}'</li>
               <li>FASTLANE_CI_INITIAL_CLONE_API_TOKEN='#{params[:clone_user_api_token]}'</li>
             </ul>
           HTML
@@ -261,11 +260,6 @@ module FastlaneCI
     end
 
     # @return [Boolean]
-    def has_clone_user_email?
-      return not_nil_and_not_empty?(FastlaneCI.env.initial_clone_email)
-    end
-
-    # @return [Boolean]
     def has_clone_user_api_token?
       return not_nil_and_not_empty?(FastlaneCI.env.clone_user_api_token)
     end
@@ -297,7 +291,7 @@ module FastlaneCI
 
     # @return [Set[String]]
     def post_parameter_list_for_clone_user_validation
-      return Set.new(%w(clone_user_email clone_user_api_token))
+      return Set.new(%w(clone_user_api_token))
     end
 
     # @return [Set[String]]

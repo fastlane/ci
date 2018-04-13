@@ -12,8 +12,8 @@ module StubHelpers
     allow_any_instance_of(FastlaneCI::EnvironmentVariables).to receive(:encryption_key).and_return("encryption_key")
     allow_any_instance_of(FastlaneCI::EnvironmentVariables).to receive(:ci_user_email).and_return("ci_user_email@gmail.com")
     allow_any_instance_of(FastlaneCI::EnvironmentVariables).to receive(:ci_user_password).and_return("ci_user_password")
+    allow_any_instance_of(FastlaneCI::EnvironmentVariables).to receive(:ci_user_api_token).and_return("bot_user_api_token")
     allow_any_instance_of(FastlaneCI::EnvironmentVariables).to receive(:repo_url).and_return("https://github.com/user_name/repo_name")
-    allow_any_instance_of(FastlaneCI::EnvironmentVariables).to receive(:clone_user_email).and_return("clone_user@gmail.com")
     allow_any_instance_of(FastlaneCI::EnvironmentVariables).to receive(:clone_user_api_token).and_return("clone_user_api_token")
   end
 

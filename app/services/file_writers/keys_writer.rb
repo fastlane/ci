@@ -24,10 +24,6 @@ module FastlaneCI
         # The git URL (https) for the configuration repo
         FASTLANE_CI_REPO_URL='#{locals[:repo_url]}'
 
-        # Needed just for the first startup of fastlane.ci:
-        # The email address used for the intial clone for the config repo
-        FASTLANE_CI_INITIAL_CLONE_EMAIL='#{locals[:clone_user_email]}'
-
         # The API token used for the initial clone for the config repo
         FASTLANE_CI_INITIAL_CLONE_API_TOKEN='#{locals[:clone_user_api_token]}'
       FILE

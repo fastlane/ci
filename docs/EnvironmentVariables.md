@@ -3,15 +3,13 @@
 ## Normal operation focused
 During the normal operation of fastlane.ci, you'll need a few values. Some values are needed for just the first time setup, while others are required 100% of the time.
 
-`FASTLANE_CI_ENCRYPTION_KEY="key"` - Arbitrary key you decide. This will be used for password encryption. **Note: Do not change after selecting a key value, otherwise there will be decoding issues.** 
+`FASTLANE_CI_ENCRYPTION_KEY="key"` - Arbitrary key you decide. This will be used for password encryption. **Note: Do not change after selecting a key value, otherwise there will be decoding issues.**
 
 `FASTLANE_CI_USER="email@bot.com"` - Email address of the fastlane CI bot account you want to use to update all your commit statuses.
 
 `FASTLANE_CI_PASSWORD="password"` - Password of your fastlane CI bot account.
 
 `FASTLANE_CI_REPO_URL="https://github.com/your-name/your-ci-config"` - Git URL (https) for the configuration repo you wish the server to use.
-
-`FASTLANE_CI_INITIAL_CLONE_EMAIL="email@user.com"` - Email address used for the initial clone for the config repo. **Note: needed just for the first startup of fastlane.ci**.
 
 `FASTLANE_CI_INITIAL_CLONE_API_TOKEN="token"` - API token used for the initial clone for the config repo. **Note: needed just for the first startup of fastlane.ci**.
 

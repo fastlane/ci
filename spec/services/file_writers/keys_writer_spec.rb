@@ -30,7 +30,6 @@ describe FastlaneCI::KeysWriter do
         ci_user_password: "ci_user_password",
         ci_user_api_token: "bot_api_token",
         repo_url: "https://github.com/user/repo",
-        clone_user_email: "clone_user_email",
         clone_user_api_token: "clone_user_api_token"
       }
     )

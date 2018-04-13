@@ -147,7 +147,7 @@ module FastlaneCI
           password_hash: BCrypt::Password.create(FastlaneCI.env.ci_user_password),
           provider_credentials: [
             FastlaneCI::GitHubProviderCredential.new(
-              email: FastlaneCI.env.initial_clone_email,
+              email: initial_clone_user_email,
               api_token: FastlaneCI.env.clone_user_api_token,
               full_name: "Clone User credentials"
             )
@@ -228,6 +228,17 @@ module FastlaneCI
     ####################################################
     # @!group String Helpers
     #####################################################
+
+    # The email of the initial clone user
+    #
+    # @return [String]
+    def initial_clone_user_email
+      @clone_user_email ||= begin
+        github_action(clone_user_client) do
+          return clone_user_client.emails.find(&:primary).email
+        end
+      end
+    end
 
     # The name of the configuration repository URL `repo`
     #
