@@ -12,3 +12,4 @@
 * __Use Cases__ - describe a complete interaction between the software and users
 ## Goal: I want to debug a build that failed
 ### [P0: As a developer, with a PR that fails to build, I want to find the root cause so I can fix it](./debug_failed_build.md)
+### [P1: As a developer, I want to debug a failed build](./debug_failed_build.md)
