@@ -474,9 +474,8 @@ module FastlaneCI
 
         success = false
         begin
-          git.reset_hard(
-            git.gcommit(sha)
-          )
+          git.gcommit(sha)
+
           success = true
         rescue StandardError => ex
           exception_context = { sha: sha }
@@ -599,10 +598,8 @@ module FastlaneCI
     def switch_to_fork(clone_url:, branch:, sha: nil, local_branch_name:, use_global_git_mutex: false)
       perform_block(use_global_git_mutex: use_global_git_mutex) do
         logger.debug("Switching to branch #{branch} from forked repo: #{clone_url} (pulling into #{local_branch_name})")
-        reset_hard!(use_global_git_mutex: false)
         # TODO: make sure it doesn't exist yet
         git.branch(local_branch_name)
-        reset_hard!(use_global_git_mutex: false)
 
         begin
           git.pull(clone_url, branch)

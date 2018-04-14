@@ -149,7 +149,6 @@ module FastlaneCI
           use_global_git_mutex: false
         )
       else
-        repo.reset_hard!
         logger.debug("Pulling `master` in checkout_sha")
         repo.pull
       end
@@ -221,14 +220,8 @@ module FastlaneCI
       environment_variables_set << key
     end
 
-    def reset_repo_state
-      # When we're done, clean up by resetting
-      repo.reset_hard!
-    end
-
     def post_run_action
       logger.debug("Finished running #{project.project_name} for #{sha}")
-      reset_repo_state
 
       unset_build_specific_environment_variables
     end
