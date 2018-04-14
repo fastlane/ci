@@ -103,7 +103,7 @@ module FastlaneCI
     # @return [GitHubProviderCredential]
     def self.provider_credential
       @_provider_credential ||= GitHubProviderCredential.new(
-        email: onboarding_user_client.user.email,
+        email: onboarding_user_client.emails.find(&:primary).email,
         api_token: FastlaneCI.env.initial_onboarding_user_api_token
       )
     end
