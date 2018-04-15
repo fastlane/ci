@@ -75,8 +75,8 @@ module FastlaneCI
       # Return cached true value, if it was successful, otherwise keep checking because it might have been fixed
       return @config_repo_exists unless @config_repo_exists.nil? || (@config_repo_exists == false)
 
-      github_action(bot_user_client) do
-        @config_repo_exists = bot_user_client.repository?(repo_shortform)
+      github_action(onboarding_user_client) do
+        @config_repo_exists = onboarding_user_client.repository?(repo_shortform)
       end
 
       return @config_repo_exists
@@ -109,7 +109,7 @@ module FastlaneCI
 
       invitation_id = invite_bot_user_to_configuration_repository
 
-      if invitation_id.nil?
+      if !invitation_id.nil?
         return accept_invitation_to_repository_as_bot_user(invitation_id)
       else
         raise "Could not add bot user as a collaborator. Invitation was not sent to collaborate on #{repo_shortform}."
