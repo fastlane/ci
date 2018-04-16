@@ -1,5 +1,6 @@
 require_relative "./job_trigger_type"
 require_relative "./repo_config_type"
+require_relative "./artifact_provider_type"
 
 require "graphql"
 
@@ -16,6 +17,7 @@ module FastlaneCI
       field :lane, types.String
       field :job_triggers, types[Types::JobTriggerType]
       field :repo_config, Types::RepoConfigInterface
+      field :artifact_provider, Types::ArtifactProviderInterface
     end
   end
 end
