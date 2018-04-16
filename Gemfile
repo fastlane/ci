@@ -2,9 +2,9 @@ source("https://rubygems.org")
 
 # Sinatra
 gem "faye-websocket", ">= 0.10.7", "< 1.0.0" # web socket connection for Sinatra
+gem "rack-contrib" # Allows to parse JSON requests.
 gem "sinatra", ">= 2.0.1", "< 3.0.0" # Our web application library
 gem "sinatra-contrib", ">= 2.0.0", "< 3.0.0" # TODO: document why we have this here @taquitos
-gem "rack-contrib" # Allows to parse JSON requests.
 
 # web server that we need to support web socket connections with sinatra
 gem "thin", ">= 1.7.2", "< 2.0.0"
