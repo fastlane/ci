@@ -1,11 +1,11 @@
 require_relative "./job_trigger_type"
+require_relative "./repo_config_type"
 
 require "graphql"
 
 module FastlaneCI
   # Definition of the different GraphQL types.
   module Types
-    # TODO: [WIP] We don't include nested Project's properties for now.
     ProjectType = GraphQL::ObjectType.define do
       name "Project"
       description "fastlane.ci Project"
@@ -15,6 +15,7 @@ module FastlaneCI
       field :platform, types.String
       field :lane, types.String
       field :job_triggers, types[Types::JobTriggerType]
+      field :repo_config, Types::RepoConfigInterface
     end
   end
 end
