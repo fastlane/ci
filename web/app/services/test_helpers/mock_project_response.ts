@@ -1,3 +1,7 @@
+import {timestamp} from 'rxjs/operators/timestamp';
+
+import {BuildSummary, BuildSummaryResponse} from '../../models/build_summary';
+import {ProjectResponse} from '../../models/project';
 import {ProjectSummaryResponse} from '../../models/project_summary';
 
 export const mockProjectListResponse: ProjectSummaryResponse[] = [
@@ -23,3 +27,25 @@ export const mockProjectListResponse: ProjectSummaryResponse[] = [
     latest_timestamp: '2018-04-04 16:11:58 -0700'
   },
 ];
+
+const mockBuildSummaryResponse_failure: BuildSummaryResponse = {
+  number: 1,
+  status: 'failure',
+  duration: 1234,
+  sha: 'cjsh4',
+  timestamp: '2018-04-04 16:11:58 -0700'
+};
+
+const mockBuildSummaryResponse_success: BuildSummaryResponse = {
+  number: 2,
+  status: 'success',
+  duration: 221234,
+  sha: 'asdfsh4',
+  timestamp: '2018-04-04 16:11:58 -0700'
+};
+
+export const mockProjectResponse: ProjectResponse = {
+  id: '12',
+  name: 'the most coolest project',
+  builds: [mockBuildSummaryResponse_success, mockBuildSummaryResponse_failure]
+};

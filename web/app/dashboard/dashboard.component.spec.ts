@@ -8,7 +8,6 @@ import {Observable} from 'rxjs/Observable';
 import {Subject} from 'rxjs/Subject';
 
 import {BuildStatus} from '../common/constants';
-import {asyncData} from '../common/testing/async_observable_helpers';
 import {ProjectSummary} from '../models/project_summary';
 import {DataService} from '../services/data.service';
 

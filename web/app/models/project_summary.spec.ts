@@ -15,6 +15,7 @@ describe('Project Model', () => {
         .toBe(1522883518000);  // 2018-04-04 16:11:58 -0700
   });
 
+  // TODO: Move this into a test that tests the helper function
   it('should handle all statuses', () => {
     const response = Object.assign({}, mockProjectSummaryResponse);
 
