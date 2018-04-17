@@ -10,7 +10,7 @@ export type FastlaneStatus =
     'failure'|'success'|'ci_problem'|'pending'|'missing_fastfile';
 
 export function fastlaneStatusToEnum(status?: FastlaneStatus): BuildStatus {
-  if (status) {
+  if (status !== null) {
     switch (status) {
       case 'success':
         return BuildStatus.SUCCESS;
@@ -31,7 +31,7 @@ export function fastlaneStatusToEnum(status?: FastlaneStatus): BuildStatus {
 }
 
 export function buildStatusToIcon(status?: BuildStatus) {
-  if (status) {
+  if (status !== null) {
     switch (status) {
       case BuildStatus.SUCCESS:
         return 'done';
