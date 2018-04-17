@@ -1,5 +1,6 @@
 require_relative "../shared/authenticated_controller_base"
 require_relative "./view_models/project_summary_view_model"
+require_relative "./view_models/project_view_model"
 
 module FastlaneCI
   # Controller for providing all data relating to projects
@@ -16,6 +17,13 @@ module FastlaneCI
       end
 
       return all_projects_view_models.to_json
+    end
+
+    get "#{HOME}/:project_id" do |project_id|
+      project = user_project_with_id(project_id: params[:project_id])
+      project_view_model = ProjectViewModel.new(project: project)
+
+      return project_view_model.to_json
     end
   end
 end

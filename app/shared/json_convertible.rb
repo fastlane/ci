@@ -10,7 +10,7 @@ module FastlaneCI
 
     # add these as instance methods
     module InstanceMethods
-      def to_json(options)
+      def to_json(options = {})
         to_object_dictionary.to_json(options)
       end
 
