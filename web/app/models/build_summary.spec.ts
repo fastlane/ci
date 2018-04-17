@@ -9,7 +9,8 @@ describe('Build Summary Model', () => {
     expect(build.number).toBe(2);
     expect(build.status).toBe(BuildStatus.SUCCESS);
     expect(build.duration).toBe(221234);
-    expect(build.sha).toBe('asdfsh4');
+    expect(build.sha).toBe('asdfshzdggfdhdfh4');
+    expect(build.shortSha).toBe('asdfsh');
     expect(build.date.getTime())
         .toBe(1522883518000);  // 2018-04-04 16:11:58 -0700
   });

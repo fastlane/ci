@@ -1,4 +1,4 @@
-import {BuildSummaryResponse} from '../build_summary';
+import {BuildSummaryResponse} from '../../models/build_summary';
 
 // TODO: move all these mocks to common/ since they're being re-used.
 export const mockBuildSummaryResponse_failure: BuildSummaryResponse = {
