@@ -6,7 +6,7 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 ## Development server
 
-1. Run fastlane.ci 
+1. Run fastlane.ci with the `WEB_APP=1` environment variable.
 1. continuously build the web application with the follow command. If you only want to build once remove `-w`.
 ```
 ng build --deploy-url="/.dist" --dev -w
