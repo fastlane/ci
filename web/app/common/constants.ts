@@ -26,7 +26,7 @@ export function fastlaneStatusToEnum(status?: FastlaneStatus): BuildStatus | und
         throw new Error(`Unknown status type ${status}`);
     }
   } else {
-    return undefined; 
+    return undefined;
   }
 }
 
