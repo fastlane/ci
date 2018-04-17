@@ -20,7 +20,7 @@ export class ProjectSummary {
     this.name = projectSummary.name;
     this.id = projectSummary.id;
     this.lane = projectSummary.lane;
-    this.latestStatus = fastlaneStatusToEnum(projectSummary.latest_status);
+    this.latestStatus = projectSummary.latest_status ? fastlaneStatusToEnum(projectSummary.latest_status) : undefined;
     this.statusIcon = buildStatusToIcon(this.latestStatus);
     this.latestDate = projectSummary.latest_timestamp ? new Date(projectSummary.latest_timestamp) : undefined;
   }
