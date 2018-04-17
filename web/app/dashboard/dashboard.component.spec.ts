@@ -13,7 +13,6 @@ import {DataService} from '../services/data.service';
 
 import {DashboardComponent} from './dashboard.component';
 import {mockProjectSummaryList} from './test_helpers/mock_project_summary';
-import { COMMON_DEPRECATED_I18N_PIPES } from '@angular/common';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
