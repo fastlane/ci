@@ -26,6 +26,13 @@ export const mockProjectListResponse: ProjectSummaryResponse[] = [
     lane: 'ios test',
     latest_timestamp: '2018-04-04 16:11:58 -0700'
   },
+  {
+    id: '4',
+    name: 'this project needs some work',
+    latest_status: null,
+    lane: 'ios test',
+    latest_timestamp: null
+  },
 ];
 
 const mockBuildSummaryResponse_failure: BuildSummaryResponse = {

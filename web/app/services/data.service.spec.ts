@@ -30,7 +30,7 @@ describe('DataService', () => {
       const projectsRequest = mockHttp.expectOne('/data/projects');
       projectsRequest.flush(mockProjectListResponse);
 
-      expect(projects.length).toBe(3);
+      expect(projects.length).toBe(4);
       expect(projects[0].name).toBe('the coolest project');
       expect(projects[0].lane).toBe('ios test');
       expect(projects[1].latestStatus).toBe(BuildStatus.SUCCESS);
