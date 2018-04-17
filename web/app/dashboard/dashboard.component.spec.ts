@@ -39,7 +39,7 @@ describe('DashboardComponent', () => {
 
   it('should load project summaries', () => {
     const subject = new Subject<ProjectSummary[]>();
-    dataService.getProjects.and.returnValue(subject.asObservable())
+    dataService.getProjects.and.returnValue(subject.asObservable());
 
     expect(component.isLoading).toBe(true);
 
