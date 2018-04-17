@@ -25,8 +25,8 @@ export const mockProjectSummaryList: ProjectSummary[] = [
   new ProjectSummary({
     id: '4',
     name: 'this project needs some work',
-    latest_status: null,
+    latest_status: undefined,
     lane: 'ios test',
-    latest_timestamp: null
+    latest_timestamp: undefined
   }),
 ];

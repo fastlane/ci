@@ -52,7 +52,7 @@ describe('DashboardComponent', () => {
     expect(component.projects[0].name).toBe('the coolest project');
     expect(component.projects[1].latestStatus).toBe(BuildStatus.SUCCESS);
     expect(component.projects[2].statusIcon).toBe('error');
-    expect(component.projects[3].latestDate).toBe(null);
+    expect(component.projects[3].latestDate).toBe(undefined);
     expect(component.projects[3].statusIcon).toBe('pause_circle_filled');
   });
 });

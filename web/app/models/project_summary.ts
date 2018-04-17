@@ -12,7 +12,7 @@ export class ProjectSummary {
   readonly name: string;
   readonly id: string;
   readonly lane: string;
-  readonly latestStatus: BuildStatus;
+  readonly latestStatus?: BuildStatus;
   readonly latestDate?: Date;
   readonly statusIcon: string;
 
@@ -22,6 +22,6 @@ export class ProjectSummary {
     this.lane = projectSummary.lane;
     this.latestStatus = fastlaneStatusToEnum(projectSummary.latest_status);
     this.statusIcon = buildStatusToIcon(this.latestStatus);
-    this.latestDate = projectSummary.latest_timestamp !== null ? new Date(projectSummary.latest_timestamp) : null;
+    this.latestDate = projectSummary.latest_timestamp ? new Date(projectSummary.latest_timestamp) : undefined;
   }
 }

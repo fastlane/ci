@@ -9,8 +9,8 @@ export enum BuildStatus {
 export type FastlaneStatus =
     'failure'|'success'|'ci_problem'|'pending'|'missing_fastfile';
 
-export function fastlaneStatusToEnum(status?: FastlaneStatus): BuildStatus {
-  if (status !== null) {
+export function fastlaneStatusToEnum(status?: FastlaneStatus): BuildStatus | undefined {
+  if (status) {
     switch (status) {
       case 'success':
         return BuildStatus.SUCCESS;
@@ -26,12 +26,12 @@ export function fastlaneStatusToEnum(status?: FastlaneStatus): BuildStatus {
         throw new Error(`Unknown status type ${status}`);
     }
   } else {
-    return BuildStatus.PENDING; 
+    return undefined; 
   }
 }
 
 export function buildStatusToIcon(status?: BuildStatus) {
-  if (status !== null) {
+  if (status) {
     switch (status) {
       case BuildStatus.SUCCESS:
         return 'done';
