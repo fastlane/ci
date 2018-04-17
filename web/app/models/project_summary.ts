@@ -4,24 +4,24 @@ export interface ProjectSummaryResponse {
   id: string;
   name: string;
   lane: string;
-  latest_status: FastlaneStatus;
-  latest_timestamp: string;
+  latest_status?: FastlaneStatus;
+  latest_timestamp?: string;
 }
 
 export class ProjectSummary {
   readonly name: string;
   readonly id: string;
   readonly lane: string;
-  readonly latestStatus: BuildStatus;
-  readonly latestDate: Date;
+  readonly latestStatus?: BuildStatus;
+  readonly latestDate?: Date;
   readonly statusIcon: string;
 
   constructor(projectSummary: ProjectSummaryResponse) {
     this.name = projectSummary.name;
     this.id = projectSummary.id;
     this.lane = projectSummary.lane;
-    this.latestStatus = fastlaneStatusToEnum(projectSummary.latest_status);
+    this.latestStatus = projectSummary.latest_status ? fastlaneStatusToEnum(projectSummary.latest_status) : undefined;
     this.statusIcon = buildStatusToIcon(this.latestStatus);
-    this.latestDate = new Date(projectSummary.latest_timestamp);
+    this.latestDate = projectSummary.latest_timestamp ? new Date(projectSummary.latest_timestamp) : undefined;
   }
 }

@@ -22,15 +22,17 @@ module FastlaneCI
     # @return [DateTime] Start time
     attr_reader :latest_timestamp
 
-    def initialize(project:, latest_build:)
+    def initialize(project:, latest_build: nil)
       raise "Incorrect object type. Expected Project, got #{project.class}" unless project.kind_of?(Project)
-      raise "Incorrect object type. Expected Build, got #{latest_build.class}" unless latest_build.kind_of?(Build)
+      unless latest_build.nil?
+        raise "Incorrect object type. Expected Build, got #{latest_build.class}" unless latest_build.kind_of?(Build)
+      end
 
       @name = project.project_name
       @lane = project.lane
       @id = project.id
-      @latest_status = latest_build.status
-      @latest_timestamp = latest_build.timestamp
+      @latest_status = latest_build&.status
+      @latest_timestamp = latest_build&.timestamp
     end
   end
 end

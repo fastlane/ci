@@ -26,18 +26,22 @@ export function fastlaneStatusToEnum(status: FastlaneStatus): BuildStatus {
   }
 }
 
-export function buildStatusToIcon(status: BuildStatus) {
-  switch (status) {
-    case BuildStatus.SUCCESS:
-      return 'done';
-    case BuildStatus.PENDING:
-      return 'pause_circle_filled';
-    case BuildStatus.FAILED:
-    case BuildStatus.MISSING_FASTFILE:
-      return 'error';
-    case BuildStatus.INTERNAL_ISSUE:
-      return 'warning';
-    default:
-      throw new Error(`Unknown build status ${status}`);
+export function buildStatusToIcon(status?: BuildStatus) {
+  if (status) {
+    switch (status) {
+      case BuildStatus.SUCCESS:
+        return 'done';
+      case BuildStatus.PENDING:
+        return 'pause_circle_filled';
+      case BuildStatus.FAILED:
+      case BuildStatus.MISSING_FASTFILE:
+        return 'error';
+      case BuildStatus.INTERNAL_ISSUE:
+        return 'warning';
+      default:
+        throw new Error(`Unknown build status ${status}`);
+    }
+  } else {
+    return 'pause_circle_filled';
   }
 }

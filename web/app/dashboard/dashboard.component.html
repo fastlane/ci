@@ -25,7 +25,7 @@
         <ng-container matColumnDef="latestBuild">
           <mat-header-cell *matHeaderCellDef>Latest Build</mat-header-cell>
           <!-- TODO: Pipe this into a relative time pipe -->
-          <mat-cell *matCellDef="let project">{{project.latestDate | date: 'fullDate'}}</mat-cell>
+          <mat-cell *matCellDef="let project">{{ project.latestDate ? (project.latestDate | date: 'fullDate') : "-"}}</mat-cell>
         </ng-container>
 
         <!-- TODO: Add Repo Column -->

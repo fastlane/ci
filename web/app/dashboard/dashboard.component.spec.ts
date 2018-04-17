@@ -46,10 +46,12 @@ describe('DashboardComponent', () => {
     subject.next(mockProjectSummaryList);  // Resolve observable
 
     expect(component.isLoading).toBe(false);
-    expect(component.projects.length).toBe(3);
+    expect(component.projects.length).toBe(4);
     expect(component.projects[0].id).toBe('1');
     expect(component.projects[0].name).toBe('the coolest project');
     expect(component.projects[1].latestStatus).toBe(BuildStatus.SUCCESS);
     expect(component.projects[2].statusIcon).toBe('error');
+    expect(component.projects[3].latestDate).toBeUndefined();
+    expect(component.projects[3].statusIcon).toBe('pause_circle_filled');
   });
 });
