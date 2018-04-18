@@ -418,12 +418,13 @@ module FastlaneCI
       # TODO: Also auto-clean those files from time to time, on server re-launch maybe, or background worker
       FileUtils.rm(temporary_storage_path) if File.exist?(temporary_storage_path)
 
-      clear_credentials_command = "git config --#{credential_scope} --replace-all credential.helper \"\""
+      # Disable for now, need to refine it since we're causing issues
+      # clear_credentials_command = "git config --#{credential_scope} --replace-all credential.helper \"\""
 
-      # Uncomment next line if you want to debug git credential stuff, it's very noisey
-      # logger.debug("Clearing credentials for #{git_config.git_url} with command: #{clear_credentials_command}")
-      cmd = TTY::Command.new(printer: :quiet)
-      cmd.run(clear_credentials_command)
+      ## Uncomment next line if you want to debug git credential stuff, it's very noisey
+      ## logger.debug("Clearing credentials for #{git_config.git_url} with command: #{clear_credentials_command}")
+      # cmd = TTY::Command.new(printer: :quiet)
+      # cmd.run(clear_credentials_command)
     end
 
     def perform_block(use_global_git_mutex: true, &block)
