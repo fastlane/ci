@@ -11,7 +11,7 @@
 <div fci-grid>
   <div fci-cell="12">
     <mat-card class="fci-project-table">
-      <mat-progress-spinner mode="indeterminate" *ngIf="isLoading" class="fci-loading-spinner" [diameter]="30"></mat-progress-spinner>
+      <mat-progress-spinner mode="indeterminate" *ngIf="isLoading" class="fci-loading-spinner" diameter="30"></mat-progress-spinner>
       <mat-table *ngIf="!isLoading" [dataSource]="projects">
         <!-- Name Column -->
         <ng-container matColumnDef="name">
