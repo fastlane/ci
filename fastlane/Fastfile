@@ -16,3 +16,9 @@ lane :tslint do
   sh("cd ..;npm install")
   sh("cd ..;npm run lint")
 end
+
+lane :web_tests do
+  desc "Unit tests for the web app"
+  sh("cd ..;npm install")
+  sh("cd ..;npm run test")
+end
