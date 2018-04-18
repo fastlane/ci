@@ -213,7 +213,7 @@ module FastlaneCI
 
     # @return [Hash]
     def keys
-      return FastlaneCI.env.all
+      return FastlaneCI.dot_keys.all
     end
 
     #####################################################
@@ -222,25 +222,25 @@ module FastlaneCI
 
     # @return [Boolean]
     def has_encryption_key?
-      return not_nil_and_not_empty?(FastlaneCI.env.encryption_key)
+      return not_nil_and_not_empty?(FastlaneCI.dot_keys.encryption_key)
     end
 
     # @return [Boolean]
     def has_ci_user?
-      return not_nil_and_not_empty?(FastlaneCI.env.ci_user_email) &&
-             not_nil_and_not_empty?(FastlaneCI.env.ci_user_password)
+      return not_nil_and_not_empty?(FastlaneCI.dot_keys.ci_user_email) &&
+             not_nil_and_not_empty?(FastlaneCI.dot_keys.ci_user_password)
     end
 
     # @return [Boolean]
     def has_clone_user?
-      return not_nil_and_not_empty?(FastlaneCI.env.initial_clone_email) &&
-             not_nil_and_not_empty?(FastlaneCI.env.clone_user_api_token)
+      return not_nil_and_not_empty?(FastlaneCI.dot_keys.initial_clone_email) &&
+             not_nil_and_not_empty?(FastlaneCI.dot_keys.clone_user_api_token)
     end
 
     # @return [Boolean]
     def has_remote_github_repo?
-      if not_nil_and_not_empty?(FastlaneCI.env.encryption_key)
-        return not_nil_and_not_empty?(FastlaneCI.env.repo_url) &&
+      if not_nil_and_not_empty?(FastlaneCI.dot_keys.encryption_key)
+        return not_nil_and_not_empty?(FastlaneCI.dot_keys.repo_url) &&
                Services.onboarding_service.correct_setup?
       else
         # Need the encryption key for the configuration_repository_service

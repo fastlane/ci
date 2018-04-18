@@ -53,7 +53,7 @@ module FastlaneCI
 
     # @return [Hash]
     def keys
-      return FastlaneCI.env.all
+      return FastlaneCI.dot_keys.all
     end
 
     #####################################################

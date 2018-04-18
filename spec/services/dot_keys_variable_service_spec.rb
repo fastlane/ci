@@ -1,7 +1,7 @@
 require "spec_helper"
 require "app/services/dot_keys_variable_service"
 
-describe FastlaneCI::EnvironmentVariableService do
+describe FastlaneCI::DotKeysVariableService do
   let(:fake_home_path) do
     File.join(FastlaneCI::FastlaneApp.settings.root, "spec/fixtures/files/")
   end
@@ -16,7 +16,7 @@ describe FastlaneCI::EnvironmentVariableService do
   end
 
   subject do
-    FastlaneCI::EnvironmentVariableService.new
+    FastlaneCI::DotKeysVariableService.new
   end
 
   describe "#write_keys_file!" do

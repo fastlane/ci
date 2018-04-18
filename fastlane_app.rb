@@ -19,9 +19,10 @@ module FastlaneCI
     return "../../../features/global/layout".to_sym
   end
 
-  def self.env
-    @env ||= FastlaneCI::EnvironmentVariables.new
-    return @env
+  # Reference to the `DotKeysVariables` object that holds all the values from the
+  # .keys file. This does not include the global or project specific environment variables
+  def self.dot_keys
+    return @env ||= FastlaneCI::DotKeysVariables.new
   end
 
   def self.server_version

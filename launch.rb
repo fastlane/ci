@@ -98,7 +98,7 @@ module FastlaneCI
     end
 
     # Will clone the remote configuration repository if the local repository is
-    # not found, but the user has a `FastlaneCI.env.repo_url` which corresponds
+    # not found, but the user has a `FastlaneCI.dot_keys.repo_url` which corresponds
     # to a valid remote configuration repository
     def self.clone_repo_if_no_local_repo_and_remote_repo_exists
       if !Services.onboarding_service.local_configuration_repo_exists? &&
