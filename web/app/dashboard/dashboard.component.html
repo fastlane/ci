@@ -37,7 +37,7 @@
         </ng-container>
 
         <mat-header-row *matHeaderRowDef="DISPLAYED_COLUMNS"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: DISPLAYED_COLUMNS;"></mat-row>
+        <mat-row *matRowDef="let row; columns: DISPLAYED_COLUMNS; let project" [routerLink]="['/project', project.id]"></mat-row>
       </mat-table>
     </mat-card>
   </div>
