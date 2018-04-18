@@ -220,7 +220,7 @@ module FastlaneCI
         priority = Notification::PRIORITIES[:urgent]
         notification_service.create_notification!(
           priority: priority,
-          name: "Unable to check out object",
+          name: "Unable to checkout object",
           message: "Unable to checkout an object (probably a branch) from #{git_config.git_url}",
           details: "#{user_unfriendly_message}, context: #{exception_context}"
         )
