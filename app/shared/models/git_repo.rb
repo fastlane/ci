@@ -215,7 +215,15 @@ module FastlaneCI
           message: "Unable to checkout an object from #{git_config.git_url}",
           details: "#{user_unfriendly_message}, context: #{exception_context}"
         )
-
+      elsif user_unfriendly_message.include?("Couldn't find remote ref")
+        # This happens when a branch is deleted but we try to pull it anyway
+        priority = Notification::PRIORITIES[:urgent]
+        notification_service.create_notification!(
+          priority: priority,
+          name: "Unable to checkout object",
+          message: "Unable to checkout an object (probably a branch) from #{git_config.git_url}",
+          details: "#{user_unfriendly_message}, context: #{exception_context}"
+        )
       else
         raise ex
       end
@@ -599,10 +607,9 @@ module FastlaneCI
     def switch_to_fork(clone_url:, branch:, sha: nil, local_branch_name:, use_global_git_mutex: false)
       perform_block(use_global_git_mutex: use_global_git_mutex) do
         logger.debug("Switching to branch #{branch} from forked repo: #{clone_url} (pulling into #{local_branch_name})")
-        # TODO: make sure it doesn't exist yet
-        git.branch(local_branch_name)
 
         begin
+          git.branch(local_branch_name)
           git.pull(clone_url, branch)
           return true
         rescue StandardError => ex
