@@ -599,10 +599,9 @@ module FastlaneCI
     def switch_to_fork(clone_url:, branch:, sha: nil, local_branch_name:, use_global_git_mutex: false)
       perform_block(use_global_git_mutex: use_global_git_mutex) do
         logger.debug("Switching to branch #{branch} from forked repo: #{clone_url} (pulling into #{local_branch_name})")
-        # TODO: make sure it doesn't exist yet
-        git.branch(local_branch_name)
 
         begin
+          git.branch(local_branch_name)
           git.pull(clone_url, branch)
           return true
         rescue StandardError => ex
