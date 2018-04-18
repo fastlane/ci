@@ -1,18 +1,14 @@
 import 'rxjs/add/operator/switchMap';
 
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
-import {MatCardModule} from '@angular/material/card';
-import {MatIconModule} from '@angular/material/icon';
-import {MatTableModule} from '@angular/material/table';
-import {MatToolbarModule} from '@angular/material/toolbar';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {MomentModule} from 'ngx-moment';
 import {ActivatedRoute, convertToParamMap} from '@angular/router';
+import {MomentModule} from 'ngx-moment';
 import {Observable} from 'rxjs/Observable';
 import {Subject} from 'rxjs/Subject';
 
 import {Project} from '../models/project';
 import {DataService} from '../services/data.service';
+import {SharedMaterialModule} from '../shared_material.module';
 
 import {ProjectComponent} from './project.component';
 import {mockProject} from './test_helpers/mock_project_response';
@@ -27,8 +23,7 @@ describe('ProjectComponent', () => {
 
     TestBed
         .configureTestingModule({
-          imports:
-              [MatIconModule, MatCardModule, MatTableModule, MatToolbarModule, MatProgressSpinnerModule, MomentModule],
+          imports: [SharedMaterialModule, MomentModule],
           declarations: [
             ProjectComponent,
           ],
