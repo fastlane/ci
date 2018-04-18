@@ -2,6 +2,7 @@ source("https://rubygems.org")
 
 # Sinatra
 gem "faye-websocket", ">= 0.10.7", "< 1.0.0" # web socket connection for Sinatra
+gem "rack-contrib" # Allows to parse JSON requests.
 gem "sinatra", ">= 2.0.1", "< 3.0.0" # Our web application library
 gem "sinatra-contrib", ">= 2.0.0", "< 3.0.0" # TODO: document why we have this here @taquitos
 
@@ -38,6 +39,9 @@ gem "google-cloud-storage", "~> 1.5.0"
 
 # Manage CI dependencies.
 gem "bundler", "~> 1.16.0"
+
+# GraphQL Ruby bindings.
+gem "graphql"
 
 # fastlane dependencies
 # TODO: point to minimum release instead of GitHub once
