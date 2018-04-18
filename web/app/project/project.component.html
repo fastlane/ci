@@ -21,7 +21,7 @@
         <ng-container matColumnDef="date">
           <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
           <!-- TODO: Pipe this into a relative time pipe -->
-          <mat-cell *matCellDef="let build">{{build.date | date: 'fullDate'}}</mat-cell>
+          <mat-cell *matCellDef="let build">{{build.date | amTimeAgo}}</mat-cell>
         </ng-container>
 
         <!-- Lane Column -->
