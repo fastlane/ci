@@ -48,7 +48,7 @@ describe FastlaneCI::DotKeysVariableService do
 
     it "returns `false` if an environment variable is `nil`" do
       allow_any_instance_of(
-        FastlaneCI::EnvironmentVariables
+        FastlaneCI::DotKeysVariables
       ).to receive(:all).and_return(environment_variables.merge(encryption_key: nil))
 
       expect(subject.all_env_variables_non_nil?).to be(false)
@@ -56,7 +56,7 @@ describe FastlaneCI::DotKeysVariableService do
 
     it "returns `false` if an environment variable is 'empty'" do
       allow_any_instance_of(
-        FastlaneCI::EnvironmentVariables
+        FastlaneCI::DotKeysVariables
       ).to receive(:all).and_return(environment_variables.merge(encryption_key: ""))
 
       expect(subject.all_env_variables_non_nil?).to be(false)

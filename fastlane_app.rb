@@ -7,7 +7,7 @@ require "git"
 require_relative "app/services/services"
 require_relative "app/workers/refresh_config_data_sources_worker"
 require_relative "app/shared/logging_module"
-require_relative "app/shared/environment_variables"
+require_relative "app/shared/dot_keys_variables"
 require_relative "app/shared/fastlane_ci_error" # TODO: move somewhere else
 require_relative "app/features/build_runner/build_runner"
 
