@@ -5,6 +5,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatTableModule} from '@angular/material/table';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {BrowserModule} from '@angular/platform-browser';
+import {MomentModule} from 'ngx-moment';
 
 import {AppRoutingModule} from './/app-routing.module';
 import {AppComponent} from './app.component';
@@ -23,6 +24,8 @@ import {DataService} from './services/data.service';
     MatTableModule,
     MatIconModule,
     MatToolbarModule,
+    /** Third-Party Module Imports */
+    MomentModule,
   ],
   providers: [DataService],
   bootstrap: [AppComponent]
