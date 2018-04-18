@@ -4,6 +4,8 @@ import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/t
 import {MatCardModule} from '@angular/material/card';
 import {MatIconModule} from '@angular/material/icon';
 import {MatTableModule} from '@angular/material/table';
+import {RouterModule} from '@angular/router';
+import {MomentModule} from 'ngx-moment';
 import {Observable} from 'rxjs/Observable';
 import {Subject} from 'rxjs/Subject';
 
@@ -24,7 +26,10 @@ describe('DashboardComponent', () => {
 
     TestBed
         .configureTestingModule({
-          imports: [MatIconModule, MatCardModule, MatTableModule],
+          imports: [
+            MatIconModule, MatCardModule, MatTableModule, RouterModule,
+            MomentModule
+          ],
           declarations: [
             DashboardComponent,
           ],
