@@ -215,7 +215,15 @@ module FastlaneCI
           message: "Unable to checkout an object from #{git_config.git_url}",
           details: "#{user_unfriendly_message}, context: #{exception_context}"
         )
-
+      elsif user_unfriendly_message.include?("Couldn't find remote ref")
+        # This happens when a branch is deleted but we try to pull it anyway
+        priority = Notification::PRIORITIES[:urgent]
+        notification_service.create_notification!(
+          priority: priority,
+          name: "Unable to check out object",
+          message: "Unable to checkout an object (probably a branch) from #{git_config.git_url}",
+          details: "#{user_unfriendly_message}, context: #{exception_context}"
+        )
       else
         raise ex
       end
