@@ -1,7 +1,7 @@
 # Internal
 require_relative "../../shared/controller_base"
 require_relative "../../services/user_service"
-require_relative "../../services/environment_variable_service"
+require_relative "../../services/dot_keys_variable_service"
 require_relative "../../shared/models/github_provider_credential"
 
 require "octokit"

@@ -83,7 +83,7 @@ module FastlaneCI
 
     # @return [Boolean]
     def no_missing_keys?
-      return Services.environment_variable_service.all_env_variables_non_nil?
+      return Services.dot_keys_variable_service.all_env_variables_non_nil?
     end
   end
 end

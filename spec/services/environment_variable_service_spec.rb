@@ -1,5 +1,5 @@
 require "spec_helper"
-require "app/services/environment_variable_service"
+require "app/services/dot_keys_variable_service"
 
 describe FastlaneCI::EnvironmentVariableService do
   let(:fake_home_path) do

@@ -3,7 +3,7 @@ require_relative "./services"
 
 module FastlaneCI
   # Logic pertaining to environment variable configuration
-  class EnvironmentVariableService
+  class DotKeysVariableService
     # Write .keys configuration file with proper environment variables. Don't
     # override old environment variables with `nil` values
     #

@@ -4,7 +4,7 @@ require_relative "./config_service"
 require_relative "./configuration_repository_service"
 require_relative "./data_sources/json_build_data_source"
 require_relative "./data_sources/json_user_data_source"
-require_relative "./environment_variable_service"
+require_relative "./dot_keys_variable_service"
 require_relative "./onboarding_service"
 require_relative "./project_service"
 require_relative "./notification_service"
@@ -174,8 +174,8 @@ module FastlaneCI
       )
     end
 
-    def self.environment_variable_service
-      @_environment_variable_service ||= FastlaneCI::EnvironmentVariableService.new
+    def self.dot_keys_variable_service
+      @_dot_keys_variable_service ||= FastlaneCI::DotKeysVariableService.new
     end
 
     def self.provider_credential_service
