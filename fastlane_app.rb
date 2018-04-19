@@ -7,7 +7,7 @@ require "git"
 require_relative "app/services/services"
 require_relative "app/workers/refresh_config_data_sources_worker"
 require_relative "app/shared/logging_module"
-require_relative "app/shared/environment_variables"
+require_relative "app/shared/dot_keys_variables"
 require_relative "app/shared/fastlane_ci_error" # TODO: move somewhere else
 require_relative "app/features/build_runner/build_runner"
 
@@ -19,9 +19,10 @@ module FastlaneCI
     return "../../../features/global/layout".to_sym
   end
 
-  def self.env
-    @env ||= FastlaneCI::EnvironmentVariables.new
-    return @env
+  # Reference to the `DotKeysVariables` object that holds all the values from the
+  # .keys file. This does not include the global or project specific environment variables
+  def self.dot_keys
+    return @env ||= FastlaneCI::DotKeysVariables.new
   end
 
   def self.server_version

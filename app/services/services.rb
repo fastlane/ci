@@ -4,7 +4,7 @@ require_relative "./config_service"
 require_relative "./configuration_repository_service"
 require_relative "./data_sources/json_build_data_source"
 require_relative "./data_sources/json_user_data_source"
-require_relative "./environment_variable_service"
+require_relative "./dot_keys_variable_service"
 require_relative "./onboarding_service"
 require_relative "./project_service"
 require_relative "./notification_service"
@@ -58,7 +58,7 @@ module FastlaneCI
     def self.ci_config_repo
       @_ci_config_repo ||= GitHubRepoConfig.new(
         id: "fastlane-ci-config",
-        git_url: FastlaneCI.env.repo_url,
+        git_url: FastlaneCI.dot_keys.repo_url,
         description: "Contains the fastlane.ci configuration",
         name: "fastlane ci",
         hidden: true
@@ -80,12 +80,12 @@ module FastlaneCI
     def self.ci_user
       # Find our fastlane.ci system user
       @_ci_user ||= Services.user_service.login(
-        email: FastlaneCI.env.ci_user_email,
-        password: FastlaneCI.env.ci_user_password
+        email: FastlaneCI.dot_keys.ci_user_email,
+        password: FastlaneCI.dot_keys.ci_user_password
       )
       if @_ci_user.nil?
         # rubocop:disable Metrics/LineLength
-        raise "Could not find ci_user for current setup, or the provided ci_user_password is incorrect, please make sure a user with the email #{FastlaneCI.env.ci_user_email} exists in your users.json"
+        raise "Could not find ci_user for current setup, or the provided ci_user_password is incorrect, please make sure a user with the email #{FastlaneCI.dot_keys.ci_user_email} exists in your users.json"
         # rubocop:enable Metrics/LineLength
       end
       return @_ci_user
@@ -103,8 +103,8 @@ module FastlaneCI
     # @return [GitHubProviderCredential]
     def self.provider_credential
       @_provider_credential ||= GitHubProviderCredential.new(
-        email: FastlaneCI.env.initial_clone_email,
-        api_token: FastlaneCI.env.clone_user_api_token
+        email: FastlaneCI.dot_keys.initial_clone_email,
+        api_token: FastlaneCI.dot_keys.clone_user_api_token
       )
     end
 
@@ -174,8 +174,12 @@ module FastlaneCI
       )
     end
 
+    def self.dot_keys_variable_service
+      @_dot_keys_variable_service ||= FastlaneCI::DotKeysVariableService.new
+    end
+
     def self.environment_variable_service
-      @_environment_variable_service ||= FastlaneCI::EnvironmentVariableService.new
+      @_dot_keys_variable_service ||= FastlaneCI::DotKeysVariableService.new
     end
 
     def self.provider_credential_service

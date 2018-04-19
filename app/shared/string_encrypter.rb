@@ -9,7 +9,7 @@ module FastlaneCI
     end
 
     def self.default_key
-      @_key ||= Digest::SHA256.digest(FastlaneCI.env.encryption_key)
+      @_key ||= Digest::SHA256.digest(FastlaneCI.dot_keys.encryption_key)
     end
 
     def self.encode(string, key: StringEncrypter.default_key)

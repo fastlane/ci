@@ -3,7 +3,7 @@ require_relative "./services"
 
 module FastlaneCI
   # Logic pertaining to environment variable configuration
-  class EnvironmentVariableService
+  class DotKeysVariableService
     # Write .keys configuration file with proper environment variables. Don't
     # override old environment variables with `nil` values
     #
@@ -20,7 +20,7 @@ module FastlaneCI
     )
       non_nil_new_env_variables = locals.reject { |_k, v| v.nil? }
                                         .each_with_object({}) { |(k, v), hash| hash[k.to_sym] = v }
-      new_environment_variables = FastlaneCI.env.all.merge(non_nil_new_env_variables)
+      new_environment_variables = FastlaneCI.dot_keys.all.merge(non_nil_new_env_variables)
       KeysWriter.new(path: keys_file_path, locals: new_environment_variables).write!
       reload_dot_env!
     end
@@ -41,7 +41,7 @@ module FastlaneCI
     #
     # @return [Boolean]
     def all_env_variables_non_nil?
-      return FastlaneCI.env.all.none? { |_k, v| v.nil? || v.empty? }
+      return FastlaneCI.dot_keys.all.none? { |_k, v| v.nil? || v.empty? }
     end
 
     # The path to the environment variables file

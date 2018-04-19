@@ -1,7 +1,7 @@
 # Internal
 require_relative "../../shared/controller_base"
 require_relative "../../services/user_service"
-require_relative "../../services/environment_variable_service"
+require_relative "../../services/dot_keys_variable_service"
 require_relative "../../shared/models/github_provider_credential"
 
 require "octokit"
@@ -36,7 +36,7 @@ module FastlaneCI
 
     # Login with fastlane.ci credentials
     get "#{HOME}/ci_login" do
-      client = Octokit::Client.new(access_token: FastlaneCI.env.clone_user_api_token)
+      client = Octokit::Client.new(access_token: FastlaneCI.dot_keys.clone_user_api_token)
 
       unless client.nil?
         email = client.user[:email]

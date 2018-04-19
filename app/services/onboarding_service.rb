@@ -21,7 +21,7 @@ module FastlaneCI
     rescue StandardError => ex
       logger.error("Something went wrong on the initial clone")
 
-      if FastlaneCI.env.clone_user_api_token.to_s.empty?
+      if FastlaneCI.dot_keys.clone_user_api_token.to_s.empty?
         logger.error("Make sure to provide your `FASTLANE_CI_INITIAL_CLONE_API_TOKEN` ENV variable")
       end
 
@@ -83,7 +83,7 @@ module FastlaneCI
 
     # @return [Boolean]
     def no_missing_keys?
-      return Services.environment_variable_service.all_env_variables_non_nil?
+      return Services.dot_keys_variable_service.all_env_variables_non_nil?
     end
   end
 end
