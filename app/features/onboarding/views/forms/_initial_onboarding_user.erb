@@ -3,13 +3,17 @@
 
   <p>
     To properly create the configuration repository, <code>fastlane.ci</code>
-    requires <code>FASTLANE_CI_INITIAL_ONBOARDING_USER_API_TOKEN</code>.
+    requires the <code>FASTLANE_CI_INITIAL_ONBOARDING_USER_API_TOKEN</code>
+    environment variable. The user associated with this API token will create
+    the private GitHub <code>fastlane.ci</code> configuration repository, and
+    invite the GitHub bot user account to the subsequent repository created.
   </p>
 
   <p>
-    The user associated with this API token will create the private GitHub
-    <code>fastlane.ci</code> configuration repository, and invite the GitHub bot
-    user account to the subsequent repository created.
+    <b>NOTE:</b> If you're creating the private <code>fastlane.ci</code>
+    configuration repository under a GitHub organization, the user associated to
+    the API token must have sufficient permissions to create a private
+    repository for the organization.
   </p>
 
   <p>
@@ -21,11 +25,11 @@
     <li>
       Create a personal access token <a href="https://github.com/settings/tokens/new">
       on GitHub</a> with all <code>repo</code> permissions, and the
-      <code>user:email</code> permission on your GitHub bot account:
-
-      <img src="../images/github_access_token_repos.png" width="60%">
-      <img src="../images/github_access_token_user_email.png" width="65%">
+      <code>user:email</code> permission.
     </li>
+
+    <img src="../images/github_access_token_repos.png" width="60%">
+    <img src="../images/github_access_token_user_email.png" width="65%">
 
     <li>Enter the API token you created below:</li>
 
