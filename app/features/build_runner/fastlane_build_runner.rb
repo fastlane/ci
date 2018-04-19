@@ -100,28 +100,41 @@ module FastlaneCI
 
         # We call the safe (because is synchronized) Bundler's `chdir` and
         # install all the dependencies, if any.
-        Bundler::SharedHelpers.chdir(File.expand_path("..", fast_file_path)) do
+        Bundler::SharedHelpers.chdir(repo.local_folder) do
           ENV["FASTLANE_SKIP_DOCS"] = true.to_s
 
-          begin
-            options = {}
-            options[:local] = true if Bundler.app_cache.exist?
+          gemfile_found = Dir[File.join(Dir.pwd, "**", "Gemfile")].any?
+          if gemfile_found
+            begin
+              # Reset the bundler scope to the Project's Gemfile.
+              Bundler.reset!
 
-            Bundler::Plugin.gemfile_install(Bundler.default_gemfile) if Bundler.feature_flag.plugins?
+              options = {}
+              options[:local] = true if Bundler.app_cache.exist?
 
-            definition = Bundler.definition
-            definition.validate_runtime!
+              Bundler::Plugin.gemfile_install(Bundler.default_gemfile) if Bundler.feature_flag.plugins?
 
-            Bundler::Installer.install(Bundler.root, definition, options)
-            Bundler.load.cache if Bundler.app_cache.exist? && !Bundler.frozen_bundle?
-            # rubocop:disable Metrics/LineLength
-            logger.info("Bundle complete! #{definition.dependencies.count} Gemfile dependencies, installed #{definition.specs.count} gems.")
-            # rubocop:enable Metrics/LineLength
-          rescue Bundler::GemfileNotFound => ex
-            logger.info(ex)
-          rescue StandardError => ex
-            logger.error(ex)
-            logger.error(ex.backtrace)
+              definition = Bundler.definition
+              definition.validate_runtime!
+
+              Bundler::Installer.install(Bundler.root, definition, options)
+              Bundler.load.cache if Bundler.app_cache.exist? && !Bundler.frozen_bundle?
+              # rubocop:disable Metrics/LineLength
+              logger.info("Bundle complete! #{definition.dependencies.count} Gemfile dependencies, installed #{definition.specs.count} gems.")
+              # rubocop:enable Metrics/LineLength
+              Bundler::SharedHelpers.set_bundle_environment
+
+              not_installed = definition.missing_specs
+              if not_installed.any?
+                logger.error("The following gems are missing")
+                not_installed.each { |s| logger.error(" * #{s.name} (#{s.version})") }
+              end
+            rescue Bundler::GemfileNotFound => ex
+              logger.info(ex)
+            rescue StandardError => ex
+              logger.error(ex)
+              logger.error(ex.backtrace)
+            end
           end
 
           begin
