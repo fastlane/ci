@@ -53,6 +53,8 @@ module FastlaneCI
 
     attr_accessor :temporary_storage_path
 
+    attr_reader :credential_scope
+
     attr_reader :local_folder # where we are keeping the local repo checkout
 
     attr_reader :notification_service # when we have issues, we need to push them somewhere
@@ -213,7 +215,15 @@ module FastlaneCI
           message: "Unable to checkout an object from #{git_config.git_url}",
           details: "#{user_unfriendly_message}, context: #{exception_context}"
         )
-
+      elsif user_unfriendly_message.include?("Couldn't find remote ref")
+        # This happens when a branch is deleted but we try to pull it anyway
+        priority = Notification::PRIORITIES[:urgent]
+        notification_service.create_notification!(
+          priority: priority,
+          name: "Unable to checkout object",
+          message: "Unable to checkout an object (probably a branch) from #{git_config.git_url}",
+          details: "#{user_unfriendly_message}, context: #{exception_context}"
+        )
       else
         raise ex
       end
@@ -394,18 +404,15 @@ module FastlaneCI
         ""
       ].join("\n")
 
-      scope = "local"
+      # we don't have a git repo yet, we have no choice and must use global
+      # TODO: check if we find a better way for the initial clone to work without setting system global state
+      @credential_scope = File.directory?(File.join(local_folder, ".git")) ? "local" : "global"
 
-      unless File.directory?(File.join(local_folder, ".git"))
-        # we don't have a git repo yet, we have no choice
-        # TODO: check if we find a better way for the initial clone to work without setting system global state
-        scope = "global"
-      end
-      use_credentials_command = <<~COMMAND
-        git config --#{scope} credential.helper 'store --file #{temporary_storage_path.shellescape}' #{local_folder}
-      COMMAND
+      # rubocop:disable Metrics/LineLength
+      use_credentials_command = "git config --#{credential_scope} credential.helper 'store --file #{temporary_storage_path.shellescape}' #{local_folder}"
+      # rubocop:enable Metrics/LineLength
 
-      # Uncomment if you want to debug git credential stuff, keeping it commented out because it's very noisey
+      # Uncomment next line if you want to debug git credential stuff, it's very noisey
       # logger.debug("Setting credentials for #{git_config.git_url} with command: #{use_credentials_command}")
       cmd = TTY::Command.new(printer: :quiet)
       cmd.run(store_credentials_command, input: content)
@@ -413,10 +420,19 @@ module FastlaneCI
       return temporary_storage_path
     end
 
+    # any calls to this should be balanced with any calls to set_auth
     def unset_auth
       return unless temporary_storage_path.kind_of?(String)
       # TODO: Also auto-clean those files from time to time, on server re-launch maybe, or background worker
       FileUtils.rm(temporary_storage_path) if File.exist?(temporary_storage_path)
+
+      # Disable for now, need to refine it since we're causing issues
+      # clear_credentials_command = "git config --#{credential_scope} --replace-all credential.helper \"\""
+
+      ## Uncomment next line if you want to debug git credential stuff, it's very noisey
+      ## logger.debug("Clearing credentials for #{git_config.git_url} with command: #{clear_credentials_command}")
+      # cmd = TTY::Command.new(printer: :quiet)
+      # cmd.run(clear_credentials_command)
     end
 
     def perform_block(use_global_git_mutex: true, &block)
@@ -467,9 +483,8 @@ module FastlaneCI
 
         success = false
         begin
-          git.reset_hard(
-            git.gcommit(sha)
-          )
+          git.gcommit(sha)
+
           success = true
         rescue StandardError => ex
           exception_context = { sha: sha }
@@ -592,12 +607,9 @@ module FastlaneCI
     def switch_to_fork(clone_url:, branch:, sha: nil, local_branch_name:, use_global_git_mutex: false)
       perform_block(use_global_git_mutex: use_global_git_mutex) do
         logger.debug("Switching to branch #{branch} from forked repo: #{clone_url} (pulling into #{local_branch_name})")
-        reset_hard!(use_global_git_mutex: false)
-        # TODO: make sure it doesn't exist yet
-        git.branch(local_branch_name)
-        reset_hard!(use_global_git_mutex: false)
 
         begin
+          git.branch(local_branch_name)
           git.pull(clone_url, branch)
           return true
         rescue StandardError => ex

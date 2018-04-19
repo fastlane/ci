@@ -132,13 +132,10 @@ module FastlaneCI
       )
       repo_config = GitHubRepoConfig.from_octokit_repo!(repo: selected_repo)
 
-      fastfile_parser = fastfile_peeker.fastfile_from_github(
-        repo_full_name: repo_config.full_name,
+      fastfile_parser = fastfile_peeker.fastfile(
+        repo_config: repo_config,
         sha_or_branch: branch
       )
-      if fastfile_parser.nil?
-        fastfile_parser = fastfile_peeker.fastfile_from_repo(repo_config: repo_config, branch: branch)
-      end
 
       fetch_available_lanes(fastfile_parser).to_json
     end

@@ -1,5 +1,5 @@
 .fci-dashboard-header {
-    background-color: #F3E5F5;
+    background-color: #E1BEE7;
     height: 448px;
     margin-bottom: -112px;
     .fci-dashboard-welcome {
@@ -18,4 +18,21 @@
             line-height: 24px;
         }
     }
+}
+
+.fci-project-table {
+    .mat-header-row {
+        font-family: 'Google Sans', sans-serif;
+        font-size: 16px;
+    }
+    .mat-row {
+        cursor: pointer;
+        &:hover {
+            background-color: #F3E5F5
+        }
+    }
+}
+
+.fci-loading-spinner {
+    margin: 0 auto;
 }

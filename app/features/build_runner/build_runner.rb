@@ -149,7 +149,6 @@ module FastlaneCI
           use_global_git_mutex: false
         )
       else
-        repo.reset_hard!
         logger.debug("Pulling `master` in checkout_sha")
         repo.pull
       end
@@ -221,14 +220,8 @@ module FastlaneCI
       environment_variables_set << key
     end
 
-    def reset_repo_state
-      # When we're done, clean up by resetting
-      repo.reset_hard!
-    end
-
     def post_run_action
       logger.debug("Finished running #{project.project_name} for #{sha}")
-      reset_repo_state
 
       unset_build_specific_environment_variables
     end
@@ -283,8 +276,16 @@ module FastlaneCI
       else
         # No work queue? Just call the block then
         logger.debug("Not using a workqueue for build runner #{self.class}, this is probably a bug")
-        work_block.call
-        post_run_block.call
+
+        begin
+          work_block.call
+        rescue StandardError => ex
+          logger.error(ex)
+        ensure
+          # this is already called in an ensure block if we're using a workqueue to execute it
+          # so no need to wrap the task queue's version of `post_run_block`
+          post_run_block.call
+        end
       end
     end
 

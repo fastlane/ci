@@ -1,16 +1,15 @@
 import 'rxjs/add/observable/of';
 
 import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
-import {MatCardModule} from '@angular/material/card';
-import {MatIconModule} from '@angular/material/icon';
-import {MatTableModule} from '@angular/material/table';
+import {RouterModule} from '@angular/router';
+import {MomentModule} from 'ngx-moment';
 import {Observable} from 'rxjs/Observable';
 import {Subject} from 'rxjs/Subject';
 
 import {BuildStatus} from '../common/constants';
-import {asyncData} from '../common/testing/async_observable_helpers';
 import {ProjectSummary} from '../models/project_summary';
 import {DataService} from '../services/data.service';
+import {SharedMaterialModule} from '../shared_material.module';
 
 import {DashboardComponent} from './dashboard.component';
 import {mockProjectSummaryList} from './test_helpers/mock_project_summary';
@@ -25,7 +24,7 @@ describe('DashboardComponent', () => {
 
     TestBed
         .configureTestingModule({
-          imports: [MatIconModule, MatCardModule, MatTableModule],
+          imports: [SharedMaterialModule, MomentModule, RouterModule],
           declarations: [
             DashboardComponent,
           ],
@@ -39,7 +38,7 @@ describe('DashboardComponent', () => {
 
   it('should load project summaries', () => {
     const subject = new Subject<ProjectSummary[]>();
-    dataService.getProjects.and.returnValue(subject.asObservable())
+    dataService.getProjects.and.returnValue(subject.asObservable());
 
     expect(component.isLoading).toBe(true);
 
@@ -47,10 +46,12 @@ describe('DashboardComponent', () => {
     subject.next(mockProjectSummaryList);  // Resolve observable
 
     expect(component.isLoading).toBe(false);
-    expect(component.projects.length).toBe(3);
+    expect(component.projects.length).toBe(4);
     expect(component.projects[0].id).toBe('1');
     expect(component.projects[0].name).toBe('the coolest project');
     expect(component.projects[1].latestStatus).toBe(BuildStatus.SUCCESS);
     expect(component.projects[2].statusIcon).toBe('error');
+    expect(component.projects[3].latestDate).toBeUndefined();
+    expect(component.projects[3].statusIcon).toBe('pause_circle_filled');
   });
 });

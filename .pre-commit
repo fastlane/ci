@@ -7,13 +7,25 @@ changed_files = `git status --porcelain`
                 .split(/\n/)
                 .select { |file_name_with_status| file_name_with_status =~ ADDED_OR_MODIFIED }
                 .map { |file_name_with_status| file_name_with_status.split(" ")[1] }
-                .select { |file_name| File.extname(file_name) == ".rb" or OTHER_RUBY_FILES.include?(file_name) }
-                .join(" ")
+changed_ruby_files = changed_files
+                     .select { |file_name| File.extname(file_name) == ".rb" or OTHER_RUBY_FILES.include?(file_name) }
+                     .join(" ")
+changed_typescript_files = changed_files
+                           .select { |file_name| File.extname(file_name) == ".ts" }
+                           .join(" ")
 
 exit(0) if changed_files.empty?
 
-exit(0) if system("rubocop #{changed_files}")
+unless changed_ruby_files.empty? or system("rubocop #{changed_ruby_files}")
+  puts("\n\n💥 Fix ruby linting errors with `rubocop -a` and stage changed,"\
+       " or bypass hook with `git commit --no-verify`")
+  exit($?.exitstatus)
+end
 
-puts("\n\n💥 Fix linting errors with `rubocop -a` and stage changed, or bypass hook with `git commit --no-verify`")
+unless changed_typescript_files.empty? or system("npm run lint")
+  puts("\n\n💥 Fix js linting errors with `npm run lintfix` and stage changed,"\
+       " or bypass hook with `git commit --no-verify`")
+  exit($?.exitstatus)
+end
 
-exit($?.exitstatus)
+exit(0)

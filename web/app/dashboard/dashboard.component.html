@@ -11,7 +11,8 @@
 <div fci-grid>
   <div fci-cell="12">
     <mat-card class="fci-project-table">
-      <mat-table [dataSource]="projects">
+      <mat-progress-spinner mode="indeterminate" *ngIf="isLoading" class="fci-loading-spinner" diameter="30"></mat-progress-spinner>
+      <mat-table *ngIf="!isLoading" [dataSource]="projects">
         <!-- Name Column -->
         <ng-container matColumnDef="name">
           <mat-header-cell *matHeaderCellDef> Project Name </mat-header-cell>
@@ -24,8 +25,7 @@
         <!-- Latest Build Column -->
         <ng-container matColumnDef="latestBuild">
           <mat-header-cell *matHeaderCellDef>Latest Build</mat-header-cell>
-          <!-- TODO: Pipe this into a relative time pipe -->
-          <mat-cell *matCellDef="let project">{{project.latestDate | date: 'fullDate'}}</mat-cell>
+          <mat-cell *matCellDef="let project">{{project.latestDate ? (project.latestDate | amTimeAgo) : "-" }}</mat-cell>
         </ng-container>
 
         <!-- TODO: Add Repo Column -->
@@ -37,7 +37,7 @@
         </ng-container>
 
         <mat-header-row *matHeaderRowDef="DISPLAYED_COLUMNS"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: DISPLAYED_COLUMNS;"></mat-row>
+        <mat-row *matRowDef="let row; columns: DISPLAYED_COLUMNS; let project" [routerLink]="['/project', project.id]"></mat-row>
       </mat-table>
     </mat-card>
   </div>

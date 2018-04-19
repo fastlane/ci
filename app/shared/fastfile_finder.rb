@@ -14,27 +14,34 @@ module FastlaneCI
 
     # if you're using this with the fastfile parser, you need to use `relative: false`
     def self.search_path(path:, relative_path: false)
-      # First assume the fastlane directory and its file is in the root of the project
-      fastfiles = Dir.glob(File.join(path, "fastlane/Fastfile"), File::FNM_CASEFOLD)
-      # If not, it might be in a subfolder
-      fastfiles = Dir.glob(File.join(path, "**/fastlane/Fastfile"), File::FNM_CASEFOLD) if fastfiles.count == 0
+      # fetch recursively for a Fastfile
+      fastfiles = Dir.glob(File.join(path, "**/Fastfile"), File::FNM_CASEFOLD)
+
+      if fastfiles.count == 0
+        directory_contents = Dir[File.expand_path(path)].join("\n")
+        logger.error("No Fastfile found at #{path}/fastlane/Fastfile, or any descendants")
+        logger.error("Directory contents: #{directory_contents}")
+        return nil
+      end
 
       if fastfiles.count > 1
         logger.error("Ugh, multiple Fastfiles found, we're gonna have to build a selection in the future")
         # for now, just take the first one
       end
 
-      if fastfiles.count == 0
-        directory_contents = Dir[File.expand_path(path)].join("\n")
-        logger.error("No Fastfile found at #{path}/fastlane/Fastfile, or any descendants")
-        logger.error("Directory contents: #{directory_contents}")
-      else
-        fastfile_path = fastfiles.first
-        if relative_path
-          fastfile_path = Pathname.new(fastfile_path).relative_path_from(Pathname.new(path))
-        end
+      # return the Fastfile at path/fastlane/Fastfile if present, otherwise the first one found
+      fastfile_path = FastfileFinder.find_prioritary_fastfile_path(paths: fastfiles, path: path)
+      if relative_path
+        fastfile_path = Pathname.new(fastfile_path).relative_path_from(Pathname.new(path))
       end
       return fastfile_path
+    end
+
+    def self.find_prioritary_fastfile_path(paths:, path: nil)
+      path = path.nil? ? "" : "#{path}/"
+      paths = paths.select { |current| current.downcase.end_with?("/fastfile") || current.casecmp("fastfile").zero? }
+      return paths
+             .find { |current| current.downcase == "#{path}fastlane/fastfile" } || paths.first
     end
   end
 end

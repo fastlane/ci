@@ -10,3 +10,15 @@ lane :rubocop do
   sh("cd ..;bundle install")
   sh("cd ..;bundle exec rubocop")
 end
+
+lane :tslint do
+  desc "TSLint the whole project to ensure no style violations"
+  sh("cd ..;npm install")
+  sh("cd ..;npm run lint")
+end
+
+lane :web_tests do
+  desc "Unit tests for the web app"
+  sh("cd ..;npm install")
+  sh("cd ..;npm run test")
+end

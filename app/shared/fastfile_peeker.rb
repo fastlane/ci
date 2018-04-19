@@ -17,6 +17,18 @@ module FastlaneCI
       @client = Octokit::Client.new(access_token: @provider_credential.api_token)
     end
 
+    def fastfile(repo_config:, sha_or_branch:)
+      fastfile_parser = fastfile_from_github(
+        repo_full_name: repo_config.full_name,
+        sha_or_branch: sha_or_branch
+      )
+      if fastfile_parser.nil?
+        logger.debug("Checking out repo and searching for fastfile in #{repo_config.full_name}")
+        fastfile_parser = fastfile_from_repo(repo_config: repo_config, branch: sha_or_branch)
+      end
+      return fastfile_parser
+    end
+
     # For a given repo, and some state associated with it (a branch or a commit sha) retrieve the FastfileParser
     # instance and return it.
     # @param [GitRepo] git_repo
@@ -52,6 +64,8 @@ module FastlaneCI
       end
     end
 
+    private
+
     def fastfile_from_contents_map(contents_map)
       github_action(@client) do |_client|
         return nil if contents_map.nil?
@@ -64,11 +78,23 @@ module FastlaneCI
       end
     end
 
+    def remote_paths(repo_full_name:, sha_or_branch:)
+      github_action(@client) do
+        begin
+          logger.debug("Checking for fastfile in #{repo_full_name}")
+          result = @client.tree(repo_full_name, sha_or_branch, { recursive: true })
+          return result[:tree].map { |resource| resource[:path] } || []
+        rescue Octokit::NotFound
+          return []
+        end
+      end
+    end
+
     def remote_file_contents_map(repo_full_name: nil, sha_or_branch:, path:)
       github_action(@client) do |client|
         begin
           logger.debug("Checking for fastfile in #{repo_full_name}/fastlane/Fastfile")
-          contents_map = client.contents(repo_full_name, path: "fastlane/Fastfile", ref: sha_or_branch)
+          contents_map = client.contents(repo_full_name, path: path, ref: sha_or_branch)
           return contents_map
         rescue Octokit::NotFound
           return nil
@@ -77,28 +103,16 @@ module FastlaneCI
     end
 
     def fastfile_from_github(repo_full_name: nil, sha_or_branch:)
-      path = "fastlane/Fastfile"
-      logger.debug("Checking GitHub repo for fastfile in #{repo_full_name}/#{path}")
+      paths = remote_paths(repo_full_name: repo_full_name, sha_or_branch: sha_or_branch)
+
+      fastfile_path = FastfileFinder.find_prioritary_fastfile_path(paths: paths)
+
       contents_map = remote_file_contents_map(
         repo_full_name: repo_full_name,
         sha_or_branch: sha_or_branch,
-        path: path
+        path: fastfile_path
       )
-      if contents_map.nil?
-        path = "Fastlane/Fastfile"
-        logger.debug("fastfile not at default path, checking for fastfile in #{repo_full_name}/#{path}")
-        contents_map = remote_file_contents_map(
-          repo_full_name: repo_full_name,
-          sha_or_branch: sha_or_branch,
-          path: path
-        )
-      end
-
       contents = fastfile_from_contents_map(contents_map)
-      if contents.nil?
-        logger.debug("Checking out repo and searching for fastfile in #{repo_full_name}")
-        return nil
-      end
 
       return Fastlane::FastfileParser.new(file_content: contents)
     end
