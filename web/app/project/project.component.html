@@ -12,7 +12,7 @@
         <ng-container matColumnDef="number">
           <mat-header-cell *matHeaderCellDef> Build </mat-header-cell>
           <mat-cell *matCellDef="let build">
-            <mat-icon>{{build.statusIcon}}</mat-icon>
+            <fci-status-icon [status]="build.status"></fci-status-icon>
             <span>{{build.number}}</span>
           </mat-cell>
         </ng-container>

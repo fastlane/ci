@@ -6,6 +6,7 @@ import {MomentModule} from 'ngx-moment';
 import {Observable} from 'rxjs/Observable';
 import {Subject} from 'rxjs/Subject';
 
+import {CommonComponentsModule} from '../common/components/common-components.module';
 import {Project} from '../models/project';
 import {DataService} from '../services/data.service';
 import {SharedMaterialModule} from '../shared_material.module';
@@ -23,7 +24,7 @@ describe('ProjectComponent', () => {
 
     TestBed
         .configureTestingModule({
-          imports: [SharedMaterialModule, MomentModule],
+          imports: [CommonComponentsModule, SharedMaterialModule, MomentModule],
           declarations: [
             ProjectComponent,
           ],

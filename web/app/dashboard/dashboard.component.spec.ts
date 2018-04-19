@@ -6,6 +6,7 @@ import {MomentModule} from 'ngx-moment';
 import {Observable} from 'rxjs/Observable';
 import {Subject} from 'rxjs/Subject';
 
+import {CommonComponentsModule} from '../common/components/common-components.module';
 import {BuildStatus} from '../common/constants';
 import {ProjectSummary} from '../models/project_summary';
 import {DataService} from '../services/data.service';
@@ -24,7 +25,10 @@ describe('DashboardComponent', () => {
 
     TestBed
         .configureTestingModule({
-          imports: [SharedMaterialModule, MomentModule, RouterModule],
+          imports: [
+            SharedMaterialModule, CommonComponentsModule, MomentModule,
+            RouterModule
+          ],
           declarations: [
             DashboardComponent,
           ],
@@ -50,8 +54,8 @@ describe('DashboardComponent', () => {
     expect(component.projects[0].id).toBe('1');
     expect(component.projects[0].name).toBe('the coolest project');
     expect(component.projects[1].latestStatus).toBe(BuildStatus.SUCCESS);
-    expect(component.projects[2].statusIcon).toBe('error');
+    expect(component.projects[2].latestStatus).toBe(BuildStatus.FAILED);
     expect(component.projects[3].latestDate).toBeUndefined();
-    expect(component.projects[3].statusIcon).toBe('pause_circle_filled');
+    expect(component.projects[3].latestStatus).toBeUndefined();
   });
 });

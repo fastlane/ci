@@ -30,6 +30,13 @@
         &:hover {
             background-color: #F3E5F5
         }
+        .mat-cell {
+            align-items: center;
+            display: flex;
+            .fci-status-icon {
+                margin-right: 8px;
+            }
+        }
     }
 }
 
