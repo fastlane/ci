@@ -44,8 +44,8 @@ module FastlaneCI
       scopes = []
 
       client = Octokit::Client.new(access_token: token)
-      github_action(client) do
-        scopes = client.scopes
+      github_action(client) do |c|
+        scopes = c.scopes
       end
 
       if scopes.include?(required)
@@ -73,8 +73,8 @@ module FastlaneCI
     # branches should be nil if you want all branches to be considered
     def open_pull_requests(repo_full_name: nil, branches: nil)
       all_open_pull_requests = []
-      github_action(client) do
-        all_open_pull_requests = client.pull_requests(repo_full_name, state: "open").map do |pr|
+      github_action(client) do |c|
+        all_open_pull_requests = c.pull_requests(repo_full_name, state: "open").map do |pr|
           # This can happen, not sure why, seems to do with other people's forks, maybe they don't exist?
           next if pr.head.repo.nil?
 
@@ -109,8 +109,8 @@ module FastlaneCI
     def statuses_for_commit_sha(repo_full_name: nil, sha: nil)
       all_statuses = []
 
-      github_action(client) do
-        all_statuses = client.statuses(repo_full_name, sha)
+      github_action(client) do |c|
+        all_statuses = c.statuses(repo_full_name, sha)
       end
 
       only_ci_statuses = all_statuses.select do |status|
@@ -153,30 +153,30 @@ module FastlaneCI
     end
 
     def recent_commits(repo_full_name:, branch:, since_time_utc:)
-      github_action(client) do
-        next client.commits_since(repo_full_name, since_time_utc, branch)
+      github_action(client) do |c|
+        next c.commits_since(repo_full_name, since_time_utc, branch)
       end
     end
 
     # TODO: parse those here or in service layer?
     def repos
-      github_action(client) do
-        next client.repos({}, query: { sort: "asc" })
+      github_action(client) do |c|
+        next c.repos({}, query: { sort: "asc" })
       end
     end
 
     # @return [Array<String>] names of the branches for the given repo
     def branch_names(repo:)
-      github_action(client) do
-        next client.branches(repo).map(&:name)
+      github_action(client) do |c|
+        next c.branches(repo).map(&:name)
       end
     end
 
     # Does the client with the associated credentials have access to the specified repo?
     # @repo [String] Repo URL as string
     def access_to_repo?(repo_url: nil)
-      github_action(client) do
-        next client.repository?(repo_url.sub("https://github.com/", ""))
+      github_action(client) do |c|
+        next c.repository?(repo_url.sub("https://github.com/", ""))
       end
     end
 
@@ -213,8 +213,8 @@ module FastlaneCI
       if remote_status_updates_disabled?
         logger.debug("Remote status updates are disabled, remote build status not updated.")
       else
-        github_action(client) do
-          client.create_status(repo, sha, state, {
+        github_action(client) do |c|
+          c.create_status(repo, sha, state, {
             target_url: target_url,
             description: description,
             context: status_context

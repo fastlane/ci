@@ -1,0 +1,66 @@
+<form id="initial_onboarding_user" method="POST" action="/onboarding_erb/initial_onboarding_user">
+  <h4>3. Initial Onboarding User</h4>
+
+  <p>
+    To properly create the configuration repository, <code>fastlane.ci</code>
+    requires the <code>FASTLANE_CI_INITIAL_ONBOARDING_USER_API_TOKEN</code>
+    environment variable. The user associated with this API token will create
+    the private GitHub <code>fastlane.ci</code> configuration repository, and
+    invite the GitHub bot user account to the subsequent repository created.
+  </p>
+
+  <p>
+    <b>NOTE:</b> If you're creating the private <code>fastlane.ci</code>
+    configuration repository under a GitHub organization, the user associated to
+    the API token must have sufficient permissions to create a private
+    repository for the organization.
+  </p>
+
+  <p>
+    Please follow the steps below to complete your <code>fastlane.ci</code>
+    cofiguration:
+  </p>
+
+  <ol>
+    <li>
+      Create a personal access token <a href="https://github.com/settings/tokens/new">
+      on GitHub</a> with all <code>repo</code> permissions, and the
+      <code>user:email</code> permission.
+    </li>
+
+    <img src="../images/github_access_token_repos.png" width="60%">
+    <img src="../images/github_access_token_user_email.png" width="65%">
+
+    <li>Enter the API token you created below:</li>
+
+    <div class="mdl-textfield mdl-js-textfield">
+      <label for="input"><code>FASTLANE_CI_INITIAL_ONBOARDING_USER_API_TOKEN</code></label>
+      <input
+        id="initial_onboarding_user_api_token"
+        class="mdl-textfield__input"
+        type="password"
+        name="initial_onboarding_user_api_token"
+        value="<%= keys[:initial_onboarding_user_api_token] %>"
+        maxlength="40"
+        minlength="40"
+        placeholder="The API token for your GitHub account"
+      />
+    </div>
+  </ol>
+
+  <input
+    class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+    type="submit"
+    value="Save configuration account information"
+  >
+</form>
+
+<!-- Progress to the next page -->
+<form method="GET" action="/onboarding_erb/git_repo">
+  <input
+    class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+    type="submit"
+    value="Next"
+    <%= "disabled" unless @progress %>
+  >
+</form>

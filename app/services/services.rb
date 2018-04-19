@@ -30,6 +30,8 @@ module FastlaneCI
       @_configuration_git_repo = nil
       @_ci_user = nil
       @_provider_credential = nil
+      @_bot_user_client = nil
+      @_onboarding_user_client = nil
 
       # Reset services
       @_project_service = nil
@@ -80,13 +82,11 @@ module FastlaneCI
     def self.ci_user
       # Find our fastlane.ci system user
       @_ci_user ||= Services.user_service.login(
-        email: FastlaneCI.env.ci_user_email,
+        email: bot_user_client.emails.find(&:primary).email,
         password: FastlaneCI.env.ci_user_password
       )
       if @_ci_user.nil?
-        # rubocop:disable Metrics/LineLength
-        raise "Could not find ci_user for current setup, or the provided ci_user_password is incorrect, please make sure a user with the email #{FastlaneCI.env.ci_user_email} exists in your users.json"
-        # rubocop:enable Metrics/LineLength
+        raise "Could not find ci_user for current setup, or the provided ci_user_password is incorrect."
       end
       return @_ci_user
     end
@@ -103,8 +103,8 @@ module FastlaneCI
     # @return [GitHubProviderCredential]
     def self.provider_credential
       @_provider_credential ||= GitHubProviderCredential.new(
-        email: FastlaneCI.env.initial_clone_email,
-        api_token: FastlaneCI.env.clone_user_api_token
+        email: onboarding_user_client.emails.find(&:primary).email,
+        api_token: FastlaneCI.env.initial_onboarding_user_api_token
       )
     end
 
@@ -184,6 +184,14 @@ module FastlaneCI
 
     def self.onboarding_service
       @_onboarding_service ||= FastlaneCI::OnboardingService.new
+    end
+
+    def self.bot_user_client
+      @_bot_user_client ||= Octokit::Client.new(access_token: FastlaneCI.env.ci_user_api_token)
+    end
+
+    def self.onboarding_user_client
+      @_onboarding_user_client ||= Octokit::Client.new(access_token: FastlaneCI.env.initial_onboarding_user_api_token)
     end
   end
 end

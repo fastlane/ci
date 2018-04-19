@@ -8,55 +8,41 @@
   <%= erb :"../../global/navigation" %>
 
   <main class="mdl-layout__content" style="padding: 40px">
-    <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="width: 100%">
-      <div class="mdl-card__title">
-        <h2 class="mdl-card__title-text">
-          Welcome to fastlane.ci 👋!
-        </h2>
-      </div>
+    <div class="mdl-card__title">
+      <h2 class="mdl-card__title-text">
+        Welcome to fastlane.ci 👋!
+      </h2>
+    </div>
 
-      <div class="mdl-card__supporting-text">
-        <p>
-          <code>fastlane.ci</code> requires a few configuration values from you
-          to properly run the server.
-        </p>
+    <div class="mdl-card__actions mdl-card--border">
+      <p>
+        <code>fastlane.ci</code> requires a few configuration values from you
+        to properly run the server.
+      </p>
 
-        The following items need to be addressed before you may properly run the
-        server:
-      </div>
+      <p>The following values need to be inputted to properly run the server:</p>
 
-      <div class="mdl-card__actions mdl-card--border">
-        <ul>
-          <% if !has_encryption_key? %>
-            <li>
-              You are missing the <code>FASTLANE_CI_ENCRYPTION_KEY</code>
-              environment variable.
-            </li>
-          <% end %>
+      <ul>
+        <% if !has_encryption_key? %>
+          <li><code>FASTLANE_CI_ENCRYPTION_KEY</code></li>
+        <% end %>
 
-          <% if !has_ci_user? %>
-            <li>
-              You are missing the <code>FASTLANE_CI_USER</code> and/or
-              <code>FASTLANE_CI_PASSWORD</code> environment variables.
-            </li>
-          <% end %>
+        <% if !has_ci_user_api_token? %>
+          <li><code>FASTLANE_CI_BOT_API_TOKEN</code></li>
+        <% end %>
 
-          <% if !has_clone_user? %>
-            <li>
-              You are missing the <code>FASTLANE_CI_INITIAL_CLONE_EMAIL</code>
-              and/or <code>FASTLANE_CI_INITIAL_CLONE_API_TOKEN</code> environment
-              variables.
-            </li>
-          <% end %>
+        <% if !has_ci_user_password? %>
+          <li><code>FASTLANE_CI_PASSWORD</code></li>
+        <% end %>
 
-          <% if !has_remote_github_repo? %>
-            <li>
-              You are missing the <code>FASTLANE_CI_REPO_URL</code> and/or you
-              didn't submit the form to create the remote repository
-            </li>
-          <% end %>
-        </ul>
-      </div>
+        <% if !has_initial_onboarding_user_api_token? %>
+          <li><code>FASTLANE_CI_INITIAL_ONBOARDING_USER_API_TOKEN</code></li>
+        <% end %>
+
+        <% if !has_remote_github_repo? %>
+          <li><code>FASTLANE_CI_REPO_URL</code></li>
+        <% end %>
+      </ul>
     </div>
 
     <a href="/onboarding_erb/encryption_key" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">

@@ -57,7 +57,7 @@ module FastlaneCI
         end
       end
       begin
-        return block.call
+        return block.call(client)
       rescue Octokit::ServerError => ex
         if (retry_count += 1) < 5
           # exponential backoff

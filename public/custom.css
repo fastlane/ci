@@ -1,0 +1,26 @@
+@import url('//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
+
+.flash_success, .flash_warning, .flash_error {
+    padding: 12px;
+}
+
+.flash_success {
+    color: #4F8A10;
+    background-color: #DFF2BF;
+}
+
+.flash_warning {
+    color: #9F6000;
+    background-color: #FEEFB3;
+}
+
+.flash_error {
+    color: #D8000C;
+    background-color: #FFD2D2;
+}
+
+.flash_success i, .flash_warning i, .flash_error i {
+    margin: 10px 30px;
+    font-size: 2em;
+    vertical-align: middle;
+}

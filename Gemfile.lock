@@ -246,6 +246,8 @@ GEM
       rack-protection (= 2.0.1)
       sinatra (= 2.0.1)
       tilt (>= 1.3, < 3)
+    sinatra-flash (0.3.0)
+      sinatra (>= 1.0.0)
     slack-notifier (2.3.2)
     term-ansicolor (1.6.0)
       tins (~> 1.0)
@@ -321,6 +323,7 @@ DEPENDENCIES
   rufus-scheduler
   sinatra (>= 2.0.1, < 3.0.0)
   sinatra-contrib (>= 2.0.0, < 3.0.0)
+  sinatra-flash
   taskqueue!
   thin (>= 1.7.2, < 2.0.0)
   tty-command (>= 0.7.0, < 1.0.0)
