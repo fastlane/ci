@@ -53,7 +53,7 @@ module FastlaneCI
     end
 
     def fastfile_from_contents_map(contents_map)
-      github_action(@client) do
+      github_action(@client) do |_client|
         return nil if contents_map.nil?
 
         if contents_map
@@ -65,10 +65,10 @@ module FastlaneCI
     end
 
     def remote_file_contents_map(repo_full_name: nil, sha_or_branch:, path:)
-      github_action(@client) do
+      github_action(@client) do |client|
         begin
           logger.debug("Checking for fastfile in #{repo_full_name}/fastlane/Fastfile")
-          contents_map = @client.contents(repo_full_name, path: "fastlane/Fastfile", ref: sha_or_branch)
+          contents_map = client.contents(repo_full_name, path: "fastlane/Fastfile", ref: sha_or_branch)
           return contents_map
         rescue Octokit::NotFound
           return nil

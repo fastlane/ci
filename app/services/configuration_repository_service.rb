@@ -75,8 +75,8 @@ module FastlaneCI
       # Return cached true value, if it was successful, otherwise keep checking because it might have been fixed
       return @config_repo_exists unless @config_repo_exists.nil? || (@config_repo_exists == false)
 
-      github_action(onboarding_user_client) do
-        @config_repo_exists = onboarding_user_client.repository?(repo_shortform)
+      github_action(onboarding_user_client) do |client|
+        @config_repo_exists = client.repository?(repo_shortform)
       end
 
       return @config_repo_exists
@@ -89,9 +89,9 @@ module FastlaneCI
     def create_private_remote_configuration_repo
       logger.debug("Creating private remote configuration repository #{repo_shortform}.")
 
-      github_action(onboarding_user_client) do
+      github_action(onboarding_user_client) do |client|
         # TODO: Handle the common case of when provided account can't create a new private repo
-        onboarding_user_client.create_repository(repo_name, private: true) unless configuration_repository_exists?
+        client.create_repository(repo_name, private: true) unless configuration_repository_exists?
       end
     end
 
@@ -100,9 +100,11 @@ module FastlaneCI
     #
     # @return [Boolean] If the user was added successfully
     def add_bot_user_as_collaborator
-      github_action(onboarding_user_client) do
+      already_exists = github_action(onboarding_user_client) { |c| c.collaborator?(repo_shortform, bot_user_login) }
+
+      if already_exists
         logger.debug("Bot user is already a collaborator to #{repo_shortform}, not adding as collaborator.")
-        return true if onboarding_user_client.collaborator?(repo_shortform, bot_user_login)
+        return true
       end
 
       logger.debug("Adding bot user as collaborator to #{repo_shortform}.")
@@ -131,15 +133,15 @@ module FastlaneCI
     def invite_bot_user_to_configuration_repository
       logger.debug("Adding the bot user as a collaborator for #{repo_shortform}.")
 
-      github_action(onboarding_user_client) do
-        invitation = onboarding_user_client.invite_user_to_repository(repo_shortform, bot_user_login)
+      return github_action(onboarding_user_client) do |client|
+        invitation = client.invite_user_to_repository(repo_shortform, bot_user_login)
 
         if invitation
           logger.debug("Added bot user as collaborator for #{repo_shortform}.")
-          return invitation.id
+          invitation.id
         else
           logger.error("ERROR: Couldn't add bot user as collaborator for #{repo_shortform}.")
-          return nil
+          nil
         end
       end
     end
@@ -151,8 +153,8 @@ module FastlaneCI
     def accept_invitation_to_repository_as_bot_user(invitation_id)
       logger.debug("Accepting invitation as bot user for #{repo_shortform}.")
 
-      github_action(bot_user_client) do
-        bot_accepted = bot_user_client.accept_repository_invitation(invitation_id)
+      return github_action(bot_user_client) do |client|
+        bot_accepted = client.accept_repository_invitation(invitation_id)
 
         if bot_accepted
           logger.debug("Bot user accepted invitation to #{repo_shortform}.")
@@ -160,7 +162,7 @@ module FastlaneCI
           logger.error("ERROR: Bot user didn't accept invitation to #{repo_shortform}.")
         end
 
-        return bot_accepted
+        bot_accepted
       end
     end
 
@@ -207,8 +209,8 @@ module FastlaneCI
     # @raise  [Octokit::UnprocessableEntity] when file already exists
     # @param  [String] file_path
     def create_remote_json_file(file_path, json_string: "[]")
-      github_action(bot_user_client) do
-        bot_user_client.contents(repo_shortform, path: file_path)
+      github_action(bot_user_client) do |client|
+        client.contents(repo_shortform, path: file_path)
       end
     rescue Octokit::NotFound
       bot_user_client.create_contents(
@@ -236,8 +238,8 @@ module FastlaneCI
       logger.debug("Checking that #{repo_shortform}/#{file_path} is a json array")
 
       contents_map = {}
-      github_action(bot_user_client) do
-        contents_map = bot_user_client.contents(repo_shortform, path: file_path)
+      github_action(bot_user_client) do |client|
+        contents_map = client.contents(repo_shortform, path: file_path)
       end
       contents_json =
         contents_map[:encoding] == "base64" ? Base64.decode64(contents_map[:content]) : contents_map[:content]
@@ -267,17 +269,15 @@ module FastlaneCI
     #
     # @return [String]
     def bot_user_login
-      github_action(bot_user_client) do
-        return bot_user_client.login
-      end
+      return github_action(bot_user_client, &:login)
     end
 
     # The email of the fastlane.ci bot account
     #
     # @return [String]
     def bot_user_email
-      github_action(bot_user_client) do
-        return bot_user_client.emails.find(&:primary).email
+      return github_action(bot_user_client) do |client|
+        client.emails.find(&:primary).email
       end
     end
 
@@ -285,8 +285,8 @@ module FastlaneCI
     #
     # @return [String]
     def initial_onboarding_user_email
-      github_action(onboarding_user_client) do
-        return onboarding_user_client.emails.find(&:primary).email
+      return github_action(onboarding_user_client) do |client|
+        client.emails.find(&:primary).email
       end
     end
 
