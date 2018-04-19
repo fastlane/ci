@@ -6,11 +6,12 @@ describe FastlaneCI::ConfigurationRepositoryService do
   let(:bot_client) { double("Bot Client", login: true) }
   let(:invitation) { double("Invitation", id: "12345678") }
   let(:service) do
-    service = FastlaneCI::ConfigurationRepositoryService.new(double("Credentials", api_token: "abc123"))
-    service.onboarding_user_client = user_client
-    service.bot_user_client = bot_client
+    FastlaneCI::ConfigurationRepositoryService.new(double("Credentials", api_token: "abc123"))
+  end
 
-    service
+  before do
+    allow(service).to receive(:onboarding_user_client).and_return(user_client)
+    allow(service).to receive(:bot_user_client).and_return(bot_client)
   end
 
   describe "#setup_private_configuration_repo" do

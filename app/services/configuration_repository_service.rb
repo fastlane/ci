@@ -12,12 +12,12 @@ module FastlaneCI
     # An octokit client authenticated with the onboarding user's API token
     #
     # @return [Octokit::Client]
-    attr_accessor :onboarding_user_client
+    attr_reader :onboarding_user_client
 
     # An octokit client authenticated with the bot user's API token
     #
     # @return [Octokit::Client]
-    attr_accessor :bot_user_client
+    attr_reader :bot_user_client
 
     # Instantiates new `ConfigurationRepositoryService` class
     #
