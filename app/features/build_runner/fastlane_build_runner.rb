@@ -107,23 +107,74 @@ module FastlaneCI
           if gemfile_found
             begin
               # Reset the bundler scope to the Project's Gemfile.
-              Bundler.reset!
+              gemfile_dir = Dir[File.join(Dir.pwd, "**", "Gemfile")].first
+              Bundler::SharedHelpers.set_env("BUNDLE_GEMFILE", gemfile_dir)
 
-              options = {}
-              options[:local] = true if Bundler.app_cache.exist?
+              old_root = Bundler.method(:root)
+              # rubocop:disable Lint/NestedMethodDefinition
+              def Bundler.root
+                Bundler::SharedHelpers.pwd.expand_path
+              end
+              # rubocop:enable Lint/NestedMethodDefinition
 
-              Bundler::Plugin.gemfile_install(Bundler.default_gemfile) if Bundler.feature_flag.plugins?
+              Bundler::Plugin.gemfile_install(gemfile_dir) if Bundler.feature_flag.plugins?
+              builder = Bundler::Dsl.new
+              builder.eval_gemfile(gemfile_dir)
 
-              definition = Bundler.definition
+              definition = builder.to_definition(nil, true)
+              def definition.lock(*); end
               definition.validate_runtime!
 
-              Bundler::Installer.install(Bundler.root, definition, options)
-              Bundler.load.cache if Bundler.app_cache.exist? && !Bundler.frozen_bundle?
+              installer = Bundler::Installer.new(Bundler.root, definition)
+
+              missing_specs = proc do
+                definition.missing_specs?
+              end
+
+              options = {}
+              options[:no_install] = false
+              options[:force] = true
+
+              Bundler.load.specs.each do |spec|
+                next if spec.name == "bundler" # Source::Rubygems doesn't install bundler
+                next if !@gems.empty? && !@gems.include?(spec.name)
+        
+                gem_name = "#{spec.name} (#{spec.version}#{spec.git_version})"
+                gem_name += " (#{spec.platform})" if !spec.platform.nil? && spec.platform != Gem::Platform::RUBY
+        
+                case source = spec.source
+                when Source::Rubygems
+                  cached_gem = spec.cache_file
+                  unless File.exist?(cached_gem)
+                    Bundler.ui.error("Failed to pristine #{gem_name}. Cached gem #{cached_gem} does not exist.")
+                    next
+                  end
+        
+                  FileUtils.rm_rf spec.full_gem_path
+                when Source::Git
+                  source.remote!
+                  if extension_cache_path = source.extension_cache_path(spec)
+                    FileUtils.rm_rf extension_cache_path
+                  end
+                  FileUtils.rm_rf spec.extension_dir
+                  FileUtils.rm_rf spec.full_gem_path
+                else
+                  Bundler.ui.warn("Cannot pristine #{gem_name}. Gem is sourced from local path.")
+                  next
+                end
+        
+                Bundler::GemInstaller.new(spec, installer, false, 0, true).install_from_spec
+              end
+
+              require "pry"
+              binding.pry
+
               # rubocop:disable Metrics/LineLength
               logger.info("Bundle complete! #{definition.dependencies.count} Gemfile dependencies, installed #{definition.specs.count} gems.")
               # rubocop:enable Metrics/LineLength
+              runtime = Bundler::Runtime.new(nil, definition)
               Bundler::SharedHelpers.set_bundle_environment
-
+              runtime.setup.require
               not_installed = definition.missing_specs
               if not_installed.any?
                 logger.error("The following gems are missing")
@@ -131,9 +182,14 @@ module FastlaneCI
               end
             rescue Bundler::GemfileNotFound => ex
               logger.info(ex)
+            rescue Gem::LoadError => ex
+              logger.error(ex)
             rescue StandardError => ex
               logger.error(ex)
               logger.error(ex.backtrace)
+            ensure
+              bundler_module = class << Bundler; self; end
+              bundler_module.send(:define_method, :root, old_root) if old_root
             end
           end
 
