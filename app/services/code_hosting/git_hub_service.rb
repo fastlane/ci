@@ -82,6 +82,7 @@ module FastlaneCI
             current_sha: pr.head.sha,
             branch: pr.head.ref,
             repo_full_name: pr.head.repo.full_name,
+            number: pr.number,
             clone_url: pr.head.repo.clone_url
           )
         end

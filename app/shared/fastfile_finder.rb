@@ -38,7 +38,7 @@ module FastlaneCI
     end
 
     def self.find_prioritary_fastfile_path(paths:, path: nil)
-      path = path.nil? ? "" : "#{path}/"
+      path = path.nil? ? "" : "#{path}/".downcase
       paths = paths.select { |current| current.downcase.end_with?("/fastfile") || current.casecmp("fastfile").zero? }
       return paths
              .find { |current| current.downcase == "#{path}fastlane/fastfile" } || paths.first

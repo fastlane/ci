@@ -17,9 +17,6 @@ gem "tty-command", ">= 0.7.0", "< 1.0.0"
 # Communication with GitHub
 gem "octokit", ">= 4.8.0", "< 5.0.0"
 
-# Local git checkouts, commits, etc.
-gem "git", ">= 1.3.0", "< 2.0.0"
-
 gem "dotenv", ">= 2.2.1", "< 3.0.0"
 
 # Caching for octokit operations
@@ -44,6 +41,7 @@ gem "bundler", "~> 1.16.0"
 # 	we shipped a new release
 gem "fastfile-parser", git: "https://github.com/fastlane/fastfile-parser", require: false
 gem "fastlane", git: "https://github.com/fastlane/fastlane"
+gem "git", git: "https://github.com/fastlane/ruby-git", require: false
 gem "taskqueue", git: "https://github.com/fastlane/TaskQueue", require: false
 
 group :test, :development do

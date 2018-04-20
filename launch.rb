@@ -238,7 +238,8 @@ module FastlaneCI
             git_fork_config = GitForkConfig.new(
               current_sha: sha,
               branch: matching_open_pr.branch,
-              clone_url: matching_open_pr.clone_url
+              clone_url: matching_open_pr.clone_url,
+              ref: matching_open_pr.git_ref
             )
           end
 
@@ -297,7 +298,8 @@ module FastlaneCI
             git_fork_config = GitForkConfig.new(
               current_sha: open_pr.current_sha,
               branch: open_pr.branch,
-              clone_url: open_pr.clone_url
+              clone_url: open_pr.clone_url,
+              ref: open_pr.git_ref
             )
           end
 
