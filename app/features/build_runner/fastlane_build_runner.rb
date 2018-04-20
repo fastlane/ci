@@ -98,12 +98,8 @@ module FastlaneCI
         # folder, and all the following code works
         # This is needed to load other configuration files, and also find Xcode projects
 
-        original_gemfile = File.open(Bundler.default_gemfile, "rb")
-        original_gemfile_contents = original_gemfile.read
-        original_gemfile.close
-        original_lockfile = File.open(Bundler.default_lockfile, "rb")
-        original_lockfile_contents = original_lockfile.read
-        original_lockfile.close
+        original_gemfile_contents = File.read(Bundler.default_gemfile)
+        original_lockfile_contents = File.read(Bundler.default_lockfile)
         # We call the safe (because is synchronized) Bundler's `chdir` and
         # install all the dependencies, if any.
         Bundler::SharedHelpers.chdir(repo.local_folder) do
