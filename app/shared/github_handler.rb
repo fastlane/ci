@@ -1,4 +1,5 @@
 require "octokit"
+require "faraday"
 require_relative "logging_module"
 
 # TODO: eventually we'll want to consider handling all these:
@@ -66,7 +67,14 @@ module FastlaneCI
           sleep(sleep_length)
           retry
         end
-
+        raise ex
+      rescue Octokit::TooManyRequests => ex
+        logger.error(ex)
+        raise ex
+      rescue Octokit::Unauthorized => ex # Maybe the token does not give access to rate limits.
+        logger.error(ex)
+      rescue Faraday::ConnectionFailed => ex
+        logger.error("Some GitHub API seems to be down right now, got a connection failure")
         raise ex
       end
     end
