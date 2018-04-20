@@ -28,7 +28,11 @@
           <mat-cell *matCellDef="let project">{{project.latestDate ? (project.latestDate | amTimeAgo) : "-" }}</mat-cell>
         </ng-container>
 
-        <!-- TODO: Add Repo Column -->
+        <!-- Repo Column -->
+        <ng-container matColumnDef="repo">
+          <mat-header-cell *matHeaderCellDef>Repo</mat-header-cell>
+          <mat-cell *matCellDef="let project">{{project.repoName}}</mat-cell>
+        </ng-container>
 
         <!-- Lane Column -->
         <ng-container matColumnDef="lane">
