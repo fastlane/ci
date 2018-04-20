@@ -1,17 +1,23 @@
 # User Goals
-## Evaluation
+## 1. Evaluation
 * Provide configuration files that are simple, powerful, and human-readable
 * Integrate with existing workflows 
 * Be highly optimized for mobile 
 
-## Pre-onboarding 
+## 2. Pre-onboarding 
 * Create an easy transition for developers from manual testing to CI
 
-## Onboarding
+## 3. Onboarding
 * Allow developers to specify build commits on PRs, nightly builds, feature branch, and manual release button
+   * [Add project flow](add_project_flow.md)
+   * [Edit global environment variables](edit_global_env_variables.md)
+   * [Bot and user onboarding](first_time_setup.md)
 * Manage required external tools automatically 
 
-## Post-onboarding 
+## 4. Post-onboarding 
+* Allow users to access projects and builds
+   * [Project view]
+   * [Build view]
 * [Give developers the ability to debug a failed build](./debug_failed_build.md) 
 * Provide notifications to users when something goes wrong 
 * Provide rapid product/app feedback
