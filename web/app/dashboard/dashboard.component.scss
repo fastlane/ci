@@ -1,29 +1,34 @@
 .fci-dashboard-header {
     background-color: #E1BEE7;
-    height: 448px;
-    margin-bottom: -112px;
     .fci-dashboard-welcome {
-        padding: 112px 0 52px 0;
+        padding: 75px 0 4px 0;
         .fci-dashboard-title {
-            color: rgba(0, 0, 0, 0.87);
             font-family: 'Google Sans', sans-serif;
-            font-size: 30px;
-            font-weight: 400;
+            color: rgba(0, 0, 0, 0.87);
+            font-size: 32px;
+            font-weight: 500;
             line-height: 40px;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
         .fci-dashboard-subtitle {
             color: rgba(0, 0, 0, 0.54);
-            font-size: 16px;
+            font-size: 18px;
+            font-family: 'Google Sans', sans-serif;
             line-height: 24px;
+        }
+        button {
+            text-transform: uppercase;
+            margin-top: 25px;
         }
     }
 }
 
 .fci-project-table {
-    .mat-header-row {
+    margin-top: 40px;
+    .mat-header-row .mat-header-cell {
         font-family: 'Google Sans', sans-serif;
-        font-size: 16px;
+        color: rgba(0, 0, 0, 0.87);
+        font-size: 18px;
     }
     .mat-row {
         cursor: pointer;
@@ -36,10 +41,13 @@
             .fci-status-icon {
                 margin-right: 8px;
             }
+            &:not(:first-child) {
+                color: rgba(0, 0, 0, 0.54);
+            }
         }
     }
 }
 
 .fci-loading-spinner {
-    margin: 0 auto;
+    margin: 32px auto;
 }

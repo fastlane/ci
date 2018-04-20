@@ -1,44 +1,44 @@
 <div class="fci-dashboard-header">
   <div fci-grid class="fci-dashboard-welcome">
-    <div fci-cell="6">
-      <div class="fci-dashboard-title"> Welcome to fastlane CI! </div>
+    <div fci-cell="12">
+      <div class="fci-dashboard-title"> Welcome to fastlane.ci! </div>
       <div class="fci-dashboard-subtitle">
-        Open source, self-hosted, mobile-optimized CI powered by fastlane brought to you by the fastlane team. </div>
+        Open source, self-hosted, mobile-optimized CI powered by fastlane brought to you by the fastlane team.
+      </div>
+      <button mat-raised-button color="primary">Add New Project</button>
     </div>
   </div>
 </div>
 
 <div fci-grid>
   <div fci-cell="12">
-    <mat-card class="fci-project-table">
-      <mat-progress-spinner mode="indeterminate" *ngIf="isLoading" class="fci-loading-spinner" diameter="30"></mat-progress-spinner>
-      <mat-table *ngIf="!isLoading" [dataSource]="projects">
-        <!-- Name Column -->
-        <ng-container matColumnDef="name">
-          <mat-header-cell *matHeaderCellDef> Project Name </mat-header-cell>
-          <mat-cell *matCellDef="let project">
-            <fci-status-icon [status]="project.latestStatus"></fci-status-icon>
-            <span>{{project.name}}</span>
-          </mat-cell>
-        </ng-container>
+    <mat-table class="fci-project-table" [dataSource]="projects">
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef> Project Name </mat-header-cell>
+        <mat-cell *matCellDef="let project">
+          <fci-status-icon [status]="project.latestStatus"></fci-status-icon>
+          <span>{{project.name}}</span>
+        </mat-cell>
+      </ng-container>
 
-        <!-- Latest Build Column -->
-        <ng-container matColumnDef="latestBuild">
-          <mat-header-cell *matHeaderCellDef>Latest Build</mat-header-cell>
-          <mat-cell *matCellDef="let project">{{project.latestDate ? (project.latestDate | amTimeAgo) : "-" }}</mat-cell>
-        </ng-container>
+      <!-- Latest Build Column -->
+      <ng-container matColumnDef="latestBuild">
+        <mat-header-cell *matHeaderCellDef>Latest Build</mat-header-cell>
+        <mat-cell *matCellDef="let project">{{project.latestDate ? (project.latestDate | amTimeAgo) : "-" }}</mat-cell>
+      </ng-container>
 
-        <!-- TODO: Add Repo Column -->
+      <!-- TODO: Add Repo Column -->
 
-        <!-- Lane Column -->
-        <ng-container matColumnDef="lane">
-          <mat-header-cell *matHeaderCellDef>Lane</mat-header-cell>
-          <mat-cell *matCellDef="let project">{{project.lane}}</mat-cell>
-        </ng-container>
+      <!-- Lane Column -->
+      <ng-container matColumnDef="lane">
+        <mat-header-cell *matHeaderCellDef>Lane</mat-header-cell>
+        <mat-cell *matCellDef="let project">{{project.lane}}</mat-cell>
+      </ng-container>
 
-        <mat-header-row *matHeaderRowDef="DISPLAYED_COLUMNS"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: DISPLAYED_COLUMNS; let project" [routerLink]="['/project', project.id]"></mat-row>
-      </mat-table>
-    </mat-card>
+      <mat-header-row *matHeaderRowDef="DISPLAYED_COLUMNS"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: DISPLAYED_COLUMNS; let project" [routerLink]="['/project', project.id]"></mat-row>
+    </mat-table>
+    <mat-progress-spinner mode="indeterminate" *ngIf="isLoading" class="fci-loading-spinner" diameter="30"></mat-progress-spinner>
   </div>
 </div>
