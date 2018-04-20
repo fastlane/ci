@@ -1,8 +1,15 @@
-import {timestamp} from 'rxjs/operators/timestamp';
+import {Project, ProjectResponse} from '../../models/project';
+import {ProjectSummary, ProjectSummaryResponse} from '../../models/project_summary';
 
-import {BuildSummary, BuildSummaryResponse} from '../../models/build_summary';
-import {ProjectResponse} from '../../models/project';
-import {ProjectSummaryResponse} from '../../models/project_summary';
+import {mockBuildSummaryResponse_failure, mockBuildSummaryResponse_success} from './mock_build_data';
+
+export const mockProjectSummaryResponse: ProjectSummaryResponse = {
+  id: '1',
+  name: 'the coolest project',
+  latest_status: 'success',
+  lane: 'ios test',
+  latest_timestamp: '2018-04-04 16:11:58 -0700'
+};
 
 export const mockProjectListResponse: ProjectSummaryResponse[] = [
   {
@@ -35,24 +42,12 @@ export const mockProjectListResponse: ProjectSummaryResponse[] = [
   },
 ];
 
-const mockBuildSummaryResponse_failure: BuildSummaryResponse = {
-  number: 1,
-  status: 'failure',
-  duration: 1234,
-  sha: 'cjsh4',
-  timestamp: '2018-04-04 16:11:58 -0700'
-};
-
-const mockBuildSummaryResponse_success: BuildSummaryResponse = {
-  number: 2,
-  status: 'success',
-  duration: 221234,
-  sha: 'asdfsh4',
-  timestamp: '2018-04-04 16:11:58 -0700'
-};
-
+export const mockProjectSummaryList =
+    mockProjectListResponse.map((response) => new ProjectSummary(response));
 export const mockProjectResponse: ProjectResponse = {
   id: '12',
   name: 'the most coolest project',
   builds: [mockBuildSummaryResponse_success, mockBuildSummaryResponse_failure]
 };
+
+export const mockProject = new Project(mockProjectResponse);
