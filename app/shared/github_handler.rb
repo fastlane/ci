@@ -41,25 +41,19 @@ module FastlaneCI
     end
 
     def github_action(client, &block)
-      # `retry` retains the variables through iterations so we assign to 0 the first time.
-      retry_count ||= 0
       if client.kind_of?(Octokit::Client)
-        begin
-          if client.rate_limit!.remaining.zero?
-            sleep_time = client.rate_limit!.resets_in
-            logger.debug("Rate Limit exceeded, sleeping for #{sleep_time} seconds")
-            sleep(sleep_time)
-          end
-        rescue Octokit::TooManyRequests => ex
-          logger.error(ex)
-          raise ex
-        rescue Octokit::Unauthorized => ex # Maybe the token does not give access to rate limits.
-          logger.error(ex)
+        if client.rate_limit!.remaining.zero?
+          sleep_time = client.rate_limit!.resets_in
+          logger.debug("Rate Limit exceeded, sleeping for #{sleep_time} seconds")
+          sleep(sleep_time)
         end
       end
+
+      # `retry` retains the variables through iterations so we assign to 0 the first time.
+      retry_count ||= 0
       begin
         return block.call(client)
-      rescue Octokit::ServerError => ex
+      rescue Octokit::ServerError, Octokit::TooManyRequests, Faraday::ConnectionFailed => ex
         if (retry_count += 1) < 5
           # exponential backoff
           sleep_length = 2**retry_count
@@ -68,14 +62,9 @@ module FastlaneCI
           retry
         end
         raise ex
-      rescue Octokit::TooManyRequests => ex
-        logger.error(ex)
-        raise ex
       rescue Octokit::Unauthorized => ex # Maybe the token does not give access to rate limits.
+        logger.error("Your GitHub Personal Auth Token is unauthorized to perform the github action")
         logger.error(ex)
-      rescue Faraday::ConnectionFailed => ex
-        logger.error("Some GitHub API seems to be down right now, got a connection failure")
-        raise ex
       end
     end
   end
