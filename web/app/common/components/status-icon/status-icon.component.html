@@ -1,0 +1,14 @@
+<ng-container [ngSwitch]="status">
+  <mat-icon *ngSwitchCase="BuildStatus.SUCCESS" class="fci-status-icon-success">
+    sentiment_very_satisfied
+  </mat-icon>
+  <mat-icon *ngSwitchCase="BuildStatus.PENDING" class="fci-status-icon-pending">
+    sentiment_neutral
+  </mat-icon>
+  <mat-icon *ngSwitchCase="isFailedState()" class="fci-status-icon-failed">
+    sentiment_very_dissatisfied
+  </mat-icon>
+  <mat-icon *ngSwitchDefault class="fci-status-icon-default">
+    sentiment_satisfied
+  </mat-icon>
+</ng-container>

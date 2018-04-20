@@ -1,3 +1,10 @@
 .fci-build-table {
     margin-top: 24px;
+    .mat-cell {
+        align-items: center;
+        display: flex;
+        .fci-status-icon {
+            margin-right: 8px;
+        }
+    }
 }

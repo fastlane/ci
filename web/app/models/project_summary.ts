@@ -1,4 +1,4 @@
-import {BuildStatus, buildStatusToIcon, FastlaneStatus, fastlaneStatusToEnum} from '../common/constants';
+import {BuildStatus, FastlaneStatus, fastlaneStatusToEnum} from '../common/constants';
 
 export interface ProjectSummaryResponse {
   id: string;
@@ -14,14 +14,16 @@ export class ProjectSummary {
   readonly lane: string;
   readonly latestStatus?: BuildStatus;
   readonly latestDate?: Date;
-  readonly statusIcon: string;
 
   constructor(projectSummary: ProjectSummaryResponse) {
     this.name = projectSummary.name;
     this.id = projectSummary.id;
     this.lane = projectSummary.lane;
-    this.latestStatus = projectSummary.latest_status ? fastlaneStatusToEnum(projectSummary.latest_status) : undefined;
-    this.statusIcon = buildStatusToIcon(this.latestStatus);
-    this.latestDate = projectSummary.latest_timestamp ? new Date(projectSummary.latest_timestamp) : undefined;
+    this.latestStatus = projectSummary.latest_status ?
+        fastlaneStatusToEnum(projectSummary.latest_status) :
+        undefined;
+    this.latestDate = projectSummary.latest_timestamp ?
+        new Date(projectSummary.latest_timestamp) :
+        undefined;
   }
 }

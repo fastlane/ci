@@ -1,4 +1,4 @@
-import {BuildStatus, buildStatusToIcon, FastlaneStatus, fastlaneStatusToEnum} from '../common/constants';
+import {BuildStatus, FastlaneStatus, fastlaneStatusToEnum} from '../common/constants';
 
 const SHORT_SHA_LENGTH = 6;
 
@@ -17,7 +17,6 @@ export class BuildSummary {
   readonly sha: string;
   readonly shortSha: string;
   readonly date: Date;
-  readonly statusIcon: string;
 
   constructor(buildSummary: BuildSummaryResponse) {
     this.number = buildSummary.number;
@@ -25,7 +24,6 @@ export class BuildSummary {
     this.sha = buildSummary.sha;
     this.shortSha = this.sha.slice(0, SHORT_SHA_LENGTH);
     this.status = fastlaneStatusToEnum(buildSummary.status);
-    this.statusIcon = buildStatusToIcon(this.status);
     this.date = new Date(buildSummary.timestamp);
   }
 }
