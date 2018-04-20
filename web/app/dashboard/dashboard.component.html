@@ -1,7 +1,7 @@
 <div class="fci-dashboard-header">
   <div fci-grid class="fci-dashboard-welcome">
     <div fci-cell="12">
-      <div class="fci-dashboard-title"> Welcome to fastlane.ci! </div>
+      <div class="fci-dashboard-title">Welcome to fastlane.ci!</div>
       <div class="fci-dashboard-subtitle">
         Open source, self-hosted, mobile-optimized CI powered by fastlane brought to you by the fastlane team.
       </div>
@@ -15,7 +15,7 @@
     <mat-table class="fci-project-table" [dataSource]="projects">
       <!-- Name Column -->
       <ng-container matColumnDef="name">
-        <mat-header-cell *matHeaderCellDef> Project Name </mat-header-cell>
+        <mat-header-cell *matHeaderCellDef>Project Name</mat-header-cell>
         <mat-cell *matCellDef="let project">
           <fci-status-icon [status]="project.latestStatus"></fci-status-icon>
           <span>{{project.name}}</span>
