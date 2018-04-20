@@ -1,6 +1,8 @@
+fastlane_require("betterlorem")
 
 lane :rspec_me do
   desc "Run all the rspec tests"
+  puts BetterLorem.w
   sh("cd ..;bundle install")
   sh("cd ..;bundle exec rspec")
 end
