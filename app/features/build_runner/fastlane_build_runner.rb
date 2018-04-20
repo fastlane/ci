@@ -177,6 +177,12 @@ module FastlaneCI
               original_lockfile = File.open(Bundler.default_lockfile, "wb")
               original_lockfile.write(original_lockfile_contents)
               original_lockfile.close
+              Bundler.load.clean(options[:"dry-run"])
+              Bundler::Plugin.gemfile_install(Bundler.default_gemfile)
+              definition = Bundler.definition
+              definition.validate_runtime!
+              Bundler::Installer.install(Bundler.root, definition, options)
+              Bundler.require
             end
           end
         end
