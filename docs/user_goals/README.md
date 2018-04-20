@@ -16,6 +16,7 @@
 
 ## 4. Post-onboarding 
 * Allow users to access projects and builds
+   * [Dashboard](dashboared_page.md)
    * [Project details page](project_details_page.md)
    * [Build details page](build_details_page.md)
 * [Give developers the ability to debug a failed build](./debug_failed_build.md) 
