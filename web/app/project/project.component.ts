@@ -7,7 +7,7 @@ import {Project} from '../models/project';
 import {DataService} from '../services/data.service';
 
 @Component({
-  selector: 'app-project',
+  selector: 'fci-project',
   templateUrl: './project.component.html',
   styleUrls: ['./project.component.scss']
 })

@@ -1,4 +1,4 @@
-import {BuildStatus, buildStatusToIcon, FastlaneStatus, fastlaneStatusToEnum} from '../common/constants';
+import {BuildStatus, FastlaneStatus, fastlaneStatusToEnum} from '../common/constants';
 
 export interface ProjectSummaryResponse {
   id: string;
@@ -16,7 +16,6 @@ export class ProjectSummary {
   readonly repoName: string;
   readonly latestStatus?: BuildStatus;
   readonly latestDate?: Date;
-  readonly statusIcon: string;
 
   constructor(projectSummary: ProjectSummaryResponse) {
     this.name = projectSummary.name;
@@ -26,7 +25,6 @@ export class ProjectSummary {
     this.latestStatus = projectSummary.latest_status ?
         fastlaneStatusToEnum(projectSummary.latest_status) :
         undefined;
-    this.statusIcon = buildStatusToIcon(this.latestStatus);
     this.latestDate = projectSummary.latest_timestamp ?
         new Date(projectSummary.latest_timestamp) :
         undefined;

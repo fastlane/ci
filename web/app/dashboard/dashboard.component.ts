@@ -4,7 +4,7 @@ import {ProjectSummary, ProjectSummaryResponse} from '../models/project_summary'
 import {DataService} from '../services/data.service';
 
 @Component({
-  selector: 'app-dashboard',
+  selector: 'fci-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })

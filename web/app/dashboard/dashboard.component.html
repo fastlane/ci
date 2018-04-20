@@ -17,7 +17,7 @@
         <ng-container matColumnDef="name">
           <mat-header-cell *matHeaderCellDef> Project Name </mat-header-cell>
           <mat-cell *matCellDef="let project">
-            <mat-icon>{{project.statusIcon}}</mat-icon>
+            <fci-status-icon [status]="project.latestStatus"></fci-status-icon>
             <span>{{project.name}}</span>
           </mat-cell>
         </ng-container>

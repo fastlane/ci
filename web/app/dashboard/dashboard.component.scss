@@ -34,6 +34,11 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            align-items: center;
+            display: flex;
+            .fci-status-icon {
+                margin-right: 8px;
+            }
         }
     }
 }

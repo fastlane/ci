@@ -120,13 +120,13 @@
     "directive-selector": [
       true,
       "attribute",
-      "app",
+      "fci",
       "camelCase"
     ],
     "component-selector": [
       true,
       "element",
-      "app",
+      "fci",
       "kebab-case"
     ],
     "no-output-on-prefix": true,
