@@ -1,6 +1,7 @@
 import {BuildStatus} from '../common/constants';
+import {mockProjectResponse} from '../common/test_helpers/mock_project_data';
+
 import {Project} from './project';
-import {mockProjectResponse} from './test_helpers/mock_project_response';
 
 describe('Project Model', () => {
   it('should convert project response successfully', () => {

@@ -6,12 +6,12 @@ import {MomentModule} from 'ngx-moment';
 import {Observable} from 'rxjs/Observable';
 import {Subject} from 'rxjs/Subject';
 
+import {mockProject} from '../common/test_helpers/mock_project_data';
 import {Project} from '../models/project';
 import {DataService} from '../services/data.service';
 import {SharedMaterialModule} from '../shared_material.module';
 
 import {ProjectComponent} from './project.component';
-import {mockProject} from './test_helpers/mock_project_response';
 
 describe('ProjectComponent', () => {
   let component: ProjectComponent;
