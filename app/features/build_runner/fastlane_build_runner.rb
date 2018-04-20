@@ -100,6 +100,7 @@ module FastlaneCI
 
         original_gemfile_contents = File.read(Bundler.default_gemfile)
         original_lockfile_contents = File.read(Bundler.default_lockfile)
+
         # We call the safe (because is synchronized) Bundler's `chdir` and
         # install all the dependencies, if any.
         Bundler::SharedHelpers.chdir(repo.local_folder) do
