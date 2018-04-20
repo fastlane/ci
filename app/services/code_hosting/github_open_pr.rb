@@ -5,17 +5,23 @@ module FastlaneCI
     attr_reader :clone_url
     attr_reader :branch
     attr_reader :repo_full_name
+    attr_reader :number
     attr_reader :current_sha
 
-    def initialize(current_sha:, branch:, repo_full_name:, clone_url:)
+    def initialize(current_sha:, branch:, repo_full_name:, number:, clone_url:)
       @current_sha = current_sha
       @branch = branch
       @repo_full_name = repo_full_name
+      @number = number
       @clone_url = clone_url
     end
 
     def fork_of_repo?(repo_full_name:)
       return self.repo_full_name != repo_full_name
+    end
+
+    def git_ref
+      return number.nil? ? nil : "pull/#{number}/head"
     end
   end
 end
