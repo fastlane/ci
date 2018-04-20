@@ -6,7 +6,7 @@ describe FastlaneCI::ConfigurationRepositoryService do
   let(:bot_client) { double("Bot Client", login: true) }
   let(:invitation) { double("Invitation", id: "12345678") }
   let(:service) do
-    FastlaneCI::ConfigurationRepositoryService.new(double("Credentials", api_token: "abc123"))
+    FastlaneCI::ConfigurationRepositoryService.new(provider_credential: double("Credentials", api_token: "abc123"))
   end
 
   before do
