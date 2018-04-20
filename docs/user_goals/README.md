@@ -16,8 +16,8 @@
 
 ## 4. Post-onboarding 
 * Allow users to access projects and builds
-   * [Project view]
-   * [Build view]
+   * [Project details page](project_details_page.md)
+   * [Build details page](build_details_page.md)
 * [Give developers the ability to debug a failed build](./debug_failed_build.md) 
 * Provide notifications to users when something goes wrong 
 * Provide rapid product/app feedback
