@@ -26,11 +26,10 @@ describe FastlaneCI::KeysWriter do
       path: template_path,
       locals: {
         encryption_key: "key",
-        ci_user_email: "ci_user_email",
         ci_user_password: "ci_user_password",
+        ci_user_api_token: "bot_api_token",
         repo_url: "https://github.com/user/repo",
-        clone_user_email: "clone_user_email",
-        clone_user_api_token: "clone_user_api_token"
+        initial_onboarding_user_api_token: "initial_onboarding_user_api_token"
       }
     )
   end

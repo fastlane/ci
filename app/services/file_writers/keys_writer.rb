@@ -12,21 +12,20 @@ module FastlaneCI
         # Randomly generated key, that's used to encrypt the user passwords
         FASTLANE_CI_ENCRYPTION_KEY='#{locals[:encryption_key]}'
 
-        # The email address of your fastlane CI bot account
-        FASTLANE_CI_USER='#{locals[:ci_user_email]}'
-
-        # The encrypted API token of your fastlane CI bot account
+        # The password for your CI bot account
         FASTLANE_CI_PASSWORD='#{locals[:ci_user_password]}'
+
+        # The API token of your fastlane CI bot account
+        FASTLANE_CI_BOT_API_TOKEN='#{locals[:ci_user_api_token]}'
 
         # The git URL (https) for the configuration repo
         FASTLANE_CI_REPO_URL='#{locals[:repo_url]}'
 
-        # Needed just for the first startup of fastlane.ci:
-        # The email address used for the intial clone for the config repo
-        FASTLANE_CI_INITIAL_CLONE_EMAIL='#{locals[:clone_user_email]}'
-
-        # The API token used for the initial clone for the config repo
-        FASTLANE_CI_INITIAL_CLONE_API_TOKEN='#{locals[:clone_user_api_token]}'
+        # The API token for initial onboarding. It's responsible for creating
+        # the remote `fastlane.ci` configuration repository, and inviting the
+        # bot user to the corresponding repository so it may perform actions on
+        # it
+        FASTLANE_CI_INITIAL_ONBOARDING_USER_API_TOKEN='#{locals[:initial_onboarding_user_api_token]}'
       FILE
     end
   end

@@ -11,11 +11,10 @@ module FastlaneCI
     def write_keys_file!(
       locals: {
         encryption_key: nil,
-        ci_user_email: nil,
         ci_user_password: nil,
+        ci_user_api_token: nil,
         repo_url: nil,
-        clone_user_email: nil,
-        clone_user_api_token: nil
+        initial_onboarding_user_api_token: nil
       }
     )
       non_nil_new_env_variables = locals.reject { |_k, v| v.nil? }

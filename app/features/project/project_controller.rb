@@ -263,6 +263,20 @@ module FastlaneCI
 
         locals[:available_lanes] = available_lanes
         locals[:fastfile_path] = relative_fastfile_path
+      else
+        provider_credential = check_and_get_provider_credential(
+          type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
+        )
+        peeker = FastfilePeeker.new(
+          provider_credential: provider_credential,
+          notification_service: Services.notification_service
+        )
+        fastfile_parser = peeker.fastfile(
+          repo_config: project.repo_config,
+          sha_or_branch: project.job_triggers.map(&:branch).first
+        )
+        available_lanes = fetch_available_lanes(fastfile_parser)
+        locals[:available_lanes] = available_lanes
       end
 
       erb(:project, locals: locals, layout: FastlaneCI.default_layout)

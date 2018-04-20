@@ -46,6 +46,8 @@ module FastlaneCI
     # rubocop:enable Metrics/ClassLength
     include FastlaneCI::Logging
 
+    DEFAULT_REMOTE = "origin"
+
     # @return [RepoConfig]
     attr_accessor :git_config
     # @return [GitRepoAuth]
@@ -215,7 +217,15 @@ module FastlaneCI
           message: "Unable to checkout an object from #{git_config.git_url}",
           details: "#{user_unfriendly_message}, context: #{exception_context}"
         )
-
+      elsif user_unfriendly_message.include?("Couldn't find remote ref")
+        # This happens when a branch is deleted but we try to pull it anyway
+        priority = Notification::PRIORITIES[:urgent]
+        notification_service.create_notification!(
+          priority: priority,
+          name: "Unable to checkout object",
+          message: "Unable to checkout an object (probably a branch) from #{git_config.git_url}",
+          details: "#{user_unfriendly_message}, context: #{exception_context}"
+        )
       else
         raise ex
       end
@@ -239,7 +249,7 @@ module FastlaneCI
           # Things are looking legit so far
           # Now we have to check if the repo is actually from the
           # same repo URL
-          if repo.remote("origin").url.casecmp(git_config.git_url.downcase).zero?
+          if repo.remote(GitRepo::DEFAULT_REMOTE).url.casecmp(git_config.git_url.downcase).zero?
             # If our courrent repo is the ci-config repo and has changes on it, we should commit them before
             # other actions, to prevent local changes to be lost.
             # This is a common issue, ci_config repo gets recreated several times trough the
@@ -257,7 +267,7 @@ module FastlaneCI
                 begin
                   repo.add(all: true)
                   repo.commit("Sync changes")
-                  git.push("origin", branch: "master", force: true) unless GitRepo.pushes_disabled?
+                  git.push(GitRepo::DEFAULT_REMOTE, branch: "master", force: true) unless GitRepo.pushes_disabled?
                 rescue StandardError => ex
                   handle_exception(ex, console_message: "Error commiting changes to ci-config repo")
                 end
@@ -596,20 +606,21 @@ module FastlaneCI
       end
     end
 
-    def switch_to_fork(clone_url:, branch:, sha: nil, local_branch_name:, use_global_git_mutex: false)
+    # If we onlt have a git repo, and it isn't specifically from GitHub, we need to use this to switch to a fork
+    # May cause merge conflicts, so don't use it unless we must.
+    def switch_to_git_fork(clone_url:, branch:, sha: nil, local_branch_name:, use_global_git_mutex: false)
       perform_block(use_global_git_mutex: use_global_git_mutex) do
         logger.debug("Switching to branch #{branch} from forked repo: #{clone_url} (pulling into #{local_branch_name})")
-        # TODO: make sure it doesn't exist yet
-        git.branch(local_branch_name)
 
         begin
-          git.pull(clone_url, branch)
+          git.branch(local_branch_name)
+          git.pull(git_fork_config.clone_url, git_fork_config.branch)
           return true
         rescue StandardError => ex
           exception_context = {
             clone_url: clone_url,
             branch: branch,
-            sha: sha,
+            sha: current_sha,
             local_branch_name: local_branch_name
           }
           handle_exception(
@@ -619,6 +630,53 @@ module FastlaneCI
           )
           return false
         end
+      end
+    end
+
+    def switch_to_ref(git_fork_config:, local_branch_name:, use_global_git_mutex: false)
+      perform_block(use_global_git_mutex: use_global_git_mutex) do
+        begin
+          ref = "#{git_fork_config.ref}:#{local_branch_name}"
+          logger.debug("Switching to new branch from ref #{ref} (pulling into #{local_branch_name})")
+          git.fetch(GitRepo::DEFAULT_REMOTE, ref, {})
+          git.branch(local_branch_name)
+          return true
+        rescue StandardError => ex
+          exception_context = {
+            clone_url: git_fork_config.clone_url,
+            branch: git_fork_config.branch,
+            sha: git_fork_config.current_sha,
+            local_branch_name: local_branch_name
+          }
+          handle_exception(
+            ex,
+            console_message: "Error switching to ref: #{ref}",
+            exception_context: exception_context
+          )
+          return false
+        end
+      end
+    end
+
+    # Useful when you don't have a PR, if you have access to a PR, use :switch_to_github_pr
+    def switch_to_fork(git_fork_config:, local_branch_prefex:, use_global_git_mutex: false)
+      local_branch_name = local_branch_prefex + git_fork_config.current_sha[0..7]
+
+      # if we have a git ref to work with, use that instead of the fork
+      if git_fork_config.ref
+        switch_to_ref(
+          git_fork_config: git_fork_config,
+          local_branch_name: local_branch_name,
+          use_global_git_mutex: use_global_git_mutex
+        )
+      else
+        switch_to_git_fork(
+          clone_url: git_fork_config.clone_url,
+          branch: git_fork_config.branch,
+          sha: git_fork_config.current_sha,
+          local_branch_name: local_branch_name,
+          use_global_git_mutex: use_global_git_mutex
+        )
       end
     end
 

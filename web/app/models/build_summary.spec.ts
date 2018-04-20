@@ -1,6 +1,7 @@
 import {BuildStatus} from '../common/constants';
+import {mockBuildSummaryResponse_success} from '../common/test_helpers/mock_build_data';
+
 import {BuildSummary} from './build_summary';
-import {mockBuildSummaryResponse_success} from './test_helpers/mock_build_response';
 
 describe('Build Summary Model', () => {
   it('should convert build summary response successfully', () => {

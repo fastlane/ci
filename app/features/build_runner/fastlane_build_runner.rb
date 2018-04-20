@@ -98,30 +98,46 @@ module FastlaneCI
         # folder, and all the following code works
         # This is needed to load other configuration files, and also find Xcode projects
 
+        original_gemfile_contents = File.read(Bundler.default_gemfile)
+        original_lockfile_contents = File.read(Bundler.default_lockfile)
         # We call the safe (because is synchronized) Bundler's `chdir` and
         # install all the dependencies, if any.
-        Bundler::SharedHelpers.chdir(File.expand_path("..", fast_file_path)) do
+        Bundler::SharedHelpers.chdir(repo.local_folder) do
           ENV["FASTLANE_SKIP_DOCS"] = true.to_s
 
-          begin
-            options = {}
-            options[:local] = true if Bundler.app_cache.exist?
+          gemfile_found = Dir[File.join(Dir.pwd, "**", "Gemfile")].any?
+          if gemfile_found
+            begin
+              gemfile_dir = Dir[File.join(Dir.pwd, "**", "Gemfile")].first
 
-            Bundler::Plugin.gemfile_install(Bundler.default_gemfile) if Bundler.feature_flag.plugins?
+              builder = Bundler::Dsl.new
+              builder.eval_gemfile(gemfile_dir)
 
-            definition = Bundler.definition
-            definition.validate_runtime!
+              # We already use local fastlane, so don't try to install it.
+              project_dependencies = builder.dependencies.reject { |d| d.name == "fastlane" }
 
-            Bundler::Installer.install(Bundler.root, definition, options)
-            Bundler.load.cache if Bundler.app_cache.exist? && !Bundler.frozen_bundle?
-            # rubocop:disable Metrics/LineLength
-            logger.info("Bundle complete! #{definition.dependencies.count} Gemfile dependencies, installed #{definition.specs.count} gems.")
-            # rubocop:enable Metrics/LineLength
-          rescue Bundler::GemfileNotFound => ex
-            logger.info(ex)
-          rescue StandardError => ex
-            logger.error(ex)
-            logger.error(ex.backtrace)
+              added = Bundler::Injector.inject(project_dependencies, {})
+              if added.any?
+                logger.info("Added to Gemfile:")
+                logger.info(added.map do |d|
+                  name = "'#{d.name}'"
+                  requirement = ", '#{d.requirement}'"
+                  group = ", :group => #{d.groups.inspect}" if d.groups != Array(:default)
+                  source = ", :source => '#{d.source}'" unless d.source.nil?
+                  %(gem #{name}#{requirement}#{group}#{source})
+                end.join("\n"))
+              end
+
+              Bundler::Installer.install(Bundler.root, Bundler.definition)
+              Bundler.require
+            rescue Bundler::GemfileNotFound, Bundler::GemNotFound => ex
+              logger.info(ex)
+            rescue Gem::LoadError => ex
+              logger.error(ex)
+            rescue StandardError => ex
+              logger.error(ex)
+              logger.error(ex.backtrace)
+            end
           end
 
           begin
@@ -153,6 +169,15 @@ module FastlaneCI
             artifacts_paths = gather_build_artifact_paths(loggers: [verbose_log, info_log])
 
             return
+          ensure
+            if gemfile_found
+              original_gemfile = File.open(Bundler.default_gemfile, "wb")
+              original_gemfile.write(original_gemfile_contents)
+              original_gemfile.close
+              original_lockfile = File.open(Bundler.default_lockfile, "wb")
+              original_lockfile.write(original_lockfile_contents)
+              original_lockfile.close
+            end
           end
         end
 

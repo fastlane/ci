@@ -1,11 +1,14 @@
-<dialog class="modal-dialog">
-  <h4 class="modal-title"><code>fastlane.ci</code> notification</h4>
+<% flash.keys.each do |type| %>
+  <div class="flash_<%= type %>">
+    <% case type
+       when :success %>
+      <i class="fa fa-check"></i>
+    <% when :warning %>
+      <i class="fa fa-info-circle"></i>
+    <% when :error %>
+      <i class="fa fa-times-circle"></i>
+    <% end %>
 
-  <div class="mdl-dialog__content">
-    <%= message %>
+    <%= type.to_s.upcase + ": " + flash[type] %>
   </div>
-
-  <div class="mdl-dialog__actions mdl-dialog__actions--full-width">
-    <button type="button" class="mdl-button close">Okay</button>
-  </div>
-</dialog>
+<% end %>

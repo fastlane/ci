@@ -8,12 +8,12 @@ import {Subject} from 'rxjs/Subject';
 
 import {CommonComponentsModule} from '../common/components/common-components.module';
 import {BuildStatus} from '../common/constants';
+import {mockProjectSummaryList} from '../common/test_helpers/mock_project_data';
 import {ProjectSummary} from '../models/project_summary';
 import {DataService} from '../services/data.service';
 import {SharedMaterialModule} from '../shared_material.module';
 
 import {DashboardComponent} from './dashboard.component';
-import {mockProjectSummaryList} from './test_helpers/mock_project_summary';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;

@@ -36,10 +36,10 @@ module FastlaneCI
 
     # Login with fastlane.ci credentials
     get "#{HOME}/ci_login" do
-      client = Octokit::Client.new(access_token: FastlaneCI.env.clone_user_api_token)
+      client = Octokit::Client.new(access_token: FastlaneCI.env.ci_user_api_token)
 
       unless client.nil?
-        email = client.user[:email]
+        email = client.emails.find(&:primary).email
       end
       locals = {
         title: "Login with your fastlane.ci account",

@@ -4,6 +4,7 @@ source("https://rubygems.org")
 gem "faye-websocket", ">= 0.10.7", "< 1.0.0" # web socket connection for Sinatra
 gem "sinatra", ">= 2.0.1", "< 3.0.0" # Our web application library
 gem "sinatra-contrib", ">= 2.0.0", "< 3.0.0" # TODO: document why we have this here @taquitos
+gem "sinatra-flash"
 
 # web server that we need to support web socket connections with sinatra
 gem "thin", ">= 1.7.2", "< 2.0.0"
@@ -16,9 +17,6 @@ gem "tty-command", ">= 0.7.0", "< 1.0.0"
 
 # Communication with GitHub
 gem "octokit", ">= 4.8.0", "< 5.0.0"
-
-# Local git checkouts, commits, etc.
-gem "git", ">= 1.3.0", "< 2.0.0"
 
 gem "dotenv", ">= 2.2.1", "< 3.0.0"
 
@@ -41,9 +39,10 @@ gem "bundler", "~> 1.16.0"
 
 # fastlane dependencies
 # TODO: point to minimum release instead of GitHub once
-# 	we shipped a new release
+#  we shipped a new release
 gem "fastfile-parser", git: "https://github.com/fastlane/fastfile-parser", require: false
 gem "fastlane", git: "https://github.com/fastlane/fastlane"
+gem "git", git: "https://github.com/fastlane/ruby-git", require: false
 gem "taskqueue", git: "https://github.com/fastlane/TaskQueue", require: false
 
 group :test, :development do

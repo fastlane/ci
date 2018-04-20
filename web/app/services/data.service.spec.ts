@@ -2,11 +2,11 @@ import {HttpClientTestingModule, HttpTestingController} from '@angular/common/ht
 import {fakeAsync, TestBed, tick} from '@angular/core/testing';
 
 import {BuildStatus} from '../common/constants';
+import {mockProjectListResponse, mockProjectResponse} from '../common/test_helpers/mock_project_data';
 import {Project} from '../models/project';
 import {ProjectSummary} from '../models/project_summary';
 
 import {DataService} from './data.service';
-import {mockProjectListResponse, mockProjectResponse} from './test_helpers/mock_project_response';
 
 describe('DataService', () => {
   let mockHttp: HttpTestingController;

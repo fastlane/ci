@@ -61,7 +61,8 @@ module FastlaneCI
         git_fork_config = GitForkConfig.new(
           current_sha: pr.current_sha,
           branch: pr.branch,
-          clone_url: pr.clone_url
+          clone_url: pr.clone_url,
+          ref: pr.git_ref
         )
         create_and_queue_build_task(
           sha: pr.current_sha,

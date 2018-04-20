@@ -1,6 +1,7 @@
 require "sinatra/base"
 require "sinatra/reloader"
 require "sinatra/custom_logger"
+require "sinatra/flash"
 require "set"
 require "logger"
 
@@ -14,13 +15,12 @@ module FastlaneCI
   # Handles default configuration like auto-reloading, session management, and erb path correcting
   #
   class ControllerBase < Sinatra::Base
-    register SetupChecker
-    include FastlaneCI::Logging
+    enable :sessions
 
-    # A message to be displayed in a pop-up after POST requests
-    #
-    # @return [String]
-    attr_reader :message
+    register SetupChecker
+    register Sinatra::Flash
+
+    include FastlaneCI::Logging
 
     # Enum for status of POST operations
     STATUS = { success: :success, error: :error }
