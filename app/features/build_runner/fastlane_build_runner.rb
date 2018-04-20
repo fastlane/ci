@@ -178,6 +178,7 @@ module FastlaneCI
               original_lockfile.write(original_lockfile_contents)
               original_lockfile.close
               Bundler.load.clean(options[:"dry-run"])
+              Bundler.reset!
               Bundler::Plugin.gemfile_install(Bundler.default_gemfile)
               definition = Bundler.definition
               definition.validate_runtime!
