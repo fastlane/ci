@@ -98,8 +98,13 @@ module FastlaneCI
         # folder, and all the following code works
         # This is needed to load other configuration files, and also find Xcode projects
 
+        # This step is needed in case of the target Project's repo having its own gem
+        # dependencies. As we don't isolate the build process by now, we have to inject
+        # those dependencies into the CI system in order to work fine.
+        # The first step is to make a snapshot of the current state of the CI's Gemfile and Gemfile.lock
         original_gemfile_contents = File.read(Bundler.default_gemfile)
         original_lockfile_contents = File.read(Bundler.default_lockfile)
+
         # We call the safe (because is synchronized) Bundler's `chdir` and
         # install all the dependencies, if any.
         Bundler::SharedHelpers.chdir(repo.local_folder) do
@@ -110,12 +115,14 @@ module FastlaneCI
             begin
               gemfile_dir = Dir[File.join(Dir.pwd, "**", "Gemfile")].first
 
+              # In case the target repo has its own Gemfile, we parse its contents
               builder = Bundler::Dsl.new
               builder.eval_gemfile(gemfile_dir)
 
               # We already use local fastlane, so don't try to install it.
               project_dependencies = builder.dependencies.reject { |d| d.name == "fastlane" }
 
+              # Inject all other dependencies that might be needed by the target.
               added = Bundler::Injector.inject(project_dependencies, {})
               if added.any?
                 logger.info("Added to Gemfile:")
@@ -128,6 +135,7 @@ module FastlaneCI
                 end.join("\n"))
               end
 
+              # Install the new Bundle and require all the new gems into the runtime.
               Bundler::Installer.install(Bundler.root, Bundler.definition)
               Bundler.require
             rescue Bundler::GemfileNotFound, Bundler::GemNotFound => ex
@@ -171,14 +179,16 @@ module FastlaneCI
             return
           ensure
             if gemfile_found
-              original_gemfile = File.open(Bundler.default_gemfile, "wb")
-              original_gemfile.write(original_gemfile_contents)
-              original_gemfile.close
-              original_lockfile = File.open(Bundler.default_lockfile, "wb")
-              original_lockfile.write(original_lockfile_contents)
-              original_lockfile.close
+              # This is te step for recovering the pre-build dependency graph for the CI
+              # The first step is to write the snapshot we made at the start of the build.
+              File.write(Bundler.default_gemfile, original_gemfile_contents)
+              File.write(Bundler.default_lockfile, original_lockfile_contents)
+              # Our bundle runtime already has the build's gems installed and loaded, so
+              # we have to clean the whole Bundle.
               Bundler.load.clean(options[:"dry-run"])
               Bundler.reset!
+              # Finally, we install the new runtime and require it to load the CI's dependencies
+              # as they were before the build. 
               Bundler::Plugin.gemfile_install(Bundler.default_gemfile)
               definition = Bundler.definition
               definition.validate_runtime!
