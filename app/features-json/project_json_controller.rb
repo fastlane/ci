@@ -1,6 +1,7 @@
 require_relative "../shared/authenticated_controller_base"
 require_relative "./view_models/project_summary_view_model"
 require_relative "./view_models/project_view_model"
+require_relative "./view_models/repo_view_model"
 
 module FastlaneCI
   # Controller for providing all data relating to projects
@@ -24,6 +25,17 @@ module FastlaneCI
       project_view_model = ProjectViewModel.new(project: project)
 
       return project_view_model.to_json
+    end
+
+    get "#{HOME}/repos" do
+      provider_credential = check_and_get_provider_credential
+      repos = FastlaneCI::GitHubService.new(provider_credential: provider_credential).repos
+
+      all_repos_view_models = repos.map do |repo|
+        RepoViewModel.new(repo: repo)
+      end
+
+      return all_repos_view_models.to_json
     end
   end
 end
