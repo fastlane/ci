@@ -3,7 +3,7 @@ require_relative "./view_models/repo_view_model"
 
 module FastlaneCI
   # Controller for providing all data relating to projects
-  class ProjectJSONController < AuthenticatedControllerBase
+  class RepositoryJSONController < AuthenticatedControllerBase
     HOME = "/data/repos"
 
     get HOME.to_s do
