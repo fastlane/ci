@@ -3,8 +3,10 @@ import {fakeAsync, TestBed, tick} from '@angular/core/testing';
 
 import {BuildStatus} from '../common/constants';
 import {mockProjectListResponse, mockProjectResponse} from '../common/test_helpers/mock_project_data';
+import {mockRepositoryResponse, mockRepositoryListResponse} from '../common/test_helpers/mock_repository_data';
 import {Project} from '../models/project';
 import {ProjectSummary} from '../models/project_summary';
+import {Repository, RepositoryResponse} from '../models/repository';
 
 import {DataService} from './data.service';
 
@@ -55,6 +57,22 @@ describe('DataService', () => {
       expect(project.builds.length).toBe(2);
       expect(project.builds[0].status).toBe(BuildStatus.SUCCESS);
       expect(project.builds[1].status).toBe(BuildStatus.FAILED);
+    });
+  });
+
+  describe('#getRepo', () => {
+    it('should return response mapped to Repository model', () => {
+      let repositories: Repository[];
+      dataService.getRepos().subscribe((repositoryResponse) => {
+        repositories = repositoryResponse;
+      });
+
+      const repositoriesRequest = mockHttp.expectOne('/data/repos');
+      repositoriesRequest.flush(mockRepositoryListResponse);
+
+      expect(repositories.length).toBe(3);
+      expect(repositories[0].fullName).toBe('fastlane/ci');
+      expect(repositories[2].url).toBe('https://github.com/fastlane/onboarding');
     });
   });
 });
