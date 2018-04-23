@@ -7,7 +7,6 @@ describe('Repository Model', () => {
     const repository = new Repository(mockRepositoryResponse);
 
     expect(repository.fullName).toBe('fastlane/ci');
-    expect(repository.apiPath).toBe('https://api.github.com/fastlane/ci');
     expect(repository.url).toBe('https://github.com/fastlane/ci');
   });
 });

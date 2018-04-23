@@ -72,7 +72,6 @@ describe('DataService', () => {
 
       expect(repositories.length).toBe(3);
       expect(repositories[0].fullName).toBe('fastlane/ci');
-      expect(repositories[1].apiPath).toBe('https://api.github.com/fastlane/fastlane');
       expect(repositories[2].url).toBe('https://github.com/fastlane/onboarding');
     });
   });
