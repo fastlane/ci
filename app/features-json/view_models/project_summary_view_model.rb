@@ -17,6 +17,9 @@ module FastlaneCI
     attr_reader :id
 
     # @return [String]
+    attr_reader :repo_name
+
+    # @return [String]
     attr_reader :latest_status
 
     # @return [DateTime] Start time
@@ -31,6 +34,7 @@ module FastlaneCI
       @name = project.project_name
       @lane = project.lane
       @id = project.id
+      @repo_name = project.repo_config.name
       @latest_status = latest_build&.status
       @latest_timestamp = latest_build&.timestamp
     end
