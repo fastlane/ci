@@ -34,78 +34,74 @@ module FastlaneCI
     end
 
     post HOME do
-      REQUIRED_PARAMS = Set["lane", "repo_org", "repo_name", "project_name", "trigger_type"]
-      has_required_params = REQUIRED_PARAMS.subset?(Set.new(@request_payload.keys))
+      required_params = Set["lane", "repo_org", "repo_name", "project_name", "trigger_type"]
+      has_required_params = required_params.subset?(Set.new(@request_payload.keys))
 
-      if has_required_params
-        provider_credential = check_and_get_provider_credential
+      # TODO: throw bad request error
+      raise "bad request" unless has_required_params
 
-        github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
+      provider_credential = check_and_get_provider_credential
 
-        selected_repo = github_service.repos.detect do |repo|
-          @request_payload["repo_name"] == repo[:name] &&
-            @request_payload["repo_org"] == repo[:owner][:login]
-        end
+      github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
 
-        repo_config = GitHubRepoConfig.from_octokit_repo!(repo: selected_repo)
-
-        lane = @request_payload["lane"]
-        project_name = @request_payload["project_name"]
-        branch = @request_payload["branch"]
-        trigger_type = @request_payload["trigger_type"]
-        hour = @request_payload["hour"]
-        minute = @request_payload["minute"]
-
-        # TODO: Until we make a proper interface to attach JobTriggers to a Project, let's add a manual one for the
-        # selected branch.
-        # TODO: get default branch when there is no branch selected
-        triggers_to_add = [FastlaneCI::ManualJobTrigger.new(branch: branch.nil? ? "master" : branch)]
-
-        case trigger_type
-        when FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit]
-          triggers_to_add << FastlaneCI::CommitJobTrigger.new(branch: branch)
-        when FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual]
-          logger.debug("Manual trigger selected - this is enabled by default")
-          # Nothing to do here, manual trigger is added by default
-        when FastlaneCI::JobTrigger::TRIGGER_TYPE[:nightly]
-          triggers_to_add << FastlaneCI::NightlyJobTrigger.new(branch: branch, hour: hour.to_i, minute: minute.to_i)
-        else
-          raise "Couldn't create a JobTrigger"
-        end
-
-        # We now have enough information to create the new project.
-        # TODO: add job_triggers here
-        # We shouldn't be blocking manual trigger builds
-        # if we do not provide an interface to add them.
-        project = Services.project_service.create_project!(
-          name: project_name,
-          repo_config: repo_config,
-          enabled: true,
-          platform: lane.split(" ").first,
-          lane: lane.split(" ").last,
-          job_triggers: triggers_to_add
-        )
-
-        if !project.nil?
-          # Do this so we trigger the clone of the repo.
-          # TODO: Do this wherever it should be done, as we must redirect
-          # to the project details only when this task is finished.
-          repo = GitRepo.new(
-            git_config: repo_config,
-            provider_credential: provider_credential,
-            local_folder: project.local_repo_path,
-            async_start: false,
-            notification_service: FastlaneCI::Services.notification_service
-          )
-
-          repo.checkout_branch(branch: branch)
-        else
-          raise "Project couldn't be created"
-        end
-      else
-        # TODO: throw bad request error
-        raise "bad request"
+      selected_repo = github_service.repos.detect do |repo|
+        @request_payload["repo_name"] == repo[:name] &&
+          @request_payload["repo_org"] == repo[:owner][:login]
       end
+
+      repo_config = GitHubRepoConfig.from_octokit_repo!(repo: selected_repo)
+
+      platform, lane = @request_payload["lane"].split(" ") # Split "ios test_lane"
+      project_name = @request_payload["project_name"]
+      branch = @request_payload["branch"]
+      trigger_type = @request_payload["trigger_type"]
+      hour = @request_payload["hour"]
+      minute = @request_payload["minute"]
+
+      # TODO: Until we make a proper interface to attach JobTriggers to a Project, let's add a manual one for the
+      # selected branch.
+      # TODO: get default branch when there is no branch selected
+      triggers_to_add = [FastlaneCI::ManualJobTrigger.new(branch: branch.nil? ? "master" : branch)]
+
+      case trigger_type
+      when FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit]
+        triggers_to_add << FastlaneCI::CommitJobTrigger.new(branch: branch)
+      when FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual]
+        logger.debug("Manual trigger selected - this is enabled by default")
+        # Nothing to do here, manual trigger is added by default
+      when FastlaneCI::JobTrigger::TRIGGER_TYPE[:nightly]
+        triggers_to_add << FastlaneCI::NightlyJobTrigger.new(branch: branch, hour: hour.to_i, minute: minute.to_i)
+      else
+        raise "Couldn't create a JobTrigger"
+      end
+
+      # We now have enough information to create the new project.
+      # TODO: add job_triggers here
+      # We shouldn't be blocking manual trigger builds
+      # if we do not provide an interface to add them.
+      project = Services.project_service.create_project!(
+        name: project_name,
+        repo_config: repo_config,
+        enabled: true,
+        platform: platform,
+        lane: lane,
+        job_triggers: triggers_to_add
+      )
+
+      raise "Project couldn't be created" if project.nil?
+
+      # Do this so we trigger the clone of the repo.
+      # TODO: Do this wherever it should be done, as we must redirect
+      # to the project details only when this task is finished.
+      repo = GitRepo.new(
+        git_config: repo_config,
+        provider_credential: provider_credential,
+        local_folder: project.local_repo_path,
+        async_start: false,
+        notification_service: FastlaneCI::Services.notification_service
+      )
+
+      repo.checkout_branch(branch: branch)
     end
   end
 end
