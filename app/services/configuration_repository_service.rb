@@ -27,6 +27,7 @@ module FastlaneCI
         client.create_repository(repo_name, private: true) unless configuration_repository_exists?
         create_remote_json_file("users.json", json_string: serialized_users)
         create_remote_json_file("projects.json")
+        create_remote_json_file("environment.json")
       end
     end
 
