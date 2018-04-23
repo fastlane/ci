@@ -5,6 +5,7 @@ import {map} from 'rxjs/operators';
 
 import {Project, ProjectResponse} from '../models/project';
 import {ProjectSummary, ProjectSummaryResponse} from '../models/project_summary';
+import {Repository, RepositoryResponse} from '../models/repository';
 
 // Data server is currently locally hosted.
 const HOSTNAME = '/data';
@@ -23,5 +24,11 @@ export class DataService {
     const url = `${HOSTNAME}/projects/${id}`;
     return this.http.get<ProjectResponse>(url).pipe(
         map((project) => new Project(project)));
+  }
+
+  getRepos(): Observable<Repository[]> {
+    const url = `${HOSTNAME}/repos`;
+    return this.http.get<RepositoryResponse[]>(url).pipe(map(
+      (repos) => repos.map((repo) => new Repository(repo))));
   }
 }

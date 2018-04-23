@@ -10,7 +10,8 @@ import {DataService} from '../services/data.service';
 })
 
 export class DashboardComponent implements OnInit {
-  readonly DISPLAYED_COLUMNS: string[] = ['name', 'latestBuild', 'lane'];
+  readonly DISPLAYED_COLUMNS: string[] =
+      ['name', 'latestBuild', 'repo', 'lane'];
   isLoading = true;
   projects: ProjectSummary[];
   constructor(private readonly dataService: DataService) {}

@@ -36,6 +36,9 @@
             background-color: #F3E5F5
         }
         .mat-cell {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             align-items: center;
             display: flex;
             .fci-status-icon {

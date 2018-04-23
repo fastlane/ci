@@ -11,6 +11,7 @@ describe('Project Model', () => {
     expect(project.name).toBe('the coolest project');
     expect(project.latestStatus).toBe(BuildStatus.SUCCESS);
     expect(project.lane).toBe('ios test');
+    expect(project.repoName).toBe('fastlane/TacoRocat');
     expect(project.latestDate.getTime())
         .toBe(1522883518000);  // 2018-04-04 16:11:58 -0700
   });
