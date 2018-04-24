@@ -3,12 +3,20 @@ import {fakeAsync, TestBed, tick} from '@angular/core/testing';
 
 import {BuildStatus} from '../common/constants';
 import {mockProjectListResponse, mockProjectResponse} from '../common/test_helpers/mock_project_data';
-import {mockRepositoryResponse, mockRepositoryListResponse} from '../common/test_helpers/mock_repository_data';
+import {mockRepositoryListResponse, mockRepositoryResponse} from '../common/test_helpers/mock_repository_data';
 import {Project} from '../models/project';
 import {ProjectSummary} from '../models/project_summary';
 import {Repository, RepositoryResponse} from '../models/repository';
 
-import {DataService} from './data.service';
+import {AddProjectRequest, DataService} from './data.service';
+
+const COMMIT_TRIGGER_PROJECT_REQUEST: AddProjectRequest = {
+  lane: 'ios test',
+  repo_org: 'fastlane',
+  repo_name: 'ci',
+  project_name: 'new hot project',
+  trigger_type: 'commit'
+};
 
 describe('DataService', () => {
   let mockHttp: HttpTestingController;
@@ -60,6 +68,25 @@ describe('DataService', () => {
     });
   });
 
+  describe('#addProject', () => {
+    it('should add project with commit trigger', () => {
+      let project: Project;
+      dataService.addProject(COMMIT_TRIGGER_PROJECT_REQUEST)
+          .subscribe((projectRespone) => {
+            project = projectRespone;
+          });
+
+      const projectsRequest = mockHttp.expectOne('/data/projects');
+      expect(projectsRequest.request.body).toBe(COMMIT_TRIGGER_PROJECT_REQUEST);
+      projectsRequest.flush(mockProjectResponse);
+
+      expect(project.id).toBe('12');
+      expect(project.builds.length).toBe(2);
+      expect(project.builds[0].status).toBe(BuildStatus.SUCCESS);
+      expect(project.builds[1].status).toBe(BuildStatus.FAILED);
+    });
+  });
+
   describe('#getRepo', () => {
     it('should return response mapped to Repository model', () => {
       let repositories: Repository[];
@@ -72,7 +99,8 @@ describe('DataService', () => {
 
       expect(repositories.length).toBe(3);
       expect(repositories[0].fullName).toBe('fastlane/ci');
-      expect(repositories[2].url).toBe('https://github.com/fastlane/onboarding');
+      expect(repositories[2].url)
+          .toBe('https://github.com/fastlane/onboarding');
     });
   });
 });
