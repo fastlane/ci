@@ -121,12 +121,5 @@ module FastlaneCI
         update_user!(user: new_user)
       end
     end
-
-    protected
-
-    # Not sure if this must be here or not, but we can open a discussion on this.
-    def commit_repo_changes!(message: nil, file_to_commit: nil)
-      Services.configuration_git_repo.commit_changes!(commit_message: message, file_to_commit: file_to_commit)
-    end
   end
 end
