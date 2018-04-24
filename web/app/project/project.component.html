@@ -28,7 +28,7 @@
         <ng-container matColumnDef="sha">
           <mat-header-cell *matHeaderCellDef>Commit Sha</mat-header-cell>
           <mat-cell *matCellDef="let build">
-            <a href="{{build.linkToSha}}">
+            <a [attr.href]="build.linkToSha" target="_blank">
               {{build.shortSha}}
             </a>
           </mat-cell>
