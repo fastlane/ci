@@ -62,6 +62,10 @@ Right now, `fastlane.ci` is in Alpha, we'd love for you to give it a try. Gettin
 1. `bundle exec rake prod`
 1. Up at running at [localhost:8080](http://localhost:8080/)
 
+### Using the `fastlane.ci` Angular frontend
+
+Check out [web](./web) for more details on how to set things up. Note that the Angular-based front-end doesn't cover all the features of the traditional web-frontend yet.
+
 ## Using `fastlane.ci` with Docker
 
 Currently, Docker deployment is for Linux projects only.
