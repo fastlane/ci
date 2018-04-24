@@ -10,6 +10,7 @@ module FastlaneCI
     # @param  [Hash] locals
     def write_keys_file!(
       locals: {
+        ci_base_url: nil,
         encryption_key: nil,
         ci_user_password: nil,
         ci_user_api_token: nil,

@@ -19,7 +19,8 @@ module FastlaneCI
 
     # used to construct build output links in PR statuses back to fastlane.ci build page
     def ci_base_url
-      return ENV["FASTLANE_CI_BASE_URL"]
+      # Assume we're in dev if we don't have this url
+      return ENV["FASTLANE_CI_BASE_URL"] || "http://localhost:8080"
     end
 
     # Randomly generated key, that's used to encrypt the user passwords

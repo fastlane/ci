@@ -1,5 +1,4 @@
 require_relative "../../shared/models/artifact"
-require_relative "../../shared/environment_variables"
 require_relative "./build_runner_output_row"
 
 # ideally we'd have a nicer way to inject this
