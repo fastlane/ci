@@ -16,7 +16,7 @@ module FastlaneCI
     # When the `/environment_variables/create` form is submitted:
     #
     # - creates a new ENV variables
-    get "#{HOME}/create" do
+    post "#{HOME}/create" do
       if valid_params?(params, post_parameter_list_for_validation)
         Services.environment_variable_service.create_environment_variable!(
           key: params[:key],
