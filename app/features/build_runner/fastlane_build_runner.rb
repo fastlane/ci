@@ -185,14 +185,14 @@ module FastlaneCI
               File.write(Bundler.default_lockfile, original_lockfile_contents)
               # Our bundle runtime already has the build's gems installed and loaded, so
               # we have to clean the whole Bundle.
-              Bundler.load.clean(options[:"dry-run"])
+              Bundler.load.clean(true)
               Bundler.reset!
               # Finally, we install the new runtime and require it to load the CI's dependencies
-              # as they were before the build. 
+              # as they were before the build.
               Bundler::Plugin.gemfile_install(Bundler.default_gemfile)
               definition = Bundler.definition
               definition.validate_runtime!
-              Bundler::Installer.install(Bundler.root, definition, options)
+              Bundler::Installer.install(Bundler.root, definition, { dry_run: true })
               Bundler.require
             end
           end
