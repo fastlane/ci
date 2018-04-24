@@ -24,7 +24,7 @@ module FastlaneCI
     # @param  [ProviderCredential] provider_credential
     def initialize(provider_credential:)
       @onboarding_user_client = Octokit::Client.new(access_token: provider_credential.api_token)
-      @bot_user_client = Octokit::Client.new(access_token: FastlaneCI.env.ci_user_api_token)
+      @bot_user_client = Octokit::Client.new(access_token: FastlaneCI.dot_keys.ci_user_api_token)
     end
 
     # Sets up the `fastlane.ci` configuration repository, with the necessary
@@ -180,11 +180,11 @@ module FastlaneCI
       users = [
         User.new(
           email: bot_user_email,
-          password_hash: BCrypt::Password.create(FastlaneCI.env.ci_user_password),
+          password_hash: BCrypt::Password.create(FastlaneCI.dot_keys.ci_user_password),
           provider_credentials: [
             FastlaneCI::GitHubProviderCredential.new(
               email: initial_onboarding_user_email,
-              api_token: FastlaneCI.env.initial_onboarding_user_api_token,
+              api_token: FastlaneCI.dot_keys.initial_onboarding_user_api_token,
               full_name: "Initial Onboarding User credentials"
             )
           ]
@@ -294,16 +294,16 @@ module FastlaneCI
     #
     # @return [String]
     def repo_name
-      return "" unless FastlaneCI.env.repo_url
-      return FastlaneCI.env.repo_url.split("/").last
+      return "" unless FastlaneCI.dot_keys.repo_url
+      return FastlaneCI.dot_keys.repo_url.split("/").last
     end
 
     # The short-form of the configuration repository URL `user/repo`
     #
     # @return [String]
     def repo_shortform
-      return "" unless FastlaneCI.env.repo_url
-      return FastlaneCI.env.repo_url.split("/").last(2).join("/")
+      return "" unless FastlaneCI.dot_keys.repo_url
+      return FastlaneCI.dot_keys.repo_url.split("/").last(2).join("/")
     end
   end
 end

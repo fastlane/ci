@@ -29,10 +29,10 @@ module FastlaneCI
     # 3) If the data is not valid, display an error message
     post "#{HOME}/keys" do
       if valid_params?(params, post_parameter_list_for_validation)
-        Services.environment_variable_service.write_keys_file!(locals: params)
-        flash[:success] = "#{Services.environment_variable_service.keys_file_path_relative_to_home} file written."
+        Services.dot_keys_variable_service.write_keys_file!(locals: params)
+        flash[:success] = "#{Services.dot_keys_variable_service.keys_file_path_relative_to_home} file written."
       else
-        flash[:error] = "#{Services.environment_variable_service.keys_file_path_relative_to_home} file NOT written."
+        flash[:error] = "#{Services.dot_keys_variable_service.keys_file_path_relative_to_home} file NOT written."
       end
 
       locals = { title: "Configuration" }
@@ -47,7 +47,7 @@ module FastlaneCI
 
     # @return [Hash]
     def keys
-      return FastlaneCI.env.all
+      return FastlaneCI.dot_keys.all
     end
 
     #####################################################
