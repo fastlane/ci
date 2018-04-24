@@ -1,7 +1,7 @@
 require "spec_helper"
-require "app/services/environment_variable_service"
+require "app/services/dot_keys_variable_service"
 
-describe FastlaneCI::EnvironmentVariableService do
+describe FastlaneCI::DotKeysVariableService do
   let(:fake_home_path) do
     File.join(FastlaneCI::FastlaneApp.settings.root, "spec/fixtures/files/")
   end
@@ -16,7 +16,7 @@ describe FastlaneCI::EnvironmentVariableService do
   end
 
   subject do
-    FastlaneCI::EnvironmentVariableService.new
+    FastlaneCI::DotKeysVariableService.new
   end
 
   describe "#write_keys_file!" do
@@ -40,26 +40,26 @@ describe FastlaneCI::EnvironmentVariableService do
     end
   end
 
-  describe "#all_env_variables_non_nil?" do
+  describe "#all_dot_variables_non_nil?" do
     it "returns `true` if all environment variables are non-`nil`, and non-'empty'" do
       # Environment variables are set in the `stub_environment_variables` method
-      expect(subject.all_env_variables_non_nil?).to be(true)
+      expect(subject.all_dot_variables_non_nil?).to be(true)
     end
 
     it "returns `false` if an environment variable is `nil`" do
       allow_any_instance_of(
-        FastlaneCI::EnvironmentVariables
+        FastlaneCI::DotKeysVariables
       ).to receive(:all).and_return(environment_variables.merge(encryption_key: nil))
 
-      expect(subject.all_env_variables_non_nil?).to be(false)
+      expect(subject.all_dot_variables_non_nil?).to be(false)
     end
 
     it "returns `false` if an environment variable is 'empty'" do
       allow_any_instance_of(
-        FastlaneCI::EnvironmentVariables
+        FastlaneCI::DotKeysVariables
       ).to receive(:all).and_return(environment_variables.merge(encryption_key: ""))
 
-      expect(subject.all_env_variables_non_nil?).to be(false)
+      expect(subject.all_dot_variables_non_nil?).to be(false)
     end
   end
 
