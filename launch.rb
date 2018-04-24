@@ -129,6 +129,7 @@ module FastlaneCI
       FastlaneCI::FastlaneApp.use(FastlaneCI::ProjectController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::ProviderCredentialsController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::UsersController)
+      FastlaneCI::FastlaneApp.use(FastlaneCI::EnvironmentVariablesController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::BuildController)
 
       # Load JSON controllers
