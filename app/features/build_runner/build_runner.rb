@@ -1,6 +1,9 @@
 require_relative "../../shared/models/artifact"
 require_relative "./build_runner_output_row"
 
+# ideally we'd have a nicer way to inject this
+require_relative "../../features/build/build_controller"
+
 module FastlaneCI
   # Class that represents a BuildRunner, used
   # to run tests for a given commit sha
@@ -376,10 +379,13 @@ module FastlaneCI
     def save_build_status_source!
       status_context = project.project_name
 
+      build_path = FastlaneCI::BuildController.build_url(project_id: project.id, build_number: current_build.number)
+      build_url = FastlaneCI.env.ci_base_url + build_path
       code_hosting_service.set_build_status!(
         repo: project.repo_config.git_url,
         sha: sha,
         state: current_build.status,
+        target_url: build_url,
         status_context: status_context,
         description: current_build.description
       )
