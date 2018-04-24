@@ -21,7 +21,7 @@ module FastlaneCI
           session[:user] = nil # Cleanup user's session, to enforce reloading the access tokens.
           redirect("/")
         else
-          logger.debug("User is onboarded, accessing #{route}")
+          logger.debug("fastlane.ci is setup, onboarding not required, accessing #{route}")
         end
       end
     end

@@ -3,6 +3,8 @@
 ## Normal operation focused
 During the normal operation of fastlane.ci, you'll need a few values. Some values are needed for just the first time setup, while others are required 100% of the time.
 
+FASTLANE_CI_BASE_URL="https://<myhost.mydomain>" - Needed so that we can link build output links in your PR statuses back to your ci system, eg: https://example.com/projects_erb/31203571-271e-4c87-9b32-14cf3c82d5ba/builds/42
+
 `FASTLANE_CI_ENCRYPTION_KEY="key"` - Arbitrary key you decide. This will be used for password encryption. **Note: Do not change after selecting a key value, otherwise there will be decoding issues.**
 
 `FASTLANE_CI_BOT_API_TOKEN="token"` - API token used to make contributions from `fastlane.ci` to your subscribed projects on behalf of the `fastlane.ci` bot user.

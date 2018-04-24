@@ -121,15 +121,22 @@ module FastlaneCI
       require_relative "app/features/all"
 
       # Load up all the available controllers
+      # NOTE: ORDER MATTERS HERE
+      # If using REST-style endpoints, you must list the controllers from
+      # the outter most first.
+      # Example:
+      # BuildController is `project/build/*`
+      # ProjectControoler is `project/*`
+      # BuildController build be `used` first, so it is defined here first
+      FastlaneCI::FastlaneApp.use(FastlaneCI::BuildController)
+      FastlaneCI::FastlaneApp.use(FastlaneCI::ProjectController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::ConfigurationController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::DashboardController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::LoginController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::NotificationsController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::OnboardingController)
-      FastlaneCI::FastlaneApp.use(FastlaneCI::ProjectController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::ProviderCredentialsController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::UsersController)
-      FastlaneCI::FastlaneApp.use(FastlaneCI::BuildController)
 
       # Load JSON controllers
       require_relative "app/features-json/project_json_controller"
