@@ -406,19 +406,15 @@ module FastlaneCI
         ""
       ].join("\n")
 
-      scope = "local"
-
-      unless File.directory?(File.join(local_folder, ".git"))
-        # we don't have a git repo yet, we have no choice
-        # TODO: check if we find a better way for the initial clone to work without setting system global state
-        scope = "global"
-      end
+      # we don't have a git repo yet, we have no choice and must use global
+      # TODO: check if we find a better way for the initial clone to work without setting system global state
+      @credential_scope = File.directory?(File.join(local_folder, ".git")) ? "local" : "global"
 
       # rubocop:disable Metrics/LineLength
-      use_credentials_command = "git config --#{scope} credential.helper 'store --file #{temporary_storage_path.shellescape}' #{local_folder}"
+      use_credentials_command = "git config --#{credential_scope} credential.helper 'store --file #{temporary_storage_path.shellescape}' #{local_folder}"
       # rubocop:enable Metrics/LineLength
 
-      # Uncomment if you want to debug git credential stuff, keeping it commented out because it's very noisey
+      # Uncomment next line if you want to debug git credential stuff, it's very noisey
       # logger.debug("Setting credentials for #{git_config.git_url} with command: #{use_credentials_command}")
       cmd = TTY::Command.new(printer: :quiet)
       cmd.run(store_credentials_command, input: content)

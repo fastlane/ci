@@ -382,7 +382,6 @@ module FastlaneCI
 
       build_path = FastlaneCI::BuildController.build_url(project_id: project.id, build_number: current_build.number)
       build_url = FastlaneCI.env.ci_base_url + build_path
-      logger.debug("***** build URL: #{build_url}")
       code_hosting_service.set_build_status!(
         repo: project.repo_config.git_url,
         sha: sha,
