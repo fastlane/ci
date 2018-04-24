@@ -38,7 +38,7 @@ module FastlaneCI
     end
 
     def create_user!(id: nil, email: nil, password: nil)
-      email = email.strip
+      email.strip!
 
       unless user_data_source.user_exist?(email: email)
         logger.debug("Creating account #{email}")
@@ -71,7 +71,7 @@ module FastlaneCI
     end
 
     def login(email:, password:)
-      email = email.strip
+      email.strip!
 
       logger.debug("Attempting to login user with email #{email}")
       user = user_data_source.login(email: email, password: password)
