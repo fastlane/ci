@@ -44,7 +44,10 @@ module FastlaneCI
 
     def environment_variables=(environment_variables)
       JSONEnvironmentDataSource.file_semaphore.synchronize do
-        File.write(environment_file_path, JSON.pretty_generate(environment_variables.map(&:to_object_dictionary)))
+        content_to_store = environment_variables.map do |current_environment_variable|
+          current_environment_variable.to_object_dictionary(ignore_instance_variables: [:@value])
+        end
+        File.write(environment_file_path, JSON.pretty_generate(content_to_store))
       end
 
       # Reload the variables to sync them up with the persisted file store
