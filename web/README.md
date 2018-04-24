@@ -11,7 +11,7 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 ```
 ng build --deploy-url="/.dist" --dev -w
 ```
-Navigate to `http://localhost:8080/`. The app will automatically reload if you change any of the source files.
+Navigate to [http://localhost:8080](http://localhost:8080). The app will automatically reload if you change any of the source files.
 
 ## Running unit tests
 
