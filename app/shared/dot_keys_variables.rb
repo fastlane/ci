@@ -4,7 +4,7 @@ module FastlaneCI
   # Class wrapping fastlane CI environment variables that people using fastlane.ci should care about
   # NOTE: This doesn't include the fastlane.ci-developer-sepcific environment variables primarily used
   # during development of fastlane.ci by the fastlane
-  class EnvironmentVariables
+  class DotKeysVariables
     # @return [Hash]
     def all
       {
