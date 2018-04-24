@@ -380,7 +380,7 @@ module FastlaneCI
       status_context = project.project_name
 
       build_path = FastlaneCI::BuildController.build_url(project_id: project.id, build_number: current_build.number)
-      build_url = FastlaneCI.env.ci_base_url + build_path
+      build_url = FastlaneCI.dot_keys.ci_base_url + build_path
       code_hosting_service.set_build_status!(
         repo: project.repo_config.git_url,
         sha: sha,
