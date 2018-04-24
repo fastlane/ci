@@ -1,10 +1,12 @@
 require "securerandom"
 require_relative "repo_config"
 require_relative "provider_credential"
+require_relative "../json_convertible"
 
 module FastlaneCI
   # Contains the metadata about a git repo
   class GitHubRepoConfig < RepoConfig
+    include FastlaneCI::JSONConvertible
     include FastlaneCI::Logging
 
     # GitHub full_name, like fastlane/ci (vs just `ci`)

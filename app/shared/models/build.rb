@@ -1,7 +1,11 @@
+require_relative "../json_convertible"
+
 module FastlaneCI
   # Represents a build, part of a project, usually many builds per project
   # One build is identified using the `build.project.id` + `build.number`
   class Build
+    include FastlaneCI::JSONConvertible
+
     # Note, BUILD_STATUSES determine how a build is persisted and how the information is pushed to remote.
     # Example: on success/failure/pending, we automatically update status local + remote
     # With missing_fastfile, we ultimately set a `:failure` when we send a status update to github
@@ -76,6 +80,24 @@ module FastlaneCI
 
     def link_to_remote_commit
       project.repo_config.link_to_remote_commit(sha)
+    end
+
+    def self.attribute_name_to_json_proc_map
+      timestamp_to_json_proc = proc { |timestamp|
+        timestamp.strftime("%s").to_i
+      }
+      return { :@timestamp => timestamp_to_json_proc }
+    end
+
+    def self.json_to_attribute_name_proc_map
+      seconds_to_datetime_proc = proc { |seconds|
+        Time.at(seconds.to_i)
+      }
+      return { :@timestamp => seconds_to_datetime_proc }
+    end
+
+    def self.attribute_to_type_map
+      return { :@artifacts => Artifact }
     end
   end
 end

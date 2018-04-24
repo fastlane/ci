@@ -1,8 +1,11 @@
+require_relative "../json_convertible"
 require "securerandom"
 
 module FastlaneCI
   # All metadata about a notification.
   class Notification
+    include FastlaneCI::JSONConvertible
+
     # Enum for notification priority
     #
     # @return [Hash]

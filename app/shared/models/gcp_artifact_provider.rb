@@ -2,6 +2,7 @@ require_relative "artifact_provider"
 require_relative "artifact"
 require_relative "build"
 require_relative "project"
+require_relative "../json_convertible"
 
 require "google/cloud/storage"
 require "pathname"
@@ -9,6 +10,8 @@ require "pathname"
 module FastlaneCI
   # ArtifactProvider backed by a Google Cloud Platform Storage bucket.
   class GCPStorageArtifactProvider < ArtifactProvider
+    include FastlaneCI::JSONConvertible
+
     class << self
       # Provide a simple default root_path for users that don't want much configuration.
       def root_browser

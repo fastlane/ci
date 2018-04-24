@@ -10,64 +10,6 @@ require_relative "../../shared/models/provider_credential"
 require_relative "../../shared/logging_module"
 
 module FastlaneCI
-  # Mixin for JobTrigger which is in an Array on Project
-  class JobTrigger
-    include FastlaneCI::JSONConvertible
-  end
-
-  # Mixin for Project to enable some basic JSON marshalling and unmarshalling
-  class Project
-    include FastlaneCI::JSONConvertible
-
-    def self.attribute_to_type_map
-      return { :@repo_config => GitHubRepoConfig }
-    end
-
-    def self.map_enumerable_type(enumerable_property_name: nil, current_json_object: nil)
-      if enumerable_property_name == :@job_triggers
-        type = current_json_object["type"]
-        # currently only supports 3 triggers
-        job_trigger = nil
-        if type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit]
-          job_trigger = CommitJobTrigger.from_json!(current_json_object)
-        elsif type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:nightly]
-          job_trigger = NightlyJobTrigger.from_json!(current_json_object)
-        elsif type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual]
-          job_trigger = ManualJobTrigger.from_json!(current_json_object)
-        else
-          raise "Unable to parse JobTrigger type: #{type} from #{current_json_object}"
-        end
-        job_trigger
-      end
-    end
-
-    def self.json_to_attribute_name_proc_map
-      provider_object_to_provider = proc { |object|
-        provider_class = Object.const_get(object["class_name"])
-        if provider_class.include?(JSONConvertible)
-          provider = provider_class.from_json!(object)
-          provider
-        end
-      }
-      return { :@artifact_provider => provider_object_to_provider }
-    end
-
-    def self.attribute_name_to_json_proc_map
-      provider_to_provider_object = proc { |provider|
-        if provider.class.include?(JSONConvertible)
-          hash = provider.to_object_dictionary
-          hash
-        end
-      }
-      return { :@artifact_provider => provider_to_provider_object }
-    end
-  end
-
-  # Mixin for GitHubRepoConfig to enable some basic JSON marshalling and unmarshalling
-  class GitHubRepoConfig
-    include FastlaneCI::JSONConvertible
-  end
-
   # (default) Store configuration in git
   class JSONProjectDataSource < ProjectDataSource
     include FastlaneCI::JSONDataSource
