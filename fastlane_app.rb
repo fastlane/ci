@@ -10,6 +10,7 @@ require_relative "app/shared/logging_module"
 require_relative "app/shared/dot_keys_variables"
 require_relative "app/shared/fastlane_ci_error" # TODO: move somewhere else
 require_relative "app/features/build_runner/build_runner"
+require_relative "app/features-json/jwt_auth"
 
 # All things fastlane ci related go in this module
 module FastlaneCI
@@ -48,6 +49,7 @@ module FastlaneCI
     # display of real-time output
     set(:server, "thin")
     if ENV["WEB_APP"]
+      use(FastlaneCI::JwtAuth)
       # Anything except a data route
       get %r{/(?!data.*).*} do
         # Use Angular Web App instead
