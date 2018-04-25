@@ -42,42 +42,37 @@ module FastlaneCI
       key.strip!
       value.strip!
 
-      # unless environment_variable_service.user_exist?(email: email)
-      logger.debug("Creating ENV variable with key #{key}")
-      return environment_variable_data_source.create_environment_variable!(key: key, value: value)
-      # end
+      if environment_variable_data_source.find_environment_variable(environment_variable_key: key).nil?
+        logger.info("Creating ENV variable with key #{key}")
+        return environment_variable_data_source.create_environment_variable!(key: key, value: value)
+      end
 
-      # logger.debug("Account #{email} already exists!")
+      logger.info("Environment Variable #{key} already exists!")
       return nil
     end
 
-    # TODO: finish the items below - taken from user_service
-    # def update_user!(user: nil)
-    #   success = environment_variable_data_source.update_user!(user: user)
-    #   if success
-    #     # TODO: remove this message if https://github.com/fastlane/ci/issues/292 is fixed
-    #     # rubocop:disable Metrics/LineLength
-    #     logger.info("Updated user #{user.email}, that means you should call `find_user(id:)` see https://github.com/fastlane/ci/issues/292")
-    #     # rubocop:enable Metrics/LineLength
-    #   end
-    #   return success
-    # end
+    def update_environment_variable!(environment_variable:)
+      key = environment_variable.key
 
-    # def delete_environment_variable!(environment_variable: nil)
-    #   environment_variable_data_source.delete_environment_variable!(environment_variable: environment_variable)
-    # end
+      if environment_variable_data_source.find_environment_variable(environment_variable_key: key).nil?
+        logger.info("No existing ENV variable with key #{key}")
+        return false
+      end
 
-    # # @return [User]
-    # def find_user(id: nil)
-    #   return environment_variable_data_source.find_user(id: id)
-    # end
+      return environment_variable_data_source.update_environment_variable!(
+        environment_variable: environment_variable
+      )
+    end
 
-    protected
+    def delete_environment_variable!(environment_variable_key:)
+      existing = environment_variable_data_source.find_environment_variable(
+        environment_variable_key: environment_variable_key
+      )
 
-    # Not sure if this must be here or not, but we can open a discussion on this.
-    # TODO: this method still needed?
-    def commit_repo_changes!(message: nil, file_to_commit: nil)
-      Services.configuration_git_repo.commit_changes!(commit_message: message, file_to_commit: file_to_commit)
+      return false unless existing
+      return environment_variable_data_source.delete_environment_variable!(
+        environment_variable: existing
+      )
     end
   end
 end

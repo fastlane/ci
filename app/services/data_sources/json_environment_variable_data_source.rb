@@ -30,7 +30,7 @@ module FastlaneCI
       reload_environment
     end
 
-    def environment_file_path(path: "environment.json")
+    def environment_file_path(path: "environment_variables.json")
       # TODO: Remove this, for some reason `json_folder_path` is `nil` here
       json_folder_path = File.expand_path("~/.fastlane/ci/fastlane-ci-config")
       File.join(json_folder_path, path)
@@ -69,34 +69,17 @@ module FastlaneCI
 
     # TODO: this isn't threadsafe
     def update_environment_variable!(environment_variable: nil)
-      # TODO
-      # user_index, existing_user = find_user_index_and_existing_user(user: user)
-
-      # if existing_user.nil?
-      #   logger.debug("Couldn't update user #{user.email} because they don't exist")
-      #   raise "Couldn't update user #{user.email} because they don't exist"
-      # else
-      #   users = self.users
-      #   users[user_index] = user
-      #   self.users = users
-      #   logger.debug("Updating user #{existing_user.email}, writing out users.json to #{environment_file_path}")
-      #   return true
-      # end
+      existing = find_environment_variable(environment_variable_key: environment_variable.key)
+      existing.value = environment_variable.value
     end
 
     def delete_environment_variable!(environment_variable: nil)
-      # user_index, existing_user = find_user_index_and_existing_user(user: user)
-
-      # if existing_user.nil?
-      #   logger.debug("Couldn't delete user #{user.email} because they don't exist")
-      #   raise "Couldn't delete user #{user.email} because they don't exist"
-      # else
-      #   users.delete_at(user_index)
-      #   logger.debug("Deleted user #{existing_user.email}, writing out users.json to #{environment_file_path}")
-      #   return true
-      # end
+      environment_variables.delete(environment_variable)
+      return true
     end
 
+    # The data source isn't responsible for checking for existing data
+    # This is done so in the service
     def create_environment_variable!(key: nil, value: nil)
       environment_variables = self.environment_variables
       new_environment_variable = EnvironmentVariable.new(
@@ -107,30 +90,17 @@ module FastlaneCI
       environment_variables.push(new_environment_variable)
       self.environment_variables = environment_variables
       logger.debug("Added ENV variable #{new_environment_variable.key}, " \
-        "writing out environment.json to #{environment_file_path}")
+        "writing out environment_variables.json to #{environment_file_path}")
       return new_environment_variable
     end
 
-    # Finds a user with a given id
+    # Finds an environment variable with a given key
     #
-    # @return [User]
-    # def find_user(id: nil)
-    #   return users.detect { |user| user.id == id }
-    # end
-
-    private
-
-    # Finds the index of the user, and returns an existing `user` if they exist
-    #
-    # @param  [User] `user` a user to lookup by `user.email`
-    # @return [Integer] `user_index` in the `users` array
-    # @return [User] `existing_user` in the `users.json` file
-    # def find_user_index_and_existing_user(user:)
-    #   users.each.with_index do |old_user, index|
-    #     return [index, old_user] if old_user.id == user.id
-    #   end
-
-    #   return [nil, nil]
-    # end
+    # @return [EnvironmentVariable]
+    def find_environment_variable(environment_variable_key:)
+      return environment_variables.detect do |environment_variable|
+        environment_variable.key == environment_variable_key
+      end
+    end
   end
 end

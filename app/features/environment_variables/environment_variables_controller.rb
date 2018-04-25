@@ -4,7 +4,7 @@ require_relative "../../shared/authenticated_controller_base"
 require_relative "../../services/services"
 
 module FastlaneCI
-  # A CRUD controller to manage users
+  # A CRUD controller to manage environment variables
   class EnvironmentVariablesController < AuthenticatedControllerBase
     HOME = "/environment_variables_erb"
 
@@ -16,43 +16,50 @@ module FastlaneCI
     # When the `/environment_variables/create` form is submitted:
     #
     # - creates a new ENV variables
-    post "#{HOME}/create" do
+    get "#{HOME}/create" do
+      new_environment_variable = nil
       if valid_params?(params, post_parameter_list_for_validation)
-        Services.environment_variable_service.create_environment_variable!(
+        new_environment_variable = Services.environment_variable_service.create_environment_variable!(
           key: params[:key],
           value: params[:value]
         )
       end
 
+      if new_environment_variable.nil?
+        # Print out error message here, either parameters were invalid,
+        # or key was already taken
+        logger.error("Something went wrong")
+      end
+
       redirect(HOME)
     end
 
-    # # Updates a user existing in the configuration repository `users.json`
-    # post "#{HOME}/update" do
-    #   if valid_params?(params, post_parameter_list_for_validation)
-    #     new_user = User.new(
-    #       id: params[:id],
-    #       email: params[:email]
-    #     )
+    # Updates an environment variable
+    get "#{HOME}/update" do
+      if valid_params?(params, post_parameter_list_for_validation)
+        environment_variable = EnvironmentVariable.new(
+          key: params[:key],
+          value: params[:value]
+        )
 
-    #     Services.user_service.update_user!(new_user)
-    #   end
+        success = Services.environment_variable_service.update_environment_variable!(
+          environment_variable: environment_variable
+        )
+        logger.error("Something went wrong") unless success
+      end
 
-    #   redirect(HOME)
-    # end
+      redirect(HOME)
+    end
 
-    # # Deletes a user existing in the configuration repository `users.json`
-    # post "#{HOME}/delete/*" do |user_id|
-    #   user = Services.user_service.find_user(id: user_id)
+    # Deletes an environment variable existing in the configuration repository `environment_variables.json`
+    get "#{HOME}/delete/*" do |environment_variable_key|
+      success = Services.environment_variable_service.delete_environment_variable!(
+        environment_variable_key: environment_variable_key
+      )
+      logger.error("Something went wrong") unless success
 
-    #   if !user.nil?
-    #     Services.user_service.delete_user!(user: user)
-    #   else
-    #     logger.debug("User not deleted, since user with `id` #{user_id} does not exist.")
-    #   end
-
-    #   redirect(back)
-    # end
+      redirect(HOME)
+    end
 
     private
 

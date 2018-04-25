@@ -21,7 +21,7 @@ module FastlaneCI
 
     # We also have to provide this as a custom reader and potentially re-encrypt
     # the value. This is needed as `JSONConvertible` accesses @ variables directly.
-    # Also `JSONConvertible` loads the existing `environment.json` and sets the
+    # Also `JSONConvertible` loads the existing `environment_variables.json` and sets the
     # values directly to the @ variables without using the setter
     def encrypted_value
       Base64.encode64(StringEncrypter.encode(@value))
@@ -31,8 +31,8 @@ module FastlaneCI
     # on the fly, as the `JSONConvertible` accesses @ variables directly instead of
     # using the setter
     def value
-      if @encrypted_value.to_s.length > 0
-        @value ||= StringEncrypter.decode(Base64.decode64(@encrypted_value))
+      if @encrypted_value.to_s.length > 0 && @value.to_s.length == 0
+        @value = StringEncrypter.decode(Base64.decode64(@encrypted_value))
       end
       return @value
     end
