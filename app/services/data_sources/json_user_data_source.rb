@@ -189,7 +189,7 @@ module FastlaneCI
 
     # Finds the index of the user, and returns an existing `user` if they exist
     #
-    # @param  [User] `user` a user to lookup by `user.email`
+    # @param  [User] `user` a user to lookup by `user.id`
     # @return [Integer] `user_index` in the `users` array
     # @return [User] `existing_user` in the `users.json` file
     def find_user_index_and_existing_user(user:)
