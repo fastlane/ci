@@ -18,6 +18,9 @@ module FastlaneCI
     # @return [String] The git sha of the commit this build was run for
     attr_reader :sha
 
+    # @return [String] The link to the sha of the commit this build was run for
+    attr_reader :link_to_sha
+
     # @return [DateTime] Start time
     attr_reader :timestamp
 
@@ -28,6 +31,7 @@ module FastlaneCI
       @status = build.status
       @duration = build.duration
       @sha = build.sha
+      @link_to_sha = build.link_to_remote_commit
       @timestamp = build.timestamp
     end
   end
