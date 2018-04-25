@@ -27,8 +27,11 @@
         <!-- Lane Column -->
         <ng-container matColumnDef="sha">
           <mat-header-cell *matHeaderCellDef>Commit Sha</mat-header-cell>
-          <!-- TODO: link this to the GitHub commit -->
-          <mat-cell *matCellDef="let build">{{build.shortSha}}</mat-cell>
+          <mat-cell *matCellDef="let build">
+            <a [attr.href]="build.linkToSha" target="_blank">
+              {{build.shortSha}}
+            </a>
+          </mat-cell>
         </ng-container>
 
         <mat-header-row *matHeaderRowDef="DISPLAYED_COLUMNS"></mat-header-row>

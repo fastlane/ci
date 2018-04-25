@@ -8,12 +8,19 @@ module FastlaneCI
     # @return [Hash]
     def all
       {
+        ci_base_url: ci_base_url,
         encryption_key: encryption_key,
         ci_user_password: ci_user_password,
         ci_user_api_token: ci_user_api_token,
         repo_url: repo_url,
         initial_onboarding_user_api_token: initial_onboarding_user_api_token
       }
+    end
+
+    # used to construct build output links in PR statuses back to fastlane.ci build page
+    def ci_base_url
+      # Assume we're in dev if we don't have this url
+      return ENV["FASTLANE_CI_BASE_URL"] || "http://localhost:8080"
     end
 
     # Randomly generated key, that's used to encrypt the user passwords

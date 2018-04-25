@@ -7,6 +7,7 @@ export interface BuildSummaryResponse {
   status: FastlaneStatus;
   duration: number;
   sha: string;
+  link_to_sha: string;
   timestamp: string;
 }
 
@@ -16,12 +17,14 @@ export class BuildSummary {
   readonly duration: number;
   readonly sha: string;
   readonly shortSha: string;
+  readonly linkToSha: string;
   readonly date: Date;
 
   constructor(buildSummary: BuildSummaryResponse) {
     this.number = buildSummary.number;
     this.duration = buildSummary.duration;
     this.sha = buildSummary.sha;
+    this.linkToSha = buildSummary.link_to_sha;
     this.shortSha = this.sha.slice(0, SHORT_SHA_LENGTH);
     this.status = fastlaneStatusToEnum(buildSummary.status);
     this.date = new Date(buildSummary.timestamp);

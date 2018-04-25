@@ -2,7 +2,7 @@ require_relative "./file_writers/keys_writer"
 require_relative "./services"
 
 module FastlaneCI
-  # Logic pertaining to environment variable configuration
+  # Logic pertaining to .keys environment variable configuration, this only includes the .keys file
   class DotKeysVariableService
     # Write .keys configuration file with proper environment variables. Don't
     # override old environment variables with `nil` values
@@ -10,6 +10,7 @@ module FastlaneCI
     # @param  [Hash] locals
     def write_keys_file!(
       locals: {
+        ci_base_url: nil,
         encryption_key: nil,
         ci_user_password: nil,
         ci_user_api_token: nil,

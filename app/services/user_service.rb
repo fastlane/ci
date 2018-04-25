@@ -38,7 +38,7 @@ module FastlaneCI
     end
 
     def create_user!(id: nil, email: nil, password: nil)
-      email = email.strip
+      email.strip!
 
       unless user_data_source.user_exist?(email: email)
         logger.debug("Creating account #{email}")
@@ -71,7 +71,7 @@ module FastlaneCI
     end
 
     def login(email:, password:)
-      email = email.strip
+      email.strip!
 
       logger.debug("Attempting to login user with email #{email}")
       user = user_data_source.login(email: email, password: password)
@@ -120,13 +120,6 @@ module FastlaneCI
         )
         update_user!(user: new_user)
       end
-    end
-
-    protected
-
-    # Not sure if this must be here or not, but we can open a discussion on this.
-    def commit_repo_changes!(message: nil, file_to_commit: nil)
-      Services.configuration_git_repo.commit_changes!(commit_message: message, file_to_commit: file_to_commit)
     end
   end
 end

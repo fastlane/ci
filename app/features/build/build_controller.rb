@@ -1,11 +1,13 @@
-require_relative "../../shared/authenticated_controller_base"
+require_relative "../../shared/controller_base"
 require_relative "./build_websocket_backend"
+require_relative "../../services/services"
 require "pathname"
 require "uri"
 
 module FastlaneCI
   # Controller for a single project view. Responsible for updates, triggering builds, and displaying project info
-  class BuildController < AuthenticatedControllerBase
+  # THIS IS NOT PROTECTED BY AUTHORIZATION DO NOT MUTATE DATA IN THIS CONTROLLER
+  class BuildController < ControllerBase
     HOME = "/projects_erb/*/builds"
     COLOR_MAPPING = {
       30 => :black,
@@ -18,12 +20,16 @@ module FastlaneCI
       37 => :white
     }
 
+    def self.build_url(project_id:, build_number:)
+      return HOME.gsub("*", project_id) + "/#{build_number}"
+    end
+
     use(FastlaneCI::BuildWebsocketBackend)
 
     get "#{HOME}/*/artifact/*" do |project_id, build_number, artifact_id|
       build_number = build_number.to_i
 
-      project = user_project_with_id(project_id: project_id)
+      project = FastlaneCI::Services.project_service.project_by_id(project_id)
       build = project.builds.find { |b| b.number == build_number }
 
       artifact = build.artifacts.find { |find_artifact| find_artifact.id == artifact_id }
@@ -58,10 +64,13 @@ module FastlaneCI
       end
     end
 
+    # Since this controller is now not protected by authorization
+    # we might want to consider protecting this by ensuring we can only call it with
+    # the current project somehow?
     get "#{HOME}/*" do |project_id, build_number|
       build_number = build_number.to_i
 
-      project = user_project_with_id(project_id: project_id)
+      project = FastlaneCI::Services.project_service.project_by_id(project_id)
       raise "Project #{project_id} not found" if project.nil?
 
       build = project.builds.find { |b| b.number == build_number }
