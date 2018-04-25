@@ -49,7 +49,6 @@ module FastlaneCI
     # display of real-time output
     set(:server, "thin")
     if ENV["WEB_APP"]
-      use(FastlaneCI::JwtAuth)
       # Anything except a data route
       get %r{/(?!data.*).*} do
         # Use Angular Web App instead

@@ -3,6 +3,7 @@ require_relative "../services/dot_keys_variable_service"
 require "jwt"
 
 module FastlaneCI
+  # API Middleware responsible of authenticate all the requests that uses it.
   class JwtAuth
     def initialize(app)
       @app = app
@@ -11,7 +12,7 @@ module FastlaneCI
     def call(env)
       options = { algorithm: "HS256", iss: "fastlane.ci" }
       bearer = env.fetch("HTTP_AUTHORIZATION", "").slice(7..-1)
-      payload, header = JWT.decode(bearer, FastlaneCI.dot_keys.encryption_key, true, options)
+      payload, = JWT.decode(bearer, FastlaneCI.dot_keys.encryption_key, true, options)
 
       env[:scopes] = payload["scopes"]
       env[:user] = payload["user"]
