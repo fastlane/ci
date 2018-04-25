@@ -181,7 +181,7 @@ module FastlaneCI
     # Finds a user with a given id
     #
     # @return [User]
-    def find_user(id: nil)
+    def find_user(id:)
       return users.detect { |user| user.id == id }
     end
 
