@@ -35,7 +35,7 @@ module FastlaneCI
     end
 
     # Updates an environment variable
-    get "#{HOME}/update" do
+    post "#{HOME}/update" do
       if valid_params?(params, post_parameter_list_for_validation)
         environment_variable = EnvironmentVariable.new(
           key: params[:key],
@@ -52,7 +52,7 @@ module FastlaneCI
     end
 
     # Deletes an environment variable existing in the configuration repository `environment_variables.json`
-    get "#{HOME}/delete/*" do |environment_variable_key|
+    post "#{HOME}/delete/*" do |environment_variable_key|
       success = Services.environment_variable_service.delete_environment_variable!(
         environment_variable_key: environment_variable_key
       )
