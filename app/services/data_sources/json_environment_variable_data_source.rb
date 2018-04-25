@@ -6,12 +6,12 @@ require_relative "../../shared/json_convertible"
 require_relative "../../shared/models/environment_variable"
 
 module FastlaneCI
-  # Mixin the JSONConvertible class for User
+  # Mixin the JSONConvertible class for EnvironmentVariable
   class EnvironmentVariable
     include FastlaneCI::JSONConvertible
   end
 
-  # Data source for users backed by JSON
+  # Data source for environment variables backed by JSON
   class JSONEnvironmentDataSource < EnvironmentDataSource
     include FastlaneCI::JSONDataSource
     include FastlaneCI::Logging
@@ -61,8 +61,8 @@ module FastlaneCI
           return
         end
 
-        @environment = JSON.parse(File.read(environment_file_path)).map do |user_object_hash|
-          EnvironmentVariable.from_json!(user_object_hash)
+        @environment = JSON.parse(File.read(environment_file_path)).map do |environment_variable_hash|
+          EnvironmentVariable.from_json!(environment_variable_hash)
         end
       end
     end
