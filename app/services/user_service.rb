@@ -37,7 +37,7 @@ module FastlaneCI
       user_data_source.users
     end
 
-    def create_user!(id: nil, email: nil, password: nil)
+    def create_user!(id:, email:, password:)
       email.strip!
 
       unless user_data_source.user_exist?(email: email)
@@ -49,24 +49,16 @@ module FastlaneCI
       return nil
     end
 
-    # TODO: THIS ALWAYS TURNS THE PROVIDER CREDENTIALS INTO HASHES
-    def update_user!(user: nil)
-      success = user_data_source.update_user!(user: user)
-      if success
-        # TODO: remove this message if https://github.com/fastlane/ci/issues/292 is fixed
-        # rubocop:disable Metrics/LineLength
-        logger.info("Updated user #{user.email}, that means you should call `find_user(id:)` see https://github.com/fastlane/ci/issues/292")
-        # rubocop:enable Metrics/LineLength
-      end
-      return success
+    def update_user!(user:)
+      return user_data_source.update_user!(user: user)
     end
 
-    def delete_user!(user: nil)
+    def delete_user!(user:)
       user_data_source.delete_user!(user: user)
     end
 
     # @return [User]
-    def find_user(id: nil)
+    def find_user(id:)
       return user_data_source.find_user(id: id)
     end
 
