@@ -31,12 +31,12 @@ module FastlaneCI
     # Updates a user existing in the configuration repository `users.json`
     post "#{HOME}/update" do
       if valid_params?(params, post_parameter_list_for_validation)
-        new_user = User.new(
+        updated_user = User.new(
           id: params[:id],
           email: params[:email]
         )
 
-        Services.user_service.update_user!(new_user)
+        Services.user_service.update_user!(user: updated_user)
       end
 
       redirect(HOME)
