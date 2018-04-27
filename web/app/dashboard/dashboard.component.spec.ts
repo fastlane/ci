@@ -1,6 +1,7 @@
 import 'rxjs/add/observable/of';
 
 import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {MatDialogModule} from '@angular/material';
 import {RouterModule} from '@angular/router';
 import {MomentModule} from 'ngx-moment';
 import {Observable} from 'rxjs/Observable';
@@ -26,8 +27,8 @@ describe('DashboardComponent', () => {
     TestBed
         .configureTestingModule({
           imports: [
-            SharedMaterialModule, CommonComponentsModule, MomentModule,
-            RouterModule
+            MatDialogModule, SharedMaterialModule, CommonComponentsModule,
+            MomentModule, RouterModule
           ],
           declarations: [
             DashboardComponent,
