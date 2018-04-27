@@ -137,6 +137,7 @@ module FastlaneCI
       FastlaneCI::FastlaneApp.use(FastlaneCI::OnboardingController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::ProviderCredentialsController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::UsersController)
+      FastlaneCI::FastlaneApp.use(FastlaneCI::EnvironmentVariablesController)
 
       # Load JSON controllers
       require_relative "app/features-json/project_json_controller"

@@ -124,6 +124,7 @@ module FastlaneCI
       logger.debug("Creating remote configuration files `users.json` and `projects.json`")
       create_remote_json_file("users.json", json_string: serialized_users)
       create_remote_json_file("projects.json")
+      create_remote_json_file("environment_variables.json")
     end
 
     # Adds the bot user as a collaborator to the fastlane.ci configuration

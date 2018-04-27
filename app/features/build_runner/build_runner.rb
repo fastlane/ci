@@ -178,6 +178,8 @@ module FastlaneCI
     def setup_build_specific_environment_variables
       @environment_variables_set = []
 
+      # Set the CI specific Environment variables first
+
       # We try to follow the existing formats
       # https://wiki.jenkins.io/display/JENKINS/Building+a+software+project
       env_mapping = {
@@ -203,6 +205,19 @@ module FastlaneCI
       env_mapping[:CI_BRANCH] = env_mapping[:GIT_BRANCH]
       # env_mapping[:CI_PULL_REQUEST] = nil # TODO: do we have the PR information here?
 
+      # Now that we have the CI specific ENV variables, let's go through the ENV variables
+      # the user defined in their configuration
+      Services.environment_variable_service.environment_variables.each do |environment_variable|
+        if env_mapping.key?(environment_variable.key.to_sym)
+          # TODO: this is probably large enough of an issue to use the fastlane.ci
+          #       notification system to show an error to the user
+          logger.error("Overwriting CI specific environment variable of key #{environment_variable.key} - " \
+            "this is not recommended")
+        end
+        env_mapping[environment_variable.key.to_sym] = environment_variable.value
+      end
+
+      # Finally, set all the ENV variables for the given build
       env_mapping.each do |key, value|
         set_build_specific_env_variable(key: key, value: value)
       end

@@ -41,6 +41,7 @@ describe FastlaneCI::ConfigurationRepositoryService do
 
       expect(service).to receive(:create_remote_json_file).with("users.json", any_args)
       expect(service).to receive(:create_remote_json_file).with("projects.json")
+      expect(service).to receive(:create_remote_json_file).with("environment_variables.json")
       service.setup_private_configuration_repo
     end
   end
