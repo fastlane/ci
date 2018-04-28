@@ -1,3 +1,4 @@
+@import "../../shared/layout";
 .fci-dashboard-header {
     background-color: #E1BEE7;
     .fci-dashboard-welcome {
@@ -17,7 +18,6 @@
             line-height: 24px;
         }
         button {
-            text-transform: uppercase;
             margin-top: 25px;
         }
     }
