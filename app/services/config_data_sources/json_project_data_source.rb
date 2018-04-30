@@ -120,14 +120,7 @@ module FastlaneCI
         saved_projects = JSON.parse(File.read(path)).map do |project_json|
           project = Project.from_json!(project_json)
 
-          # Now load the project specific files here
-          # that are in
-          #
-          #   `projects/[project_id]/[file].json
-          #
-          # more information on https://github.com/fastlane/ci/issues/643
-          project_specific_path = File.join(git_repo.file_path("projects"), project.id)
-          environment_variable_data_source = JSONEnvironmentDataSource.create(project_specific_path)
+          environment_variable_data_source = project_specific_environment_variables_data_source(project: project)
           project.environment_variables = environment_variable_data_source.environment_variables
 
           project
@@ -158,7 +151,15 @@ module FastlaneCI
 
     def projects=(projects)
       JSONProjectDataSource.projects_file_semaphore.synchronize do
-        File.write(git_repo.file_path("projects.json"), JSON.pretty_generate(projects.map(&:to_object_dictionary)))
+        # We have to ignore the `environment_variables` instance variable, as it's stored in a separate file
+        json_data = JSON.pretty_generate(projects.map do |project|
+          # While we iterate, also store the project specific configuration files
+          environment_variable_data_source = project_specific_environment_variables_data_source(project: project)
+          environment_variable_data_source.environment_variables = project.environment_variables
+
+          project.to_object_dictionary(ignore_instance_variables: [:@environment_variables])
+        end)
+        File.write(git_repo.file_path("projects.json"), json_data)
       end
     end
 
@@ -218,6 +219,7 @@ module FastlaneCI
       unless project.nil?
         raise "project must be configured with an instance of #{Project.name}" unless project.class <= Project
       end
+
       project_index = nil
       existing_project = nil
       projects.each.with_index do |old_project, index|
@@ -266,6 +268,19 @@ module FastlaneCI
         projects.delete_at(project_index)
         self.projects = projects
       end
+    end
+
+    private
+
+    def project_specific_environment_variables_data_source(project: nil)
+      # Now access the project specific files here
+      # that are in
+      #
+      #   `projects/[project_id]/[file].json
+      #
+      # more information on https://github.com/fastlane/ci/issues/643
+      project_specific_path = File.join(git_repo.file_path("projects"), project.id)
+      return JSONEnvironmentDataSource.create(project_specific_path)
     end
   end
 end
