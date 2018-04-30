@@ -48,7 +48,7 @@ module FastlaneCI
     end
 
     def self.verify_app_built
-      unless ENV["ERB_CLIENT"]
+      unless ENV["FASTLANE_CI_ERB_CLIENT"]
         app_exists = File.file?(File.join("public", ".dist", "index.html"))
 
         unless app_exists
@@ -121,7 +121,7 @@ module FastlaneCI
       require_relative "app/features/all"
       # Load up all the available controllers
 
-      if ENV["ERB_CLIENT"]
+      if ENV["FASTLANE_CI_ERB_CLIENT"]
         # NOTE: ORDER MATTERS HERE
         # If using REST-style endpoints, you must list the controllers from
         # the outter most first.
