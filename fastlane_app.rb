@@ -47,7 +47,7 @@ module FastlaneCI
     # which is required to support web socket streams for the
     # display of real-time output
     set(:server, "thin")
-    if ENV["ERB_CLIENT"]
+    if ENV["FASTLANE_CI_ERB_CLIENT"]
       get "/" do
         if session[:user]
           redirect("/dashboard_erb")
