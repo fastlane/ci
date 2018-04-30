@@ -1,3 +1,50 @@
-<p>
-  add-project-dialog works!
-</p>
+<div mat-dialog-title>Add a project</div>
+<div mat-dialog-content>
+  <div class="fci-dialog-form-section fci-input-container">
+    <div class="fci-section-title">For my project</div>
+    <input placeholder="Project Name" [(ngModel)]="project.project_name">
+  </div>
+  <div class="fci-dialog-form-section fci-input-container">
+    <div class="fci-section-title">With the repo</div>
+    <mat-select class="fci-repo-select" [(value)]="project.repo_name">
+      <mat-option *ngFor="let repo of repositories" [value]="repo.fullName">
+        {{repo.fullName}}
+      </mat-option>
+    </mat-select>
+  </div>
+  <div class="fci-dialog-form-section fci-input-container">
+    <div class="fci-section-title">I want to run the lane</div>
+    <mat-select class="fci-lane-select" [(value)]="project.lane">
+      <mat-option *ngFor="let lane of FAKE_LANES" [value]="lane">
+        {{lane}}
+      </mat-option>
+    </mat-select>
+  </div>
+  <div class="fci-dialog-form-section fci-input-container">
+    <div class="fci-section-title">With builds being triggered</div>
+    <mat-select class="fci-trigger-select" [(value)]="project.trigger_type">
+      <mat-option *ngFor="let triggerOption of TRIGGER_OPTIONS" [value]="triggerOption.value">
+        {{triggerOption.viewValue}}
+      </mat-option>
+    </mat-select>
+    <ng-container *ngIf="project.trigger_type === 'nightly'">
+      <span class="fci-at-time">at</span>
+      <mat-select class="fci-hour-select" [(value)]="timeSelectorData.hour">
+        <mat-option *ngFor="let hour of HOURS" [value]="hour">
+          {{hour}}
+        </mat-option>
+      </mat-select>
+      <mat-select class="fci-am-pm-select" [(value)]="timeSelectorData.isAm">
+        <mat-option [value]="true">AM</mat-option>
+        <mat-option [value]="false">PM</mat-option>
+      </mat-select>
+    </ng-container>
+  </div>
+</div>
+<div mat-dialog-actions>
+  <button mat-button>Close</button>
+  <button mat-raised-button color="primary" (click)="addProject()">Add Project</button>
+</div>
+<button mat-icon-button class="fci-dialog-icon-close-button">
+  <mat-icon>close</mat-icon>
+</button>

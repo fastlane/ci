@@ -1,0 +1,39 @@
+.fci-dialog-form-section {
+    font-family: 'Roboto';
+    padding-bottom: 16px;
+    &:last-child {
+        padding-bottom: 74px;
+    }
+    .fci-section-title {
+        padding-bottom: 4px;
+    }
+    input {
+        width: 320px;
+    }
+    .mat-select.fci-lane-select,
+    .mat-select.fci-repo-select {
+        min-width: 200px
+    }
+    .mat-select.fci-trigger-select {
+        // This needs to change if you change the name of the
+        // longest select options
+        min-width: 178px;
+    }
+    .mat-select.fci-am-pm-select,
+    .mat-select.fci-hour-select {
+        min-width: 26px;
+    }
+    .fci-at-time {
+        padding: 0 8px;
+    }
+}
+
+.mat-select-value {
+    width: auto;
+    max-width: 100%;
+}
+
+.mat-dialog-actions {
+    justify-content: flex-end;
+    padding-bottom: 24px;
+}

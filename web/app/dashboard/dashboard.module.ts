@@ -11,15 +11,14 @@ import {ProjectComponent} from '../project/project.component';
 import {DataService} from '../services/data.service';
 import {SharedMaterialModule} from '../shared_material.module';
 import {AddProjectDialogComponent} from './add-project-dialog/add-project-dialog.component';
+import {AddProjectDialogModule} from './add-project-dialog/add-project-dialog.modules';
 
 @NgModule({
   declarations: [
     DashboardComponent,
-    AddProjectDialogComponent,
   ],
   entryComponents: [
     DashboardComponent,
-    AddProjectDialogComponent,
   ],
   imports: [
     /** Angular Library Imports */
@@ -27,7 +26,7 @@ import {AddProjectDialogComponent} from './add-project-dialog/add-project-dialog
     CommonModule,  // For ngIf and other common directives
     BrowserAnimationsModule,
     /** Internal Imports */
-    CommonComponentsModule,
+    CommonComponentsModule, AddProjectDialogModule,
     /** Angular Material Imports */
     SharedMaterialModule, MatDialogModule,
     /** Third-Party Module Imports */

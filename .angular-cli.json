@@ -20,7 +20,9 @@
       "prefix": "fci",
       "styles": [
         "global/theme.scss",
-        "global/grid.scss"
+        "global/input.scss",
+        "global/grid.scss",
+        "global/dialog.scss"
       ],
       "scripts": [],
       "environmentSource": "environments/environment.ts",

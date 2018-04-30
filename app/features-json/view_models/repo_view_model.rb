@@ -12,7 +12,7 @@ module FastlaneCI
     attr_reader :url
 
     def initialize(repo:)
-      @full_name = repo.slug
+      @full_name = repo.full_name
       @url = repo.url
     end
   end

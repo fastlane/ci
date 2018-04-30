@@ -22,7 +22,10 @@ describe('DashboardComponent', () => {
   let dataService: jasmine.SpyObj<Partial<DataService>>;
 
   beforeEach(() => {
-    dataService = {getProjects: jasmine.createSpy()};
+    dataService = {
+      getProjects: jasmine.createSpy(),
+      getRepos: jasmine.createSpy()
+    };
 
     TestBed
         .configureTestingModule({

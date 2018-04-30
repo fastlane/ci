@@ -1,0 +1,58 @@
+.fci-input-container {
+    padding-bottom: 16px;
+    input {
+        background-color: white;
+        border: 0;
+        border-radius: 0;
+        box-sizing: border-box;
+        color: rgba(0, 0, 0, 0.87);
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 20px;
+        margin: 0;
+        max-width: 100%;
+        outline: 0;
+        padding: 8px !important;
+        transition: box-shadow .15s;
+        vertical-align: middle;
+        -webkit-appearance: none;
+        box-shadow: 0 -2px 0 transparent inset, 0 0 0 1px #e0e0e0 inset;
+        width: 320px;
+        max-height: 36px;
+    }
+    .mat-select {
+        /** Wrap contents */
+        width: auto;
+        max-width: 100%;
+        /** Box styling */
+        background-color: white;
+        border: 0;
+        border-radius: 0;
+        box-sizing: border-box;
+        margin: 0;
+        max-width: 100%;
+        outline: 0;
+        padding: 8px !important;
+        transition: box-shadow .15s;
+        vertical-align: middle;
+        -webkit-appearance: none;
+        box-shadow: 0 -2px 0 transparent inset, 0 0 0 1px #e0e0e0 inset;
+        max-height: 38px;
+        /** Font */
+        color: rgba(0, 0, 0, 0.87);
+        font-size: 16px;
+        font-family: 'Roboto';
+        font-weight: 400;
+        line-height: 24px;
+        /** Inner text inherits content wrapping */
+        .mat-select-trigger {
+            min-width: inherit;
+            width: inherit;
+            .mat-select-value {
+                min-width: inherit;
+                width: inherit;
+                max-width: 100%;
+            }
+        }
+    }
+}
