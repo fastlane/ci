@@ -47,13 +47,7 @@ module FastlaneCI
     # which is required to support web socket streams for the
     # display of real-time output
     set(:server, "thin")
-    if ENV["WEB_APP"]
-      # Anything except a data route
-      get %r{/(?!data.*).*} do
-        # Use Angular Web App instead
-        send_file(File.join("public", ".dist", "index.html"))
-      end
-    else
+    if ENV["ERB_CLIENT"]
       get "/" do
         if session[:user]
           redirect("/dashboard_erb")
@@ -61,10 +55,16 @@ module FastlaneCI
           redirect("/login_erb")
         end
       end
-
-      get "/favico.ico" do
-        "nope" # TODO: Add favicon once we have it
+    else
+      # Anything except a data route
+      get %r{/(?!data.*).*} do
+        # Use Angular Web App instead
+        send_file(File.join("public", ".dist", "index.html"))
       end
+    end
+
+    get "/favicon.ico" do
+      send_file(File.join("public", "favicon.ico"))
     end
   end
 end

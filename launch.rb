@@ -48,7 +48,7 @@ module FastlaneCI
     end
 
     def self.verify_app_built
-      if ENV["WEB_APP"]
+      unless ENV["ERB_CLIENT"]
         app_exists = File.file?(File.join("public", ".dist", "index.html"))
 
         unless app_exists
@@ -119,25 +119,29 @@ module FastlaneCI
     def self.register_available_controllers
       # require all controllers
       require_relative "app/features/all"
-
       # Load up all the available controllers
-      # NOTE: ORDER MATTERS HERE
-      # If using REST-style endpoints, you must list the controllers from
-      # the outter most first.
-      # Example:
-      # BuildController is `project/build/*`
-      # ProjectControoler is `project/*`
-      # BuildController build be `used` first, so it is defined here first
-      FastlaneCI::FastlaneApp.use(FastlaneCI::BuildController)
-      FastlaneCI::FastlaneApp.use(FastlaneCI::ProjectController)
-      FastlaneCI::FastlaneApp.use(FastlaneCI::ConfigurationController)
-      FastlaneCI::FastlaneApp.use(FastlaneCI::DashboardController)
+
+      if ENV["ERB_CLIENT"]
+        # NOTE: ORDER MATTERS HERE
+        # If using REST-style endpoints, you must list the controllers from
+        # the outter most first.
+        # Example:
+        # BuildController is `project/build/*`
+        # ProjectControoler is `project/*`
+        # BuildController build be `used` first, so it is defined here first
+        FastlaneCI::FastlaneApp.use(FastlaneCI::BuildController)
+        FastlaneCI::FastlaneApp.use(FastlaneCI::ProjectController)
+        FastlaneCI::FastlaneApp.use(FastlaneCI::ConfigurationController)
+        FastlaneCI::FastlaneApp.use(FastlaneCI::DashboardController)
+        FastlaneCI::FastlaneApp.use(FastlaneCI::NotificationsController)
+        FastlaneCI::FastlaneApp.use(FastlaneCI::OnboardingController)
+        FastlaneCI::FastlaneApp.use(FastlaneCI::ProviderCredentialsController)
+        FastlaneCI::FastlaneApp.use(FastlaneCI::UsersController)
+        FastlaneCI::FastlaneApp.use(FastlaneCI::EnvironmentVariablesController)
+      end
+
+      # TODO: Only load this with ERB_CLIENT env once Web app has login support
       FastlaneCI::FastlaneApp.use(FastlaneCI::LoginController)
-      FastlaneCI::FastlaneApp.use(FastlaneCI::NotificationsController)
-      FastlaneCI::FastlaneApp.use(FastlaneCI::OnboardingController)
-      FastlaneCI::FastlaneApp.use(FastlaneCI::ProviderCredentialsController)
-      FastlaneCI::FastlaneApp.use(FastlaneCI::UsersController)
-      FastlaneCI::FastlaneApp.use(FastlaneCI::EnvironmentVariablesController)
 
       # Load JSON controllers
       require_relative "app/features-json/project_json_controller"
