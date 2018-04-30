@@ -1,0 +1,13 @@
+<div fci-grid class="fci-login-container">
+  <div fci-cell="12">
+    <div class="fci-input-container">
+      <label>Username</label>
+      <input ([ngModel])="username">
+    </div>
+    <div class="fci-input-container">
+      <label>Password</label>
+      <input ([ngModel])="username" type="password">
+    </div>
+    <button mat-raised-button color="primary" (click)="login()">Login</button>
+  </div>
+</div>
