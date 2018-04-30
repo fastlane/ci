@@ -1,4 +1,4 @@
-require "spec_helper"
+require "stub_helpers"
 require "app/services/code_hosting/decorators/git_repo_decorator"
 
 describe FastlaneCI::GitRepoDecorator do

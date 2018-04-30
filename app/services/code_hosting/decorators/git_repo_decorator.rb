@@ -1,5 +1,4 @@
 require_relative "../../../shared/logging_module"
-require "securerandom"
 
 module FastlaneCI
   # This module acts as a decorator to be added to any method that potentially will make changes
@@ -44,7 +43,7 @@ module FastlaneCI
     # Add this as Instance Methods
     module InstanceMethods
       def pull_before(func_name, git_repo: GitRepoDecorator.configuration_repo)
-        new_name_for_old_function = "#{func_name}_old_pull_#{SecureRandom.uuid}".to_sym
+        new_name_for_old_function = "#{func_name}_old_pull".to_sym
         alias_method(new_name_for_old_function, func_name)
         define_method(func_name) do |*args|
           # Here we use the mutex as a throttling tool. While a pull operation is
@@ -68,7 +67,7 @@ module FastlaneCI
       end
 
       def commit_after(func_name, git_repo: GitRepoDecorator.configuration_repo)
-        new_name_for_old_function = "#{func_name}_old_commit_#{SecureRandom.uuid}".to_sym
+        new_name_for_old_function = "#{func_name}_old_commit".to_sym
         alias_method(new_name_for_old_function, func_name)
         define_method(func_name) do |*args|
           # Here we use the mutex as a throttling tool. While a commit operation is

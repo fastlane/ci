@@ -105,7 +105,7 @@ module FastlaneCI
     def delete_project!(project: nil)
       self.project_data_source.delete_project!(project: project)
     end
-    commit_after(:update_project_repos)
+    commit_after(:delete_project!)
 
     def push_configuration_repo_changes!
       Services.configuration_git_repo.push
