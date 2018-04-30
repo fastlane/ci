@@ -11,7 +11,7 @@
 ## 3. Onboarding
 * Allow developers to specify build commits on PRs, nightly builds, feature branch, and manual release button
    * [Add project flow](add_project_flow.md)
-     * *User goal: As a developer, I want to be able to set the trigger for builds and releases*
+      * *User goal: As a developer, I want to be able to set the trigger for builds and releases*
    * [Edit global environment variables](edit_global_env_variables.md)
    * [Bot and user onboarding](first_time_setup.md)
 * Manage required external tools automatically 
