@@ -15,6 +15,19 @@
     <% end %>
   </select>
   <br />
+  <h5>Environment Variables</h5>
+  <h6>Global</h6>
+  <ul>
+    <% global_env_variables.each do |environment_variable| %>
+      <li><%= environment_variable.key %> => <%= environment_variable.value %></li>
+    <% end %>
+  </ul>
+  <h6>Project specific</h6>
+  <ul>
+    <% project_env_variables.each do |environment_variable| %>
+      <li><%= environment_variable.key %> => <%= environment_variable.value %></li>
+    <% end %>
+  </ul>
   <br />
   <input class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" type="submit" title="Save">
 </form>

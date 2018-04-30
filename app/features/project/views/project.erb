@@ -22,7 +22,7 @@
       <%= erb(:project_info, locals: { project: project }) %>
     </section>
     <section class="mdl-layout__tab-panel" id="scroll-tab-settings">
-      <%= erb(:project_settings, locals: { project: project , available_lanes: available_lanes, fastfile_path: fastfile_path }) %>
+      <%= erb(:project_settings, locals: { project: project , available_lanes: available_lanes, fastfile_path: fastfile_path, global_env_variables: global_env_variables, project_env_variables: project_env_variables }) %>
     </section>
   </main>
 </div>
