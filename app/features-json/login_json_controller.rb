@@ -6,13 +6,16 @@ require "jwt"
 require "json"
 
 module FastlaneCI
-  # Controller responsible of handling 
+  # Controller responsible of handling the login process using JWT token.
   class LoginJSONController < ControllerBase
     HOME = "/login"
 
     post HOME.to_s do
-      email = params[:email]
-      password = params[:password]
+      # Allow this endpoint to be requested with { Content-Type: application/json }
+      payload = params
+      payload = JSON.parse(request.body.read).symbolize_keys unless params[:path]
+      email = payload[:email]
+      password = payload[:password]
       user = Services.user_service.login(email: email, password: password)
       if user.nil?
         halt(401)
