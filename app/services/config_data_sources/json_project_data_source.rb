@@ -151,23 +151,6 @@ module FastlaneCI
       end
     end
 
-    def git_repos
-      JSONProjectDataSource.repos_file_semaphore.synchronize do
-        path = git_repo.file_path("repos.json")
-        return [] unless File.exist?(path)
-
-        saved_git_repos = JSON.parse(File.read(path)).map(&RepoConfig.method(:from_json!))
-        return saved_git_repos
-      end
-    end
-
-    def save_git_repo_configs!(git_repo_configs: nil)
-      JSONProjectDataSource.repos_file_semaphore.synchronize do
-        path = git_repo.file_path("repos.json")
-        File.write(path, JSON.pretty_generate(git_repo_configs.map(&:to_object_dictionary)))
-      end
-    end
-
     def create_project!(
       name: nil,
       repo_config: nil,
