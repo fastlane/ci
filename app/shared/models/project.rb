@@ -55,7 +55,7 @@ module FastlaneCI
       @id = id || SecureRandom.uuid
       @platform = platform
       @lane = lane
-      @environment_variables = environment_variables
+      @environment_variables = environment_variables || []
       @artifact_provider = artifact_provider
       # TODO: This is fine for now to avoid runtime fails due to lack of triggers.
       # In the future, the Add Project workflow, should provide the enough interface

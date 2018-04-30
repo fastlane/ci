@@ -119,6 +119,17 @@ module FastlaneCI
 
         saved_projects = JSON.parse(File.read(path)).map do |project_json|
           project = Project.from_json!(project_json)
+
+          # Now load the project specific files here
+          # that are in
+          #
+          #   `projects/[project_id]/[file].json
+          #
+          # more information on https://github.com/fastlane/ci/issues/643
+          project_specific_path = File.join(git_repo.file_path("projects"), project.id)
+          environment_variable_data_source = JSONEnvironmentDataSource.create(project_specific_path)
+          project.environment_variables = environment_variable_data_source.environment_variables
+
           project
         end
 

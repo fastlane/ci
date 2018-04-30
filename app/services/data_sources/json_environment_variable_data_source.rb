@@ -21,6 +21,9 @@ module FastlaneCI
     end
 
     # can't have us reading and writing to a file at the same time
+    # TODO: currently we just have this global lock
+    #   Instead we'll have multiple instances of `JSONEnvironmentVariableDataSource` objects
+    #   for each project and a global one
     JSONEnvironmentDataSource.file_semaphore = Mutex.new
 
     def after_creation(**params)
@@ -31,9 +34,7 @@ module FastlaneCI
     end
 
     def environment_file_path(path: "environment_variables.json")
-      # TODO: Remove this, for some reason `json_folder_path` is `nil` here
-      json_folder_path = File.expand_path("~/.fastlane/ci/fastlane-ci-config")
-      File.join(json_folder_path, path)
+      return File.join(json_folder_path, path)
     end
 
     def environment_variables

@@ -24,7 +24,7 @@ module FastlaneCI
         )
         data_store_folder = ENV["data_store_folder"] # you can set it at runtime!
         data_store_folder ||= File.join(FastlaneCI::FastlaneApp.settings.root, "sample_data")
-        environment_variable_data_source = JSONEnvironmentDataSource.create(json_folder_path: data_store_folder)
+        environment_variable_data_source = JSONEnvironmentDataSource.create(data_store_folder)
       end
 
       self.environment_variable_data_source = environment_variable_data_source
