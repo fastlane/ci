@@ -217,6 +217,19 @@ module FastlaneCI
         env_mapping[environment_variable.key.to_sym] = environment_variable.value
       end
 
+      # Now set the project specific environment variables
+      project.environment_variables.each do |environment_variable|
+        if env_mapping.key?(environment_variable.key.to_sym)
+          # TODO: similar to above: better error handling, depending on what variable gets overwritten
+          #       this might be a big deal
+          logger.error("Overwriting CI specific environment variable of key #{environment_variable.key}")
+        end
+        env_mapping[environment_variable.key.to_sym] = environment_variable.value
+      end
+
+      # Here we'll set the branch specific environment variables once this is implemented
+      # This might not be top priority for a v1
+
       # Finally, set all the ENV variables for the given build
       env_mapping.each do |key, value|
         set_build_specific_env_variable(key: key, value: value)

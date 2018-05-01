@@ -279,6 +279,12 @@ module FastlaneCI
         locals[:available_lanes] = available_lanes
       end
 
+      # TODO: We should think carefully about exposing the value of an existing ENV variable
+      #       as this could potentially introduce a security risk. During development
+      #       the code below will make debugging easier
+      locals[:global_env_variables] = Services.environment_variable_service.environment_variables
+      locals[:project_env_variables] = project.environment_variables
+
       erb(:project, locals: locals, layout: FastlaneCI.default_layout)
     end
 

@@ -180,7 +180,9 @@ module FastlaneCI
     end
 
     def self.environment_variable_service
-      @environment_variable_service ||= FastlaneCI::EnvironmentVariableService.new
+      @environment_variable_service ||= FastlaneCI::EnvironmentVariableService.new(
+        environment_variable_data_source: JSONEnvironmentDataSource.create(ci_config_git_repo_path)
+      )
     end
 
     def self.provider_credential_service

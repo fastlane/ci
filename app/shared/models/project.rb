@@ -32,6 +32,9 @@ module FastlaneCI
     # @return [Array[JobTrigger]] The job triggers
     attr_reader :job_triggers
 
+    # @return [Array[EnvironmentVariable]] The project specific environment variables
+    attr_accessor :environment_variables
+
     # @return [ArtifactProvider]
     attr_reader :artifact_provider
 
@@ -42,6 +45,7 @@ module FastlaneCI
       platform: nil,
       lane: nil,
       id: nil,
+      environment_variables: nil,
       artifact_provider: LocalArtifactProvider.new,
       job_triggers: []
     )
@@ -51,6 +55,7 @@ module FastlaneCI
       @id = id || SecureRandom.uuid
       @platform = platform
       @lane = lane
+      @environment_variables = environment_variables || []
       @artifact_provider = artifact_provider
       # TODO: This is fine for now to avoid runtime fails due to lack of triggers.
       # In the future, the Add Project workflow, should provide the enough interface
