@@ -151,12 +151,15 @@ module FastlaneCI
 
     def projects=(projects)
       JSONProjectDataSource.projects_file_semaphore.synchronize do
-        # We have to ignore the `environment_variables` instance variable, as it's stored in a separate file
-        json_data = JSON.pretty_generate(projects.map do |project|
-          # While we iterate, also store the project specific configuration files
+        # First store the project specific configuration files, for every project
+        projects.each do |project|
           environment_variable_data_source = project_specific_environment_variables_data_source(project: project)
           environment_variable_data_source.environment_variables = project.environment_variables
+        end
 
+        # now store things into the actual projects.json
+        # We have to ignore the `environment_variables` instance variable, as it's stored in a separate file
+        json_data = JSON.pretty_generate(projects.map do |project|
           project.to_object_dictionary(ignore_instance_variables: [:@environment_variables])
         end)
         File.write(git_repo.file_path("projects.json"), json_data)
