@@ -33,15 +33,14 @@ module FastlaneCI
 
     def payload(user)
       {
-        exp: Time.now.to_i + 60 * 60,
+        # One month expire time is more than safe for now.
+        exp: Time.now.to_i + (60 * 60 * 24 * 30),
         iat: Time.now.to_i,
-        # TODO: We shall figure out how to identify the source of the authentication
-        # (i.e., third-party webapps, our angular app, etc.)
         iss: "fastlane.ci",
-        scopes: ["default"],
-        user: user.provider_credentials.map! do |credential|
-          credential.to_object_dictionary(ignore_instance_variables: [:@ci_user])
-        end
+        # We are only going to pass the user primary key to the client in order
+        # to make sure that the calls being made to other services are made with
+        # the correct relationship tree between objects being checked.
+        user: user.id.to_s
       }
     end
   end
