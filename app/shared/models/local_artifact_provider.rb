@@ -2,12 +2,15 @@ require_relative "artifact_provider"
 require_relative "artifact"
 require_relative "build"
 require_relative "project"
+require_relative "../json_convertible"
 
 require "pathname"
 
 module FastlaneCI
   # ArtifactProvider backed by a local filesystem.
   class LocalArtifactProvider < ArtifactProvider
+    include FastlaneCI::JSONConvertible
+
     class << self
       # Provide a simple default root_path for users that don't want much configuration.
       def default_root_path

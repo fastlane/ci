@@ -1,4 +1,8 @@
+require_relative "../json_convertible"
+
 module FastlaneCI
+  include FastlaneCI::JSONConvertible
+
   # A specific event that will cause a job to start
   class JobTrigger
     TRIGGER_TYPE = {

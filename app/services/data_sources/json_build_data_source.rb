@@ -1,6 +1,5 @@
 require "json"
 require_relative "build_data_source"
-require_relative "../../shared/json_convertible"
 require_relative "../../shared/logging_module"
 require_relative "../../shared/models/build"
 require_relative "../../shared/models/artifact"
@@ -9,70 +8,6 @@ require_relative "../../shared/models/local_artifact_provider.rb"
 require_relative "../../shared/models/gcp_artifact_provider"
 
 module FastlaneCI
-  # Mixin the JSONConvertible class for Build
-  class Build
-    include FastlaneCI::JSONConvertible
-
-    def self.attribute_name_to_json_proc_map
-      timestamp_to_json_proc = proc { |timestamp|
-        timestamp.strftime("%s").to_i
-      }
-      return { :@timestamp => timestamp_to_json_proc }
-    end
-
-    def self.json_to_attribute_name_proc_map
-      seconds_to_datetime_proc = proc { |seconds|
-        Time.at(seconds.to_i)
-      }
-      return { :@timestamp => seconds_to_datetime_proc }
-    end
-
-    def self.attribute_to_type_map
-      return { :@artifacts => Artifact }
-    end
-  end
-
-  # Mixin the JSONConvertible class for Artifact
-  class Artifact
-    include FastlaneCI::JSONConvertible
-
-    def self.json_to_attribute_name_proc_map
-      provider_object_to_provider = proc { |object|
-        # So, there might be some chances (but it shouldn't ever happen)
-        # that the Artifact's ArtifactProvider is null in the JSON, so it must be nil in the object.
-        # But that means that the Artifact is unrecoverable.
-        # TODO: What kind of error handling should we provide? An Artifact with nil provider is unrecoverable.
-        nil if object.nil?
-        provider_class = Object.const_get(object["class_name"])
-        if provider_class.include?(JSONConvertible)
-          provider = provider_class.from_json!(object)
-          provider
-        end
-      }
-      return { :@provider => provider_object_to_provider }
-    end
-
-    def self.attribute_name_to_json_proc_map
-      provider_to_provider_object = proc { |provider|
-        if provider.class.include?(JSONConvertible)
-          hash = provider.to_object_dictionary
-          hash
-        end
-      }
-      return { :@provider => provider_to_provider_object }
-    end
-  end
-
-  # Mixin the JSONConvertible class for LocalArtifactProvider
-  class LocalArtifactProvider
-    include FastlaneCI::JSONConvertible
-  end
-
-  # Mixin the JSONConvertible class for GCPStorageArtifactProvider
-  class GCPStorageArtifactProvider
-    include FastlaneCI::JSONConvertible
-  end
-
   # Data source for all things related to builds on the file system in JSON
   class JSONBuildDataSource < BuildDataSource
     include FastlaneCI::JSONDataSource

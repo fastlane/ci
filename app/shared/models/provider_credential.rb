@@ -1,8 +1,11 @@
 require "json"
+require_relative "../json_convertible"
 
 module FastlaneCI
   # base class for all provider credentials, see GitHubProviderCredential as an example
   class ProviderCredential
+    include FastlaneCI::JSONConvertible
+
     # we'll transform this list so the enum can be sym => string, and string => string
     simple_provider_types = {
       github: "github"

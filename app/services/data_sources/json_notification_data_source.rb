@@ -4,11 +4,6 @@ require_relative "../../shared/json_convertible"
 require_relative "../../shared/models/notification"
 
 module FastlaneCI
-  # Mixin the JSONConvertible class for Notification
-  class Notification
-    include FastlaneCI::JSONConvertible
-  end
-
   # Data source for notifications backed by JSON
   class JSONNotificationDataSource < NotificationDataSource
     include FastlaneCI::JSONDataSource

@@ -9,32 +9,6 @@ require_relative "../../shared/models/provider_credential"
 require_relative "../../shared/models/github_provider_credential"
 
 module FastlaneCI
-  # Mixin the JSONConvertible class for User
-  class User
-    include FastlaneCI::JSONConvertible
-
-    def self.attribute_to_type_map
-      return { :@provider_credentials => GitHubProviderCredential }
-    end
-
-    def self.map_enumerable_type(enumerable_property_name: nil, current_json_object: nil)
-      if enumerable_property_name == :@provider_credentials
-        type = current_json_object["type"]
-        # currently only supports 1 type, but we could automate this part too
-        provider_credential = nil
-        if type == FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
-          provider_credential = GitHubProviderCredential.from_json!(current_json_object)
-        end
-        provider_credential
-      end
-    end
-  end
-
-  # Mixin the JSONConvertible class for all Providers
-  class ProviderCredential
-    include FastlaneCI::JSONConvertible
-  end
-
   # Data source for users backed by JSON
   class JSONUserDataSource < UserDataSource
     include FastlaneCI::JSONDataSource
