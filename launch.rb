@@ -200,6 +200,7 @@ module FastlaneCI
       # For now, we're not using a fancy framework that adds multiple heavy dependencies
       # including a database, etc.
       FastlaneCI::RefreshConfigDataSourcesWorker.new
+      FastlaneCI::CheckForFastlaneCIUpdateWorker.new
     end
 
     # In the event of a server crash, we want to run pending builds on server
