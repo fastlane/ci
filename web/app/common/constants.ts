@@ -6,6 +6,10 @@ export enum BuildStatus {
   INTERNAL_ISSUE = 'ci_problem'
 }
 
+export enum LocalStorageKeys {
+  AUTH_TOKEN = 'auth_token'
+}
+
 export type FastlaneStatus =
     'failure'|'success'|'ci_problem'|'pending'|'missing_fastfile';
 
