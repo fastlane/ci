@@ -22,9 +22,6 @@ module FastlaneCI
 
     include FastlaneCI::Logging
 
-    # Enum for status of POST operations
-    STATUS = { success: :success, error: :error }
-
     # I don't like this here, I'd rather use the mixin for organization, but that isn't done
     # TODO: use mixin
     configure :development do
