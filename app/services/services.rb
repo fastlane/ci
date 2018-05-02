@@ -45,6 +45,8 @@ module FastlaneCI
       @_worker_service = nil
       @_configuration_repository_service = nil
       @_update_fastlane_ci_service = nil
+      @_environment_variable_service = nil
+      @_dot_keys_variable_service = nil
     end
 
     ########################################################
@@ -182,7 +184,7 @@ module FastlaneCI
     end
 
     def self.environment_variable_service
-      @environment_variable_service ||= FastlaneCI::EnvironmentVariableService.new(
+      @_environment_variable_service ||= FastlaneCI::EnvironmentVariableService.new(
         environment_variable_data_source: JSONEnvironmentDataSource.create(ci_config_git_repo_path)
       )
     end

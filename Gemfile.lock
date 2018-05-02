@@ -14,9 +14,9 @@ GIT
 
 GIT
   remote: https://github.com/fastlane/fastlane
-  revision: c579921dcf7a95ea30c4f947e39c66fa64810354
+  revision: 27fd2c57a9519c03393b21191285caacf075f294
   specs:
-    fastlane (2.89.0)
+    fastlane (2.94.0)
       CFPropertyList (>= 2.3, < 4.0.0)
       addressable (>= 2.3, < 3.0.0)
       babosa (>= 1.0.2, < 2.0.0)
@@ -24,6 +24,7 @@ GIT
       colored
       commander-fastlane (>= 4.4.6, < 5.0.0)
       dotenv (>= 2.1.1, < 3.0.0)
+      emoji_regex (~> 0.1)
       excon (>= 0.45.0, < 1.0.0)
       faraday (~> 0.9)
       faraday-cookie_jar (~> 0.0.6)
@@ -71,7 +72,7 @@ GEM
     ast (2.4.0)
     atomos (0.1.2)
     babosa (1.0.2)
-    backports (3.11.1)
+    backports (3.11.3)
     bcrypt (3.1.11)
     byebug (10.0.2)
     claide (1.0.2)
@@ -95,16 +96,17 @@ GEM
     diff-lcs (1.3)
     digest-crc (0.4.1)
     docile (1.1.5)
-    domain_name (0.5.20170404)
+    domain_name (0.5.20180417)
       unf (>= 0.0.5, < 1.0.0)
-    dotenv (2.2.1)
+    dotenv (2.4.0)
+    emoji_regex (0.1.1)
     equalizer (0.0.11)
     equatable (0.5.0)
     et-orbi (1.1.0)
       tzinfo
-    eventmachine (1.2.5)
+    eventmachine (1.2.6)
     excon (0.62.0)
-    faraday (0.14.0)
+    faraday (0.15.0)
       multipart-post (>= 1.2, < 3)
     faraday-cookie_jar (0.0.6)
       faraday (>= 0.7.4)
@@ -113,7 +115,7 @@ GEM
       faraday (~> 0.8)
     faraday_middleware (0.12.2)
       faraday (>= 0.7.4, < 1.0)
-    fastimage (2.1.1)
+    fastimage (2.1.3)
     faye-websocket (0.10.7)
       eventmachine (>= 0.12.0)
       websocket-driver (>= 0.5.1)
@@ -185,7 +187,7 @@ GEM
       byebug (~> 10.0)
       pry (~> 0.10)
     public_suffix (2.0.5)
-    rack (2.0.4)
+    rack (2.0.5)
     rack-protection (2.0.1)
       rack
     rack-test (1.0.0)
@@ -231,7 +233,7 @@ GEM
       faraday (~> 0.9)
       jwt (>= 1.5, < 3.0)
       multi_json (~> 1.10)
-    simctl (1.6.3)
+    simctl (1.6.4)
       CFPropertyList
       naturally
     simplecov (0.14.1)
@@ -268,7 +270,7 @@ GEM
     tilt (2.0.8)
     tins (1.16.3)
     tty-color (0.4.2)
-    tty-command (0.7.0)
+    tty-command (0.8.0)
       pastel (~> 0.7.0)
     tty-cursor (0.5.0)
     tty-screen (0.6.4)
@@ -280,7 +282,7 @@ GEM
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.7.5)
-    unicode-display_width (1.3.0)
+    unicode-display_width (1.3.2)
     unparser (0.2.7)
       abstract_type (~> 0.0.7)
       adamantium (~> 0.2.0)
