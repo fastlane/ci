@@ -20,13 +20,22 @@ module FastlaneCI
 
     def check_for_update
       logger.debug("checking for updates for fastlane.ci...")
+
       return unless update_available?
 
-      logger.info("fastlane.ci version #{version_of_latest_release} is available")
-      # TODO: in a separate PR I'm gonna add support for automatically updating itself
-      #       right now we're just printing out that there is an update available
-      #       the plan is to have the actual updater in a separate class so that it can be
-      #       triggered from various locations, including UI for the user
+      logger.info("New fastlane.ci version #{version_of_latest_release} is available")
+      # This is where we'll check if the user has auto-updates enabled
+      # or if we just show an update message to the user
+
+      # Auto-update enabled code:
+      # FastlaneCI::Services.update_fastlane_ci_service.update_fastlane_ci
+
+      # Manual update enabled code:
+      Services.notification_service.create_notification!(
+        priority: Notification::PRIORITIES[:normal],
+        name: "New version of fastlane.ci available",
+        message: "Please open the fastlane.ci system settings, and hit the \"Update fastlane\" button"
+      )
     end
 
     def update_available?

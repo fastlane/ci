@@ -9,6 +9,7 @@ require_relative "./environment_variable_service"
 require_relative "./onboarding_service"
 require_relative "./project_service"
 require_relative "./notification_service"
+require_relative "./update_fastlane_ci_service"
 require_relative "./user_service"
 require_relative "./worker_service"
 
@@ -43,6 +44,7 @@ module FastlaneCI
       @_config_service = nil
       @_worker_service = nil
       @_configuration_repository_service = nil
+      @_update_fastlane_ci_service = nil
       @_environment_variable_service = nil
       @_dot_keys_variable_service = nil
     end
@@ -197,6 +199,10 @@ module FastlaneCI
 
     def self.bot_user_client
       @_bot_user_client ||= Octokit::Client.new(access_token: FastlaneCI.dot_keys.ci_user_api_token)
+    end
+
+    def self.update_fastlane_ci_service
+      @_update_fastlane_ci_service ||= FastlaneCI::UpdateFastlaneCIService.new
     end
 
     def self.onboarding_user_client
