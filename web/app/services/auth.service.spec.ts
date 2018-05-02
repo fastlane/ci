@@ -4,7 +4,7 @@ import {mockLoginResponse} from '../common/test_helpers/mock_login_data';
 import {AuthService, LoginRequest, LoginResponse} from './auth.service';
 
 const FAKE_LOGIN_REQUEST: LoginRequest = {
-  username: 'tacoRocat',
+  email: 'tacoRocat@fastlane.com',
   password: 'wholetthedogsout'
 };
 
@@ -50,7 +50,7 @@ describe('AuthService', () => {
       loginResponse = response;
     });
 
-    const loginRequest = mockHttp.expectOne('/data/login');
+    const loginRequest = mockHttp.expectOne('/api/login');
     expect(loginRequest.request.body).toBe(FAKE_LOGIN_REQUEST);
     loginRequest.flush(mockLoginResponse);
 
@@ -60,7 +60,7 @@ describe('AuthService', () => {
   it('should store the token in local storage', () => {
     authService.login(FAKE_LOGIN_REQUEST).subscribe();
 
-    const loginRequest = mockHttp.expectOne('/data/login');
+    const loginRequest = mockHttp.expectOne('/api/login');
     loginRequest.flush(mockLoginResponse);
 
     expect(mockLocalStorage.getItem('auth_token')).toBe('12345');

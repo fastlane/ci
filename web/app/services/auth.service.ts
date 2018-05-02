@@ -6,14 +6,14 @@ import {shareReplay, tap} from 'rxjs/operators';
 import {LocalStorageKeys} from '../common/constants';
 
 // Auth server is currently locally hosted.
-const HOSTNAME = '/data';
+const HOSTNAME = '/api';
 
 export interface LoginResponse {
   token: string;
 }
 
 export interface LoginRequest {
-  username: string;
+  email: string;
   password: string;
 }
 
