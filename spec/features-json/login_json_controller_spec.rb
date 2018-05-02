@@ -1,18 +1,24 @@
 require "spec_helper"
 require "app/features-json/login_json_controller"
+require "app/services/onboarding_service"
+require "app/services/user_service"
 
 describe FastlaneCI::LoginJSONController do
+  def app
+    described_class
+  end
+  let(:user) { double("User", id: "some-id") }
+  let(:json) { JSON.parse(last_response.body) }
 
-  def app() described_class end
+  before do
+    allow(FastlaneCI::Services.onboarding_service).to receive(:correct_setup?).and_return(true)
+    allow(FastlaneCI::Services.user_service).to receive(:login).and_return(user)
+    allow(FastlaneCI.dot_keys).to receive(:encryption_key).and_return("test")
+  end
 
   it "should return a valid JWT token using the global encryption key" do
-    
-    post "/login", { username: "fastlane", password: "password" }.to_json, { "CONTENT_TYPE" => "application/json" }
-    
-    # TODO: For whatever reason I can't figure out, the response is not what
-    # I'm expecting here, so tests are failing.
+    post "/login", { email: "fastlane", password: "password" }.to_json, { "CONTENT_TYPE" => "application/json" }
     expect(last_response).to be_ok
-    expect(last_response).to be_json
-
+    expect(json).to have_key("token")
   end
 end
