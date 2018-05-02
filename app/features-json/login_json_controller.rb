@@ -11,9 +11,9 @@ module FastlaneCI
   class LoginJSONController < ControllerBase
     include JSONController
 
-    HOME = "/login"
+    HOME = "/api"
 
-    post HOME do
+    post "#{HOME}/login" do
       # Allow this endpoint to be requested with { Content-Type: application/json }
       user = Services.user_service.login(email: params[:email], password: params[:password])
       if user.nil?
