@@ -38,6 +38,9 @@ gem "google-cloud-storage", "~> 1.5.0"
 # Manage CI dependencies.
 gem "bundler", "~> 1.16.0"
 
+# Manage JWT authentication tokens.
+gem "jwt", "~> 2.1.0"
+
 # fastlane dependencies
 # TODO: point to minimum release instead of GitHub once
 #  we shipped a new release
