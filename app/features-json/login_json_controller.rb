@@ -1,6 +1,7 @@
 require_relative "../shared/controller_base"
 require_relative "../services/user_service"
 require_relative "../services/dot_keys_variable_service"
+require_relative "json_controller"
 
 require "jwt"
 require "json"
@@ -8,15 +9,13 @@ require "json"
 module FastlaneCI
   # Controller responsible of handling the login process using JWT token.
   class LoginJSONController < ControllerBase
+    include JSONController
+
     HOME = "/login"
 
-    post HOME.to_s do
-      # Allow this endpoint to be requested with { Content-Type: application/json }
-      payload = params
-      payload = JSON.parse(request.body.read).symbolize_keys unless params[:path]
-      email = payload[:email]
-      password = payload[:password]
-      user = Services.user_service.login(email: email, password: password)
+    post HOME do
+      # Allow this endpoint to be requested with { Content-Type: application/json }
+      user = Services.user_service.login(email: params[:email], password: params[:password])
       if user.nil?
         halt(401)
       else
@@ -39,7 +38,7 @@ module FastlaneCI
         iss: "fastlane.ci",
         # We are only going to pass the user primary key to the client in order
         # to make sure that the calls being made to other services are made with
-        # the correct relationship tree between objects being checked.
+        # the correct relationship tree between objects being checked.
         user: user.id.to_s
       }
     end
