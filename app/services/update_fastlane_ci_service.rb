@@ -65,7 +65,9 @@ module FastlaneCI
       end
 
       # suppress updater output - very noisy
-      Gem::DefaultUserInteraction.ui = Gem::SilentUI.new
+      unless ENV["FASTLANE_CI_VERBOSE"]
+        Gem::DefaultUserInteraction.ui = Gem::SilentUI.new
+      end
 
       update_needed.each do |tool_info|
         tool = tool_info[0]

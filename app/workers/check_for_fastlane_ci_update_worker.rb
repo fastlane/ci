@@ -34,8 +34,7 @@ module FastlaneCI
       Services.notification_service.create_notification!(
         priority: Notification::PRIORITIES[:normal],
         name: "New version of fastlane.ci available",
-        message: "Please open the fastlane.ci system settings, and hit the \"Update fastlane\" button",
-        details: "Please open the fastlane.ci system settings, and hit the \"Update fastlane\" button"
+        message: "Please open the fastlane.ci system settings, and hit the \"Update fastlane\" button"
       )
     end
 
