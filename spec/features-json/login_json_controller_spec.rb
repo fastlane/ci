@@ -17,7 +17,7 @@ describe FastlaneCI::LoginJSONController do
   end
 
   it "should return a valid JWT token using the global encryption key" do
-    post "/login", { email: "fastlane", password: "password" }.to_json, { "CONTENT_TYPE" => "application/json" }
+    post "/api/login", { email: "fastlane", password: "password" }.to_json, { "CONTENT_TYPE" => "application/json" }
     expect(last_response).to be_ok
     expect(json).to have_key("token")
   end
