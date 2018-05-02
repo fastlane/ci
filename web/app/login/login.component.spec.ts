@@ -1,11 +1,9 @@
-import {Location} from '@angular/common';
 import {DebugElement} from '@angular/core';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material';
 import {By} from '@angular/platform-browser';
 import {Router} from '@angular/router';
-import {RouterTestingModule} from '@angular/router/testing';
 import {Subject} from 'rxjs/Subject';
 
 import {mockLoginResponse} from '../common/test_helpers/mock_login_data';
