@@ -6,7 +6,7 @@ import {shareReplay, tap} from 'rxjs/operators';
 import {LocalStorageKeys} from '../common/constants';
 
 // Auth server is currently locally hosted.
-const HOSTNAME = '/api';
+const API_ROOT = '/api';
 
 export interface LoginResponse {
   token: string;
@@ -22,7 +22,7 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   login(loginRequest: LoginRequest): Observable<LoginResponse> {
-    const url = `${HOSTNAME}/login`;
+    const url = `${API_ROOT}/login`;
     return this.http.post<LoginResponse>(url, loginRequest)
         .pipe(tap(this.setSession), shareReplay());
   }
