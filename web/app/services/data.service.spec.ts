@@ -12,6 +12,7 @@ import {AddProjectRequest, DataService} from './data.service';
 
 const COMMIT_TRIGGER_PROJECT_REQUEST: AddProjectRequest = {
   lane: 'ios test',
+  branch: 'master',
   repo_org: 'fastlane',
   repo_name: 'ci',
   project_name: 'new hot project',

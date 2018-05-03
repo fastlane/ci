@@ -45,8 +45,7 @@ module FastlaneCI
       github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
 
       selected_repo = github_service.repos.detect do |repo|
-        @request_payload["repo_name"] == repo[:name] &&
-          @request_payload["repo_org"] == repo[:owner][:login]
+        @request_payload["repo_name"] == repo[:full_name]
       end
 
       repo_config = GitHubRepoConfig.from_octokit_repo!(repo: selected_repo)
@@ -102,6 +101,8 @@ module FastlaneCI
       )
 
       repo.checkout_branch(branch: branch)
+
+      return project
     end
   end
 end
