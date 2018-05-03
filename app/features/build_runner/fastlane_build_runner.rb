@@ -39,6 +39,10 @@ module FastlaneCI
 
     # completion_block is called with an array of artifacts
     def run(new_line_block:, completion_block:)
+      if lane.nil?
+        raise "Before calling `.run` on #{self}, you have to call `.setup` to finish preparing the BuildRunner"
+      end
+
       artifacts_paths = [] # first thing we do, as we access it in the `ensure` block of this method
       require "fastlane"
 
