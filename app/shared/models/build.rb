@@ -41,6 +41,19 @@ module FastlaneCI
     # @return [String] the trigger type that triggered this particular build
     attr_accessor :trigger
 
+    # The attributes below are relevant to be stored, as it might change in the course of a project
+    # and we want the ability to re-trigger historic builds
+
+    # @return [String] the lane name (without platform) that was used for this particular build
+    attr_accessor :lane
+
+    # @return [String] the platform name (without lane) that was used for this particular build
+    attr_accessor :platform
+
+    # @return [Hash] the parameters that were passed on this particular build
+    # TODO: We currently don't use/store/support parameters (yet) https://github.com/fastlane/ci/issues/783
+    attr_accessor :parameters
+
     def initialize(
       project: nil,
       number: nil,
@@ -49,7 +62,10 @@ module FastlaneCI
       duration: nil,
       sha: nil,
       description: nil,
-      trigger: nil
+      trigger: nil,
+      lane: nil,
+      platform: nil,
+      parameters: nil
     )
       @project = project
       @number = number
@@ -59,7 +75,10 @@ module FastlaneCI
       @sha = sha
       @artifacts = []
       @description = description
-      self.trigger = trigger
+      @trigger = trigger
+      @lane = lane
+      @platform = platform
+      @parameters = parameters
     end
 
     # Most cases we don't want people doing this, but there are a couple valid reasons, make it explicit

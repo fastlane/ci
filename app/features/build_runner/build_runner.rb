@@ -90,6 +90,7 @@ module FastlaneCI
     # Use this method for additional setup for subclasses
     # This method could have any number of additional parameters
     # that allow you to customize the runner
+    # This method is called after `.new` was called from outside of BuildRunner
     def setup
       not_implemented(__method__)
     end
