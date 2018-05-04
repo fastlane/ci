@@ -1,6 +1,6 @@
 import {HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
 import {inject, TestBed} from '@angular/core/testing';
-import {mockLoginResponse} from '../common/test_helpers/mock_login_data';
+import {mockLoginResponse, mockTokenExpired, mockTokenNotExpired} from '../common/test_helpers/mock_login_data';
 import {AuthService, LoginRequest, LoginResponse} from './auth.service';
 
 const FAKE_LOGIN_REQUEST: LoginRequest = {
@@ -66,16 +66,16 @@ describe('AuthService', () => {
     expect(mockLocalStorage.getItem('auth_token')).toBe('12345');
   });
 
-  it('should be logged in if token exists in local storage', () => {
-    mockLocalStorage.setItem('auth_token', '12345');
-    expect(authService.isLoggedIn()).toBe(true);
-  });
+  it('should be logged in if token exists in local storage and not Expired',
+     () => {
+       mockLocalStorage.setItem('auth_token', mockTokenNotExpired);
+       expect(authService.isLoggedIn()).toBe(true);
+     });
 
-  // TODO: do this test once we have expiry
-  // it('should not be logged in if stored token is expired', () => {
-  //   mockLocalStorage.setItem('token_expiry', 'OLD DATE');
-  //   expect(authService.isLoggedIn()).toBe(false);
-  // });
+  it('should not be logged in if stored token is expired', () => {
+    mockLocalStorage.setItem('auth_token', mockTokenExpired);
+    expect(authService.isLoggedIn()).toBe(false);
+  });
 
   it('should not be logged in if no stored token', () => {
     mockLocalStorage.removeItem('auth_token');
