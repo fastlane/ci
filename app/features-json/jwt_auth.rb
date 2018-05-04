@@ -13,7 +13,7 @@ module FastlaneCI
       options = { algorithm: "HS256", iss: "fastlane.ci" }
       bearer = env.fetch("HTTP_AUTHORIZATION", "").slice(7..-1)
       payload, = JWT.decode(bearer, FastlaneCI.dot_keys.encryption_key, true, options)
-      
+
       env[:user] = payload["user"]
 
       @app.call(env)
