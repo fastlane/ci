@@ -54,6 +54,11 @@ module FastlaneCI
     # TODO: We currently don't use/store/support parameters (yet) https://github.com/fastlane/ci/issues/783
     attr_accessor :parameters
 
+    # @return [String] contains all information to check out that specific remote, branch, sha, ref again
+    #                  this information will be used when re-running an old build
+    #                  see https://github.com/fastlane/ci/issues/481 for more details
+    attr_accessor :git_fork_config
+
     def initialize(
       project: nil,
       number: nil,
@@ -65,7 +70,8 @@ module FastlaneCI
       trigger: nil,
       lane: nil,
       platform: nil,
-      parameters: nil
+      parameters: nil,
+      git_fork_config: nil
     )
       @project = project
       @number = number
@@ -79,6 +85,7 @@ module FastlaneCI
       @lane = lane
       @platform = platform
       @parameters = parameters
+      @git_fork_config = git_fork_config
     end
 
     # Most cases we don't want people doing this, but there are a couple valid reasons, make it explicit
