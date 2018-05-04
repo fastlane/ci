@@ -357,7 +357,7 @@ module FastlaneCI
       builds = Services.build_service.list_builds(project: project)
 
       if builds.count > 0
-        new_build_number = builds.sort_by(&:number).last.number + 1
+        new_build_number = builds.max_by(&:number).number + 1
       else
         new_build_number = 1 # We start with build number 1
       end
