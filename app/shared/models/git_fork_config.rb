@@ -21,11 +21,11 @@ module FastlaneCI
     attr_reader :ref
 
     # @return [String] e.g. "a690bef20006f3b7ddbafbe65408c516da077d3f"
-    attr_reader :current_sha
+    attr_reader :sha
 
     # If you have a ref you can pass, e.g.: `pull/661/head`, that's preferred
-    def initialize(current_sha: nil, branch: nil, clone_url: nil, ref: nil)
-      @current_sha = current_sha
+    def initialize(sha: nil, branch: nil, clone_url: nil, ref: nil)
+      @sha = sha
       @branch = branch
       @clone_url = clone_url
       @ref = ref
