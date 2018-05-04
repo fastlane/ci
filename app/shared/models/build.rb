@@ -35,7 +35,7 @@ module FastlaneCI
     attr_accessor :artifacts
 
     # @return [String] An optional message to go along with the build, will show up as part of the build status on
-    # github
+    # GitHub
     attr_accessor :description
 
     # @return [String] the trigger type that triggered this particular build
@@ -102,6 +102,20 @@ module FastlaneCI
 
     def link_to_remote_commit
       project.repo_config.link_to_remote_commit(sha)
+    end
+
+    # This method will return the branch name (if available)
+    # and automatically fallback to the short (8 char) git sha. Either way
+    # you'll have something nice to show to the user
+    def human_friendly_branch_information
+      # TODO: self.git_fork_config will never be `nil`, this is just here to be
+      #       "backwards compatibile" for now. Let's remove this with the launch
+      #       of fastlane.ci Beta. The `.branch` check must still be here
+      if git_fork_config && git_fork_config.branch.to_s.length > 0
+        return git_fork_config.branch
+      end
+
+      return sha[0...7]
     end
   end
 end

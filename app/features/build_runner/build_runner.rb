@@ -374,7 +374,7 @@ module FastlaneCI
         duration: -1,
         sha: sha,
         trigger: trigger.type,
-        git_fork_config: self.git_fork_config
+        git_fork_config: git_fork_config
       )
       save_build_status!
     end

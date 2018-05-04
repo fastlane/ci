@@ -28,7 +28,10 @@ module FastlaneCI
     end
 
     def self.attribute_to_type_map
-      return { :@artifacts => Artifact }
+      return {
+        :@git_fork_config => GitForkConfig,
+        :@artifacts => Artifact
+      }
     end
   end
 
@@ -50,6 +53,12 @@ module FastlaneCI
         end
       }
       return { :@provider => provider_object_to_provider }
+    end
+
+    # Mixin the JSONConvertible class for GitForkConfig
+    class GitForkConfig
+      # See comment in git_fork_config.rb
+      include FastlaneCI::JSONConvertible
     end
 
     def self.attribute_name_to_json_proc_map
