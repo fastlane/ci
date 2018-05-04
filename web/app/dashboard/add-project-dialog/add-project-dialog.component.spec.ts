@@ -6,6 +6,8 @@ import {MAT_DIALOG_DATA} from '@angular/material';
 import {By} from '@angular/platform-browser';
 import {Subject} from 'rxjs/Subject';
 
+import {FormSpinnerModule} from '../../common/components/form-spinner/form-spinner.module';
+import {mockProject} from '../../common/test_helpers/mock_project_data';
 import {mockRepositoryList} from '../../common/test_helpers/mock_repository_data';
 import {Project} from '../../models/project';
 import {Repository} from '../../models/repository';
@@ -26,11 +28,12 @@ describe('AddProjectDialogComponent', () => {
   let addProjectButtonEl: HTMLButtonElement;
 
   beforeEach(async(() => {
-    dataService = {
-      addProject: jasmine.createSpy().and.returnValue(projectSubject)
-    };
     reposSubject = new Subject<Repository[]>();
     projectSubject = new Subject<Project>();
+    dataService = {
+      addProject:
+          jasmine.createSpy().and.returnValue(projectSubject.asObservable())
+    };
 
     TestBed
         .configureTestingModule({
@@ -44,7 +47,7 @@ describe('AddProjectDialogComponent', () => {
           ],
           imports: [
             MatDialogModule, MatButtonModule, MatSelectModule, MatIconModule,
-            CommonModule, FormsModule
+            CommonModule, FormsModule, FormSpinnerModule
           ]
         })
         .compileComponents();
@@ -66,52 +69,63 @@ describe('AddProjectDialogComponent', () => {
         fixture.debugElement.query(By.css('button.mat-primary')).nativeElement;
   }));
 
-  it('should two way bind the project name input', async(() => {
-       const projectInput = fixture.debugElement.query(
-           By.css('input[placeholder="Project Name"]'));
-       component.project.project_name = 'ProjectX';
-       fixture.detectChanges();
+  describe('repo, lane, project name form controls', () => {
+    beforeEach(() => {
+      // Load Repos
+      reposSubject.next(mockRepositoryList);
+      fixture.detectChanges();
+    });
 
-       // ngModel is async, need to wait for it to stabilize
-       fixture.whenStable().then(() => {
-         expect(projectNameEl.value).toBe('ProjectX');
-
-         projectNameEl.value = 'ProjectY';
-         projectNameEl.dispatchEvent(new Event('input'));
+    it('should two way bind the project name input', async(() => {
+         const projectInput = fixture.debugElement.query(
+             By.css('input[placeholder="Project Name"]'));
+         component.project.project_name = 'ProjectX';
          fixture.detectChanges();
 
-         expect(component.project.project_name).toBe('ProjectY');
-       });
-     }));
+         // ngModel is async, need to wait for it to stabilize
+         fixture.whenStable().then(() => {
+           expect(projectNameEl.value).toBe('ProjectX');
 
-  it('should set repo option', () => {
-    reposSubject.next(mockRepositoryList);
-    fixture.detectChanges();
+           projectNameEl.value = 'ProjectY';
+           projectNameEl.dispatchEvent(new Event('input'));
+           fixture.detectChanges();
 
-    component.project.repo_name = 'fastlane/fastlane';
-    fixture.detectChanges();
+           expect(component.project.project_name).toBe('ProjectY');
+         });
+       }));
 
-    expect(repoSelectEl.textContent).toBe('fastlane/fastlane');
+    it('should set repo option', () => {
+      component.project.repo_name = 'fastlane/fastlane';
+      fixture.detectChanges();
 
-    component.project.repo_name = 'fastlane/ci';
-    fixture.detectChanges();
+      expect(repoSelectEl.textContent).toBe('fastlane/fastlane');
 
-    expect(repoSelectEl.textContent).toBe('fastlane/ci');
-  });
+      component.project.repo_name = 'fastlane/ci';
+      fixture.detectChanges();
 
-  it('should set lane option', () => {
-    component.project.lane = 'ios beta';
-    fixture.detectChanges();
+      expect(repoSelectEl.textContent).toBe('fastlane/ci');
+    });
 
-    expect(laneSelectEl.textContent).toBe('ios beta');
+    it('should set lane option', () => {
+      component.project.lane = 'ios beta';
+      fixture.detectChanges();
 
-    component.project.lane = 'ios test';
-    fixture.detectChanges();
+      expect(laneSelectEl.textContent).toBe('ios beta');
 
-    expect(laneSelectEl.textContent).toBe('ios test');
+      component.project.lane = 'ios test';
+      fixture.detectChanges();
+
+      expect(laneSelectEl.textContent).toBe('ios test');
+    });
   });
 
   describe('triggers', () => {
+    beforeEach(() => {
+      // Load Repos
+      reposSubject.next(mockRepositoryList);
+      fixture.detectChanges();
+    });
+
     it('should show correct nightly trigger option name', () => {
       component.project.trigger_type = 'nightly';
       fixture.detectChanges();
@@ -130,19 +144,20 @@ describe('AddProjectDialogComponent', () => {
       component.project.trigger_type = 'nightly';
       fixture.detectChanges();
 
-      expect(fixture.debugElement.query(By.css('.fci-hour-select')))
-          .not.toBe(null);
-      expect(fixture.debugElement.query(By.css('.fci-am-pm-select')))
-          .not.toBe(null);
+      expect(fixture.debugElement.queryAll(By.css('.fci-hour-select')).length)
+          .toBe(1);
+      expect(fixture.debugElement.queryAll(By.css('.fci-am-pm-select')).length)
+          .toBe(1);
     });
 
     it('should not show time selection when trigger is not nightly', () => {
       component.project.trigger_type = 'commit';
       fixture.detectChanges();
 
-      expect(fixture.debugElement.query(By.css('.fci-hour-select'))).toBe(null);
-      expect(fixture.debugElement.query(By.css('.fci-am-pm-select')))
-          .toBe(null);
+      expect(fixture.debugElement.queryAll(By.css('.fci-hour-select')).length)
+          .toBe(0);
+      expect(fixture.debugElement.queryAll(By.css('.fci-am-pm-select')).length)
+          .toBe(0);
     });
 
     it('should set nightly time correctly', async(() => {
@@ -173,6 +188,12 @@ describe('AddProjectDialogComponent', () => {
   });
 
   describe('#addProject', () => {
+    beforeEach(() => {
+      // Load Repos
+      reposSubject.next(mockRepositoryList);
+      fixture.detectChanges();
+    });
+
     it('should add the project hour in military time when nightly trigger',
        () => {
          component.project.trigger_type = 'nightly';
@@ -194,10 +215,23 @@ describe('AddProjectDialogComponent', () => {
          expect(component.project.hour).toBe(0);
        });
 
-    it('should show spinner while adding project',
-       () => {
-           // TODO
-       });
+    it('should show spinner while adding project', () => {
+      const spinnerEl = fixture.debugElement.query(By.css('.mat-spinner'));
+      expect(fixture.debugElement.queryAll(By.css('.mat-spinner')).length)
+          .toBe(0);
+
+      addProjectButtonEl.click();
+      fixture.detectChanges();
+
+      expect(fixture.debugElement.queryAll(By.css('.mat-spinner')).length)
+          .toBe(1);
+
+      projectSubject.next(mockProject);
+      fixture.detectChanges();
+
+      expect(fixture.debugElement.queryAll(By.css('.mat-spinner')).length)
+          .toBe(0);
+    });
 
     it('should close dialog on success',
        () => {
