@@ -50,7 +50,7 @@ module FastlaneCI
     # Array of env variables that were set, that we need to unset after the run
     attr_accessor :environment_variables_set
 
-    def initialize(project:, sha:, github_service:, notification_service:, work_queue:, trigger:, git_fork_config: nil)
+    def initialize(project:, sha:, github_service:, notification_service:, work_queue:, trigger:, git_fork_config:)
       if trigger.nil?
         # rubocop:disable Metrics/LineLength
         raise "No trigger provided, this is probably caused by a build being triggered, but then the project not having this particular build trigger associated"
@@ -195,7 +195,7 @@ module FastlaneCI
       }
 
       if git_fork_config && git_fork_config.branch.to_s.length > 0
-        env_mapping[:GIT_BRANCH] = git_fork_config.branch # TODO: does this work?
+        env_mapping[:GIT_BRANCH] = git_fork_config.branch.to_s # TODO: does this work?
       else
         env_mapping[:GIT_BRANCH] = "master" # TODO: use actual default branch?
       end
@@ -373,7 +373,8 @@ module FastlaneCI
         timestamp: Time.now.utc,
         duration: -1,
         sha: sha,
-        trigger: trigger.type
+        trigger: trigger.type,
+        git_fork_config: self.git_fork_config
       )
       save_build_status!
     end
