@@ -98,9 +98,11 @@ module FastlaneCI
           build_object_hash = JSON.parse(File.read(build_path))
           build = Build.from_json!(build_object_hash)
         rescue StandardError => ex
-          logger.debug(ex.to_s)
+          logger.error(ex.to_s)
+          logger.error(ex.backtrace)
           raise "Error parsing build information on path '#{File.expand_path(build_path)}'"
         end
+
         build.update_project!(project) # this is not part of the x.json file
         build
       end
