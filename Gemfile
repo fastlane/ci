@@ -19,7 +19,7 @@ gem "tty-command", ">= 0.7.0", "< 1.0.0"
 gem "octokit", ">= 4.8.0", "< 5.0.0"
 
 # Load the `.keys` dotenv file we use to store encryption data
-gem "dotenv", ">= 2.2.1", "< 3.0.0"
+gem "dotenv", ">= 2.4.0", "< 3.0.0"
 
 # Caching for octokit operations
 gem "faraday-http-cache"
