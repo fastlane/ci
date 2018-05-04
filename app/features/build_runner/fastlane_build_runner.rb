@@ -24,17 +24,24 @@ module FastlaneCI
     attr_reader :parameters
 
     # Set additional values specific to the fastlane build runner
+    # TODO: the parameters are not used/implemented yet, see https://github.com/fastlane/ci/issues/783
     def setup(parameters: nil)
-      # TODO: We have to update `Project` to properly let the user define platform and lane
-      #   Currently we just split the string
-      #   See https://github.com/fastlane/ci/issues/236
-      lane_pieces = project.lane.split(" ")
-
       # Setting the variables directly (only having `attr_reader`) as they're immutable
       # Once you define a FastlaneBuildRunner, you shouldn't be able to modify them
-      @platform = lane_pieces.count > 1 ? lane_pieces.first : nil
-      @lane = lane_pieces.last
+      @platform = project.platform
+      @lane = project.lane
       @parameters = parameters
+
+      # Append additional metadata to the build for historic information
+      current_build.lane = lane
+      current_build.platform = platform
+      current_build.parameters = self.parameters
+
+      # The call below could be optimized, as it will also set the status
+      # on the GitHub remote. We want to store the lane, platform and parameters
+      # that's why we call it here in the `setup` method again, as well as in
+      # `BuildRunner#prepare_build_object`
+      save_build_status!
     end
 
     # completion_block is called with an array of artifacts
