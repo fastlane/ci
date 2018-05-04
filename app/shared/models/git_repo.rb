@@ -614,7 +614,7 @@ module FastlaneCI
 
         begin
           git.branch(local_branch_name)
-          git.pull(git_fork_config.clone_url, branch)
+          git.pull(clone_url, branch)
           return true
         rescue StandardError => ex
           exception_context = {
