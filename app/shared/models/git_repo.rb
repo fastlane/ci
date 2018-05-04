@@ -620,7 +620,6 @@ module FastlaneCI
           exception_context = {
             clone_url: clone_url,
             branch: branch,
-            sha: current_sha,
             local_branch_name: local_branch_name
           }
           handle_exception(
