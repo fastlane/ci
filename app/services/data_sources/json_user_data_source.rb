@@ -146,14 +146,12 @@ module FastlaneCI
     end
 
     def delete_user!(user: nil)
-      user_index, existing_user = find_user_index_and_existing_user(user: user)
-
-      if existing_user.nil?
+      if find_user(id: user.id).nil?
         logger.debug("Couldn't delete user #{user.email} because they don't exist")
         raise "Couldn't delete user #{user.email} because they don't exist"
       else
-        users.delete_at(user_index)
-        logger.debug("Deleted user #{existing_user.email}, writing out users.json to #{user_file_path}")
+        users.delete(user)
+        logger.debug("Deleted user #{user.email}, writing out users.json to #{user_file_path}")
         return true
       end
     end
