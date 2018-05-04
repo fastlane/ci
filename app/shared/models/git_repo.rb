@@ -606,7 +606,7 @@ module FastlaneCI
       end
     end
 
-    # If we onlt have a git repo, and it isn't specifically from GitHub, we need to use this to switch to a fork
+    # If we only have a git repo, and it isn't specifically from GitHub, we need to use this to switch to a fork
     # May cause merge conflicts, so don't use it unless we must.
     def switch_to_git_fork(clone_url:, branch:, sha: nil, local_branch_name:, use_global_git_mutex: false)
       perform_block(use_global_git_mutex: use_global_git_mutex) do
@@ -614,7 +614,7 @@ module FastlaneCI
 
         begin
           git.branch(local_branch_name)
-          git.pull(git_fork_config.clone_url, git_fork_config.branch)
+          git.pull(clone_url, branch)
           return true
         rescue StandardError => ex
           exception_context = {
