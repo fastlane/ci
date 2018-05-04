@@ -43,14 +43,23 @@ module FastlaneCI
         return
       end
 
-      # TODO: This should be hidden in a service
+      branch_to_trigger = "master" # TODO: how/where do we get the default branch
+
+      git_fork_config = GitForkConfig.new(
+        current_sha: current_sha,
+        branch: branch_to_trigger,
+        clone_url: project.repo_config.git_url
+        # we don't need to pass a `ref`, as the sha and branch is all we need
+      )
+
       build_runner = FastlaneBuildRunner.new(
         project: project,
         sha: current_sha,
         github_service: FastlaneCI::GitHubService.new(provider_credential: current_github_provider_credential),
         notification_service: FastlaneCI::Services.notification_service,
         work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
-        trigger: project.find_triggers_of_type(trigger_type: :manual).first
+        trigger: project.find_triggers_of_type(trigger_type: :manual).first,
+        git_fork_config: git_fork_config
       )
       build_runner.setup(parameters: nil)
       Services.build_runner_service.add_build_runner(build_runner: build_runner)
