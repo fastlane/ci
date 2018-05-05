@@ -645,7 +645,7 @@ module FastlaneCI
           exception_context = {
             clone_url: git_fork_config.clone_url,
             branch: git_fork_config.branch,
-            sha: git_fork_config.current_sha,
+            sha: git_fork_config.sha,
             local_branch_name: local_branch_name
           }
           handle_exception(
@@ -660,7 +660,7 @@ module FastlaneCI
 
     # Useful when you don't have a PR, if you have access to a PR, use :switch_to_github_pr
     def switch_to_fork(git_fork_config:, local_branch_prefex:, use_global_git_mutex: false)
-      local_branch_name = local_branch_prefex + git_fork_config.current_sha[0..7]
+      local_branch_name = local_branch_prefex + git_fork_config.sha[0..7]
 
       # if we have a git ref to work with, use that instead of the fork
       if git_fork_config.ref
@@ -673,7 +673,7 @@ module FastlaneCI
         switch_to_git_fork(
           clone_url: git_fork_config.clone_url,
           branch: git_fork_config.branch,
-          sha: git_fork_config.current_sha,
+          sha: git_fork_config.sha,
           local_branch_name: local_branch_name,
           use_global_git_mutex: use_global_git_mutex
         )

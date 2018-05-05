@@ -50,11 +50,16 @@ module FastlaneCI
     # Array of env variables that were set, that we need to unset after the run
     attr_accessor :environment_variables_set
 
-    def initialize(project:, sha:, github_service:, notification_service:, work_queue:, trigger:, git_fork_config: nil)
+    def initialize(project:, sha:, github_service:, notification_service:, work_queue:, trigger:, git_fork_config:)
       if trigger.nil?
-        # rubocop:disable Metrics/LineLength
-        raise "No trigger provided, this is probably caused by a build being triggered, but then the project not having this particular build trigger associated"
+        raise "No trigger provided, this is probably caused by a build being triggered, " \
+              "but then the project not having this particular build trigger associated"
         # rubocop:enable Metrics/LineLength
+      end
+
+      if git_fork_config.nil?
+        raise "No `git_fork_config` provided when creating a new `BuildRunner` object. A `git_fork_config`" \
+              " is required to have the necessary information for historic builds to re-run a build"
       end
 
       # Setting the variables directly (only having `attr_reader`) as they're immutable
@@ -194,8 +199,8 @@ module FastlaneCI
         CI: true
       }
 
-      if git_fork_config && git_fork_config.branch.to_s.length > 0
-        env_mapping[:GIT_BRANCH] = git_fork_config.branch # TODO: does this work?
+      if git_fork_config.branch.to_s.length > 0
+        env_mapping[:GIT_BRANCH] = git_fork_config.branch.to_s # TODO: does this work?
       else
         env_mapping[:GIT_BRANCH] = "master" # TODO: use actual default branch?
       end
@@ -372,8 +377,8 @@ module FastlaneCI
         # so that utc stuff is discoverable
         timestamp: Time.now.utc,
         duration: -1,
-        sha: sha,
-        trigger: trigger.type
+        trigger: trigger.type,
+        git_fork_config: git_fork_config
       )
       save_build_status!
     end
