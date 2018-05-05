@@ -14,6 +14,7 @@ export interface AddProjectRequest {
   lane: string;
   repo_org: string;
   repo_name: string;
+  branch: string;
   project_name: string;
   trigger_type: 'commit'|'nightly';
   hour?: number;
