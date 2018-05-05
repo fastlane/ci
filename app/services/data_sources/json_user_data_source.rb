@@ -131,29 +131,25 @@ module FastlaneCI
 
     # TODO: this isn't threadsafe
     def update_user!(user: nil)
-      user_index, existing_user = find_user_index_and_existing_user(user: user)
+      user_index = user_index(user: user)
 
-      if existing_user.nil?
+      if user_index.nil?
         logger.debug("Couldn't update user #{user.email} because they don't exist")
         raise "Couldn't update user #{user.email} because they don't exist"
       else
-        users = self.users
         users[user_index] = user
-        self.users = users
-        logger.debug("Updating user #{existing_user.email}, writing out users.json to #{user_file_path}")
+        logger.debug("Updating user #{user.email}, writing out users.json to #{user_file_path}")
         return true
       end
     end
 
     def delete_user!(user: nil)
-      user_index, existing_user = find_user_index_and_existing_user(user: user)
-
-      if existing_user.nil?
+      if find_user(id: user.id).nil?
         logger.debug("Couldn't delete user #{user.email} because they don't exist")
         raise "Couldn't delete user #{user.email} because they don't exist"
       else
-        users.delete_at(user_index)
-        logger.debug("Deleted user #{existing_user.email}, writing out users.json to #{user_file_path}")
+        users.delete(user)
+        logger.debug("Deleted user #{user.email}, writing out users.json to #{user_file_path}")
         return true
       end
     end
@@ -178,8 +174,9 @@ module FastlaneCI
       end
     end
 
-    # Finds a user with a given id
+    # Finds a user with a given `id`
     #
+    # @param  [String] `id` the UUID for a user to find.
     # @return [User]
     def find_user(id:)
       return users.detect { |user| user.id == id }
@@ -187,17 +184,13 @@ module FastlaneCI
 
     private
 
-    # Finds the index of the user, and returns an existing `user` if they exist
+    # Finds the index of the user, if it exists
     #
     # @param  [User] `user` a user to lookup by `user.id`
     # @return [Integer] `user_index` in the `users` array
-    # @return [User] `existing_user` in the `users.json` file
-    def find_user_index_and_existing_user(user:)
-      users.each.with_index do |old_user, index|
-        return [index, old_user] if old_user.id == user.id
-      end
-
-      return [nil, nil]
+    def user_index(user:)
+      users.each.with_index { |old_user, index| return index if old_user.id == user.id }
+      return nil
     end
   end
 end

@@ -20,6 +20,40 @@ describe FastlaneCI::JSONUserDataSource do
 
   subject { described_class.create(file_path) }
 
+  describe "#update_user!" do
+    let(:user) { users.first }
+    let(:users) { user_params.map { |params| FastlaneCI::User.new(params) } }
+
+    context "user doesn't exist" do
+      before(:each) do
+        subject.stub(:users).and_return([])
+      end
+
+      it "raises an error message and doesn't write to the `users.json` file" do
+        expect(File).not_to(receive(:write))
+        expect { subject.update_user!(user: user) }.to raise_error
+      end
+    end
+
+    context "user exists" do
+      let(:new_user_email) { "new.user1@gmail.com" }
+      let(:new_user) { FastlaneCI::User.new(user_params.first.merge(email: new_user_email)) }
+
+      before(:each) do
+        subject.stub(:users).and_return(users)
+      end
+
+      it "updates the `user` email in the `users.json` file" do
+        expect { subject.update_user!(user: new_user) }
+          .to change { subject.users.first.email }.from(first_user_email).to(new_user_email)
+      end
+
+      it "returns `true` when a user is updated" do
+        expect(subject.update_user!(user: new_user)).to be(true)
+      end
+    end
+  end
+
   describe "#delete_user!" do
     let(:user) { users.first }
     let(:users) { user_params.map { |params| FastlaneCI::User.new(params) } }
@@ -52,11 +86,15 @@ describe FastlaneCI::JSONUserDataSource do
 
   private
 
+  def first_user_email
+    "test.user1@gmail.com"
+  end
+
   def user_params
     [
       {
         id: "uuid-1",
-        email: "test.user1@gmail.com",
+        email: first_user_email,
         password_hash: "some-bad-password",
         provider_credentials: [
           FastlaneCI::GitHubProviderCredential.new(
