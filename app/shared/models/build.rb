@@ -54,7 +54,7 @@ module FastlaneCI
     # @return [String] contains all information to check out that specific remote, branch, sha, ref again
     #                  this information will be used when re-running an old build
     #                  see https://github.com/fastlane/ci/issues/481 for more details
-    attr_accessor :git_fork_config
+    attr_reader :git_fork_config
 
     def initialize(
       project: nil,
@@ -107,10 +107,7 @@ module FastlaneCI
     # and automatically fallback to the short (8 char) git sha. Either way
     # you'll have something nice to show to the user
     def human_friendly_branch_information
-      if git_fork_config.branch.to_s.length > 0
-        return git_fork_config.branch
-      end
-
+      return git_fork_config.branch if git_fork_config.branch.to_s.length > 0
       return sha[0...7]
     end
   end
