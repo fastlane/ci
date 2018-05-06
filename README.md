@@ -117,7 +117,3 @@ bundle exec rubocop -a
 ----
 
 [Interested? Be the first to hear about the official release](https://tinyletter.com/fastlane-tools)
-
-## We're hiring!
-
-Are you passionate about _fastlane_ already, and want to help us build `fastlane.ci`? We're looking for engineers to join our team, drop us a message with your CV to fastlane@google.com.
