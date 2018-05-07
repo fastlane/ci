@@ -37,6 +37,9 @@ module StubHelpers
     allow_any_instance_of(FastlaneCI::GitRepo).to receive(:git_config).and_return(fake_git_config)
     allow_any_instance_of(FastlaneCI::GitRepo).to receive(:repo_auth).and_return(fake_repo_auth)
     allow_any_instance_of(FastlaneCI::GitRepo).to receive(:clone)
+    allow_any_instance_of(FastlaneCI::GitRepo).to receive(:pull)
+    allow_any_instance_of(FastlaneCI::GitRepo).to receive(:push)
+    allow_any_instance_of(FastlaneCI::GitRepo).to receive(:commit_changes!)
   end
 
   def stub_services
