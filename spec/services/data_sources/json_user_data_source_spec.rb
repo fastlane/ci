@@ -36,10 +36,24 @@ describe FastlaneCI::JSONUserDataSource do
 
     context "user doesn't exist" do
       let(:new_user_email) { "new.user1@gmail.com" }
-      let(:new_user_params) { create_user_params.merge(email: new_user_email) }
 
-      it "returns `User` object when a new user is created" do
-        expect(subject.create_user!(new_user_params)).to be_an_instance_of(FastlaneCI::User)
+      context "`id` parameter exists" do
+        let(:new_user_params) { create_user_params.merge(email: new_user_email) }
+
+        it "returns `User` object when a new user is created" do
+          expect(subject.create_user!(new_user_params)).to be_an_instance_of(FastlaneCI::User)
+        end
+      end
+
+      context "`id` parameter does not exist" do
+        let(:new_user_params) do
+          create_user_params.tap { |hs| hs.delete(:id) }
+                            .merge(email: new_user_email)
+        end
+
+        it "returns `User` object when a new user is created" do
+          expect(subject.create_user!(new_user_params)).to be_an_instance_of(FastlaneCI::User)
+        end
       end
     end
 
