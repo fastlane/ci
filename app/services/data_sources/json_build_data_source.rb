@@ -116,7 +116,13 @@ module FastlaneCI
         build
       end
 
-      return most_recent_builds
+      # Unsure how this happens, but logging it and compacting the array is a start.
+      compacted_builds = most_recent_builds.compact
+      if most_recent_builds.count != compacted_builds.count
+        logger.debug("most_recent_builds had nil in it, but we compacted it\nbuilds: #{most_recent_builds}")
+      end
+
+      return compacted_builds
     end
 
     def pending_builds(project: nil)
