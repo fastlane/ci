@@ -1,6 +1,6 @@
 # Update Xcode installation #
 
-Xcode doens't support proper versioning like other development environments do. The goal with `fastlane.ci` is to make it easy as possible for the user to upgrade their CI system to run multiple versions of Xcode in parallel depending on the branch. This allows development team to work on a `swift-x` migration branch to test Xcode-`X` features without having to break the build for the remaining branches.
+Xcode doesn't support proper versioning like other development environments do. The goal with `fastlane.ci` is to make it easy as possible for the user to upgrade their CI system to run multiple versions of Xcode in parallel depending on the branch. This allows development team to work on a `swift-x` migration branch to test Xcode-`X` features without having to break the build for the remaining branches.
 
 To list, manage and install Xcode release, we make use of the [xcode-install gem](https://github.com/krausefx/xcode-install), which exposes all the features we need to implement this use-case.
 
