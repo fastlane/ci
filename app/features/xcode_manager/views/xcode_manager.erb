@@ -42,6 +42,7 @@
             <th>Version</th>
             <th>Installed</th>
             <th>Full Name</th>
+            <th>Action</th>
           </tr>
         </thead>
 
@@ -56,6 +57,17 @@
               </td>
               <td>
                 <%= xcode_version.name %>
+              </td>
+              <td>
+                <% if xcode_version.installed? %>
+                  <a href="#" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                    Set as default
+                  </a>
+                <% else %>
+                  <a href="#" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+                    Install
+                  </a>
+                <% end %>
               </td>
             </tr>
           <% end %>
