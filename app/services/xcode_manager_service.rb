@@ -43,7 +43,7 @@ module FastlaneCI
     def switch_xcode_version!(xcode_path:)
       # It's save to say that DEVELOPER_DIR is fully managed by fastlane.ci
       # and we don't respect the user setting their own
-      ENV["DEVELOPER_DIR"] = xcode_path_to_use.to_s if xcode_path_to_use
+      ENV["DEVELOPER_DIR"] = xcode_path.to_s if xcode_path
     end
 
     # Call this after calling `switch_xcode_version!`
