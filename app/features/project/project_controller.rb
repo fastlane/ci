@@ -22,9 +22,10 @@ module FastlaneCI
 
       project = user_project_with_id(project_id: project_id)
       current_github_provider_credential = check_and_get_provider_credential
-
-      # Create random folder for checkout, prefixed with `manual_build`
-      checkout_folder = File.join(File.expand_path(project.local_repo_path), "manual_build_#{SecureRandom.uuid}")
+      # rubocop:disable Metrics/LineLength
+      # Create random folder for checkout, prefixed with `manual_build` or use the current_sha with the number of times we made a re-run for this commit.
+      checkout_folder = File.join(File.expand_path(project.local_repo_path), "manual_build_#{current_sha || SecureRandom.uuid}#{current_sha ? "_#{Dir[File.join(File.expand_path(project.local_repo_path), "*#{current_sha}*")].count}" : ''}")
+      # rubocop:enable Metrics/LineLength
       # TODO: This should be hidden in a service
       repo = FastlaneCI::GitRepo.new(
         git_config: project.repo_config,
