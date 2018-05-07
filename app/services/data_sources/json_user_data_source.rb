@@ -101,7 +101,7 @@ module FastlaneCI
       end
     end
 
-    def login(email: nil, password: nil)
+    def login(email:, password:)
       user = users.detect { |existing_user| existing_user.email.casecmp(email.downcase).zero? }
 
       if user.nil?
@@ -125,12 +125,12 @@ module FastlaneCI
     end
 
     # just check to see if we have a user with that email...
-    def user_exist?(email: nil)
+    def user_exist?(email:)
       return users.any? { |existing_user| existing_user.email.casecmp(email.downcase).zero? }
     end
 
     # TODO: this isn't threadsafe
-    def update_user!(user: nil)
+    def update_user!(user:)
       user_index = user_index(user: user)
 
       if user_index.nil?
@@ -143,7 +143,7 @@ module FastlaneCI
       end
     end
 
-    def delete_user!(user: nil)
+    def delete_user!(user:)
       if find_user(id: user.id).nil?
         logger.debug("Couldn't delete user #{user.email} because they don't exist")
         raise "Couldn't delete user #{user.email} because they don't exist"
@@ -154,7 +154,7 @@ module FastlaneCI
       end
     end
 
-    def create_user!(id: nil, email: nil, password: nil, provider_credentials: [])
+    def create_user!(id: nil, email:, password:, provider_credentials: [])
       users = self.users
       new_user = User.new(
         id: id,
