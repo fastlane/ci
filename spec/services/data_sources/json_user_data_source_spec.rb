@@ -20,6 +20,53 @@ describe FastlaneCI::JSONUserDataSource do
 
   subject { described_class.create(file_path) }
 
+  describe "#create_user!" do
+    let(:users) { user_params.map { |params| FastlaneCI::User.new(params) } }
+
+    # Removes the `password_hash` key, and adds the `password` key
+    let(:create_user_params) do
+      user_params.first
+                 .tap { |hs| hs.delete(:password_hash) }
+                 .merge(password: "password")
+    end
+
+    before(:each) do
+      subject.stub(:users).and_return(users)
+    end
+
+    context "user doesn't exist" do
+      let(:new_user_email) { "new.user1@gmail.com" }
+
+      context "`id` parameter exists" do
+        let(:new_user_params) { create_user_params.merge(email: new_user_email) }
+
+        it "returns `User` object when a new user is created" do
+          expect(subject.create_user!(new_user_params)).to be_an_instance_of(FastlaneCI::User)
+        end
+      end
+
+      context "`id` parameter does not exist" do
+        let(:new_user_params) do
+          create_user_params.tap { |hs| hs.delete(:id) }
+                            .merge(email: new_user_email)
+        end
+
+        it "returns `User` object when a new user is created" do
+          expect(subject.create_user!(new_user_params)).to be_an_instance_of(FastlaneCI::User)
+        end
+      end
+    end
+
+    context "user exists" do
+      let(:old_user_params) { create_user_params }
+
+      it "returns `nil` if the user already exists" do
+        expect(File).not_to(receive(:write))
+        expect(subject.create_user!(old_user_params)).to be_nil
+      end
+    end
+  end
+
   describe "#update_user!" do
     let(:user) { users.first }
     let(:users) { user_params.map { |params| FastlaneCI::User.new(params) } }
