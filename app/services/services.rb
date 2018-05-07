@@ -12,6 +12,8 @@ require_relative "./notification_service"
 require_relative "./update_fastlane_ci_service"
 require_relative "./user_service"
 require_relative "./worker_service"
+require_relative "./xcode_manager_service"
+
 
 module FastlaneCI
   # A class that stores the singletones for each
@@ -47,6 +49,7 @@ module FastlaneCI
       @_update_fastlane_ci_service = nil
       @_environment_variable_service = nil
       @_dot_keys_variable_service = nil
+      @_xcode_manager_service = nil
     end
 
     ########################################################
@@ -181,6 +184,10 @@ module FastlaneCI
 
     def self.dot_keys_variable_service
       @_dot_keys_variable_service ||= FastlaneCI::DotKeysVariableService.new
+    end
+
+    def self.xcode_manager_service
+      @_xcode_manager_service ||= FastlaneCI::XcodeManagerService.new
     end
 
     def self.environment_variable_service
