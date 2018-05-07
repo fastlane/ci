@@ -170,6 +170,9 @@ module FastlaneCI
 
     def pre_run_action(&completion_block)
       logger.debug("Running pre_run_action in checkout_sha")
+
+      setup_tooling_environment
+
       checkout_sha do |checkout_success|
         if checkout_success
           setup_build_specific_environment_variables
@@ -179,6 +182,12 @@ module FastlaneCI
         end
         completion_block.call(checkout_success)
       end
+    end
+
+    # Implement this method in sub classes to prepare necessary tooling
+    # like Xcode or Android studio, to be able to successfully run a build
+    def setup_tooling_environment
+      not_implemented(__method__)
     end
 
     def setup_build_specific_environment_variables

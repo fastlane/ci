@@ -9,7 +9,7 @@ module FastlaneCI
     HOME = "/xcode_manager_erb"
 
     get HOME do
-      locals = { 
+      locals = {
         title: "Xcode Manager",
         # Passing xcode versions to make sure to not
         # re-run this multiple times on a single request

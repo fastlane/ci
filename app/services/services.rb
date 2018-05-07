@@ -14,7 +14,6 @@ require_relative "./user_service"
 require_relative "./worker_service"
 require_relative "./xcode_manager_service"
 
-
 module FastlaneCI
   # A class that stores the singletones for each
   # service we provide
