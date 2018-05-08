@@ -51,5 +51,33 @@ module FastlaneCI
     def clear_xcode_version!
       ENV.delete("DEVELOPER_DIR")
     end
+
+    # Run `xcode-select-p`, makes testing possible
+    def xcode_select_p
+      `xcode-select -p`.strip
+    end
+
+    # @return [String] The path to the currently selected Xcode
+    #   e.g. "/Applications/Xcode9.2.app"
+    def current_xcode_path
+      path = ENV["DEVELOPER_DIR"] if ENV["DEVELOPER_DIR"].to_s.length > 0
+      path ||= xcode_select_p
+
+      # When using `xcode-select -p` the output ends with "Contents/Developer" for legacy reasons
+      path = File.expand_path("../..", path) if path.end_with?("Contents/Developer")
+
+      return path
+    end
+
+    # @return [XcodeInstall::InstalledXcode] of the currently selected Xcode
+    def current_xcode
+      return XcodeInstall::InstalledXcode.new(current_xcode_path)
+    end
+
+    # Detect the current Xcode version
+    # @return [Gem::Version] e.g. `Gem::Version.new("9.2")`
+    def current_xcode_version
+      return Gem::Version.new(current_xcode.fetch_version)
+    end
   end
 end

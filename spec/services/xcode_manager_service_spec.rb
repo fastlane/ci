@@ -19,4 +19,33 @@ describe FastlaneCI::XcodeManagerService do
       expect(ENV["DEVELOPER_DIR"]).to eq(nil)
     end
   end
+
+  describe "#current_xcode_path" do
+    it "uses the DEVELOPER_DIR ENV variable if provided" do
+      path = "/Applications/Xcode9.2.app"
+      ENV["DEVELOPER_DIR"] = path
+      expect(xcode_manager_service.current_xcode_path).to eq(path)
+    end
+
+    it "falls back to `xcode-select -p` if no ENV variable is provided" do
+      path = "/Applications/Xcode9.2.app"
+      ENV.delete("DEVELOPER_DIR")
+      expect(xcode_manager_service).to receive(:xcode_select_p).and_return(path)
+      expect(xcode_manager_service.current_xcode_path).to eq(path)
+    end
+
+    it "falls back to `xcode-select -p` if DEVELOPER_DIR ENV is provided but empty" do
+      path = "/Applications/Xcode9.2.app"
+      ENV["DEVELOPER_DIR"] = ""
+      expect(xcode_manager_service).to receive(:xcode_select_p).and_return(path)
+      expect(xcode_manager_service.current_xcode_path).to eq(path)
+    end
+
+    it "automatically removes the `Contents/Developer` from the path" do
+      path = "/Applications/Xcode9.2.app"
+      ENV.delete("DEVELOPER_DIR")
+      expect(xcode_manager_service).to receive(:xcode_select_p).and_return(path + "/Contents/Developer")
+      expect(xcode_manager_service.current_xcode_path).to eq(path)
+    end
+  end
 end

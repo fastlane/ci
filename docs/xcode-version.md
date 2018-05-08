@@ -53,7 +53,7 @@ In Ruby, comparing the file content is really easy:
 #### Parse the version
 
 ```ruby
-Gem::Version.new("9.2b3") # => #<Gem::Version "9.2b3">
+Gem::Version.new("9.2b3") # => <Gem::Version "9.2b3">
 ```
 
 #### Compare
