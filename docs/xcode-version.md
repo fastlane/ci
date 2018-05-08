@@ -14,6 +14,10 @@ Tools like [xcode-install](https://github.com/krausefx/xcode-install) allow an a
 
 The file name must always be `.xcode-version`
 
+## File location
+
+The file must be located in the same directory as your Xcode project/workspace
+
 ## File content
 
 The file content must be a simple string in a text file
