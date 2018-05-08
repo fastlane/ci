@@ -322,6 +322,21 @@ module FastlaneCI
         # This version isn't installed yet, let's see if it's available to install
         if Services.xcode_manager_service.available_xcode_versions.map(&:version).include?(parsed_xcode_version)
           logger.info("#{parsed_xcode_version} is available to be installed")
+          Services.xcode_manager_service.install_xcode!(
+            version: parsed_xcode_version,
+            success_block: proc do |version|
+              puts "Success: #{version}"
+            end,
+            error_block: proc do |version, exception|
+              puts "Error: #{version} - #{exception}"
+            end
+          )
+          # TODO: we now have to pause this build and put it back into the queue for when
+          # the success block was called
+
+          # TODO: how do we wait/block here
+          @xcode_path_to_use = matching_xcode_instance.path
+
           # TODO: how/where do we want to trigger the installation process of a new Xcode version
         else
           logger.error("#{parsed_xcode_version} is not available to be installed")

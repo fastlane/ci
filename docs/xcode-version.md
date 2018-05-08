@@ -70,4 +70,7 @@ Gem::Version.new("9.2") > Gem::Version.new("9.2b5") # => true
 
 # Check if 10 is larger than 9
 Gem::Version.new("10.4.5") > Gem::Version.new("9.1.2") # => true
+
+# Check if 8.0 is the same as 8
+Gem::Version.new("8.0") == Gem::Version.new("8") # => true
 ```

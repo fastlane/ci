@@ -4,6 +4,8 @@ require_relative "./services"
 module FastlaneCI
   # Manages Xcode installations
   class XcodeManagerService
+    include FastlaneCI::Logging
+
     def installer
       if @_installer.nil?
         @_installer = XcodeInstall::Installer.new
@@ -11,6 +13,10 @@ module FastlaneCI
       # @_installer.rm_list_cache
 
       return @_installer
+    end
+
+    def xcode_queue
+      @_xcode_queue ||= TaskQueue::TaskQueue.new(name: "fastlane.ci Xcode queue")
     end
 
     # @return [XcodeInstall::Xcode]
@@ -78,6 +84,49 @@ module FastlaneCI
     # @return [Gem::Version] e.g. `Gem::Version.new("9.2")`
     def current_xcode_version
       return Gem::Version.new(current_xcode.fetch_version)
+    end
+
+    # Install a specific version of Xcode on the current machine
+    # success_block is only called when no exception occured
+    # only either error_block or success_block will be called
+    # @param version [Gem::Version]
+    def install_xcode!(version:, success_block:, error_block:)
+      raise "Please only pass `Gem::Version` to `install_xcode!`" unless version.kind_of?(Gem::Version)
+
+      unless available_xcode_versions.map(&:version).include?(version)
+        raise "Xcode version '#{version}' is not available in the list of Xcode versions: " \
+              "#{available_xcode_versions.map(&:version).join(', ')}"
+      end
+
+      install_xcode_task = TaskQueue::Task.new(work_block: proc {
+        # ENV["XCODE_INSTALL_USER"] = ""
+        begin
+          installer.install_version(
+            # version: the version to install
+            version,
+            # `should_switch` is false, as we handle it on the fastlane.ci side of things, also this will create aliases which we don't need
+            false,
+            # `should_clean` is true, as we don't need to keep old DMG files around
+            false, # false for now for faster debugging
+            # `should_install` is true, as we want to not only download, but also install this version
+            true,
+            # `progress`: Let's see what we want here
+            true,
+            # `url` is nil, as we don't have a custom source
+            nil,
+            # `show_release_notes` is `false`, as this is a non-interactive machine
+            false
+          )
+          logger.info("Successfully finished Xcode installation of version #{version}")
+          success_block.call(version)
+        rescue StandardError => ex
+          logger.error(ex)
+          logger.error(ex.backtrace)
+          error_block.call(version, ex)
+        end
+      })
+
+      xcode_queue.add_task_async(task: install_xcode_task)
     end
   end
 end
