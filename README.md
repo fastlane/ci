@@ -114,6 +114,12 @@ bundle exec rspec
 bundle exec rubocop -a
 ```
 
+## License
+
+This project is licensed under the terms of the MIT license. See the [LICENSE](LICENSE) file.
+
+> This project and all fastlane tools are in no way affiliated with Apple Inc.
+
 ----
 
 [Interested? Be the first to hear about the official release](https://tinyletter.com/fastlane-tools)
