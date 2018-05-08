@@ -22,12 +22,15 @@ module FastlaneCI
 
       project = user_project_with_id(project_id: project_id)
       current_github_provider_credential = check_and_get_provider_credential
-      # Create random folder for checkout, prefixed with `manual_build` 
+      # Create random folder for checkout, prefixed with `manual_build`
       # or use the current_sha with the number of times we made a re-run for this commit.
-      sha_or_uuid = "#{current_sha || SecureRandom.uuid}"
+      sha_or_uuid = (current_sha || SecureRandom.uuid).to_s
       if current_sha
         sha_build_count = Dir[File.join(File.expand_path(project.local_repo_path), "*#{current_sha}*")].count
-        checkout_folder = File.join(File.expand_path(project.local_repo_path), "manual_build_#{sha_or_uuid}_#{sha_build_count}")
+        checkout_folder = File.join(
+          File.expand_path(project.local_repo_path),
+          "manual_build_#{sha_or_uuid}_#{sha_build_count}"
+        )
       else
         checkout_folder = File.join(File.expand_path(project.local_repo_path), "manual_build_#{sha_or_uuid}")
       end
