@@ -20,7 +20,7 @@ The file must be located in the same directory as your Xcode project/workspace
 
 ## File content
 
-The file content must be a simple string in a text file
+The file content must be a simple string in a text file. The file may or may not end with an empty new line, the parser is responsible for stripping out the trailing `\n` (if used)
 
 ### Sample files
 
