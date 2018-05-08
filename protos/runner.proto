@@ -1,0 +1,34 @@
+/**
+ * proto definitions for auto-generated client, server, and messages to pass using grpc.
+ *
+ * if you make any changes to this file, run
+ *   `rake proto`
+ * to regenerate the ruby code.
+ **/
+
+syntax = "proto3";
+
+package fastlane_c_i;
+
+service Runner {
+  rpc Spawn(Command) returns (stream Log) {}
+}
+
+message Log {
+  string message = 1;
+  enum Level {
+    DEBUG = 0;
+    INFO = 1;
+    WARN = 2;
+    ERROR = 3;
+    FATAL = 5;
+  }
+  Level level = 2;
+  int32 status = 3;
+}
+
+message Command {
+  string bin = 1;
+  repeated string parameters = 2;
+  map<string,string> env = 3;
+}

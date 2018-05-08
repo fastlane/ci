@@ -13,6 +13,10 @@ task :devbootstrap do
   sh "ln -sf ../../.pre-commit .git/hooks/pre-commit"
 end
 
+task :proto do
+  sh "bundle exec grpc_tools_ruby_protoc -I protos/ --ruby_out=./protos --grpc_out=./protos protos/*.proto"
+end
+
 begin
   require "rspec/core/rake_task"
   RSpec::Core::RakeTask.new(:spec)

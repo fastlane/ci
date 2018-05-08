@@ -135,6 +135,9 @@ GEM
       digest-crc (~> 0.4)
       google-api-client (~> 0.13.0)
       google-cloud-core (~> 1.0)
+    google-protobuf (3.5.1.2)
+    googleapis-common-protos-types (1.0.1)
+      google-protobuf (~> 3.0)
     googleauth (0.6.2)
       faraday (~> 0.12)
       jwt (>= 1.4, < 3.0)
@@ -143,6 +146,11 @@ GEM
       multi_json (~> 1.11)
       os (~> 0.9)
       signet (~> 0.7)
+    grpc (1.11.0)
+      google-protobuf (~> 3.1)
+      googleapis-common-protos-types (~> 1.0.0)
+      googleauth (>= 0.5.1, < 0.7)
+    grpc-tools (1.11.0)
     highline (1.7.10)
     http-cookie (1.0.3)
       domain_name (~> 0.5)
@@ -320,6 +328,8 @@ DEPENDENCIES
   faye-websocket (>= 0.10.7, < 1.0.0)
   git!
   google-cloud-storage (~> 1.5.0)
+  grpc (~> 1.11.0)
+  grpc-tools
   jwt (~> 2.1.0)
   octokit (>= 4.8.0, < 5.0.0)
   pry
