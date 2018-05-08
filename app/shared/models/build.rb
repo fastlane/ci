@@ -89,6 +89,8 @@ module FastlaneCI
     end
 
     def sha
+      raise "Build is missing `git_fork_config`, you're probably using an old ci-config repo" if git_fork_config.nil?
+
       return git_fork_config.sha
     end
 
