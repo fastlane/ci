@@ -2,6 +2,10 @@ require "spec_helper"
 require "app/services/xcode_manager_service"
 
 describe FastlaneCI::XcodeManagerService do
+  before do
+    ENV["XCODE_INSTALL_USER"] = "1"
+  end
+
   let (:xcode_manager_service) { FastlaneCI::XcodeManagerService.new }
 
   describe "#switch_xcode_version!" do
@@ -46,6 +50,21 @@ describe FastlaneCI::XcodeManagerService do
       ENV.delete("DEVELOPER_DIR")
       expect(xcode_manager_service).to receive(:xcode_select_p).and_return(path + "/Contents/Developer")
       expect(xcode_manager_service.current_xcode_path).to eq(path)
+    end
+  end
+
+  describe "#installing_xcode_versions" do
+    it "returns an empty on a new service init" do
+      expect(xcode_manager_service.installing_xcode_versions).to eq([])
+    end
+
+    it "returns an array with Xcode versions if installations are in progress" do
+      version = Gem::Version.new("8.1")
+
+      expect(xcode_manager_service.xcode_queue).to receive(:add_task_async).and_return(nil)
+
+      xcode_manager_service.install_xcode!(version: version)
+      expect(xcode_manager_service.installing_xcode_versions).to eq([version])
     end
   end
 end

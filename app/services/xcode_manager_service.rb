@@ -1,6 +1,8 @@
 require_relative "../shared/logging_module"
 require_relative "./services"
 
+require "xcode/install"
+
 module FastlaneCI
   # Manages Xcode installations
   class XcodeManagerService
@@ -9,16 +11,18 @@ module FastlaneCI
     # Keeps an array of Gem::Version to keep track of what we're currently installing
     attr_accessor :installations_in_progress
 
+    def initialize
+      if ENV["XCODE_INSTALL_USER"].to_s.length == 0
+        raise "No `XCODE_INSTALL_USER` ENV variable provided, please provide one when launching up the fastlane.ci"
+      end
+
+      self.installations_in_progress = []
+    end
+
     # A shared reference to the `XcodeInstall::Installer` object we use
     def installer
       if @_installer.nil?
-        if ENV["XCODE_INSTALL_USER"].to_s.length == 0
-          raise "No `XCODE_INSTALL_USER` ENV variable provided, please provide one when launching up the fastlane.ci"
-        end
-
         @_installer = XcodeInstall::Installer.new
-
-        self.installations_in_progress = []
       end
       # @_installer.rm_list_cache
 
