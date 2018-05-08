@@ -43,3 +43,23 @@ You can also use pre-releases using the following syntax
 **Note**: Be aware that pre-releases will be taken down from Apple's servers, meaning that it won't allow you to have fully reproducible builds as you can't download the Xcode release once it's gone.
 
 It is recommended to only use non-beta releases in an `.xcode-version` file to have fully reproducible builds that you'll be able to run in a few years also.
+
+## Comparing versions
+
+### Ruby
+
+In Ruby, comparing the file content is really easy:
+
+#### Parse the version
+
+```ruby
+Gem::Version.new("9.2b3") # => #<Gem::Version "9.2b3">
+```
+
+#### Compare
+
+```ruby
+Gem::Version.new("9.2b3") > Gem::Version.new("9.2b1") # => true
+Gem::Version.new("9.2b3") == Gem::Version.new("9.2b3") # => true
+Gem::Version.new("9.2") > Gem::Version.new("9.2b5") # => true
+```
