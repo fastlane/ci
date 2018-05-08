@@ -70,7 +70,7 @@ module FastlaneCI
     # add these as class methods
     module ClassMethods
       def from_json!(json_object)
-        instance = new
+        instance, json_object = _initialize_using!(json_object)
         json_object.each do |var, val|
           # If we encounter with a value that is represented by an array, iterate over it.
           if val.kind_of?(Array)
@@ -223,6 +223,20 @@ module FastlaneCI
         end
 
         return var_name, var_value
+      end
+
+      def _initialize_using!(json_object)
+        instance = allocate
+        required_init_params = instance.method(:initialize).parameters
+                                       .select { |arg| arg[0] == :keyreq }
+                                       .map(&:last)
+        unless (required_init_params - json_object.keys).empty?
+          raise "Required initialization parameters not found in the object: #{json_object}"
+        end
+        init_params_hash = json_object.select { |key, value| required_init_params.include?(key) }
+        instance.send(:initialize, init_params_hash)
+        clean_json_object = json_object.reject { |key| required_init_params.include?(key) }
+        return instance, clean_json_object
       end
     end
   end
