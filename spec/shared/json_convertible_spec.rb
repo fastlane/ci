@@ -77,6 +77,16 @@ class MockMultipleAttributeArrayJSONConvertible
   end
 end
 
+class MockJSONConvertibleWithRequiredParams
+  include FastlaneCI::JSONConvertible
+
+  attr_reader :one_attribute
+
+  def initialize(one_attribute:)
+    @one_attribute = one_attribute
+  end
+end
+
 module FastlaneCI
   describe JSONConvertible do
     let (:mock_object) { MockJSONConvertible.new(one_attribute: "Hello", other_attribute: Time.at(0)) }
@@ -233,6 +243,12 @@ module FastlaneCI
       expect(dictionary_object).to eql({ "one_attribute" => "World", "other_attribute" => Time.at(10), "array_attribute" => [
                                          { "one_attribute" => "Inner World", "other_attribute" => Time.at(100) }
                                        ] })
+    end
+
+    it "Allows to decode objects with required initialization parameters" do
+      object_dictionary = { one_attribute: "rocket" }
+      object = MockJSONConvertibleWithRequiredParams.from_json!(object_dictionary)
+      expect(object.one_attribute).to eql("rocket")
     end
   end
 end
