@@ -14,9 +14,22 @@ module FastlaneCI
         # Passing xcode versions to make sure to not
         # re-run this multiple times on a single request
         installed_xcode_versions: Services.xcode_manager_service.installed_xcode_versions,
-        available_xcode_versions: Services.xcode_manager_service.available_xcode_versions
+        available_xcode_versions: Services.xcode_manager_service.available_xcode_versions,
+        installing_xcode_versions: Services.xcode_manager_service.installing_xcode_versions
       }
       erb(:xcode_manager, locals: locals, layout: FastlaneCI.default_layout)
+    end
+
+    # TODO: this will be POST of course
+    get "#{HOME}/install" do
+      # TODO: add error handling for `version` parameter
+      version = Gem::Version.new(params[:version])
+
+      Services.xcode_manager_service.install_xcode!(
+        version: version
+      )
+
+      redirect(HOME)
     end
   end
 end

@@ -8,6 +8,32 @@
   <%= erb :"../../global/navigation" %>
 
   <main class="mdl-layout__content" style="padding: 40px">
+    <h4>Currently installing...</h4>
+    <div class="table-responsive-vertical shadow-z-1" style="overflow: scroll">
+      <table class="table-mc-light-blue mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+        <thead>
+          <tr>
+            <th>Version</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% installing_xcode_versions.each do |xcode_version| %>
+            <tr>
+              <td>
+                <%= xcode_version.to_s %>
+              </td>
+              <td>
+                ⬇️
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+
     <h4>Installed Xcode versions</h4>
     <div class="table-responsive-vertical shadow-z-1" style="overflow: scroll">
       <table class="table-mc-light-blue mdl-data-table mdl-js-data-table mdl-shadow--2dp">
@@ -63,8 +89,10 @@
                   <a href="#" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
                     Set as default
                   </a>
+                <% elsif installing_xcode_versions.include?(xcode_version.version) %>
+                  Already installing...
                 <% else %>
-                  <a href="#" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+                  <a href="/xcode_manager_erb/install?version=<%= xcode_version.version %>" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
                     Install
                   </a>
                 <% end %>

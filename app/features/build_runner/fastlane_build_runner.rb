@@ -334,7 +334,7 @@ module FastlaneCI
           # the success block was called
 
           # TODO: how do we wait/block here
-          @xcode_path_to_use = matching_xcode_instance.path
+          # @xcode_path_to_use = matching_xcode_instance.path
         else
           logger.error("#{parsed_xcode_version} is not available to be installed")
           return

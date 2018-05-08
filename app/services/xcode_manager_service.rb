@@ -6,9 +6,19 @@ module FastlaneCI
   class XcodeManagerService
     include FastlaneCI::Logging
 
+    # Keeps an array of Gem::Version to keep track of what we're currently installing
+    attr_accessor :installations_in_progress
+
+    # A shared reference to the `XcodeInstall::Installer` object we use
     def installer
       if @_installer.nil?
+        if ENV["XCODE_INSTALL_USER"].to_s.length == 0
+          raise "No `XCODE_INSTALL_USER` ENV variable provided, please provide one when launching up the fastlane.ci"
+        end
+
         @_installer = XcodeInstall::Installer.new
+
+        self.installations_in_progress = []
       end
       # @_installer.rm_list_cache
 
@@ -86,25 +96,32 @@ module FastlaneCI
       return Gem::Version.new(current_xcode.fetch_version)
     end
 
+    # ###############################
+    # Everything around installation
+    # ###############################
+
     # Install a specific version of Xcode on the current machine
     # success_block is only called when no exception occured
     # only either error_block or success_block will be called
     # @param version [Gem::Version]
-    def install_xcode!(version:, success_block:, error_block:)
+    def install_xcode!(version:, success_block: nil, error_block: nil)
       raise "Please only pass `Gem::Version` to `install_xcode!`" unless version.kind_of?(Gem::Version)
 
-      unless available_xcode_versions.map(&:version).include?(version)
+      unless installer.exist?(version)
         raise "Xcode version '#{version}' is not available in the list of Xcode versions: " \
               "#{available_xcode_versions.map(&:version).join(', ')}"
       end
 
+      logger.info("#{version} is available to be installed... putting installation process on the queue")
+      # TODO: Check if installing a given Xcode version is already in the queue
+
       install_xcode_task = TaskQueue::Task.new(work_block: proc {
-        # ENV["XCODE_INSTALL_USER"] = ""
         begin
           installer.install_version(
             # version: the version to install
             version,
-            # `should_switch` is false, as we handle it on the fastlane.ci side of things, also this will create aliases which we don't need
+            # `should_switch` is false, as we handle it on the fastlane.ci side of things, also
+            #  this will create aliases which we don't need
             false,
             # `should_clean` is true, as we don't need to keep old DMG files around
             false, # false for now for faster debugging
@@ -118,15 +135,25 @@ module FastlaneCI
             false
           )
           logger.info("Successfully finished Xcode installation of version #{version}")
-          success_block.call(version)
+          success_block.call(version) if success_block
         rescue StandardError => ex
           logger.error(ex)
           logger.error(ex.backtrace)
-          error_block.call(version, ex)
+          error_block.call(version, ex) if error_block
+        ensure
+          installations_in_progress.delete(version)
         end
       })
 
       xcode_queue.add_task_async(task: install_xcode_task)
+
+      # Reference the task with the Xcode version
+      installations_in_progress << version
+    end
+
+    # @return Array [Gem::Version]
+    def installing_xcode_versions
+      return installations_in_progress
     end
   end
 end
