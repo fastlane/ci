@@ -233,7 +233,7 @@ module FastlaneCI
         unless (required_init_params - json_object.keys).empty?
           raise "Required initialization parameters not found in the object: #{json_object}"
         end
-        init_params_hash = json_object.select { |key, value| required_init_params.include?(key) }
+        init_params_hash = json_object.select { |key, _value| required_init_params.include?(key) }
         instance.send(:initialize, init_params_hash)
         clean_json_object = json_object.reject { |key| required_init_params.include?(key) }
         return instance, clean_json_object
