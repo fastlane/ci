@@ -21,4 +21,6 @@ Xcode doens't support proper versioning like other development environments do. 
 
 [xcode-install](https://github.com/krausefx/xcode-install) is an open source tool maintained by @KrauseFx that allows the user to install new versions of Xcode using the command line.
 
+As part of this project, we also created the concept of `.xcode-version` files, check out [xcode-version.md](./xcode-version.md) for a full documentation on the file format.
+
 TODO
