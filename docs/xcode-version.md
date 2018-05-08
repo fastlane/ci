@@ -59,7 +59,15 @@ Gem::Version.new("9.2b3") # => #<Gem::Version "9.2b3">
 #### Compare
 
 ```ruby
+# Compare pre-releases
 Gem::Version.new("9.2b3") > Gem::Version.new("9.2b1") # => true
+
+# Check if 2 versions are the same
 Gem::Version.new("9.2b3") == Gem::Version.new("9.2b3") # => true
+
+# Check if public version is higher than the pre release for the same version
 Gem::Version.new("9.2") > Gem::Version.new("9.2b5") # => true
+
+# Check if 10 is larger than 9
+Gem::Version.new("10.4.5") > Gem::Version.new("9.1.2") # => true
 ```
