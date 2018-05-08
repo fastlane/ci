@@ -171,10 +171,9 @@ module FastlaneCI
     def pre_run_action(&completion_block)
       logger.debug("Running pre_run_action in checkout_sha")
 
-      setup_tooling_environment
-
       checkout_sha do |checkout_success|
         if checkout_success
+          setup_tooling_environment
           setup_build_specific_environment_variables
         else
           # TODO: this could be a notification specifically for user interaction

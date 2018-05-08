@@ -23,9 +23,6 @@ module FastlaneCI
     attr_reader :lane
     attr_reader :parameters
 
-    # @return [Gem::Version] The Xcode version that is/was being used for this build
-    attr_reader :xcode_version
-
     # @return [String] The path to the Xcode installation to use for this build
     attr_reader :xcode_path_to_use
 
@@ -165,9 +162,21 @@ module FastlaneCI
             end
           end
 
-          Services.xcode_manager_service.switch_xcode_version!(
-            xcode_path: xcode_path_to_use.to_s # .to_s as it's a `PathName`
-          )
+          # Reset the Xcode version to the system default first
+          Services.xcode_manager_service.reset_xcode_version!
+
+          # Switch to the specified Xcode (if specified)
+          if xcode_path_to_use.to_s.length > 0
+            Services.xcode_manager_service.switch_xcode_version!(
+              xcode_path: xcode_path_to_use.to_s # .to_s as it's a `PathName`
+            )
+          end
+
+          # We always want to fetch the currently used Xcode version
+          # and store it as part of the build metadata inside the `build_tools` attribute
+          # to make builds reproducable
+          # TODO: take the `build_tools` hash into account when hitting `re-run` on a given build
+          current_build.build_tools[:xcode_version] = Services.xcode_manager_service.current_xcode_version.to_s
 
           begin
             # Run fastlane now
@@ -199,7 +208,7 @@ module FastlaneCI
 
             return
           ensure
-            Services.xcode_manager_service.clear_xcode_version! if xcode_path_to_use
+            Services.xcode_manager_service.reset_xcode_version! if xcode_path_to_use
 
             if gemfile_found
               # This is te step for recovering the pre-build dependency graph for the CI
@@ -308,13 +317,7 @@ module FastlaneCI
 
       if matching_xcode_instance
         logger.info("#{parsed_xcode_version} is defined and installed, let's use it")
-
-        @xcode_version = parsed_xcode_version
         @xcode_path_to_use = matching_xcode_instance.path
-
-        # We also want to persist the Xcode version that was used
-        # TODO: consider the `build_tools` hash when hitting `re-run` on a given build
-        current_build.build_tools[:xcode_version] = xcode_version
       else
         # This version isn't installed yet, let's see if it's available to install
         if Services.xcode_manager_service.available_xcode_versions.map(&:version).include?(parsed_xcode_version)

@@ -48,7 +48,7 @@ module FastlaneCI
 
     # Call this after calling `switch_xcode_version!`
     # after finishing the build
-    def clear_xcode_version!
+    def reset_xcode_version!
       ENV.delete("DEVELOPER_DIR")
     end
 
