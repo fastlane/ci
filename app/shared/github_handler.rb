@@ -112,7 +112,7 @@ module FastlaneCI
           Faraday::Adapter::NetHttp,
           Faraday::Request::Retry,
           max: 1000,
-          interval: 0.05,
+          interval: 0.5,
           interval_randomness: 0.5,
           backoff_factor: 2,
           exceptions: [
