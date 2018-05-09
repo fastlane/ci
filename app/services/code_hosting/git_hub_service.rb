@@ -187,13 +187,8 @@ module FastlaneCI
       status_context = GitHubService.status_context_prefix + status_context
       state = state.to_s
 
-      # Available states https://developer.github.com/v3/repos/statuses/
-      if state == "missing_fastfile" || state == "ci_problem"
-        state = "failure"
-      end
-
-      available_states = ["error", "failure", "pending", "success", "ci_problem"]
-      raise "Invalid state '#{state}'" unless available_states.include?(state)
+      available_states = ["error", "failure", "pending", "success", "ci_problem", "missing_fastfile", "installing_xcode"]
+      raise "Invalid state for GitHubService: '#{state}'" unless available_states.include?(state)
 
       # We auto receive the SLUG, so that the user of this class can pass a full URL also
       repo = repo.split("/")[-2..-1].join("/")
@@ -201,10 +196,24 @@ module FastlaneCI
       if description.nil?
         description = "All green" if state == "success"
         description = "Still running" if state == "pending"
+        description = "Installing Xcode" if state == "installing_xcode"
+        description = "Missing Fastfile" if state == "missing_fastfile"
+        description = "Problem with fastlane.ci" if state == "ci_problem"
 
         # TODO: what's the difference?
         description = "Build encountered a failure" if state == "failure"
         description = "Build encountered an error " if state == "error"
+      end
+
+      # Only after setting the description, we want to update the `state`
+      # to use the official GitHub terms
+      #
+      # All available states https://developer.github.com/v3/repos/statuses/
+      if state == "missing_fastfile" || state == "ci_problem"
+        state = "failure"
+      end
+      if state == "installing_xcode"
+        state = "pending"
       end
 
       # this needs to be synchronous because we're doing it during initialization of our build runner

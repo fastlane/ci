@@ -10,6 +10,7 @@ module FastlaneCI
       :pending,
       :missing_fastfile,
       :failure,
+      :installing_xcode,
       :ci_problem
     ]
 
