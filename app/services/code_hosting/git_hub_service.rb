@@ -187,7 +187,15 @@ module FastlaneCI
       status_context = GitHubService.status_context_prefix + status_context
       state = state.to_s
 
-      available_states = ["error", "failure", "pending", "success", "ci_problem", "missing_fastfile", "installing_xcode"]
+      available_states = [
+        "error",
+        "failure",
+        "pending",
+        "success",
+        "ci_problem",
+        "missing_fastfile",
+        "installing_xcode"
+      ]
       raise "Invalid state for GitHubService: '#{state}'" unless available_states.include?(state)
 
       # We auto receive the SLUG, so that the user of this class can pass a full URL also

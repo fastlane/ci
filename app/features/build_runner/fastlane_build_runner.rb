@@ -298,7 +298,7 @@ module FastlaneCI
       unless File.exist?(xcode_version_file_path)
         logger.debug("No `.xcode-version` file found for repo '#{project.project_name}', " \
                      "not managing Xcode for this one...")
-        return
+        return true # we're ok with this, all good to run the build
       end
 
       xcode_version_to_use = File.read(xcode_version_file_path).strip
@@ -306,7 +306,7 @@ module FastlaneCI
         parsed_xcode_version = Gem::Version.new(xcode_version_to_use)
       rescue ArgumentError => ex
         logger.error("Invalid version specification in `.xcode-version` file, make sure it's valid: #{ex}")
-        return
+        return true # we're ok with this, let's keep the system default Xcode
       end
 
       # valid Xcode version specification
@@ -318,26 +318,38 @@ module FastlaneCI
       if matching_xcode_instance
         logger.info("#{parsed_xcode_version} is defined and installed, let's use it")
         @xcode_path_to_use = matching_xcode_instance.path
+        return true
       else
         # This version isn't installed yet, let's see if it's available to install
         if Services.xcode_manager_service.installer.exist?(parsed_xcode_version)
+          # Let the git remote know we're installing Xcode, as it will significantly delay this build
+          current_build.status = :installing_xcode
+          save_build_status! # tell the git remote
+
           Services.xcode_manager_service.install_xcode!(
             version: parsed_xcode_version,
             success_block: proc do |version|
+              # we don't have to set any Xcode path here
+              # as basically we're putting the build back into the queue again
+              # which will then detect the newly installed Xcode version
+              # and switch the path automatically #magic
               puts "Success: #{version}"
+              # Put the build back into the queue
+              Services.build_runner_service.add_build_runner(build_runner: self)
             end,
             error_block: proc do |version, exception|
               puts "Error: #{version} - #{exception}"
+              # TODO: raise an exception here and make the build fail
+              # It might not be enough to just raise it here
+              # we have to test it
+              raise "Error installing Xcode"
             end
           )
-          # TODO: we now have to pause this build and put it back into the queue for when
-          # the success block was called
 
-          # TODO: how do we wait/block here
-          # @xcode_path_to_use = matching_xcode_instance.path
+          return false
         else
-          logger.error("#{parsed_xcode_version} is not available to be installed")
-          return
+          # TODO: make sure this marks the build as failed
+          raise "#{parsed_xcode_version} is not available to be installed for build #{current_build}"
         end
       end
     end

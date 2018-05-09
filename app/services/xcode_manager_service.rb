@@ -118,6 +118,7 @@ module FastlaneCI
 
       logger.info("#{version} is available to be installed... putting installation process on the queue")
       # TODO: Check if installing a given Xcode version is already in the queue
+      #       if it is, we need a way to append the `success` block to it
 
       install_xcode_task = TaskQueue::Task.new(work_block: proc {
         begin
