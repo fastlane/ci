@@ -46,7 +46,7 @@ gem "jwt", "~> 2.1.0"
 #  we shipped a new release
 
 # Interprocess communication
-gem "grpc", "~> 1.11.0"
+gem "grpc", ">= 1.11.0", "< 2.0.0"
 
 # Internal projects
 gem "fastfile-parser", git: "https://github.com/fastlane/fastfile-parser", require: false
