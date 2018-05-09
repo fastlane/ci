@@ -5,6 +5,7 @@ require "tty-command"
 require "securerandom"
 require "digest"
 require "task_queue"
+require "faraday"
 require "faraday-http-cache"
 require "fileutils"
 
@@ -87,6 +88,21 @@ module FastlaneCI
       def load_octokit_cache_stack
         @stack ||= Faraday::RackBuilder.new do |builder|
           builder.use(Faraday::HttpCache, serializer: Marshal, shared_cache: false)
+          # In order to have access to SocketError and ETIMEDOUT exceptions.
+          require "socket"
+          require "net/http"
+          builder.use(Faraday::Request::Retry,
+                      max: 1000,
+                      interval: 0.05,
+                      interval_randomness: 0.5,
+                      backoff_factor: 2,
+                      exceptions: [
+                        Errno::ETIMEDOUT,
+                        "Timeout::Error",
+                        Faraday::Error::TimeoutError,
+                        Faraday::Error::RetriableResponse,
+                        SocketError
+                      ])
           builder.use(Octokit::Response::RaiseError)
           builder.adapter(Faraday.default_adapter)
         end
