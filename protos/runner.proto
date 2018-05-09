@@ -15,7 +15,10 @@ service Runner {
 }
 
 message Log {
+  // the text contents of the log line.
   string message = 1;
+
+  // the log level that was used to output this log line. Null if none given.
   enum Level {
     DEBUG = 0;
     INFO = 1;
@@ -24,11 +27,19 @@ message Log {
     FATAL = 5;
   }
   Level level = 2;
+
+  // the exit status of the Command. The last `Log` of a stream should contain only a `status` field.
   int32 status = 3;
 }
 
+// A command to be spawned on by the server.
 message Command {
+  // the executable name, possibly including absolute path.
   string bin = 1;
+
+  // and command line parameters to be passed to the bin
   repeated string parameters = 2;
+
+  // a map of the environment to be given to the child process.
   map<string,string> env = 3;
 }
