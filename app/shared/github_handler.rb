@@ -111,7 +111,7 @@ module FastlaneCI
         client.middleware.insert_before(
           Faraday::Adapter::NetHttp,
           Faraday::Request::Retry,
-          max: 1000,
+          max: 3,
           interval: 0.5,
           interval_randomness: 0.5,
           backoff_factor: 2,
