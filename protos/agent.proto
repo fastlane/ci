@@ -10,7 +10,7 @@ syntax = "proto3";
 
 package fastlane_c_i;
 
-service Runner {
+service Agent {
   rpc Spawn(Command) returns (stream Log) {}
 }
 

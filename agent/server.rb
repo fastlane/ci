@@ -1,16 +1,19 @@
 require "logger"
 require "open3"
-require_relative "runner"
+require_relative "agent"
 
 module FastlaneCI
-  module Runner
+  module Agent
     ##
-    # A simple implementation of the runner service.
+    # A simple implementation of the agent service.
     class Server < Service
       ##
       # this class is used to create a lazy enumerator
       # that will yield back lines from the stdout/err of the process
       # as well as the exit status when it is complete.
+
+      EOT_CHAR = "\4".freeze # end-of-transmission character.
+
       class ProcessEnumerator
         def initialize(io, thread)
           @io = io
@@ -21,7 +24,7 @@ module FastlaneCI
           Enumerator.new do |y|
             y.yield(@io.gets) while @thread.alive?
             @io.close
-            y.yield(nil, @thread.value.exitstatus)
+            y.yield(EOT_CHAR, @thread.value.exitstatus)
           end
         end
       end
@@ -43,8 +46,8 @@ module FastlaneCI
       # otherwise, we run the risk of deadlock if we dont properly flush both pipes as per:
       # https://ruby-doc.org/stdlib-2.1.0/libdoc/open3/rdoc/Open3.html#method-c-popen3
       #
-      # @input FastlaneCI::Runner::Command
-      # @output Enumerable::Lazy<FastlaneCI::Runner::Log> A lazy enumerable with log lines.
+      # @input FastlaneCI::Agent::Command
+      # @output Enumerable::Lazy<FastlaneCI::Agent::Log> A lazy enumerable with log lines.
       def spawn(command, _call)
         @logger.info("spawning process with command: #{command.bin} #{command.parameters}, env: #{command.env.to_h}")
         stdin, stdouterr, wait_thrd = Open3.popen2e(command.env.to_h, command.bin, *command.parameters)
@@ -56,7 +59,7 @@ module FastlaneCI
         # convert every line from io to a Log object in a lazy stream
         process_enumerator.generator.lazy.flat_map do |line, status|
           # proto3 doesn't have nullable fields, afaik
-          Log.new(message: (line || ""), status: (status || 0))
+          Log.new(message: line, status: (status || 0))
         end
       end
     end
@@ -65,7 +68,7 @@ end
 
 # rubocop:disable all
 if $0 == __FILE__
-  include FastlaneCI::Runner
+  include FastlaneCI::Agent
 
   server = Server.server
 

@@ -3,13 +3,13 @@ require "grpc"
 proto_path = File.expand_path("../protos", File.dirname(__FILE__))
 $LOAD_PATH << proto_path unless $LOAD_PATH.include?(proto_path)
 
-require "runner_services_pb"
+require "agent_services_pb"
 
 module FastlaneCI
   ##
-  # Runner - The deamon that runs on a compute resource waiting to accept rpc commands and execute them.
+  # Agent - The deamon that runs on a compute resource waiting to accept rpc commands and execute them.
   # It will respond with a log stream and exit status for the commands.
-  module Runner
+  module Agent
     HOST = "0.0.0.0".freeze
     PORT = "8080".freeze
   end
