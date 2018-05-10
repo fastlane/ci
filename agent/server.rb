@@ -7,24 +7,23 @@ module FastlaneCI
     ##
     # A simple implementation of the agent service.
     class Server < Service
+      EOT_CHAR = "\4".freeze # end-of-transmission character.
+
       ##
       # this class is used to create a lazy enumerator
       # that will yield back lines from the stdout/err of the process
       # as well as the exit status when it is complete.
+      class ProcessOutputEnumerator
+        extend Forwardable
+        include Enumerable
 
-      EOT_CHAR = "\4".freeze # end-of-transmission character.
+        def_delegators :@enumerator, :each, :next
 
-      class ProcessEnumerator
         def initialize(io, thread)
-          @io = io
-          @thread = thread
-        end
-
-        def generator
-          Enumerator.new do |y|
-            y.yield(@io.gets) while @thread.alive?
-            @io.close
-            y.yield(EOT_CHAR, @thread.value.exitstatus)
+          @enumerator = Enumerator.new do |y|
+            y.yield(io.gets) while thread.alive?
+            io.close
+            y.yield(EOT_CHAR, thread.value.exitstatus)
           end
         end
       end
@@ -55,9 +54,9 @@ module FastlaneCI
 
         @logger.info("spawned process with pid: #{wait_thrd.pid}")
 
-        process_enumerator = ProcessEnumerator.new(stdouterr, wait_thrd)
+        penum = ProcessOutputEnumerator.new(stdouterr, wait_thrd)
         # convert every line from io to a Log object in a lazy stream
-        process_enumerator.generator.lazy.flat_map do |line, status|
+        penum.lazy.flat_map do |line, status|
           # proto3 doesn't have nullable fields, afaik
           Log.new(message: line, status: (status || 0))
         end
