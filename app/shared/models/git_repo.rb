@@ -5,6 +5,7 @@ require "tty-command"
 require "securerandom"
 require "digest"
 require "task_queue"
+require "faraday"
 require "faraday-http-cache"
 require "fileutils"
 

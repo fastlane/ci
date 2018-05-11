@@ -1,5 +1,7 @@
 require "octokit"
 require "faraday"
+require "socket"
+require "net/http"
 require_relative "logging_module"
 
 # TODO: eventually we'll want to consider handling all these:
@@ -42,6 +44,8 @@ module FastlaneCI
 
     def github_action(client, &block)
       if client.kind_of?(Octokit::Client)
+        # Inject Faraday::Request::Retry to the client if necessary
+        client = inject_retry_middleware(client)
         # `rate_limit_retry_count` retains the variables through iterations so we assign to 0 the first time.
         rate_limit_retry_count ||= 0
         begin
@@ -96,6 +100,31 @@ module FastlaneCI
         # TODO: accomplish the above ^
         raise ex
       end
+    end
+
+    private
+
+    def inject_retry_middleware(client)
+      unless client.middleware.handlers.include?(Faraday::Request::Retry)
+        middleware_dup = client.middleware.dup
+        client.middleware = middleware_dup
+        client.middleware.insert_before(
+          Faraday::Adapter::NetHttp,
+          Faraday::Request::Retry,
+          max: 3,
+          interval: 0.5,
+          interval_randomness: 0.5,
+          backoff_factor: 2,
+          exceptions: [
+            Errno::ETIMEDOUT,
+            "Timeout::Error",
+            Faraday::Error::TimeoutError,
+            Faraday::Error::RetriableResponse,
+            SocketError
+          ]
+        )
+      end
+      return client
     end
   end
 end
