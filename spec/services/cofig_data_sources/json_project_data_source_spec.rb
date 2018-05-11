@@ -30,7 +30,6 @@ describe FastlaneCI::JSONProjectDataSource do
 
     context "project exists" do
       it "returns `true` if a project exists for given name" do
-        expect(File).not_to(receive(:write))
         expect(subject.project_exist?(first_project_name)).to be(true)
       end
     end
@@ -92,10 +91,6 @@ describe FastlaneCI::JSONProjectDataSource do
         expect { subject.update_project!(project: updated_project) }
           .to change { subject.projects.first.project_name }.from(first_project_name).to(updated_project_name)
       end
-
-      it "returns `true` when a project is updated" do
-        expect(subject.update_project!(project: updated_project)).to be(true)
-      end
     end
   end
 
@@ -122,10 +117,6 @@ describe FastlaneCI::JSONProjectDataSource do
 
       it "removes the `project` from the `projects.json` file" do
         expect { subject.delete_project!(project: project) }.to change { subject.projects.size }.from(1).to(0)
-      end
-
-      it "returns `true` when a project is deleted" do
-        expect(subject.delete_project!(project: project)).to be(true)
       end
     end
   end
