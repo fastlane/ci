@@ -11,6 +11,7 @@ module FastlaneCI
   # It will respond with a log stream and exit status for the commands.
   module Agent
     HOST = "0.0.0.0".freeze
-    PORT = "8080".freeze
+    PORT = "8089".freeze
+    EOT_CHAR = "\4".freeze # end-of-transmission character.
   end
 end

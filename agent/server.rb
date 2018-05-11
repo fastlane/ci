@@ -7,8 +7,6 @@ module FastlaneCI
     ##
     # A simple implementation of the agent service.
     class Server < Service
-      EOT_CHAR = "\4".freeze # end-of-transmission character.
-
       ##
       # this class is used to create a lazy enumerator
       # that will yield back lines from the stdout/err of the process

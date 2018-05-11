@@ -29,7 +29,7 @@ describe FastlaneCI::Agent::Server do
 
     let(:penum) { FastlaneCI::Agent::Server::ProcessOutputEnumerator.new(io, thread) }
 
-    it "will returns lines of text from the file" do
+    it "will return lines of text from the file" do
       expect(penum.next).to eq("this is a line of text\n")
     end
 
