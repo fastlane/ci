@@ -226,6 +226,8 @@ module FastlaneCI
         projects = self.projects
         projects[project_index] = project
         self.projects = projects
+
+        return true
       end
     end
 
@@ -233,6 +235,7 @@ module FastlaneCI
       unless project.nil?
         raise "project must be configured with an instance of #{Project.name}" unless project.class <= Project
       end
+
       project_index = nil
       existing_project = nil
       projects.each.with_index do |old_project, index|
@@ -253,6 +256,8 @@ module FastlaneCI
         projects = self.projects
         projects.delete_at(project_index)
         self.projects = projects
+
+        return true
       end
     end
 
