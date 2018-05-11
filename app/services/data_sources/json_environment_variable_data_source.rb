@@ -76,7 +76,6 @@ module FastlaneCI
 
     def delete_environment_variable!(environment_variable: nil)
       environment_variables.delete(environment_variable)
-      return true
     end
 
     # The data source isn't responsible for checking for existing data
