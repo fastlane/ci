@@ -230,6 +230,7 @@ AllCops:
     - './fastfile-parser/**/*'
     - './taskqueue/**/*'
     - '**/node_modules/**/*'
+    - 'protos/*_pb.rb'
 
 # They have not to be snake_case
 Naming/FileName:
