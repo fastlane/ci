@@ -8,7 +8,8 @@ module FastlaneCI
   class XcodeManagerService
     include FastlaneCI::Logging
 
-    # Keeps an array of Gem::Version to keep track of what we're currently installing
+    # Keeps an a hash, the key being the Gem::Version of the Xcode version we're installing
+    # and the value being the % of the download progress
     attr_accessor :installations_in_progress
 
     def initialize
@@ -16,7 +17,7 @@ module FastlaneCI
         raise "No `XCODE_INSTALL_USER` ENV variable provided, please provide one when launching up the fastlane.ci"
       end
 
-      self.installations_in_progress = []
+      self.installations_in_progress = {}
     end
 
     # A shared reference to the `XcodeInstall::Installer` object we use
@@ -132,12 +133,17 @@ module FastlaneCI
             false, # false for now for faster debugging
             # `should_install` is true, as we want to not only download, but also install this version
             true,
-            # `progress`: Let's see what we want here
-            true,
+            # `progress` We pass the custom `progress_block` instead, we don't want to show the
+            #           download progress in stdout
+            false,
             # `url` is nil, as we don't have a custom source
             nil,
             # `show_release_notes` is `false`, as this is a non-interactive machine
-            false
+            false,
+            # `progress_block` be updated on the download progress
+            proc do |percent|
+              installations_in_progress[version] = percent
+            end
           )
           logger.info("Successfully finished Xcode installation of version #{version}")
           success_block.call(version) if success_block
@@ -153,10 +159,10 @@ module FastlaneCI
       xcode_queue.add_task_async(task: install_xcode_task)
 
       # Reference the task with the Xcode version
-      installations_in_progress << version
+      installations_in_progress[version] = 0
     end
 
-    # @return Array [Gem::Version]
+    # @return Hash Gem::Version => %
     def installing_xcode_versions
       return installations_in_progress
     end
