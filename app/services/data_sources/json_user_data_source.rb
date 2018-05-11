@@ -139,7 +139,6 @@ module FastlaneCI
       else
         users[user_index] = user
         logger.debug("Updating user #{user.email}, writing out users.json to #{user_file_path}")
-        return true
       end
     end
 
@@ -150,7 +149,6 @@ module FastlaneCI
       else
         users.delete(user)
         logger.debug("Deleted user #{user.email}, writing out users.json to #{user_file_path}")
-        return true
       end
     end
 
