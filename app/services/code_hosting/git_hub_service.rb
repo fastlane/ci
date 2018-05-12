@@ -202,15 +202,22 @@ module FastlaneCI
       repo = repo.split("/")[-2..-1].join("/")
 
       if description.nil?
-        description = "All green" if state == "success"
-        description = "Still running" if state == "pending"
-        description = "Installing Xcode" if state == "installing_xcode"
-        description = "Missing Fastfile" if state == "missing_fastfile"
-        description = "Problem with fastlane.ci" if state == "ci_problem"
-
-        # TODO: what's the difference?
-        description = "Build encountered a failure" if state == "failure"
-        description = "Build encountered an error " if state == "error"
+        description = case state
+                      when "success"
+                        "All green"
+                      when "pending"
+                        "Still running"
+                      when "installing_xcode"
+                        "Installing Xcode"
+                      when "missing_fastfile"
+                        "Missing Fastfile"
+                      when "ci_problem"
+                        "Problem with fastlane.ci"
+                      when "failure"
+                        "Build encountered a failure"
+                      when "error"
+                        "Build encountered an error"
+                      end
       end
 
       # Only after setting the description, we want to update the `state`
