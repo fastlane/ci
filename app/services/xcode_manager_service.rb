@@ -17,7 +17,7 @@ module FastlaneCI
         raise "No `XCODE_INSTALL_USER` ENV variable provided, please provide one when launching up the fastlane.ci"
       end
 
-      self.installations_in_progress = {}
+      @installations_in_progress = {}
     end
 
     # A shared reference to the `XcodeInstall::Installer` object we use
