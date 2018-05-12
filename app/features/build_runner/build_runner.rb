@@ -173,7 +173,7 @@ module FastlaneCI
 
       checkout_sha do |checkout_success|
         if checkout_success
-          if setup_tooling_environment # see comment for `#setup_tooling_environment` method
+          if setup_tooling_environment? # see comment for `#setup_tooling_environment?` method
             setup_build_specific_environment_variables
             completion_block.call(checkout_success)
           end
@@ -190,10 +190,10 @@ module FastlaneCI
     # @return [Boolean] Return `false` if the build trigger some longer process
     #         e.g. installing a new development environment. This will not call
     #         the completion block and interrupt running the give build.
-    #         It's critical that the `setup_tooling_environment` method
+    #         It's critical that the `setup_tooling_environment?` method
     #         added the same build runner onto the work queue again
     #         Check out the `fastlane_build_runner` implementation for more details
-    def setup_tooling_environment
+    def setup_tooling_environment?
       not_implemented(__method__)
     end
 

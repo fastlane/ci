@@ -293,7 +293,7 @@ module FastlaneCI
     end
 
     # Responsible for setting up Xcode build environment
-    def setup_tooling_environment
+    def setup_tooling_environment?
       xcode_version_file_path = File.join(repo.local_folder, ".xcode-version")
       unless File.exist?(xcode_version_file_path)
         logger.debug("No `.xcode-version` file found for repo '#{project.project_name}', " \
