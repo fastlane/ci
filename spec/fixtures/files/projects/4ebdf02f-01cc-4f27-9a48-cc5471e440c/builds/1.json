@@ -29,7 +29,7 @@
   "git_fork_config": {
     "sha": "e03bb7bbd89f0bfe425fea0e97ca431d579108ff",
     "branch": "master",
-    "clone_url": "https://github.com/username/fastlane-app",
+    "clone_url": "https://github.com/username/project_0",
     "ref": null
   }
 }
