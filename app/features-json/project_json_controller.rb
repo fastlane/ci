@@ -1,4 +1,5 @@
 require_relative "../shared/authenticated_controller_base"
+require_relative "./view_models/lane_view_model"
 require_relative "./view_models/project_summary_view_model"
 require_relative "./view_models/project_view_model"
 
@@ -31,6 +32,52 @@ module FastlaneCI
       project_view_model = ProjectViewModel.new(project: project)
 
       return project_view_model.to_json
+    end
+
+    # Details of a project settings
+    get "#{HOME}/:project_id/lanes" do |project_id|
+      project = user_project_with_id(project_id: project_id)
+
+      project_path = project.local_repo_path
+
+      # If the repo is cloned locally, search that instead of relying on GitHub.
+      # TODO: Move this into the FastfilePeeker
+      if File.directory?(project_path)
+        fastfile_path = FastlaneCI::FastfileFinder.search_path(path: project_path)
+        fastfile_parser = Fastlane::FastfileParser.new(path: fastfile_path)
+      else
+        provider_credential = check_and_get_provider_credential(
+          type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
+        )
+        peeker = FastfilePeeker.new(
+          provider_credential: provider_credential,
+          notification_service: Services.notification_service
+        )
+        fastfile_parser = peeker.fastfile(
+          repo_config: project.repo_config,
+          sha_or_branch: project.job_triggers.map(&:branch).first
+        )
+      end
+
+      return fetch_available_lanes(fastfile_parser).to_json
+    end
+
+    def fetch_available_lanes(fastfile_parser)
+      # we don't want to show `_before_all_block_`, `_after_all_block_` and `_error_block_`
+      # or a private lane as an available lane
+      lanes = []
+      fastfile_parser.tree.each do |platform, value|
+        value.each do |lane_name, lane_content|
+          if lane_name.to_s.empty? ||
+             lane_name.to_s.end_with?("_block_") ||
+             lane_content[:private] == true
+            next
+          end
+          lane_platform = platform.nil? ? :no_platform : platform
+          lanes << LaneViewModel.new(lane_name: lane_name, lane_platform: lane_platform)
+        end
+      end
+      return lanes
     end
 
     post HOME do
