@@ -1,3 +1,6 @@
+echo 'export PATH=$HOME/.gem/ruby/2.3.0/bin:$PATH' >> ~/.bash_profile
+source ~/.bash_profile
+
 if [ ! -d /usr/local/Homebrew/.git ]; then
   echo "==> Installing Homebrew ..."
   /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
@@ -10,7 +13,7 @@ echo "==> Installing node and npm ..."
 brew install node
 
 echo "==> Installing Bundler ..."
-sudo gem install bundler -NV
+gem install bundler --no-document --verbose
 
 echo "==> Installing all dependencies ..."
 cd /fastlane-ci
