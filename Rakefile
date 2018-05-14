@@ -31,7 +31,6 @@ namespace :docker do
   desc "Bootstrap for running in a Docker container"
   task :dev_bootstrap do
     sh("bundle install")
-    sh("brew install node") unless sh("npm -v")
     sh("npm install")
   end
 end
