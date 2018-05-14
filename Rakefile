@@ -1,9 +1,9 @@
 task :dev do
-  sh "bundle exec rackup -p 8080 --env development"
+  sh "bundle exec rackup -o 0.0.0.0 -p 8080 --env development"
 end
 
 task :prod do
-  sh "bundle exec rackup -p 8080 --env production"
+  sh "bundle exec rackup -o 0.0.0.0 -p 8080 --env production"
 end
 
 task :dev_bootstrap do
