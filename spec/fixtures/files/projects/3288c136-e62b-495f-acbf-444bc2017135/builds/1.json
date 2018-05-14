@@ -1,0 +1,20 @@
+{
+  "number": 1,
+  "status": "pending",
+  "timestamp": 1526051941,
+  "duration": -1,
+  "artifacts": [
+
+  ],
+  "description": null,
+  "trigger": "manual",
+  "lane": "custom_lane",
+  "platform": "ios",
+  "parameters": null,
+  "git_fork_config": {
+    "sha": "e03bb7bbd89f0bfe425fea0e97ca431d579108ff",
+    "branch": "master",
+    "clone_url": "https://github.com/username/project_1",
+    "ref": null
+  }
+}
