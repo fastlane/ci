@@ -21,8 +21,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Hide the VirtualBox GUI when booting the machine
     vb.gui = false
 
-    # Customize the amount of memory on the VM
+    # Customize the amount of CPUs and memory of the VM
     vb.memory = "8192"
+    vb.cpus = 1
+
+    # No matter how much CPU is used in the VM, no more than 50% should be used
+    # on the host machine
+    vb.customize ["modifyvm", :id, "--cpuexecutioncap", "50"]
 
     # Because the USB 2.0 controller state is part of the saved VM state, the
     # VM cannot be started with USB 2.0 support on.
