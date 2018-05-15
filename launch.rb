@@ -139,7 +139,7 @@ module FastlaneCI
         FastlaneCI::FastlaneApp.use(FastlaneCI::UsersController)
         FastlaneCI::FastlaneApp.use(FastlaneCI::EnvironmentVariablesController)
         FastlaneCI::FastlaneApp.use(FastlaneCI::XcodeManagerController)
-        FastlaneCI::FastlaneApp.use(FastlaneCI::AppleIDsController)
+        FastlaneCI::FastlaneApp.use(FastlaneCI::AppleIDController)
       end
 
       # TODO: Only load this with ERB_CLIENT env once Web app has login support
