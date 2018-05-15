@@ -25,7 +25,7 @@ echo "==> Installing node and npm ..."
 brew install node
 
 echo "==> Installing Bundler ..."
-gem install bundler --no-document --verbose
+gem install bundler --user-install --no-document --verbose
 
 echo "==> Installing all dependencies ..."
 cd /fastlane-ci
