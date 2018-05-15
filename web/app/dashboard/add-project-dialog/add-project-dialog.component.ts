@@ -32,6 +32,7 @@ function timeSelectDataToMilitaryTime(timeData: TimeSelectorData): number {
 })
 export class AddProjectDialogComponent implements OnInit {
   isLoadingRepositories = true;
+  isAddingProject = false;
   repositories: Repository[];
   readonly timeSelectorData: TimeSelectorData = {hour: 12, isAm: true};
   // TODO: do something to make these properties camelCase
@@ -59,13 +60,15 @@ export class AddProjectDialogComponent implements OnInit {
     this.data.repositories.subscribe((repositories) => {
       this.repositories = repositories;
       this.project.repo_name = this.repositories[0].fullName;
-      // this.isLoadingRepositories = false;
+      this.isLoadingRepositories = false;
     });
 
     // TODO Get Lanes
     this.project.lane = this.FAKE_LANES[0];
   }
   addProject() {
+    this.isAddingProject = true;
+
     if (this.project.trigger_type === 'nightly') {
       this.project.hour = timeSelectDataToMilitaryTime(this.timeSelectorData);
     }
@@ -73,6 +76,7 @@ export class AddProjectDialogComponent implements OnInit {
     this.dataService.addProject(this.project).subscribe((project) => {
       // TODO: Show toast that the project was created
       console.log('Project', project);
+      this.isAddingProject = false;
     });
   }
 }

@@ -1,7 +1,10 @@
 import {HTTP_INTERCEPTORS} from '@angular/common/http';
 import {HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
 import {inject, TestBed} from '@angular/core/testing';
+import {Router} from '@angular/router';
+
 import {mockProjectListResponse} from '../common/test_helpers/mock_project_data';
+
 import {AuthInterceptor} from './auth.interceptor';
 import {DataService} from './data.service';
 
@@ -9,6 +12,7 @@ describe('AuthInterceptor', () => {
   let mockHttp: HttpTestingController;
   let dataService: DataService;
   let mockStorage = {};
+  let router: jasmine.SpyObj<Partial<Router>>;
 
   // TODO: generalize this as a test helper
   const mockLocalStorage = {
@@ -29,6 +33,7 @@ describe('AuthInterceptor', () => {
   beforeEach(() => {
     spyOn(localStorage, 'getItem').and.callFake(mockLocalStorage.getItem);
     spyOn(localStorage, 'setItem').and.callFake(mockLocalStorage.setItem);
+    router = {navigate: jasmine.createSpy()};
 
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
@@ -39,6 +44,7 @@ describe('AuthInterceptor', () => {
           useClass: AuthInterceptor,
           multi: true,
         },
+        {provide: Router, useValue: router},
       ]
     });
 
@@ -48,6 +54,7 @@ describe('AuthInterceptor', () => {
 
   afterEach(() => {
     mockLocalStorage.clear();
+    mockHttp.verify();
   });
 
   it('should add Authorization header if token is stored', () => {
@@ -68,5 +75,15 @@ describe('AuthInterceptor', () => {
 
     const authHeader = projectsRequest.request.headers.get('Authorization');
     expect(authHeader).toBe(null);
+  });
+
+  it('should redirect to login if 401 UNAUTHORIZED reponse', () => {
+    mockLocalStorage.removeItem('auth_token');
+
+    dataService.getProjects().subscribe({error: () => null});
+    const projectsRequest = mockHttp.expectOne('/data/projects');
+    projectsRequest.flush({}, {status: 401, statusText: 'unauthorized'});
+
+    expect(router.navigate).toHaveBeenCalledWith(['/login']);
   });
 });

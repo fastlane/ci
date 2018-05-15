@@ -1,0 +1,18 @@
+# default owner
+@fastlane/Team
+
+# Container
+docker-compose.yml  @fastlane/ci-container-team
+.dockerignore       @fastlane/ci-container-team
+
+# Frontend
+web/*               @nakhbari
+karma.conf.js       @nakhbari
+package.json        @nakhbari
+tsconfig.json       @nakhbari
+tslint.json         @nakhbari
+
+# Backend
+app/*               @KrauseFx
+launch.rb           @KrauseFx
+fastlane_app.rb     @KrauseFx
