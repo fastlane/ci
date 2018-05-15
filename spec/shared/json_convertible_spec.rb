@@ -100,6 +100,15 @@ class MockJSONConvertibleWithMixedParams
   end
 end
 
+class MockJSONConvertibleWithNoParams
+  include FastlaneCI::JSONConvertible
+
+  attr_accessor :one_attribute
+
+  def initialize
+  end
+end
+
 module FastlaneCI
   describe JSONConvertible do
     let (:mock_object) { MockJSONConvertible.new(one_attribute: "Hello", other_attribute: Time.at(0)) }
@@ -274,6 +283,12 @@ module FastlaneCI
       object = MockJSONConvertibleWithMixedParams.from_json!(object_dictionary)
       expect(object.one_attribute).to eql("cat")
       expect(object.other_attribute).to eql("dog")
+    end
+
+    it "Allows to decode objects with no initialization parameters" do
+      object_dictionary = { one_attribute: "robot" }
+      object = MockJSONConvertibleWithNoParams.from_json!(object_dictionary)
+      expect(object.one_attribute).to eql("robot")
     end
   end
 end
