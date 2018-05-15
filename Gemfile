@@ -42,7 +42,7 @@ gem "bundler", "~> 1.16.0"
 gem "jwt", "~> 2.1.0"
 
 # Manage Xcode installations for the user
-gem "xcode-install", ">= 2.3.1", "<= 3.0.0"
+gem "xcode-install", ">= 2.4.0", "< 3.0.0"
 
 # fastlane dependencies
 # TODO: point to minimum release instead of GitHub once
