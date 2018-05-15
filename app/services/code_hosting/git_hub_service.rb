@@ -181,6 +181,27 @@ module FastlaneCI
       end
     end
 
+    def description_for_state(state)
+      case state
+      when "success"
+        "All green"
+      when "pending"
+        "Still running"
+      when "installing_xcode"
+        "Installing Xcode"
+      when "missing_fastfile"
+        "Missing Fastfile"
+      when "ci_problem"
+        "Problem with fastlane.ci"
+      when "failure"
+        "Build encountered a failure"
+      when "error"
+        "Build encountered an error"
+      else
+        "Unknown error"
+        end
+    end
+
     # The `target_url`, `description` and `context` parameters are optional
     # @repo [String] Repo URL as string
     def set_build_status!(repo: nil, sha: nil, state: nil, target_url: nil, description: nil, status_context:)
@@ -201,24 +222,7 @@ module FastlaneCI
       # We auto receive the SLUG, so that the user of this class can pass a full URL also
       repo = repo.split("/")[-2..-1].join("/")
 
-      if description.nil?
-        description = case state
-                      when "success"
-                        "All green"
-                      when "pending"
-                        "Still running"
-                      when "installing_xcode"
-                        "Installing Xcode"
-                      when "missing_fastfile"
-                        "Missing Fastfile"
-                      when "ci_problem"
-                        "Problem with fastlane.ci"
-                      when "failure"
-                        "Build encountered a failure"
-                      when "error"
-                        "Build encountered an error"
-                      end
-      end
+      description ||= description_for_state(state)
 
       # Only after setting the description, we want to update the `state`
       # to use the official GitHub terms
