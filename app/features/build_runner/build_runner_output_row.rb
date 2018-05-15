@@ -30,6 +30,8 @@ module FastlaneCI
       @type = type
       @message = message
       @time = time
+
+      @html = FastlaneOutputToHtml.convert_row(self)
     end
 
     # Did this particular message fail the build? (e.g. `user_error` or `build_error`)

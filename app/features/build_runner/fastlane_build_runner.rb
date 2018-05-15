@@ -292,7 +292,6 @@ module FastlaneCI
         message: raw_row[:message],
         time: raw_row[:time]
       )
-      current_row.html = FastlaneOutputToHtml.convert_row(current_row)
       return current_row
     end
 
@@ -320,7 +319,13 @@ module FastlaneCI
       end
 
       if matching_xcode_instance
-        logger.info("#{parsed_xcode_version} is defined and installed, let's use it")
+        new_row(
+          BuildRunnerOutputRow.new(
+            type: "important",
+            message: "#{parsed_xcode_version} is defined and installed, switching to using it",
+            time: Time.now
+          )
+        )
         @xcode_path_to_use = matching_xcode_instance.path
         return true
       else
@@ -329,6 +334,14 @@ module FastlaneCI
           # Let the git remote know we're installing Xcode, as it will significantly delay this build
           current_build.status = :installing_xcode
           save_build_status! # tell the git remote
+
+          new_row(
+            BuildRunnerOutputRow.new(
+              type: "important",
+              message: "Installing Xcode version #{parsed_xcode_version}... this might take a while",
+              time: Time.now
+            )
+          )
 
           Services.xcode_manager_service.install_xcode!(
             version: parsed_xcode_version,
