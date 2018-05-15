@@ -188,7 +188,9 @@ module FastlaneCI
     end
 
     def self.xcode_manager_service
-      @_xcode_manager_service ||= FastlaneCI::XcodeManagerService.new
+      @_xcode_manager_service ||= FastlaneCI::XcodeManagerService.new(
+        user: ENV["FASTLANE_USER"] # TODO: this will be passed from settings.json via https://github.com/fastlane/ci/issues/870
+      )
     end
 
     def self.environment_variable_service

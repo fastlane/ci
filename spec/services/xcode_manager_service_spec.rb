@@ -2,11 +2,27 @@ require "spec_helper"
 require "app/services/xcode_manager_service"
 
 describe FastlaneCI::XcodeManagerService do
-  before do
-    ENV["XCODE_INSTALL_USER"] = "1"
-  end
+  let (:apple_id_email) { "fake@random.com" }
+  let (:apple_id_password) { "top_secret" }
+  let (:secondary_apple_id_email) { "fake_also@random.com" }
 
-  let (:xcode_manager_service) { FastlaneCI::XcodeManagerService.new }
+  let (:xcode_manager_service) do
+    apple_ids = [
+      FastlaneCI::AppleID.new(
+        user: apple_id_email,
+        password: apple_id_password
+      ),
+      FastlaneCI::AppleID.new(
+        user: secondary_apple_id_email,
+        password: "top_secret_also"
+      )
+    ]
+
+    allow(FastlaneCI::Services.apple_id_service).to receive(:apple_ids).and_return(apple_ids)
+    service = FastlaneCI::XcodeManagerService.new(user: apple_id_email)
+
+    service
+  end
 
   describe "#switch_xcode_version!" do
     it "switches the DEVELOPER_DIR ENV variable" do
@@ -21,6 +37,27 @@ describe FastlaneCI::XcodeManagerService do
       ENV["DEVELOPER_DIR"] = "/Applications/Xcode.app"
       xcode_manager_service.reset_xcode_version!
       expect(ENV["DEVELOPER_DIR"]).to eq(nil)
+    end
+  end
+
+  describe "#apple_id" do
+    it "allows access to the apple_id" do
+      expect(xcode_manager_service.apple_id.user).to eq(apple_id_email)
+      expect(xcode_manager_service.apple_id.password).to eq(apple_id_password)
+    end
+  end
+
+  describe "#use_apple_id" do
+    it "raises an exception if Apple ID isn't available" do
+      unavailable_apple_id = "someonewhodoesntexist@random.com"
+      expect do
+        xcode_manager_service.use_apple_id(user: unavailable_apple_id)
+      end.to raise_error("No registered Apple ID found with user #{unavailable_apple_id}, make sure to add your Apple account to fastlane.ci")
+    end
+
+    it "raises properly switches the Apple ID if it is available" do
+      xcode_manager_service.use_apple_id(user: secondary_apple_id_email)
+      expect(xcode_manager_service.apple_id.user).to eq(secondary_apple_id_email)
     end
   end
 

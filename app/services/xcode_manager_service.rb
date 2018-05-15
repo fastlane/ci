@@ -12,12 +12,34 @@ module FastlaneCI
     # and the value being the % of the download progress
     attr_accessor :installations_in_progress
 
-    def initialize
-      if ENV["XCODE_INSTALL_USER"].to_s.length == 0
-        raise "No `XCODE_INSTALL_USER` ENV variable provided, please provide one when launching up the fastlane.ci"
-      end
+    # @return [AppleID] The Apple ID to use to install Xcode
+    attr_reader :apple_id
+
+    # @param user [String]: the email address / username of the Apple ID to use
+    def initialize(user: nil)
+      user ||= ENV["XCODE_INSTALL_USER"] # if the server is launched with this ENV variable
+
+      use_apple_id(user: user)
 
       @installations_in_progress = {}
+    end
+
+    # Change the Apple ID to be used, you have to pass either `apple_id` or `user`
+    # @param apple_id [AppleID]
+    # @param user [String]
+    def use_apple_id(apple_id: nil, user: nil)
+      # use the user (email) to identify to make sure the account is
+      # persisted and can be used
+      user ||= apple_id.user
+
+      @apple_id = Services.apple_id_service.apple_ids.find { |a| a.user == user } if user
+      if self.apple_id.nil?
+        # Think about the user flow on how this would be shown, we probably want to check
+        # for the existance of the Apple ID earlier, and then not even show the button,
+        # or make the button redirect to the Apple ID login instead
+        raise "No registered Apple ID found with user #{user}, make sure to add your Apple account to fastlane.ci"
+      end
+      return true
     end
 
     # A shared reference to the `XcodeInstall::Installer` object we use
@@ -122,6 +144,10 @@ module FastlaneCI
       #       if it is, we need a way to append the `success` block to it
 
       install_xcode_task = TaskQueue::Task.new(work_block: proc {
+        # There is no public interface in xcode-install to pass the Apple ID credentials
+        # So we use environment variables to pass both the username, and the password
+        ENV["XCODE_INSTALL_USER"] = apple_id.user
+        ENV["XCODE_INSTALL_PASSWORD"] = apple_id.password
         begin
           installer.install_version(
             # version: the version to install
@@ -148,11 +174,14 @@ module FastlaneCI
           logger.info("Successfully finished Xcode installation of version #{version}")
           success_block.call(version) if success_block
         rescue StandardError => ex
+          # Handle and show error here
           logger.error(ex)
           logger.error(ex.backtrace)
           error_block.call(version, ex) if error_block
         ensure
           installations_in_progress.delete(version)
+          ENV.delete("XCODE_INSTALL_USER")
+          ENV.delete("XCODE_INSTALL_PASSWORD")
         end
       })
 
