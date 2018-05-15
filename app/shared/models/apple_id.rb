@@ -6,6 +6,9 @@ module FastlaneCI
   class AppleID
     attr_accessor :user
 
+    # TODO: currently we don't support 2 step verification for Apple IDs yet
+    # tracked via https://github.com/fastlane/ci/issues/639
+
     # The prefix is used for the iTunesTransporter password, it's an application
     # specific password. This is not implemented in fastlane.ci yet, but will be soon
     # TODO: Implement transporter password
