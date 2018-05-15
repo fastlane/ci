@@ -1,9 +1,9 @@
-require_relative "../shared/authenticated_controller_base"
+require_relative "./json_authenticated_controller_base"
 require_relative "./view_models/repo_view_model"
 
 module FastlaneCI
   # Controller for providing all data relating to projects
-  class RepositoryJSONController < AuthenticatedControllerBase
+  class RepositoryJSONController < JSONAuthenticatedControllerBase
     HOME = "/data/repos"
 
     get HOME.to_s do

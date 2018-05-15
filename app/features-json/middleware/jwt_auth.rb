@@ -1,4 +1,4 @@
-require_relative "../services/dot_keys_variable_service"
+require_relative "../../services/dot_keys_variable_service"
 
 require "jwt"
 

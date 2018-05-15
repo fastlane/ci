@@ -1,10 +1,10 @@
-require_relative "../shared/authenticated_controller_base"
+require_relative "./json_authenticated_controller_base"
 require_relative "./view_models/project_summary_view_model"
 require_relative "./view_models/project_view_model"
 
 module FastlaneCI
   # Controller for providing all data relating to projects
-  class ProjectJSONController < AuthenticatedControllerBase
+  class ProjectJSONController < JSONAuthenticatedControllerBase
     HOME = "/data/projects"
 
     # Get the payload from the body
