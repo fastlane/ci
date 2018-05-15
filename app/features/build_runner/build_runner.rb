@@ -172,11 +172,9 @@ module FastlaneCI
       logger.debug("Running pre_run_action in checkout_sha")
 
       checkout_sha do |checkout_success|
-        if checkout_success
-          if setup_tooling_environment? # see comment for `#setup_tooling_environment?` method
-            setup_build_specific_environment_variables
-            completion_block.call(checkout_success)
-          end
+        if checkout_success && setup_tooling_environment? # see comment for `#setup_tooling_environment?` method
+          setup_build_specific_environment_variables
+          completion_block.call(checkout_success)
         else
           # TODO: this could be a notification specifically for user interaction
           logger.debug("Unable to launch build runner because we were unable to checkout the required sha: #{sha}")
