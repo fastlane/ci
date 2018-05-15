@@ -10,7 +10,7 @@ module FastlaneCI
 
     # Keeps an a hash, the key being the Gem::Version of the Xcode version we're installing
     # and the value being the % of the download progress
-    attr_accessor :installations_in_progress
+    attr_accessor :installing_xcode_versions
 
     # @return [AppleID] The Apple ID to use to install Xcode
     attr_reader :apple_id
@@ -21,7 +21,7 @@ module FastlaneCI
 
       use_apple_id(user: user)
 
-      @installations_in_progress = {}
+      @installing_xcode_versions = {}
     end
 
     # Change the Apple ID to be used, you have to pass either `apple_id` or `user`
@@ -139,6 +139,10 @@ module FastlaneCI
               "#{available_xcode_versions.map(&:version).join(', ')}"
       end
 
+      if installing_xcode_versions[version]
+        raise "Xcode version #{version} is already being downloaded... Download couldn't be started"
+      end
+
       logger.info("#{version} is available to be installed... putting installation process on the queue")
       # TODO: Check if installing a given Xcode version is already in the queue
       #       if it is, we need a way to append the `success` block to it
@@ -168,7 +172,7 @@ module FastlaneCI
             false,
             # `progress_block` be updated on the download progress
             proc do |percent|
-              installations_in_progress[version] = percent
+              installing_xcode_versions[version] = percent
             end
           )
           logger.info("Successfully finished Xcode installation of version #{version}")
@@ -179,7 +183,7 @@ module FastlaneCI
           logger.error(ex.backtrace)
           error_block.call(version, ex) if error_block
         ensure
-          installations_in_progress.delete(version)
+          installing_xcode_versions.delete(version)
           ENV.delete("XCODE_INSTALL_USER")
           ENV.delete("XCODE_INSTALL_PASSWORD")
         end
@@ -188,12 +192,7 @@ module FastlaneCI
       xcode_queue.add_task_async(task: install_xcode_task)
 
       # Reference the task with the Xcode version
-      installations_in_progress[version] = 0
-    end
-
-    # @return Hash Gem::Version => %
-    def installing_xcode_versions
-      return installations_in_progress
+      installing_xcode_versions[version] = 0
     end
   end
 end

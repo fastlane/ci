@@ -96,14 +96,26 @@ describe FastlaneCI::XcodeManagerService do
     end
 
     it "returns a hash with Xcode versions if installations are in progress" do
-      version = Gem::Version.new("8.1")
+      version_to_install = Gem::Version.new("8.1")
 
       expect(xcode_manager_service.xcode_queue).to receive(:add_task_async).and_return(nil)
 
-      xcode_manager_service.install_xcode!(version: version)
+      xcode_manager_service.install_xcode!(version: version_to_install)
       expect(xcode_manager_service.installing_xcode_versions).to eq({
-        version => 0
+        version_to_install => 0
       })
+    end
+
+    it "raises an exception if installation is already in progress" do
+      version_to_install = Gem::Version.new("8.1")
+
+      xcode_manager_service.installing_xcode_versions = {
+        version_to_install => 50
+      }
+
+      expect do
+        xcode_manager_service.install_xcode!(version: version_to_install)
+      end.to raise_error("Xcode version 8.1 is already being downloaded... Download couldn't be started")
     end
   end
 end
