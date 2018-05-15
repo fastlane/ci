@@ -1,26 +1,18 @@
-# via https://blog.github.com/2017-07-06-introducing-code-owners/
-#
-# Lines starting with '#' are comments.
-# Each line is a file pattern followed by one or more owners.
-
-# Order is important. The last matching pattern has the most precedence.
-# So if a pull request only touches javascript files, only these owners
-# will be requested to review.
-
+# default owner
+@fastlane/Team
 
 # Container
 docker-compose.yml  @fastlane/ci-container-team
 .dockerignore       @fastlane/ci-container-team
 
-
 # Frontend
-web/*               @nakhbari # TODO: replace with frontend focus team
-karma.conf.js       @nakhbari # TODO: replace with frontend focus team
-package.json        @nakhbari # TODO: replace with frontend focus team
-tsconfig.json       @nakhbari # TODO: replace with frontend focus team
-tslint.json         @nakhbari # TODO: replace with frontend focus team
+web/*               @nakhbari
+karma.conf.js       @nakhbari
+package.json        @nakhbari
+tsconfig.json       @nakhbari
+tslint.json         @nakhbari
 
 # Backend
-app/*               @KrauseFx  # TODO: replace with backend focus team
-launch.rb           @KrauseFx  # TODO: replace with backend focus team
-fastlane_app.rb     @KrauseFx  # TODO: replace with backend focus team
+app/*               @KrauseFx
+launch.rb           @KrauseFx
+fastlane_app.rb     @KrauseFx
