@@ -199,7 +199,7 @@ module FastlaneCI
         "Build encountered an error"
       else
         "Unknown error"
-        end
+      end
     end
 
     # The `target_url`, `description` and `context` parameters are optional
