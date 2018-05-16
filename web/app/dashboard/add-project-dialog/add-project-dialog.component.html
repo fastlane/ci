@@ -46,9 +46,9 @@
   </div>
 </div>
 <div mat-dialog-actions>
-  <button mat-button>Close</button>
+  <button mat-button (click)="closeDialog()">Close</button>
   <button mat-raised-button color="primary" (click)="addProject()">Add Project</button>
 </div>
-<button mat-icon-button class="fci-dialog-icon-close-button">
+<button mat-icon-button class="fci-dialog-icon-close-button" (click)="closeDialog()">
   <mat-icon>close</mat-icon>
 </button>

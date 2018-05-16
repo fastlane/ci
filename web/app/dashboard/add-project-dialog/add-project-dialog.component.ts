@@ -1,5 +1,5 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA} from '@angular/material';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 import * as moment from 'moment';
 import {Observable} from 'rxjs/Observable';
 
@@ -21,6 +21,23 @@ interface TimeSelectorData {
   isAm: boolean;
 }
 
+const TRIGGER_OPTIONS: TriggerOption[] = [
+  {viewValue: 'for every commit and PR', value: 'commit'},
+  {viewValue: 'nightly', value: 'nightly'},
+];
+
+const HOURS: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
+// TODO: do something to make these properties camelCase
+const BASE_PROJECT_REQUEST: AddProjectRequest = {
+  lane: '',
+  repo_org: '',
+  branch: 'master',
+  repo_name: '',
+  project_name: '',
+  trigger_type: 'commit',
+};
+
 function timeSelectDataToMilitaryTime(timeData: TimeSelectorData): number {
   return moment(`${timeData.hour} ${timeData.isAm ? 'AM' : 'PM'}`, 'H:A')
       .hour();
@@ -38,26 +55,17 @@ export class AddProjectDialogComponent implements OnInit {
   repositories: Repository[];
   lanes: string[] = [];
   readonly timeSelectorData: TimeSelectorData = {hour: 12, isAm: true};
-  // TODO: do something to make these properties camelCase
-  readonly project: AddProjectRequest = {
-    lane: '',
-    repo_org: '',
-    branch: 'master',
-    repo_name: '',
-    project_name: '',
-    trigger_type: 'commit',
-  };
-  readonly TRIGGER_OPTIONS: TriggerOption[] = [
-    {viewValue: 'for every commit and PR', value: 'commit'},
-    {viewValue: 'nightly', value: 'nightly'},
-  ];
-  readonly HOURS: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+  readonly project = BASE_PROJECT_REQUEST;
+  readonly TRIGGER_OPTIONS = TRIGGER_OPTIONS;
+  readonly HOURS = HOURS;
 
   constructor(
       @Inject(MAT_DIALOG_DATA) private readonly data: AddProjectDialogConfig,
-      private readonly dataService: DataService) {}
+      private readonly dataService: DataService,
+      private readonly dialogRef: MatDialogRef<AddProjectDialogComponent>,
+  ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.data.repositories.subscribe((repositories) => {
       this.repositories = repositories;
       this.project.repo_name = this.repositories[0].fullName;
@@ -66,7 +74,7 @@ export class AddProjectDialogComponent implements OnInit {
     });
   }
 
-  loadRepoLanes() {
+  loadRepoLanes(): void {
     this.isLoadingLanes = true;
     this.dataService.getRepoLanes(this.project.repo_name, this.project.branch)
         .subscribe((lanes) => {
@@ -76,7 +84,7 @@ export class AddProjectDialogComponent implements OnInit {
         });
   }
 
-  addProject() {
+  addProject(): void {
     this.isAddingProject = true;
 
     if (this.project.trigger_type === 'nightly') {
@@ -86,6 +94,11 @@ export class AddProjectDialogComponent implements OnInit {
     this.dataService.addProject(this.project).subscribe((project) => {
       // TODO: Show toast that the project was created
       this.isAddingProject = false;
+      this.closeDialog();
     });
+  }
+
+  closeDialog(): void {
+    this.dialogRef.close();
   }
 }
