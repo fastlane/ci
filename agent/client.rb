@@ -16,11 +16,3 @@ module FastlaneCI
     end
   end
 end
-
-if $0 == __FILE__
-  client = FastlaneCI::Agent::Client.new("localhost")
-  logs = client.request_spawn("ping", "-c", "5", "google.com")
-  logs.each do |log|
-    puts({ message: log.message, status: log.status, level: log.level })
-  end
-end

@@ -63,17 +63,14 @@ module FastlaneCI
   end
 end
 
-# rubocop:disable all
 if $0 == __FILE__
-  include FastlaneCI::Agent
 
-  server = Server.server
+  server = FastlaneCI::Agent::Server.server
 
   Signal.trap("SIGINT") do
     Thread.new { server.stop }.join # Mutex#synchronize can't be called in trap context. Put it on a thread.
   end
 
-  # TODO: unify logger
-  puts("Server is running on #{HOST}:#{PORT}")
+  puts("Agent (#{FastlaneCI::Agent::VERSION}) is running on #{FastlaneCI::Agent::HOST}:#{FastlaneCI::Agent::PORT}")
   server.run_till_terminated
 end
