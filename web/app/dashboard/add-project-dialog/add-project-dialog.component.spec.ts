@@ -1,7 +1,7 @@
 import {CommonModule} from '@angular/common';
 import {async, ComponentFixture, fakeAsync, TestBed} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
-import {MatButtonModule, MatDialogModule, MatIconModule, MatProgressSpinnerModule, MatSelectModule} from '@angular/material';
+import {MatButtonModule, MatDialogModule, MatDialogRef, MatIconModule, MatProgressSpinnerModule, MatSelectModule} from '@angular/material';
 import {MAT_DIALOG_DATA} from '@angular/material';
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
@@ -30,6 +30,8 @@ describe('AddProjectDialogComponent', () => {
   let laneSelectEl: HTMLElement;
   let triggerSelectEl: HTMLElement;
   let addProjectButtonEl: HTMLButtonElement;
+  let dialogRef:
+      jasmine.SpyObj<Partial<MatDialogRef<AddProjectDialogComponent>>>;
 
   beforeEach(async(() => {
     reposSubject = new Subject<Repository[]>();
@@ -41,6 +43,7 @@ describe('AddProjectDialogComponent', () => {
       getRepoLanes:
           jasmine.createSpy().and.returnValue(lanesSubject.asObservable())
     };
+    dialogRef = {close: jasmine.createSpy()};
 
     TestBed
         .configureTestingModule({
@@ -50,7 +53,8 @@ describe('AddProjectDialogComponent', () => {
               provide: MAT_DIALOG_DATA,
               useValue: {repositories: reposSubject.asObservable()}
             },
-            {provide: DataService, useValue: dataService}
+            {provide: DataService, useValue: dataService},
+            {provide: MatDialogRef, useValue: dialogRef}
           ],
           imports: [
             MatDialogModule, MatButtonModule, MatSelectModule, MatIconModule,
@@ -76,6 +80,18 @@ describe('AddProjectDialogComponent', () => {
     addProjectButtonEl =
         fixture.debugElement.query(By.css('button.mat-primary')).nativeElement;
   }));
+
+  it('Should close dialog when close button is clicked', () => {
+    fixture.debugElement.query(By.css('.mat-dialog-actions > .mat-button'))
+        .nativeElement.click();
+    expect(dialogRef.close).toHaveBeenCalled();
+  });
+
+  it('Should close dialog when X button is clicked', () => {
+    fixture.debugElement.query(By.css('.fci-dialog-icon-close-button'))
+        .nativeElement.click();
+    expect(dialogRef.close).toHaveBeenCalled();
+  });
 
   describe('repo, lane, project name form controls', () => {
     beforeEach(() => {
@@ -300,9 +316,11 @@ describe('AddProjectDialogComponent', () => {
           .toBe(0);
     });
 
-    it('should close dialog on success',
-       () => {
-           // TODO
-       });
+    it('should close dialog on success', () => {
+      addProjectButtonEl.click();
+      projectSubject.next(mockProject);
+
+      expect(dialogRef.close).toHaveBeenCalled();
+    });
   });
 });
