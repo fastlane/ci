@@ -25,6 +25,7 @@ The Agent is responsible for the following:
 ## Process Environment
 Each GRPC request to the Agent should contain all of the necessary configuration information required to run the Lane successfully. This can be accomplished by supplying an environment (the ENV variables) to the child process when it is spawned by the Agent.
 
+<img src="WorkerAgent.svg">
 
 For more on using the environment for configuration (https://12factor.net/config)
 The Agent may have to fetch resources (such as source code) from other services but it should not have to fetch any configuration data.
