@@ -2,8 +2,10 @@ import {HttpClientTestingModule, HttpTestingController} from '@angular/common/ht
 import {fakeAsync, TestBed, tick} from '@angular/core/testing';
 
 import {BuildStatus} from '../common/constants';
+import {mockLanesResponse} from '../common/test_helpers/mock_lane_data';
 import {mockProjectListResponse, mockProjectResponse} from '../common/test_helpers/mock_project_data';
 import {mockRepositoryListResponse, mockRepositoryResponse} from '../common/test_helpers/mock_repository_data';
+import {Lane} from '../models/lane';
 import {Project} from '../models/project';
 import {ProjectSummary} from '../models/project_summary';
 import {Repository, RepositoryResponse} from '../models/repository';
@@ -66,6 +68,26 @@ describe('DataService', () => {
       expect(project.builds.length).toBe(2);
       expect(project.builds[0].status).toBe(BuildStatus.SUCCESS);
       expect(project.builds[1].status).toBe(BuildStatus.FAILED);
+    });
+  });
+
+  describe('#getRepoLanes', () => {
+    it('should return response mapped to Lane model', () => {
+      let lanes: Lane[];
+      dataService.getRepoLanes('some/repo', 'master')
+          .subscribe((lanesResponse) => {
+            lanes = lanesResponse;
+          });
+
+      const lanesRequest = mockHttp.expectOne(
+          '/data/repos/lanes?repo_full_name=some%2Frepo&branch=master');
+      lanesRequest.flush(mockLanesResponse);
+
+      expect(lanes.length).toBe(2);
+      expect(lanes[0].name).toBe('test');
+      expect(lanes[0].platform).toBe('ios');
+      expect(lanes[1].name).toBe('beta');
+      expect(lanes[1].platform).toBe('android');
     });
   });
 
