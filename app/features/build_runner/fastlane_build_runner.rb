@@ -23,6 +23,9 @@ module FastlaneCI
     attr_reader :lane
     attr_reader :parameters
 
+    # @return [String] The path to the Xcode installation to use for this build
+    attr_reader :xcode_path_to_use
+
     # Set additional values specific to the fastlane build runner
     # TODO: the parameters are not used/implemented yet, see https://github.com/fastlane/ci/issues/783
     def setup(parameters: nil)
@@ -36,6 +39,10 @@ module FastlaneCI
       current_build.lane = lane
       current_build.platform = platform
       current_build.parameters = self.parameters
+
+      # The versions of the build tools are set later one, after the repo was checked out
+      # and we can read files like the `xcode-version` file
+      current_build.build_tools = {}
 
       # The call below could be optimized, as it will also set the status
       # on the GitHub remote. We want to store the lane, platform and parameters
@@ -159,6 +166,22 @@ module FastlaneCI
             end
           end
 
+          # Reset the Xcode version to the system default first
+          Services.xcode_manager_service.reset_xcode_version!
+
+          # Switch to the specified Xcode (if specified)
+          if xcode_path_to_use.to_s.length > 0
+            Services.xcode_manager_service.switch_xcode_version!(
+              xcode_path: xcode_path_to_use.to_s # .to_s as it's a `PathName`
+            )
+          end
+
+          # We always want to fetch the currently used Xcode version
+          # and store it as part of the build metadata inside the `build_tools` attribute
+          # to make builds reproducable
+          # TODO: take the `build_tools` hash into account when hitting `re-run` on a given build
+          current_build.build_tools[:xcode_version] = Services.xcode_manager_service.current_xcode_version.to_s
+
           begin
             # Run fastlane now
             Fastlane::LaneManager.cruise_lane(
@@ -189,6 +212,8 @@ module FastlaneCI
 
             return
           ensure
+            Services.xcode_manager_service.reset_xcode_version! if xcode_path_to_use
+
             if gemfile_found
               # This is te step for recovering the pre-build dependency graph for the CI
               # The first step is to write the snapshot we made at the start of the build.
@@ -267,8 +292,83 @@ module FastlaneCI
         message: raw_row[:message],
         time: raw_row[:time]
       )
-      current_row.html = FastlaneOutputToHtml.convert_row(current_row)
       return current_row
+    end
+
+    # Responsible for setting up Xcode build environment
+    def setup_tooling_environment?
+      xcode_version_file_path = File.join(repo.local_folder, ".xcode-version")
+      unless File.exist?(xcode_version_file_path)
+        logger.debug("No `.xcode-version` file found for repo '#{project.project_name}', " \
+                     "not managing Xcode for this one...")
+        return true # we're ok with this, all good to run the build
+      end
+
+      xcode_version_to_use = File.read(xcode_version_file_path).strip
+      begin
+        parsed_xcode_version = Gem::Version.new(xcode_version_to_use)
+      rescue ArgumentError => ex
+        logger.error("Invalid version specification in `.xcode-version` file, make sure it's valid: #{ex}")
+        return true # we're ok with this, let's keep the system default Xcode
+      end
+
+      # valid Xcode version specification
+      # let's see if the version exists
+      matching_xcode_instance = Services.xcode_manager_service.installed_xcode_versions.find do |xcode|
+        xcode.bundle_version == parsed_xcode_version
+      end
+
+      if matching_xcode_instance
+        new_row(
+          BuildRunnerOutputRow.new(
+            type: "important",
+            message: "#{parsed_xcode_version} is defined and installed, switching to using it",
+            time: Time.now
+          )
+        )
+        @xcode_path_to_use = matching_xcode_instance.path
+        return true
+      else
+        # This version isn't installed yet, let's see if it's available to install
+        if Services.xcode_manager_service.installer.exist?(parsed_xcode_version)
+          # Let the git remote know we're installing Xcode, as it will significantly delay this build
+          current_build.status = :installing_xcode
+          save_build_status! # tell the git remote
+
+          new_row(
+            BuildRunnerOutputRow.new(
+              type: "important",
+              message: "Installing Xcode version #{parsed_xcode_version}... this might take a while",
+              time: Time.now
+            )
+          )
+
+          Services.xcode_manager_service.install_xcode!(
+            version: parsed_xcode_version,
+            success_block: proc do |version|
+              # we don't have to set any Xcode path here
+              # as basically we're putting the build back into the queue again
+              # which will then detect the newly installed Xcode version
+              # and switch the path automatically #magic
+              puts "Success: #{version}"
+              # Put the build back into the queue
+              Services.build_runner_service.add_build_runner(build_runner: self)
+            end,
+            error_block: proc do |version, exception|
+              puts "Error: #{version} - #{exception}"
+              # TODO: raise an exception here and make the build fail
+              # It might not be enough to just raise it here
+              # we have to test it
+              raise "Error installing Xcode"
+            end
+          )
+
+          return false
+        else
+          # TODO: make sure this marks the build as failed
+          raise "#{parsed_xcode_version} is not available to be installed for build #{current_build}"
+        end
+      end
     end
 
     protected

@@ -40,7 +40,6 @@ module FastlaneCI
 
     def create_environment_variable!(key: nil, value: nil)
       key.strip!
-      value.strip!
 
       if environment_variable_data_source.find_environment_variable(environment_variable_key: key).nil?
         logger.info("Creating ENV variable with key #{key}")
@@ -56,10 +55,9 @@ module FastlaneCI
 
       if environment_variable_data_source.find_environment_variable(environment_variable_key: key).nil?
         logger.info("No existing ENV variable with key #{key}")
-        return false
       end
 
-      return environment_variable_data_source.update_environment_variable!(
+      environment_variable_data_source.update_environment_variable!(
         environment_variable: environment_variable
       )
     end
@@ -68,9 +66,7 @@ module FastlaneCI
       existing = environment_variable_data_source.find_environment_variable(
         environment_variable_key: environment_variable_key
       )
-
-      return false unless existing
-      return environment_variable_data_source.delete_environment_variable!(
+      environment_variable_data_source.delete_environment_variable!(
         environment_variable: existing
       )
     end

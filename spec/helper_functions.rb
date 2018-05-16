@@ -1,4 +1,8 @@
 module HelperFunctions
+  def fixture_path
+    File.join(FastlaneCI::FastlaneApp.settings.root, "spec/fixtures/files/")
+  end
+
   def provider_credential
     FastlaneCI::GitHubProviderCredential.new(email: "test_user", api_token: nil)
   end

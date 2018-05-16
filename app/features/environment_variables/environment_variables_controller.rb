@@ -16,7 +16,7 @@ module FastlaneCI
     # When the `/environment_variables/create` form is submitted:
     #
     # - creates a new ENV variables
-    get "#{HOME}/create" do
+    post "#{HOME}/create" do
       new_environment_variable = nil
       if valid_params?(params, post_parameter_list_for_validation)
         new_environment_variable = Services.environment_variable_service.create_environment_variable!(
@@ -42,10 +42,9 @@ module FastlaneCI
           value: params[:value]
         )
 
-        success = Services.environment_variable_service.update_environment_variable!(
+        Services.environment_variable_service.update_environment_variable!(
           environment_variable: environment_variable
         )
-        logger.error("Something went wrong") unless success
       end
 
       redirect(HOME)
@@ -53,10 +52,9 @@ module FastlaneCI
 
     # Deletes an environment variable existing in the configuration repository `environment_variables.json`
     post "#{HOME}/delete/*" do |environment_variable_key|
-      success = Services.environment_variable_service.delete_environment_variable!(
+      Services.environment_variable_service.delete_environment_variable!(
         environment_variable_key: environment_variable_key
       )
-      logger.error("Something went wrong") unless success
 
       redirect(HOME)
     end

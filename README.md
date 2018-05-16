@@ -84,7 +84,7 @@ Currently, Docker deployment is for Linux projects only.
 
 ## Development installation
 
-Run the rake task: `rake devbootstrap`.
+Run the rake task: `rake dev_bootstrap`.
 1. Install all dependencies (ruby, javascript)
 2. Add a pre-commit hook
 

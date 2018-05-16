@@ -1,0 +1,108 @@
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
+  <header class="mdl-layout__header">
+    <div class="mdl-layout__header-row">
+      <span class="mdl-layout__title"><%= title %></span>
+    </div>
+  </header>
+
+  <%= erb :"../../global/navigation" %>
+
+  <main class="mdl-layout__content" style="padding: 40px">
+    <% if installing_xcode_versions.count > 0 %>
+      <h4>Currently installing...</h4>
+      <div class="table-responsive-vertical shadow-z-1" style="overflow: scroll">
+        <table class="table-mc-light-blue mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+          <thead>
+            <tr>
+              <th>Version</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <% installing_xcode_versions.each do |xcode_version, percent| %>
+              <tr>
+                <td>
+                  <%= xcode_version.to_s %>
+                </td>
+                <td>
+                  <%= percent %>%
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+
+
+    <h4>Installed Xcode versions</h4>
+    <div class="table-responsive-vertical shadow-z-1" style="overflow: scroll">
+      <table class="table-mc-light-blue mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+        <thead>
+          <tr>
+            <th>Version</th>
+            <th>Path</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% installed_xcode_versions.each do |xcode_version| %>
+            <tr>
+              <td>
+                <%= xcode_version.bundle_version %>
+              </td>
+              <td>
+                <%= xcode_version.path %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+
+    <h4>Available Xcode versions</h4>
+    <div class="table-responsive-vertical shadow-z-1" style="overflow: scroll">
+      <table class="table-mc-light-blue mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+        <thead>
+          <tr>
+            <th>Version</th>
+            <th>Installed</th>
+            <th>Full Name</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% available_xcode_versions.each do |xcode_version| %>
+            <tr>
+              <td>
+                <%= xcode_version.version %>
+              </td>
+              <td>
+                <%= xcode_version.installed? ? "✅" : "👎️" %>
+              </td>
+              <td>
+                <%= xcode_version.name %>
+              </td>
+              <td>
+                <% if xcode_version.installed? %>
+                  <a href="#" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                    Set as default
+                  </a>
+                <% elsif installing_xcode_versions.key?(xcode_version.version) %>
+                  Downloading (<%= installing_xcode_versions[xcode_version.version] %>%)
+                <% else %>
+                  <a href="/xcode_manager_erb/install?version=<%= xcode_version.version %>" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+                    Install
+                  </a>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>

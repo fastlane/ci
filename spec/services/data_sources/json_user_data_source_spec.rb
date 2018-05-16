@@ -94,10 +94,6 @@ describe FastlaneCI::JSONUserDataSource do
         expect { subject.update_user!(user: new_user) }
           .to change { subject.users.first.email }.from(first_user_email).to(new_user_email)
       end
-
-      it "returns `true` when a user is updated" do
-        expect(subject.update_user!(user: new_user)).to be(true)
-      end
     end
   end
 
@@ -123,10 +119,6 @@ describe FastlaneCI::JSONUserDataSource do
 
       it "removes the `user` from the `users.json` file" do
         expect { subject.delete_user!(user: user) }.to change { subject.users.size }.from(2).to(1)
-      end
-
-      it "returns `true` when a user is deleted" do
-        expect(subject.delete_user!(user: user)).to be(true)
       end
     end
   end
