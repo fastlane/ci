@@ -7,7 +7,7 @@
   </div>
   <div class="fci-dialog-form-section fci-input-container">
     <div class="fci-section-title">With the repo</div>
-    <mat-select class="fci-repo-select" [(value)]="project.repo_name">
+    <mat-select class="fci-repo-select" [(value)]="project.repo_name" (selectionChange)="loadRepoLanes()">
       <mat-option *ngFor="let repo of repositories" [value]="repo.fullName">
         {{repo.fullName}}
       </mat-option>
@@ -15,11 +15,14 @@
   </div>
   <div class="fci-dialog-form-section fci-input-container">
     <div class="fci-section-title">I want to run the lane</div>
-    <mat-select class="fci-lane-select" [(value)]="project.lane">
-      <mat-option *ngFor="let lane of FAKE_LANES" [value]="lane">
-        {{lane}}
-      </mat-option>
-    </mat-select>
+    <div class="fci-lane-form">
+      <mat-select class="fci-lane-select" [(value)]="project.lane" [disabled]="isLoadingLanes || lanes.length === 0">
+        <mat-option *ngFor="let lane of lanes" [value]="lane">
+          {{lane}}
+        </mat-option>
+      </mat-select>
+      <mat-spinner *ngIf="isLoadingLanes" mode="indeterminate" diameter="25"></mat-spinner>
+    </div>
   </div>
   <div class="fci-dialog-form-section fci-input-container">
     <div class="fci-section-title">With builds being triggered</div>

@@ -1,14 +1,17 @@
 import {CommonModule} from '@angular/common';
-import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {async, ComponentFixture, fakeAsync, TestBed} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
-import {MatButtonModule, MatDialogModule, MatIconModule, MatSelectModule} from '@angular/material';
+import {MatButtonModule, MatDialogModule, MatIconModule, MatProgressSpinnerModule, MatSelectModule} from '@angular/material';
 import {MAT_DIALOG_DATA} from '@angular/material';
 import {By} from '@angular/platform-browser';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {Subject} from 'rxjs/Subject';
 
 import {FormSpinnerModule} from '../../common/components/form-spinner/form-spinner.module';
+import {mockLanes, mockLanesResponse} from '../../common/test_helpers/mock_lane_data';
 import {mockProject} from '../../common/test_helpers/mock_project_data';
 import {mockRepositoryList} from '../../common/test_helpers/mock_repository_data';
+import {Lane} from '../../models/lane';
 import {Project} from '../../models/project';
 import {Repository} from '../../models/repository';
 import {DataService} from '../../services/data.service';
@@ -20,6 +23,7 @@ describe('AddProjectDialogComponent', () => {
   let fixture: ComponentFixture<AddProjectDialogComponent>;
   let reposSubject: Subject<Repository[]>;
   let projectSubject: Subject<Project>;
+  let lanesSubject: Subject<Lane[]>;
   let dataService: jasmine.SpyObj<Partial<DataService>>;
   let projectNameEl: HTMLInputElement;
   let repoSelectEl: HTMLElement;
@@ -30,9 +34,12 @@ describe('AddProjectDialogComponent', () => {
   beforeEach(async(() => {
     reposSubject = new Subject<Repository[]>();
     projectSubject = new Subject<Project>();
+    lanesSubject = new Subject<Lane[]>();
     dataService = {
       addProject:
-          jasmine.createSpy().and.returnValue(projectSubject.asObservable())
+          jasmine.createSpy().and.returnValue(projectSubject.asObservable()),
+      getRepoLanes:
+          jasmine.createSpy().and.returnValue(lanesSubject.asObservable())
     };
 
     TestBed
@@ -47,7 +54,8 @@ describe('AddProjectDialogComponent', () => {
           ],
           imports: [
             MatDialogModule, MatButtonModule, MatSelectModule, MatIconModule,
-            CommonModule, FormsModule, FormSpinnerModule
+            CommonModule, FormsModule, FormSpinnerModule,
+            MatProgressSpinnerModule, BrowserAnimationsModule
           ]
         })
         .compileComponents();
@@ -106,16 +114,72 @@ describe('AddProjectDialogComponent', () => {
       expect(repoSelectEl.textContent).toBe('fastlane/ci');
     });
 
-    it('should set lane option', () => {
-      component.project.lane = 'ios beta';
+    it('should set lane option', async(() => {
+         // Load Lanes
+         lanesSubject.next(mockLanes);
+         fixture.detectChanges();
+
+         fixture.whenStable().then(() => {
+           component.project.lane = 'ios test';
+           fixture.detectChanges();
+
+           expect(laneSelectEl.textContent).toBe('ios test');
+
+           component.project.lane = 'android beta';
+           fixture.detectChanges();
+
+           expect(laneSelectEl.textContent).toBe('android beta');
+         });
+       }));
+
+    it('should reload lanes if repo changes', async(() => {
+         // Load Lanes
+         lanesSubject.next(mockLanes);
+         expect(component.isLoadingLanes).toBe(false);
+         expect(component.lanes.length).toBe(2);
+
+         fixture.whenStable().then(() => {
+           fixture.detectChanges();
+           // Open select options
+           const repoSelectTriggerEl =
+               fixture.debugElement
+                   .query(By.css('.fci-repo-select .mat-select-trigger'))
+                   .nativeElement;
+           repoSelectTriggerEl.click();
+           fixture.detectChanges();
+
+           // Select the third option
+           const repoSelectOptionsEl =
+               fixture.debugElement.queryAll(By.css('.mat-option'));
+           expect(repoSelectOptionsEl.length).toBe(3);
+           repoSelectOptionsEl[2].nativeElement.click();
+           fixture.detectChanges();
+
+           expect(repoSelectEl.textContent).toBe('fastlane/onboarding');
+
+           // Assert that the new lanes are loaded
+           expect(component.isLoadingLanes).toBe(true);
+           lanesSubject.next([mockLanes[0]]);
+           expect(component.isLoadingLanes).toBe(false);
+           expect(component.lanes.length).toBe(1);
+         });
+       }));
+
+    it('should show spinner when lanes are loading', () => {
+      expect(component.isLoadingLanes).toBe(true);
+      let laneSpinnerEl =
+          fixture.debugElement.queryAll(By.css('.fci-lane-form .mat-spinner'));
+
+      expect(laneSpinnerEl.length).toBe(1);
+
+      lanesSubject.next(mockLanes);
       fixture.detectChanges();
 
-      expect(laneSelectEl.textContent).toBe('ios beta');
+      laneSpinnerEl =
+          fixture.debugElement.queryAll(By.css('.fci-lane-form .mat-spinner'));
 
-      component.project.lane = 'ios test';
-      fixture.detectChanges();
-
-      expect(laneSelectEl.textContent).toBe('ios test');
+      expect(component.isLoadingLanes).toBe(false);
+      expect(laneSpinnerEl.length).toBe(0);
     });
   });
 
@@ -191,6 +255,9 @@ describe('AddProjectDialogComponent', () => {
     beforeEach(() => {
       // Load Repos
       reposSubject.next(mockRepositoryList);
+
+      // Load Lanes
+      lanesSubject.next(mockLanes);
       fixture.detectChanges();
     });
 

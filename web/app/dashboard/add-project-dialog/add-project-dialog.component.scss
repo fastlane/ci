@@ -26,6 +26,14 @@
     .fci-at-time {
         padding: 0 8px;
     }
+    .fci-lane-form {
+        display: flex;
+        align-items: center;
+        .mat-spinner {
+            display: inline-block;
+            margin-left: 8px;
+        }
+    }
 }
 
 .mat-select-value {

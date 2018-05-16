@@ -32,6 +32,7 @@ export class DashboardComponent implements OnInit {
     });
 
     // Load repositories for adding a project ahead of time
+    // TODO: figure out subscription to start cold observables.
     this.repositories = this.dataService.getRepos();
   }
 
