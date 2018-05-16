@@ -41,6 +41,11 @@
             text-overflow: ellipsis;
             align-items: center;
             display: flex;
+            span {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
             .fci-status-icon {
                 margin-right: 8px;
             }
