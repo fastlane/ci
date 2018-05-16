@@ -7,6 +7,7 @@ require_relative "../../shared/models/artifact"
 require_relative "../../shared/models/artifact_provider.rb"
 require_relative "../../shared/models/local_artifact_provider.rb"
 require_relative "../../shared/models/gcp_artifact_provider"
+require_relative "../../shared/models/git_fork_config"
 
 module FastlaneCI
   # Mixin the JSONConvertible class for Build
