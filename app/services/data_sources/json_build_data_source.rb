@@ -7,6 +7,7 @@ require_relative "../../shared/models/artifact"
 require_relative "../../shared/models/artifact_provider.rb"
 require_relative "../../shared/models/local_artifact_provider.rb"
 require_relative "../../shared/models/gcp_artifact_provider"
+require_relative "../../shared/models/git_fork_config"
 
 module FastlaneCI
   # Mixin the JSONConvertible class for Build
@@ -28,7 +29,10 @@ module FastlaneCI
     end
 
     def self.attribute_to_type_map
-      return { :@artifacts => Artifact }
+      return {
+        :@git_fork_config => GitForkConfig,
+        :@artifacts => Artifact
+      }
     end
   end
 
@@ -50,6 +54,12 @@ module FastlaneCI
         end
       }
       return { :@provider => provider_object_to_provider }
+    end
+
+    # Mixin the JSONConvertible class for GitForkConfig
+    class GitForkConfig
+      # See comment in git_fork_config.rb
+      include FastlaneCI::JSONConvertible
     end
 
     def self.attribute_name_to_json_proc_map
@@ -98,9 +108,11 @@ module FastlaneCI
           build_object_hash = JSON.parse(File.read(build_path))
           build = Build.from_json!(build_object_hash)
         rescue StandardError => ex
-          logger.debug(ex.to_s)
+          logger.error(ex.to_s)
+          logger.error(ex.backtrace)
           raise "Error parsing build information on path '#{File.expand_path(build_path)}'"
         end
+
         build.update_project!(project) # this is not part of the x.json file
         build
       end

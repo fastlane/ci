@@ -31,7 +31,7 @@ module FastlaneCI
       return unless File.exist?(keys_file_path)
 
       require "dotenv"
-      ENV.update(Dotenv::Environment.new(keys_file_path))
+      ENV.update(Dotenv::Environment.new(keys_file_path, true))
 
       Services.reset_services!
     end

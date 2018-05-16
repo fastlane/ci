@@ -1,5 +1,9 @@
 import {NgModule} from '@angular/core';
+import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material';
+
+import {AuthService} from '../services/auth.service';
+
 import {LoginComponent} from './login.component';
 
 @NgModule({
@@ -11,12 +15,13 @@ import {LoginComponent} from './login.component';
   ],
   imports: [
     /** Angular Library Imports */
-    MatButtonModule
+    FormsModule,
     /** Internal Imports */
     /** Angular Material Imports */
+    MatButtonModule,
     /** Third-Party Module Imports */
   ],
-  providers: [],
+  providers: [AuthService],
 })
 export class LoginModule {
 }

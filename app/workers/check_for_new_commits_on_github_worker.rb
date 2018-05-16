@@ -59,7 +59,7 @@ module FastlaneCI
 
       new_commit_prs.each do |pr|
         git_fork_config = GitForkConfig.new(
-          current_sha: pr.current_sha,
+          sha: pr.current_sha,
           branch: pr.branch,
           clone_url: pr.clone_url,
           ref: pr.git_ref

@@ -1,0 +1,37 @@
+# https://help.github.com/articles/about-codeowners/
+# The order is relevant, most important rule at the bottom
+# It is important that every team has write access to the repo
+# that's why all ci-related teams are a child team of `@fastlane/Team`
+# so they automatically get write access to this repo
+# If you introduce a new team, make sure they are also a child-team of
+# `@fastlane/Team`
+
+# default owner
+* @fastlane/Team
+
+# Multiple owners
+.ruby-version       @fastlane/ci-container @fastlane/ci-backend
+.pre-commit         @fastlane/ci-container @fastlane/ci-backend @fastlane/ci-frontend
+docs/*              @fastlane/ci-backend @fastlane/ci-frontend
+
+# Container
+docker-compose.yml  @fastlane/ci-container
+.dockerignore       @fastlane/ci-container
+Dockerfile          @fastlane/ci-container
+
+# Frontend
+web/*               @fastlane/ci-frontend
+karma.conf.js       @fastlane/ci-frontend
+package.json        @fastlane/ci-frontend
+tsconfig.json       @fastlane/ci-frontend
+tslint.json         @fastlane/ci-frontend
+.angular-cli.json   @fastlane/ci-frontend
+
+# Backend
+app/*               @fastlane/ci-backend
+spec/*              @fastlane/ci-backend
+public/*            @fastlane/ci-backend
+launch.rb           @fastlane/ci-backend
+fastlane_app.rb     @fastlane/ci-backend
+.rubocop.yml        @fastlane/ci-backend
+fastlane            @fastlane/ci-backend

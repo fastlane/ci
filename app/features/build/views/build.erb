@@ -31,6 +31,28 @@
       </a>
       </td>
     </tr>
+    <% if build.git_fork_config %>
+      <% if build.git_fork_config.branch.to_s.length > 0 %>
+        <tr>
+          <td>Branch</td><td><%= build.git_fork_config.branch %></td>
+        </tr>
+      <% end %>
+      <% if build.git_fork_config.ref.to_s.length > 0 %>
+        <tr>
+          <td>Ref</td><td><%= build.git_fork_config.ref %></td>
+        </tr>
+      <% end %>
+      <% if build.git_fork_config.clone_url.to_s.length > 0 %>
+        <tr>
+          <td>Clone URL</td><td><%= build.git_fork_config.clone_url %></td>
+        </tr>
+      <% end %>
+    <% end %>
+    <% if build.build_tools.count > 0 %>
+      <tr>
+        <td>Build tools</td><td><%= build.build_tools %></td>
+      </tr>
+    <% end %>
     <% if build.description.to_s.length > 0 %>
       <tr>
         <td>Build description</td><td><%= build.description %></td>

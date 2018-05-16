@@ -12,6 +12,7 @@ require_relative "app/shared/logging_module"
 require_relative "app/shared/dot_keys_variables"
 require_relative "app/shared/fastlane_ci_error" # TODO: move somewhere else
 require_relative "app/features/build_runner/build_runner"
+require_relative "app/features-json/jwt_auth"
 
 # All things fastlane ci related go in this module
 module FastlaneCI
@@ -49,6 +50,10 @@ module FastlaneCI
     # which is required to support web socket streams for the
     # display of real-time output
     set(:server, "thin")
+    get "/favicon.ico" do
+      send_file(File.join("public", "favicon.ico"))
+    end
+
     if ENV["FASTLANE_CI_ERB_CLIENT"]
       get "/" do
         if session[:user]
@@ -58,15 +63,11 @@ module FastlaneCI
         end
       end
     else
-      # Anything except a data route
-      get %r{/(?!data.*).*} do
+      # Any route that hasn't already been defined
+      get "/*" do
         # Use Angular Web App instead
         send_file(File.join("public", ".dist", "index.html"))
       end
-    end
-
-    get "/favicon.ico" do
-      send_file(File.join("public", "favicon.ico"))
     end
   end
 end

@@ -138,6 +138,8 @@ module FastlaneCI
         FastlaneCI::FastlaneApp.use(FastlaneCI::ProviderCredentialsController)
         FastlaneCI::FastlaneApp.use(FastlaneCI::UsersController)
         FastlaneCI::FastlaneApp.use(FastlaneCI::EnvironmentVariablesController)
+        FastlaneCI::FastlaneApp.use(FastlaneCI::XcodeManagerController)
+        FastlaneCI::FastlaneApp.use(FastlaneCI::AppleIDController)
       end
 
       # TODO: Only load this with ERB_CLIENT env once Web app has login support
@@ -146,7 +148,9 @@ module FastlaneCI
       # Load JSON controllers
       require_relative "app/features-json/project_json_controller"
       require_relative "app/features-json/repos_json_controller"
+      require_relative "app/features-json/login_json_controller"
 
+      FastlaneCI::FastlaneApp.use(FastlaneCI::LoginJSONController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::ProjectJSONController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::RepositoryJSONController)
     end
@@ -251,7 +255,7 @@ module FastlaneCI
 
           if matching_open_pr.fork_of_repo?(repo_full_name: repo_full_name)
             git_fork_config = GitForkConfig.new(
-              current_sha: sha,
+              sha: sha,
               branch: matching_open_pr.branch,
               clone_url: matching_open_pr.clone_url,
               ref: matching_open_pr.git_ref
@@ -311,7 +315,7 @@ module FastlaneCI
           git_fork_config = nil
           if open_pr.fork_of_repo?(repo_full_name: project.repo_config.full_name)
             git_fork_config = GitForkConfig.new(
-              current_sha: open_pr.current_sha,
+              sha: open_pr.current_sha,
               branch: open_pr.branch,
               clone_url: open_pr.clone_url,
               ref: open_pr.git_ref

@@ -22,9 +22,18 @@ module FastlaneCI
 
       project = user_project_with_id(project_id: project_id)
       current_github_provider_credential = check_and_get_provider_credential
-
       # Create random folder for checkout, prefixed with `manual_build`
-      checkout_folder = File.join(File.expand_path(project.local_repo_path), "manual_build_#{SecureRandom.uuid}")
+      # or use the current_sha with the number of times we made a re-run for this commit.
+      sha_or_uuid = (current_sha || SecureRandom.uuid).to_s
+      if current_sha
+        sha_build_count = Dir[File.join(File.expand_path(project.local_repo_path), "*#{current_sha}*")].count
+        checkout_folder = File.join(
+          File.expand_path(project.local_repo_path),
+          "manual_build_#{sha_or_uuid}_#{sha_build_count}"
+        )
+      else
+        checkout_folder = File.join(File.expand_path(project.local_repo_path), "manual_build_#{sha_or_uuid}")
+      end
       # TODO: This should be hidden in a service
       repo = FastlaneCI::GitRepo.new(
         git_config: project.repo_config,
@@ -43,14 +52,23 @@ module FastlaneCI
         return
       end
 
-      # TODO: This should be hidden in a service
+      branch_to_trigger = "master" # TODO: how/where do we get the default branch
+
+      git_fork_config = GitForkConfig.new(
+        sha: current_sha,
+        branch: branch_to_trigger,
+        clone_url: project.repo_config.git_url
+        # we don't need to pass a `ref`, as the sha and branch is all we need
+      )
+
       build_runner = FastlaneBuildRunner.new(
         project: project,
         sha: current_sha,
         github_service: FastlaneCI::GitHubService.new(provider_credential: current_github_provider_credential),
         notification_service: FastlaneCI::Services.notification_service,
         work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
-        trigger: project.find_triggers_of_type(trigger_type: :manual).first
+        trigger: project.find_triggers_of_type(trigger_type: :manual).first,
+        git_fork_config: git_fork_config
       )
       build_runner.setup(parameters: nil)
       Services.build_runner_service.add_build_runner(build_runner: build_runner)

@@ -37,7 +37,7 @@ module FastlaneCI
       user_data_source.users
     end
 
-    def create_user!(id:, email:, password:)
+    def create_user!(id: nil, email:, password:)
       email.strip!
 
       unless user_data_source.user_exist?(email: email)
@@ -50,7 +50,7 @@ module FastlaneCI
     end
 
     def update_user!(user:)
-      return user_data_source.update_user!(user: user)
+      user_data_source.update_user!(user: user)
     end
 
     def delete_user!(user:)

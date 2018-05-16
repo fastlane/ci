@@ -5,6 +5,7 @@ require "tty-command"
 require "securerandom"
 require "digest"
 require "task_queue"
+require "faraday"
 require "faraday-http-cache"
 require "fileutils"
 
@@ -244,6 +245,9 @@ module FastlaneCI
           retry if (retry_count += 1) < 5
           raise "Exceeded retry count for #{__method__}. Exception: #{aex}"
         end
+        # Git will not allow to commit with an empty name or empty email
+        # (e.g. on a shared box which has no global git config)
+        setup_author(full_name: repo_auth.full_name, username: repo_auth.username)
         repo = git
         if repo.index.writable?
           # Things are looking legit so far
@@ -606,7 +610,7 @@ module FastlaneCI
       end
     end
 
-    # If we onlt have a git repo, and it isn't specifically from GitHub, we need to use this to switch to a fork
+    # If we only have a git repo, and it isn't specifically from GitHub, we need to use this to switch to a fork
     # May cause merge conflicts, so don't use it unless we must.
     def switch_to_git_fork(clone_url:, branch:, sha: nil, local_branch_name:, use_global_git_mutex: false)
       perform_block(use_global_git_mutex: use_global_git_mutex) do
@@ -614,13 +618,13 @@ module FastlaneCI
 
         begin
           git.branch(local_branch_name)
-          git.pull(git_fork_config.clone_url, git_fork_config.branch)
+          git.pull(clone_url, branch)
           return true
         rescue StandardError => ex
           exception_context = {
             clone_url: clone_url,
             branch: branch,
-            sha: current_sha,
+            sha: sha,
             local_branch_name: local_branch_name
           }
           handle_exception(
@@ -645,7 +649,7 @@ module FastlaneCI
           exception_context = {
             clone_url: git_fork_config.clone_url,
             branch: git_fork_config.branch,
-            sha: git_fork_config.current_sha,
+            sha: git_fork_config.sha,
             local_branch_name: local_branch_name
           }
           handle_exception(
@@ -660,7 +664,7 @@ module FastlaneCI
 
     # Useful when you don't have a PR, if you have access to a PR, use :switch_to_github_pr
     def switch_to_fork(git_fork_config:, local_branch_prefex:, use_global_git_mutex: false)
-      local_branch_name = local_branch_prefex + git_fork_config.current_sha[0..7]
+      local_branch_name = local_branch_prefex + git_fork_config.sha[0..7]
 
       # if we have a git ref to work with, use that instead of the fork
       if git_fork_config.ref
@@ -673,7 +677,7 @@ module FastlaneCI
         switch_to_git_fork(
           clone_url: git_fork_config.clone_url,
           branch: git_fork_config.branch,
-          sha: git_fork_config.current_sha,
+          sha: git_fork_config.sha,
           local_branch_name: local_branch_name,
           use_global_git_mutex: use_global_git_mutex
         )

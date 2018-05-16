@@ -1,0 +1,35 @@
+{
+  "number": 1,
+  "status": "success",
+  "timestamp": 1526051391,
+  "duration": 15.687108,
+  "artifacts": [
+    {
+      "type": "fastlane.verbose.log",
+      "reference": "4ebdf02f-01cc-4f27-9a48-cc5471e440c3/1/fastlane.verbose.log/fastlane.verbose.log",
+      "provider": {
+        "class_name": "FastlaneCI::LocalArtifactProvider"
+      },
+      "id": "ee16692a-fa5f-4bc4-8b25-d9b0b23a47d6"
+    },
+    {
+      "type": "fastlane.log",
+      "reference": "4ebdf02f-01cc-4f27-9a48-cc5471e440c3/1/fastlane.log/fastlane.log",
+      "provider": {
+        "class_name": "FastlaneCI::LocalArtifactProvider"
+      },
+      "id": "09280d60-71f7-4bf8-9e8e-9cd9af8eb0f0"
+    }
+  ],
+  "description": "All green",
+  "trigger": "manual",
+  "lane": "custom_lane",
+  "platform": "ios",
+  "parameters": null,
+  "git_fork_config": {
+    "sha": "e03bb7bbd89f0bfe425fea0e97ca431d579108ff",
+    "branch": "master",
+    "clone_url": "https://github.com/username/project_0",
+    "ref": null
+  }
+}

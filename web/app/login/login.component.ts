@@ -1,4 +1,7 @@
 import {Component, OnInit} from '@angular/core';
+import {Router} from '@angular/router';
+
+import {AuthService} from '../services/auth.service';
 
 @Component({
   selector: 'fci-login',
@@ -6,11 +9,22 @@ import {Component, OnInit} from '@angular/core';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
-  username: string;
+  email: string;
   password: string;
-  constructor() {}
+  isLoggingIn = false;
+
+  constructor(
+      private readonly authService: AuthService,
+      private readonly router: Router) {}
 
   login(): void {
-    // TODO: Auth Service login
+    this.isLoggingIn = true;
+    this.authService.login({email: this.email, password: this.password})
+        .subscribe(() => {
+          this.isLoggingIn = false;
+          // TODO: preserve user's state and return to that instead
+          // Logged-in go back to landing page
+          this.router.navigate(['/']);
+        });
   }
 }

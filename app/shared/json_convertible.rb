@@ -196,26 +196,32 @@ module FastlaneCI
       protected
 
       def _from_json!(var, val, is_iterable: false)
+        # TODO: attribute_key_name_map doesn't seem to be used anywhere in the code base
         if attribute_key_name_map.key(var)
           var_name = attribute_key_name_map.key(var).to_sym
         else
           var_name = "@#{var}".to_sym
         end
+
         if json_to_attribute_name_proc_map.key?(var_name)
           var_value = json_to_attribute_name_proc_map[var_name].call(val)
         else
           var_value = val
         end
+
         if attribute_to_type_map.key?(var_name)
           if attribute_to_type_map[var_name].include?(FastlaneCI::JSONConvertible)
             # classes that include `JSONConvertible` take precedence over custom mapping.
             var_value = attribute_to_type_map[var_name].from_json!(val)
+          else
+            raise "#{var_name} does not implement `FastlaneCI::JSONConvertible`"
           end
         elsif is_iterable
           # This is only intended for array properties, it passes the final variable name and a single object of
           # the variable array. Expects to return and object.
           var_value = map_enumerable_type(enumerable_property_name: var_name, current_json_object: val)
         end
+
         return var_name, var_value
       end
     end

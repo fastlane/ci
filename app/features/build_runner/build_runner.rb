@@ -50,11 +50,16 @@ module FastlaneCI
     # Array of env variables that were set, that we need to unset after the run
     attr_accessor :environment_variables_set
 
-    def initialize(project:, sha:, github_service:, notification_service:, work_queue:, trigger:, git_fork_config: nil)
+    def initialize(project:, sha:, github_service:, notification_service:, work_queue:, trigger:, git_fork_config:)
       if trigger.nil?
-        # rubocop:disable Metrics/LineLength
-        raise "No trigger provided, this is probably caused by a build being triggered, but then the project not having this particular build trigger associated"
+        raise "No trigger provided, this is probably caused by a build being triggered, " \
+              "but then the project not having this particular build trigger associated"
         # rubocop:enable Metrics/LineLength
+      end
+
+      if git_fork_config.nil?
+        raise "No `git_fork_config` provided when creating a new `BuildRunner` object. A `git_fork_config`" \
+              " is required to have the necessary information for historic builds to re-run a build"
       end
 
       # Setting the variables directly (only having `attr_reader`) as they're immutable
@@ -90,6 +95,7 @@ module FastlaneCI
     # Use this method for additional setup for subclasses
     # This method could have any number of additional parameters
     # that allow you to customize the runner
+    # This method is called after `.new` was called from outside of BuildRunner
     def setup
       not_implemented(__method__)
     end
@@ -164,15 +170,31 @@ module FastlaneCI
 
     def pre_run_action(&completion_block)
       logger.debug("Running pre_run_action in checkout_sha")
+
       checkout_sha do |checkout_success|
         if checkout_success
-          setup_build_specific_environment_variables
+          if setup_tooling_environment? # see comment for `#setup_tooling_environment?` method
+            setup_build_specific_environment_variables
+            completion_block.call(checkout_success)
+          end
         else
           # TODO: this could be a notification specifically for user interaction
           logger.debug("Unable to launch build runner because we were unable to checkout the required sha: #{sha}")
+          completion_block.call(checkout_success)
         end
-        completion_block.call(checkout_success)
       end
+    end
+
+    # Implement this method in sub classes to prepare necessary tooling
+    # like Xcode or Android studio, to be able to successfully run a build
+    # @return [Boolean] Return `false` if the build trigger some longer process
+    #         e.g. installing a new development environment. This will not call
+    #         the completion block and interrupt running the give build.
+    #         It's critical that the `setup_tooling_environment?` method
+    #         added the same build runner onto the work queue again
+    #         Check out the `fastlane_build_runner` implementation for more details
+    def setup_tooling_environment?
+      not_implemented(__method__)
     end
 
     def setup_build_specific_environment_variables
@@ -193,8 +215,8 @@ module FastlaneCI
         CI: true
       }
 
-      if git_fork_config && git_fork_config.branch.to_s.length > 0
-        env_mapping[:GIT_BRANCH] = git_fork_config.branch # TODO: does this work?
+      if git_fork_config.branch.to_s.length > 0
+        env_mapping[:GIT_BRANCH] = git_fork_config.branch.to_s # TODO: does this work?
       else
         env_mapping[:GIT_BRANCH] = "master" # TODO: use actual default branch?
       end
@@ -357,7 +379,7 @@ module FastlaneCI
       builds = Services.build_service.list_builds(project: project)
 
       if builds.count > 0
-        new_build_number = builds.sort_by(&:number).last.number + 1
+        new_build_number = builds.max_by(&:number).number + 1
       else
         new_build_number = 1 # We start with build number 1
       end
@@ -371,8 +393,8 @@ module FastlaneCI
         # so that utc stuff is discoverable
         timestamp: Time.now.utc,
         duration: -1,
-        sha: sha,
-        trigger: trigger.type
+        trigger: trigger.type,
+        git_fork_config: git_fork_config
       )
       save_build_status!
     end
