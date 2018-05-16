@@ -63,7 +63,7 @@ describe FastlaneCI::JwtAuth do
     let(:token) { JWT.encode(data, "fastlane-ci-test", "HS256") }
     let(:invalid_data) { "Bearer #{token}" }
 
-    it "Returns a 400 status" do
+    it "Returns a 500 status" do
       header("Authorization", invalid_data)
       get("/buy/tacos")
 
