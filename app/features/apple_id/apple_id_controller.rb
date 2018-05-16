@@ -5,7 +5,7 @@ require_relative "../../services/services"
 
 module FastlaneCI
   # A CRUD controller to manage Apple ID credentials
-  class AppleIDsController < AuthenticatedControllerBase
+  class AppleIDController < AuthenticatedControllerBase
     HOME = "/apple_ids_erb"
 
     get HOME do
