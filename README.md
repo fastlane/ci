@@ -84,7 +84,7 @@ Currently, Docker deployment is for Linux projects only.
 
 ## Development installation
 
-Run the rake task: `rake devbootstrap`.
+Run the rake task: `rake dev_bootstrap`.
 1. Install all dependencies (ruby, javascript)
 2. Add a pre-commit hook
 
@@ -113,6 +113,12 @@ bundle exec rspec
 ```
 bundle exec rubocop -a
 ```
+
+## License
+
+This project is licensed under the terms of the MIT license. See the [LICENSE](LICENSE) file.
+
+> This project and all fastlane tools are in no way affiliated with Apple Inc.
 
 ----
 

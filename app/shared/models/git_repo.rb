@@ -5,6 +5,7 @@ require "tty-command"
 require "securerandom"
 require "digest"
 require "task_queue"
+require "faraday"
 require "faraday-http-cache"
 require "fileutils"
 
@@ -244,6 +245,9 @@ module FastlaneCI
           retry if (retry_count += 1) < 5
           raise "Exceeded retry count for #{__method__}. Exception: #{aex}"
         end
+        # Git will not allow to commit with an empty name or empty email
+        # (e.g. on a shared box which has no global git config)
+        setup_author(full_name: repo_auth.full_name, username: repo_auth.username)
         repo = git
         if repo.index.writable?
           # Things are looking legit so far

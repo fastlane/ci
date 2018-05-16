@@ -1,4 +1,5 @@
 require "bcrypt"
+require "fileutils"
 require_relative "json_data_source"
 require_relative "environment_data_source"
 require_relative "../../shared/logging_module"
@@ -27,6 +28,7 @@ module FastlaneCI
     JSONEnvironmentDataSource.file_semaphore = Mutex.new
 
     def after_creation(**params)
+      FileUtils.mkdir_p(json_folder_path)
       logger.debug("Using folder path for environment data: #{json_folder_path}")
       # load up the json file here
       # parse all data into objects so we can fail fast on error
@@ -76,7 +78,6 @@ module FastlaneCI
 
     def delete_environment_variable!(environment_variable: nil)
       environment_variables.delete(environment_variable)
-      return true
     end
 
     # The data source isn't responsible for checking for existing data

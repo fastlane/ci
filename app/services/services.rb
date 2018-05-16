@@ -12,6 +12,8 @@ require_relative "./notification_service"
 require_relative "./update_fastlane_ci_service"
 require_relative "./user_service"
 require_relative "./worker_service"
+require_relative "./xcode_manager_service"
+require_relative "./apple_id_service"
 
 module FastlaneCI
   # A class that stores the singletones for each
@@ -47,6 +49,8 @@ module FastlaneCI
       @_update_fastlane_ci_service = nil
       @_environment_variable_service = nil
       @_dot_keys_variable_service = nil
+      @_xcode_manager_service = nil
+      @_apple_id_service = nil
     end
 
     ########################################################
@@ -183,6 +187,12 @@ module FastlaneCI
       @_dot_keys_variable_service ||= FastlaneCI::DotKeysVariableService.new
     end
 
+    def self.xcode_manager_service
+      @_xcode_manager_service ||= FastlaneCI::XcodeManagerService.new(
+        user: ENV["FASTLANE_USER"] # TODO: this will be passed from settings.json via https://github.com/fastlane/ci/issues/870
+      )
+    end
+
     def self.environment_variable_service
       @_environment_variable_service ||= FastlaneCI::EnvironmentVariableService.new(
         environment_variable_data_source: JSONEnvironmentDataSource.create(ci_config_git_repo_path)
@@ -208,6 +218,12 @@ module FastlaneCI
     def self.onboarding_user_client
       @_onboarding_user_client ||= Octokit::Client.new(
         access_token: FastlaneCI.dot_keys.initial_onboarding_user_api_token
+      )
+    end
+
+    def self.apple_id_service
+      @_apple_id_service ||= FastlaneCI::AppleIDService.new(
+        apple_id_data_source: JSONAppleIDDataSource.create(ci_config_git_repo_path)
       )
     end
   end
