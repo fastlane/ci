@@ -14,6 +14,7 @@ require File.expand_path("../../fastlane_app.rb", __FILE__)
 
 module RSpecMixin
   include Rack::Test::Methods
+
   def app
     FastlaneCI::FastlaneApp.new
   end
@@ -27,3 +28,6 @@ RSpec.configure do |config|
   config.tty = true
   config.color = true
 end
+
+# Do not allow reading on STDIN on tests. This will block the test run.
+STDIN.close
