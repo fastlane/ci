@@ -233,7 +233,7 @@ module FastlaneCI
         # because they could be forks of the main repo, so let's grab all that info
         open_pull_requests = github_service.open_pull_requests(
           repo_full_name: repo_full_name,
-          branches: branches_to_check
+          branches: nil # branches_to_check should be used only for commit-trigger checking, not pr-trigger checking.
         )
 
         # Enqueue each pending build rerun in an asynchronous task queue
