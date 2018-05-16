@@ -40,7 +40,6 @@ module FastlaneCI
 
     def create_environment_variable!(key: nil, value: nil)
       key.strip!
-      value.strip!
 
       if environment_variable_data_source.find_environment_variable(environment_variable_key: key).nil?
         logger.info("Creating ENV variable with key #{key}")
