@@ -1,26 +1,37 @@
-# via https://blog.github.com/2017-07-06-introducing-code-owners/
-#
-# Lines starting with '#' are comments.
-# Each line is a file pattern followed by one or more owners.
+# https://help.github.com/articles/about-codeowners/
+# The order is relevant, most important rule at the bottom
+# It is important that every team has write access to the repo
+# that's why all ci-related teams are a child team of `@fastlane/Team`
+# so they automatically get write access to this repo
+# If you introduce a new team, make sure they are also a child-team of
+# `@fastlane/Team`
 
-# Order is important. The last matching pattern has the most precedence.
-# So if a pull request only touches javascript files, only these owners
-# will be requested to review.
+# default owner
+* @fastlane/Team
 
+# Multiple owners
+.ruby-version       @fastlane/ci-container @fastlane/ci-backend
+.pre-commit         @fastlane/ci-container @fastlane/ci-backend @fastlane/ci-frontend
+docs/*              @fastlane/ci-backend @fastlane/ci-frontend
 
 # Container
-docker-compose.yml  @fastlane/ci-container-team
-.dockerignore       @fastlane/ci-container-team
-
+docker-compose.yml  @fastlane/ci-container
+.dockerignore       @fastlane/ci-container
+Dockerfile          @fastlane/ci-container
 
 # Frontend
-web/*               @nakhbari # TODO: replace with frontend focus team
-karma.conf.js       @nakhbari # TODO: replace with frontend focus team
-package.json        @nakhbari # TODO: replace with frontend focus team
-tsconfig.json       @nakhbari # TODO: replace with frontend focus team
-tslint.json         @nakhbari # TODO: replace with frontend focus team
+web/*               @fastlane/ci-frontend
+karma.conf.js       @fastlane/ci-frontend
+package.json        @fastlane/ci-frontend
+tsconfig.json       @fastlane/ci-frontend
+tslint.json         @fastlane/ci-frontend
+.angular-cli.json   @fastlane/ci-frontend
 
 # Backend
-app/*               @KrauseFx  # TODO: replace with backend focus team
-launch.rb           @KrauseFx  # TODO: replace with backend focus team
-fastlane_app.rb     @KrauseFx  # TODO: replace with backend focus team
+app/*               @fastlane/ci-backend
+spec/*              @fastlane/ci-backend
+public/*            @fastlane/ci-backend
+launch.rb           @fastlane/ci-backend
+fastlane_app.rb     @fastlane/ci-backend
+.rubocop.yml        @fastlane/ci-backend
+fastlane            @fastlane/ci-backend

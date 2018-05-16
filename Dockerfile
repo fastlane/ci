@@ -11,6 +11,6 @@ COPY Gemfile Gemfile.lock Rakefile ./
 COPY . .
 RUN bundle install
 
-CMD ["hosted_prod_test"]
+CMD ["docker:prod_test"]
 ENTRYPOINT ["bundle", "exec", "rake"]
 EXPOSE 8080
