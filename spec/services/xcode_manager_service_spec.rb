@@ -95,6 +95,7 @@ describe FastlaneCI::XcodeManagerService do
       expect(xcode_manager_service.installing_xcode_versions).to eq({})
     end
 
+    # TODO: fix this
     xit "returns a hash with Xcode versions if installations are in progress" do
       version_to_install = Gem::Version.new("8.1")
 
@@ -106,6 +107,7 @@ describe FastlaneCI::XcodeManagerService do
       })
     end
 
+    # TODO: fix this
     xit "raises an exception if installation is already in progress" do
       version_to_install = Gem::Version.new("8.1")
 
