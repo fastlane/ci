@@ -170,15 +170,31 @@ module FastlaneCI
 
     def pre_run_action(&completion_block)
       logger.debug("Running pre_run_action in checkout_sha")
+
       checkout_sha do |checkout_success|
         if checkout_success
-          setup_build_specific_environment_variables
+          if setup_tooling_environment? # see comment for `#setup_tooling_environment?` method
+            setup_build_specific_environment_variables
+            completion_block.call(checkout_success)
+          end
         else
           # TODO: this could be a notification specifically for user interaction
           logger.debug("Unable to launch build runner because we were unable to checkout the required sha: #{sha}")
+          completion_block.call(checkout_success)
         end
-        completion_block.call(checkout_success)
       end
+    end
+
+    # Implement this method in sub classes to prepare necessary tooling
+    # like Xcode or Android studio, to be able to successfully run a build
+    # @return [Boolean] Return `false` if the build trigger some longer process
+    #         e.g. installing a new development environment. This will not call
+    #         the completion block and interrupt running the give build.
+    #         It's critical that the `setup_tooling_environment?` method
+    #         added the same build runner onto the work queue again
+    #         Check out the `fastlane_build_runner` implementation for more details
+    def setup_tooling_environment?
+      not_implemented(__method__)
     end
 
     def setup_build_specific_environment_variables
