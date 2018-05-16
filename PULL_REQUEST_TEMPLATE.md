@@ -1,0 +1,2 @@
+- [ ] I have tested this change locally and tried to launch the server as well as access a project, and with that at least one build
+- [ ] If there is an existing issue, make sure to add `Fixes ...` as part of the PR body to refernece the issue you're solving
