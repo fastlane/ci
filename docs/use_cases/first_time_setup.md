@@ -28,7 +28,7 @@ At the end of the first time setup, the user will have the following outcomes:
 ### Steps ###
 1. User installs fastlane.ci and starts the server
 1. Onboarding webpage is launched in browser
-1. User is asked to connect their
+1. User is asked to connect their GitHub personal access token
     1. Explanation of why we need a personal access token
     1. Explanation of scope of access token
     1. Link to GitHub to create an personal access token
