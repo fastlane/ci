@@ -17,7 +17,7 @@ module FastlaneCI
     def current_user
       user = FastlaneCI::Services.user_service.find_user(id: env[:user])
       if user.nil?
-        halt 500
+        halt(500)
       else
         return user
       end
