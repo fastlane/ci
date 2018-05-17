@@ -28,25 +28,28 @@ At the end of the first time setup, the user will have the following outcomes:
 ### Steps ###
 1. User installs fastlane.ci and starts the server
 1. Onboarding webpage is launched in browser
-1. User is asked to connect their **personal GitHub account** (basically [/docs/use_cases/new_user_flow_github.md](/docs/use_cases/new_user_flow_github.md))
+1. User is asked to connect their GitHub personal access token
     1. Explanation of why we need a personal access token
     1. Explanation of scope of access token
     1. Link to GitHub to create an personal access token
-    1. Text box for the GitHub email & personal access token
+    1. Text box for personal access token and read-only email text box (which is automatically filled in from GitHub)
     1. After submitting the information, validation occurs
-        1. Redirect on success, information added to temporary `users.json`
+        1. On success, we use the access token to retrieve their email
+        1. Display email that we will use
+        1. On Next, information added to temporary `users.json`
         1. Error information on failure
 1. User is asked to setup a **CI bot account** with best practices
     1. Explanation of why we need a ci bot account and what it does
     1. Suggestions on email/password/2fa setup
     1. Explanation of scope of access token
     1. Link to GitHub to create an personal access token
-    1. Text box for the GitHub email & personal access token
+    1. Text box for personal access token and email (which is automatically filled in from GitHub)
     1. After submitting the information, validation occurs
         1. Redirect on success, information added to temporary `users.json`
         1. Error information on failure
-1. Onboarding process to help create a new `private repo` for the `ci-config`
+1. Onboarding process to help link or create a `private repo` for the `ci-config`
     1. Explanation on why we need a repo
+    1. Text box for entering an existing `private repo` for the config, or leave blank to create one
     1. If user gave permission to create new repo, offer one-click button to create it for them
     1. If user didn't give permission to create new repo, link to GitHub URL
     1. After repo is available, automatically invite the bot to repo if permission is there, otherwise tell user how to add the bot

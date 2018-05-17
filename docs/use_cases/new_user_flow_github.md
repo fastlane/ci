@@ -15,13 +15,13 @@ At the end of the new user flow, the user will have the following outcomes:
 
 ### Steps ###
 1. New user webpage explains why an account is needed, `Next` pressed
-1. User is asked for email address associated with GitHub account
 1. User presented with information about setting up an `api_token`
     1. Examples of scope given and reasons
     1. Told to copy `api_token`
 1. User is linked to GitHub area for creating `api_token`
 1. Once a `api_token` is obtained, user must input `token` into page, and then presses `Next`
-1. Validation occurs on the `email` and `api_token` and if successful, the user is added to the `users.json` in the `config-repo`
+1. Validation occurs on `api_token` and if successful, we use the `api_token` to retrieve their primary email address, and display that. 
+1. The user is added to the `users.json` in the `config-repo`
 1. Successfully setup new user page
 
 ### Error states ###
