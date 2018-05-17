@@ -7,8 +7,20 @@ describe FastlaneCI::JwtAuth do
   let(:inner_app) { ->(env) { [200, env, "app"] } }
   let(:app) { described_class.new(inner_app, "fastlane-ci-test", "/buy") }
 
-  context "Client makes a request without authentication headers" do
+  context "Client makes a request with correct auth header" do
+    let(:data) { { iat: Time.now.to_i, exp: Time.now.to_i + 60, iss: "fastlane.ci", user: "123" } }
+    let(:token) { JWT.encode(data, "fastlane-ci-test", "HS256") }
+    let(:bearer) { "Bearer #{token}" }
 
+    it "Returns a 200 status" do
+      header("Authorization", bearer)
+      get("/buy/tacos")
+
+      expect(last_response.status).to eql(200)
+    end
+  end
+
+  context "Client makes a request without authentication headers" do
     it "Returns a 401 status" do
       get("/buy/tacos")
       expect(last_response.status).to eql(401)
@@ -72,10 +84,9 @@ describe FastlaneCI::JwtAuth do
   end
 
   context "Client makes a request to an unprotected enpoint" do
-
     it "Returns a 200 status" do
       get("/favicon")
-      
+
       expect(last_response.status).to eql(200)
     end
   end
