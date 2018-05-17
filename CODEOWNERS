@@ -6,8 +6,8 @@
 # If you introduce a new team, make sure they are also a child-team of
 # `@fastlane/Team`
 
-# default owner
-* @fastlane/Team
+# We don't need a default owner, as it will automatically fallback to
+# requiring at least one review
 
 # Multiple owners
 .ruby-version       @fastlane/ci-container @fastlane/ci-backend
