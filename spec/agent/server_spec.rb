@@ -27,10 +27,10 @@ describe FastlaneCI::Agent::Server do
     let(:thread_value) { double("thread value") }
     let(:thread) { double("Thread", alive?: true, value: thread_value) }
 
-    let(:penum) { FastlaneCI::Agent::Server::ProcessOutputEnumerator.new(io, thread) }
+    let(:output_enumerator) { FastlaneCI::Agent::Server::ProcessOutputEnumerator.new(io, thread) }
 
     it "will return lines of text from the file" do
-      expect(penum.next).to eq("this is a line of text\n")
+      expect(output_enumerator.next).to eq("this is a line of text\n")
     end
 
     it "enumerates lines from a file until the thread dies and returns its status" do
@@ -38,7 +38,7 @@ describe FastlaneCI::Agent::Server do
       allow(thread_value).to receive(:exitstatus).and_return(0)
       allow(io).to receive(:close)
 
-      expect { |block| penum.each(&block) }.to yield_with_args("\4", 0)
+      expect { |block| output_enumerator.each(&block) }.to yield_with_args("\4", 0)
     end
 
     it "closes the file handle when the thread dies" do
@@ -46,11 +46,11 @@ describe FastlaneCI::Agent::Server do
       allow(thread_value).to receive(:exitstatus).and_return(0)
 
       expect(io).to receive(:close)
-      penum.next
+      output_enumerator.next
     end
 
     it "can convert to a lazy Enumerator" do
-      expect(penum.lazy).to be_instance_of(Enumerator::Lazy)
+      expect(output_enumerator.lazy).to be_instance_of(Enumerator::Lazy)
     end
   end
 end

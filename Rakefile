@@ -35,7 +35,7 @@ namespace :docker do
   end
 end
 
-task :proto do
+task :generate_protos do
   sh "bundle exec grpc_tools_ruby_protoc -I protos/ --ruby_out=./protos --grpc_out=./protos protos/*.proto"
 end
 

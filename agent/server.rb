@@ -18,18 +18,18 @@ module FastlaneCI
         def_delegators :@enumerator, :each, :next
 
         def initialize(io, thread)
-          @enumerator = Enumerator.new do |y|
-            y.yield(io.gets) while thread.alive?
+          @enumerator = Enumerator.new do |yielder|
+            yielder.yield(io.gets) while thread.alive?
             io.close
-            y.yield(EOT_CHAR, thread.value.exitstatus)
+            yielder.yield(EOT_CHAR, thread.value.exitstatus)
           end
         end
       end
 
       def self.server
-        GRPC::RpcServer.new.tap do |s|
-          s.add_http2_port("#{HOST}:#{PORT}", :this_port_is_insecure)
-          s.handle(new)
+        GRPC::RpcServer.new.tap do |server|
+          server.add_http2_port("#{HOST}:#{PORT}", :this_port_is_insecure)
+          server.handle(new)
         end
       end
 
@@ -52,9 +52,9 @@ module FastlaneCI
 
         @logger.info("spawned process with pid: #{wait_thrd.pid}")
 
-        penum = ProcessOutputEnumerator.new(stdouterr, wait_thrd)
+        output_enumerator = ProcessOutputEnumerator.new(stdouterr, wait_thrd)
         # convert every line from io to a Log object in a lazy stream
-        penum.lazy.flat_map do |line, status|
+        output_enumerator.lazy.flat_map do |line, status|
           # proto3 doesn't have nullable fields, afaik
           Log.new(message: line, status: (status || 0))
         end
