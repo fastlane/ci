@@ -5,7 +5,7 @@ require "app/features-json/middleware/jwt_auth"
 
 describe FastlaneCI::JwtAuth do
   let(:inner_app) { ->(env) { [200, env, "app"] } }
-  let(:app) { described_class.new(inner_app, "fastlane-ci-test") }
+  let(:app) { described_class.new(inner_app, "fastlane-ci-test", "/buy") }
 
   context "Client makes a request without authentication headers" do
 
@@ -68,6 +68,15 @@ describe FastlaneCI::JwtAuth do
       get("/buy/tacos")
 
       expect(last_response.status).to eql(500)
+    end
+  end
+
+  context "Client makes a request to an unprotected enpoint" do
+
+    it "Returns a 200 status" do
+      get("/favicon")
+      
+      expect(last_response.status).to eql(200)
     end
   end
 end
