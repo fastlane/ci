@@ -48,6 +48,9 @@ gem "xcode-install", ">= 2.4.0", "< 3.0.0"
 # TODO: point to minimum release instead of GitHub once
 #  we shipped a new release
 
+# Interprocess communication
+gem "grpc", ">= 1.11.0", "< 2.0.0"
+
 # Internal projects
 gem "fastfile-parser", git: "https://github.com/fastlane/fastfile-parser", require: false
 gem "fastlane", git: "https://github.com/fastlane/fastlane"
@@ -58,6 +61,7 @@ gem "git", git: "https://github.com/fastlane/ruby-git", require: false # Interac
 
 group :test, :development do
   gem "coveralls"
+  gem "grpc-tools"
   gem "pry"
   gem "pry-byebug"
   gem "rack-test", require: "rack/test"
