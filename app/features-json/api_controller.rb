@@ -69,8 +69,9 @@ module FastlaneCI
     set(:jwt_secret, FastlaneCI.dot_keys.encryption_key)
 
     before do
-      next unless settings.authentication?
-      authenticate!(via: settings.authenticate_via)
+      if settings.authentication?
+        authenticate!(via: settings.authenticate_via)
+      end
     end
 
     helpers do
