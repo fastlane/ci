@@ -80,12 +80,14 @@ module FastlaneCI
         authorization = request.env["HTTP_AUTHORIZATION"]
         bearer_token = authorization && authorization.slice(7..-1) # strip off the `Bearer `
 
-        JWT.decode(
+        payload, _header = JWT.decode(
           bearer_token,
           settings.jwt_secret,
           true, # Validate Issuer?
           { verify_iss: true, verify_iat: true, algorithm: "HS256", iss: "fastlane.ci" } # Options
         )
+
+        return payload
       rescue JWT::InvalidIssuerError
         halt(403, { "Content-Type" => "text/plain" }, "The token does not have a valid issuer.")
       rescue JWT::InvalidIatError

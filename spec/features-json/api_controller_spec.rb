@@ -106,21 +106,39 @@ describe FastlaneCI::APIController do
     end
   end
 
-  describe "jwt authentication" do
-    xit "will successfully decode a token"
-    xit "will halt with an error if the token is not valid"
-  end
-
-  describe "user authentication methods" do
+  describe "helper methods" do
     let(:app) { FastlaneCI::APIController.new }
 
     before do
       app.settings.jwt_secret = "fastlane-ci-test"
+      # test helper methods outside the request/response cycle.
+      # we are setting up a request like this.
+      app.helpers.request = Sinatra::Request.new(Rack::MockRequest.env_for("/", { "HTTP_AUTHORIZATION" => bearer_token }))
     end
 
-    xit "returns the `user` from the JWT token" do
-      header("Authorization", bearer_token)
-      expect(app.helpers.user_id).to eq("abc123")
+    describe "jwt authentication" do
+      it "will successfully decode a token" do
+        payload = app.helpers.authenticate!(via: :jwt)
+        expect(payload).to include("iss", "sub", "user", "iat")
+      end
+
+      it "will halt with an error if the token is not valid" do
+        app.helpers.request = Sinatra::Request.new(Rack::MockRequest.env_for("/", { "HTTP_AUTHORIZATION" => "" }))
+        expect do
+          app.helpers.authenticate!(via: :jwt)
+        end.to throw_symbol(:halt)
+      end
+    end
+
+    describe "user authentication methods" do
+      it "returns the `user` property from the JWT token" do
+        expect(app.helpers.user_id).to eq("1")
+      end
+
+      it "return a user from the user service" do
+        expect(FastlaneCI::Services.user_service).to receive(:find_user).with(id: "1")
+        app.helpers.current_user
+      end
     end
   end
 end
