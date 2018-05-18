@@ -101,7 +101,7 @@ module FastlaneCI
         when :jwt
           return jwt
         else
-          raise "`#{settings.authenticate_via}` is an un-supported authentication scheme."
+          raise "`#{via}` is an un-supported authentication scheme."
         end
       end
 
