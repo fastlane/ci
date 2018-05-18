@@ -271,7 +271,7 @@ module FastlaneCI
                 begin
                   repo.add(all: true)
                   repo.commit("Sync changes")
-                  git.push(GitRepo::DEFAULT_REMOTE, branch: "master", force: true) unless GitRepo.pushes_disabled?
+                  git.push(GitRepo::DEFAULT_REMOTE, "master", force: true) unless GitRepo.pushes_disabled?
                 rescue StandardError => ex
                   handle_exception(ex, console_message: "Error commiting changes to ci-config repo")
                 end
