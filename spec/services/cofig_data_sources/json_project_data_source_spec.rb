@@ -10,7 +10,7 @@ describe FastlaneCI::JSONProjectDataSource do
   end
 
   subject do
-    FastlaneCI::JSONProjectDataSource.create(git_repo, user: ci_user)
+    FastlaneCI::JSONProjectDataSource.create(git_repo_path, user: ci_user)
   end
 
   let(:projects) do
