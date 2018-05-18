@@ -76,7 +76,6 @@ module FastlaneCI
     helpers do
       # Decode the JWT or halt.
       def jwt
-        puts(request)
         authorization = request.env["HTTP_AUTHORIZATION"]
         bearer_token = authorization && authorization.slice(7..-1) # strip off the `Bearer `
 
@@ -100,7 +99,7 @@ module FastlaneCI
       def authenticate!(via:)
         case via
         when :jwt
-          jwt
+          return jwt
         else
           raise "`#{settings.authenticate_via}` is an un-supported authentication scheme."
         end
