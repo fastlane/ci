@@ -185,9 +185,9 @@ module FastlaneCI
         artifact_provider: artifact_provider,
         job_triggers: job_triggers
       )
-      
-      FileUtils.mkdir_p(File.join(json_folder_path, "projects", new_project.id))
-      
+
+      FileUtils.mkdir_p(File.join(json_folder_path.to_s, "projects", new_project.id))
+
       if !project_exist?(new_project.project_name)
         projects_clone << new_project
         self.projects = projects_clone
