@@ -1,7 +1,7 @@
 require_relative "../shared/controller_base"
 require_relative "../services/user_service"
 require_relative "../services/dot_keys_variable_service"
-require_relative "json_controller"
+require_relative "json_params"
 
 require "jwt"
 require "json"
@@ -9,7 +9,7 @@ require "json"
 module FastlaneCI
   # Controller responsible of handling the login process using JWT token.
   class LoginJSONController < ControllerBase
-    include JSONController
+    include JSONParams
 
     HOME = "/api/login"
 
