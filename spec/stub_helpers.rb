@@ -45,7 +45,7 @@ module StubHelpers
     allow(FastlaneCI::Services).to receive(:project_service).and_return(
       FastlaneCI::ProjectService.new(
         project_data_source: FastlaneCI::JSONProjectDataSource.create(
-          git_repo, user: ci_user
+          git_repo_path, user: ci_user
         )
       )
     )
