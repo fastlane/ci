@@ -28,12 +28,6 @@ module RuboCop
             )
           end
         end
-
-        private
-
-        def range(node)
-          range_between(node.begin, node.end)
-        end
       end
     end
   end
