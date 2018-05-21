@@ -2,17 +2,9 @@ require "sinatra/json"
 
 module FastlaneCI
   ##
-  # JSONController mixin allows `params` method to return the params from the parsed request body
+  # JSONParams mixin allows `params` method to return the params from the parsed request body
   #
-  module JSONController
-    def self.included(mod)
-      mod.before do
-        if request.content_type != "application/json"
-          logger.warn("JSON Controller expected json requests, but got `#{request.content_type}`")
-        end
-      end
-    end
-
+  module JSONParams
     def params
       return @json_params if defined?(@json_params)
 
