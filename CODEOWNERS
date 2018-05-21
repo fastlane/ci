@@ -13,6 +13,7 @@
 .ruby-version       @fastlane/ci-container @fastlane/ci-backend
 .pre-commit         @fastlane/ci-container @fastlane/ci-backend @fastlane/ci-frontend
 docs/*              @fastlane/ci-backend @fastlane/ci-frontend
+Gemfile*            @fastlane/ci-container @fastlane/ci-backend
 
 # Container
 docker-compose.yml  @fastlane/ci-container
