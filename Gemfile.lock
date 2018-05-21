@@ -14,7 +14,7 @@ GIT
 
 GIT
   remote: https://github.com/fastlane/fastlane
-  revision: 62fc33d4bf6fbe359e31d9b4782ab74e72521ebe
+  revision: 72eb1a40dd982985828a7d1de2d1bf91184191e1
   specs:
     fastlane (2.95.0)
       CFPropertyList (>= 2.3, < 4.0.0)
@@ -31,7 +31,7 @@ GIT
       faraday_middleware (~> 0.9)
       fastimage (>= 2.1.0, < 3.0.0)
       gh_inspector (>= 1.1.2, < 2.0.0)
-      google-api-client (>= 0.13.1, < 0.14.0)
+      google-api-client (>= 0.21.2, < 0.22.0)
       highline (>= 1.7.2, < 2.0.0)
       json (< 3.0.0)
       mini_magick (~> 4.5.1)
@@ -59,6 +59,21 @@ GIT
   specs:
     git (1.3.0)
 
+GIT
+  remote: https://github.com/krausefx/google-cloud-ruby
+  revision: f71ec2e7a1eaf43c15312d611dd1cc4de530f823
+  branch: patch-1
+  specs:
+    google-cloud-core (1.2.0)
+      google-cloud-env (~> 1.0)
+    google-cloud-env (1.0.1)
+      faraday (~> 0.11)
+    google-cloud-storage (1.12.0)
+      digest-crc (~> 0.4)
+      google-api-client (~> 0.19)
+      google-cloud-core (~> 1.2)
+      googleauth (~> 0.6.2)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -73,7 +88,7 @@ GEM
     atomos (0.1.2)
     babosa (1.0.2)
     backports (3.11.3)
-    bcrypt (3.1.11)
+    bcrypt (3.1.12)
     byebug (10.0.2)
     claide (1.0.2)
     coderay (1.1.2)
@@ -123,21 +138,13 @@ GEM
       et-orbi (~> 1.1, >= 1.1.1)
       raabro (~> 1.1)
     gh_inspector (1.1.3)
-    google-api-client (0.13.6)
+    google-api-client (0.21.2)
       addressable (~> 2.5, >= 2.5.1)
-      googleauth (~> 0.5)
+      googleauth (>= 0.5, < 0.7.0)
       httpclient (>= 2.8.1, < 3.0)
       mime-types (~> 3.0)
       representable (~> 3.0)
       retriable (>= 2.0, < 4.0)
-    google-cloud-core (1.2.0)
-      google-cloud-env (~> 1.0)
-    google-cloud-env (1.0.1)
-      faraday (~> 0.11)
-    google-cloud-storage (1.5.0)
-      digest-crc (~> 0.4)
-      google-api-client (~> 0.13.0)
-      google-cloud-core (~> 1.0)
     google-protobuf (3.5.1.2)
     googleapis-common-protos-types (1.0.1)
       google-protobuf (~> 3.0)
@@ -149,11 +156,11 @@ GEM
       multi_json (~> 1.11)
       os (~> 0.9)
       signet (~> 0.7)
-    grpc (1.11.0)
+    grpc (1.12.0)
       google-protobuf (~> 3.1)
       googleapis-common-protos-types (~> 1.0.0)
       googleauth (>= 0.5.1, < 0.7)
-    grpc-tools (1.11.0)
+    grpc-tools (1.12.0)
     highline (1.7.10)
     http-cookie (1.0.3)
       domain_name (~> 0.5)
@@ -282,7 +289,7 @@ GEM
     tilt (2.0.8)
     tins (1.16.3)
     tty-color (0.4.2)
-    tty-command (0.8.0)
+    tty-command (0.8.1)
       pastel (~> 0.7.0)
     tty-cursor (0.5.0)
     tty-screen (0.6.4)
@@ -326,18 +333,18 @@ PLATFORMS
 
 DEPENDENCIES
   bcrypt (>= 3.1.11, < 4.0.0)
-  bundler (~> 1.16.0)
+  bundler (>= 1.16.0, < 2.0.0)
   coveralls
   dotenv (>= 2.4.0, < 3.0.0)
-  faraday-http-cache
+  faraday-http-cache (>= 2.0.0, < 3.0.0)
   fastfile-parser!
   fastlane!
   faye-websocket (>= 0.10.7, < 1.0.0)
   git!
-  google-cloud-storage (~> 1.5.0)
+  google-cloud-storage!
   grpc (>= 1.11.0, < 2.0.0)
   grpc-tools
-  jwt (~> 2.1.0)
+  jwt (>= 2.1.0, < 3.0.0)
   octokit (>= 4.8.0, < 5.0.0)
   pry
   pry-byebug
@@ -345,7 +352,7 @@ DEPENDENCIES
   rake
   rspec
   rubocop
-  rufus-scheduler
+  rufus-scheduler (>= 3.5.0, < 4.0.0)
   sinatra (>= 2.0.1, < 3.0.0)
   sinatra-contrib (>= 2.0.0, < 3.0.0)
   sinatra-flash
