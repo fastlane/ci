@@ -24,7 +24,7 @@ module FastlaneCI
   #
   # The following settings are provided to subclasses of APIController:
   #
-  # * `authentiation`- boolean value that makes every request check authentication in a before filter.
+  # * `authentication`- boolean value that makes every request check authentication in a before filter.
   #    Disable with: `disable :authentication`. Enabled by default.
   # * `authenticate_via` - which authentication scheme to use. `:jwt` by default.
   # * `jwt_secret` - The key to use in decoding JWT tokens.
@@ -34,8 +34,8 @@ module FastlaneCI
   # If you disable authentication for the whole controller, you can enable it on a per-route basis using
   # a route condition like this:
   #
-  #   get '/private', authenticate: :jwt do
-  #     json({message: 'secret'})
+  #   get "/private", authenticate: :jwt do
+  #     json({message: "secret"})
   #   end
   #
   # User authentication
