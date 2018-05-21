@@ -1,5 +1,11 @@
+var argv = require('yargs').argv;
 // Karma configuration file, see link for more information
 // https://karma-runner.github.io/1.0/config/configuration-file.html
+
+const coverage_reporters = [
+  { type: 'text-summary' },
+  { type : 'lcov', dir : 'coverage' }
+];
 
 module.exports = function (config) {
   config.set({
@@ -7,6 +13,8 @@ module.exports = function (config) {
     frameworks: ['jasmine', '@angular/cli'],
     plugins: [
       require('karma-jasmine'),
+      require('karma-coverage'),
+      require('karma-coveralls'),
       require('karma-chrome-launcher'),
       require('karma-jasmine-html-reporter'),
       require('karma-coverage-istanbul-reporter'),
@@ -19,15 +27,18 @@ module.exports = function (config) {
       reports: [ 'html', 'lcovonly' ],
       fixWebpackSourcePaths: true
     },
+    coverageReporter: {
+      reporters: coverage_reporters,
+    },
     angularCli: {
       environment: 'dev'
     },
-    reporters: ['progress', 'kjhtml'],
+    reporters: ['progress', 'kjhtml', 'coverage', 'coveralls' ],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
     browsers: ['Chrome'],
-    singleRun: false
+    singleRun: !argv.watch,
   });
 };
