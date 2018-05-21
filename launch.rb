@@ -243,16 +243,12 @@ module FastlaneCI
             next
           end
 
-          git_fork_config = nil
-
-          if matching_open_pr.fork_of_repo?(repo_full_name: repo_full_name)
-            git_fork_config = GitForkConfig.new(
-              sha: sha,
-              branch: matching_open_pr.branch,
-              clone_url: matching_open_pr.clone_url,
-              ref: matching_open_pr.git_ref
-            )
-          end
+          git_fork_config = GitForkConfig.new(
+            sha: sha,
+            branch: matching_open_pr.branch,
+            clone_url: matching_open_pr.clone_url,
+            ref: matching_open_pr.git_ref
+          )
 
           build_runner = FastlaneBuildRunner.new(
             project: project,
@@ -298,17 +294,14 @@ module FastlaneCI
           # if we have a status, skip it!
           next if statuses.count > 0
 
-          git_fork_config = nil
-          if open_pr.fork_of_repo?(repo_full_name: project.repo_config.full_name)
-            git_fork_config = GitForkConfig.new(
-              sha: open_pr.current_sha,
-              branch: open_pr.branch,
-              clone_url: open_pr.clone_url,
-              ref: open_pr.git_ref
-            )
-          end
-
           logger.debug("Found sha: #{open_pr.current_sha} in #{open_pr.repo_full_name} missing status, adding build.")
+
+          git_fork_config = GitForkConfig.new(
+            sha: open_pr.current_sha,
+            branch: open_pr.branch,
+            clone_url: open_pr.clone_url,
+            ref: open_pr.git_ref
+          )
 
           build_runner = FastlaneBuildRunner.new(
             project: project,
