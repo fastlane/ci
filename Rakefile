@@ -7,8 +7,12 @@ task :prod do
 end
 
 task :dev_bootstrap do
+  unless system("which brew")
+    raise "`brew` is required. Please install brew. https://brew.sh/"
+  end
+
   sh("bundle install")
-  sh("brew install node") unless sh("npm -v")
+  sh("brew install node") unless system("which npm")
   sh("npm install")
   sh("ln -sf ../../.pre-commit .git/hooks/pre-commit")
 end
