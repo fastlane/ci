@@ -1,5 +1,17 @@
 source("https://rubygems.org")
 
+# Please **always** use the follow notation to define a dependency:
+#
+# gem "gem_name", ">= 1.3.4", "< 2.0.0" # comment on why we need this dependency
+#
+# Note:
+# 	- Always add a comment on why this dependency is needed
+# 	- Always use `>=` and `<` to define a version range:
+# 		- This way we can require a minimum version, including a hotfix while also
+# 		- defining a maximum version (major = breaking)
+# 		- If we used `~>` we can't define a patch release without being too strict with our locking
+#
+
 # Sinatra
 gem "faye-websocket", ">= 0.10.7", "< 1.0.0" # web socket connection for Sinatra
 gem "sinatra", ">= 2.0.1", "< 3.0.0" # Our web application library
