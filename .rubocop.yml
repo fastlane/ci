@@ -1,3 +1,6 @@
+require:
+  - ./lib/bundler_cop.rb
+
 # We're not joking around
 Style/Documentation:
   Enabled: true
