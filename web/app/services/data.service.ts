@@ -46,10 +46,10 @@ export class DataService {
         map((lanes) => lanes.map((lane) => new Lane(lane))));
   }
 
-  addProject(request: AddProjectRequest): Observable<Project> {
+  addProject(request: AddProjectRequest): Observable<ProjectSummary> {
     const url = `${HOSTNAME}/projects`;
-    return this.http.post<ProjectResponse>(url, request)
-        .pipe(map((project) => new Project(project)));
+    return this.http.post<ProjectSummaryResponse>(url, request)
+        .pipe(map((project) => new ProjectSummary(project)));
   }
 
   getRepos(): Observable<Repository[]> {

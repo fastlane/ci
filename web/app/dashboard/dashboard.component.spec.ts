@@ -1,15 +1,17 @@
 import 'rxjs/add/observable/of';
 
 import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
-import {MatDialogModule} from '@angular/material';
+import {MatDialog, MatDialogModule} from '@angular/material';
+import {By} from '@angular/platform-browser';
 import {RouterModule} from '@angular/router';
+import {RouterTestingModule} from '@angular/router/testing';
 import {MomentModule} from 'ngx-moment';
 import {Observable} from 'rxjs/Observable';
 import {Subject} from 'rxjs/Subject';
 
 import {CommonComponentsModule} from '../common/components/common-components.module';
 import {BuildStatus} from '../common/constants';
-import {mockProjectSummaryList} from '../common/test_helpers/mock_project_data';
+import {mockProjectSummary, mockProjectSummaryList} from '../common/test_helpers/mock_project_data';
 import {ProjectSummary} from '../models/project_summary';
 import {DataService} from '../services/data.service';
 import {SharedMaterialModule} from '../shared_material.module';
@@ -20,23 +22,43 @@ describe('DashboardComponent', () => {
   let component: DashboardComponent;
   let fixture: ComponentFixture<DashboardComponent>;
   let dataService: jasmine.SpyObj<Partial<DataService>>;
+  let dialog: jasmine.SpyObj<Partial<MatDialog>>;
+  let projectListSubject: Subject<ProjectSummary[]>;
+  let projectAddedSubject: Subject<ProjectSummary>;
 
   beforeEach(() => {
+    projectListSubject = new Subject<ProjectSummary[]>();
+    projectAddedSubject = new Subject<ProjectSummary>();
+
     dataService = {
-      getProjects: jasmine.createSpy(),
+      getProjects: jasmine.createSpy().and.returnValue(
+          projectListSubject.asObservable()),
       getRepos: jasmine.createSpy()
+    };
+
+    dialog = {
+      open: jasmine.createSpy().and.returnValue({
+        componentInstance:
+            {projectAdded: projectAddedSubject.asObservable()}
+      })
     };
 
     TestBed
         .configureTestingModule({
           imports: [
-            MatDialogModule, SharedMaterialModule, CommonComponentsModule,
-            MomentModule, RouterModule
+            SharedMaterialModule,
+            CommonComponentsModule,
+            MomentModule,
+            RouterModule,
+            RouterTestingModule,
           ],
           declarations: [
             DashboardComponent,
           ],
-          providers: [{provide: DataService, useValue: dataService}],
+          providers: [
+            {provide: DataService, useValue: dataService},
+            {provide: MatDialog, useValue: dialog}
+          ],
         })
         .compileComponents();
 
@@ -44,22 +66,47 @@ describe('DashboardComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should load project summaries', () => {
-    const subject = new Subject<ProjectSummary[]>();
-    dataService.getProjects.and.returnValue(subject.asObservable());
+  describe('intitliazation', () => {
+    it('should load project summaries', () => {
+      expect(component.isLoading).toBe(true);
 
-    expect(component.isLoading).toBe(true);
+      projectListSubject.next(mockProjectSummaryList);  // Resolve observable
 
-    fixture.detectChanges();               // onInit()
-    subject.next(mockProjectSummaryList);  // Resolve observable
+      expect(component.isLoading).toBe(false);
+      expect(component.projects.length).toBe(4);
+      expect(component.projects[0].id).toBe('1');
+      expect(component.projects[0].name).toBe('the coolest project');
+      expect(component.projects[1].latestStatus).toBe(BuildStatus.SUCCESS);
+      expect(component.projects[2].latestStatus).toBe(BuildStatus.FAILED);
+      expect(component.projects[3].latestDate).toBeUndefined();
+      expect(component.projects[3].latestStatus).toBeUndefined();
+    });
+  });
 
-    expect(component.isLoading).toBe(false);
-    expect(component.projects.length).toBe(4);
-    expect(component.projects[0].id).toBe('1');
-    expect(component.projects[0].name).toBe('the coolest project');
-    expect(component.projects[1].latestStatus).toBe(BuildStatus.SUCCESS);
-    expect(component.projects[2].latestStatus).toBe(BuildStatus.FAILED);
-    expect(component.projects[3].latestDate).toBeUndefined();
-    expect(component.projects[3].latestStatus).toBeUndefined();
+  describe('after intitliazation', () => {
+    beforeEach(() => {
+      projectListSubject.next(mockProjectSummaryList);  // Resolve observable
+      fixture.detectChanges();
+    });
+
+    it('should add new project to project table', () => {
+      let tableRowsEl = fixture.debugElement.queryAll(By.css('.mat-row'));
+      expect(tableRowsEl.length).toBe(4);
+
+      component.openAddProjectDialog();
+      projectAddedSubject.next(mockProjectSummary);
+      fixture.detectChanges();
+
+      tableRowsEl = fixture.debugElement.queryAll(By.css('.mat-row'));
+      expect(tableRowsEl.length).toBe(5);
+      expect(tableRowsEl[4].nativeElement.innerText)
+          .toContain('the coolest project');
+    });
+
+    it('should open add project dialog when new project is clicked', () => {
+      fixture.debugElement.query(By.css('.fci-dashboard-welcome button'))
+          .nativeElement.click();
+      expect(dialog.open).toHaveBeenCalled();
+    });
   });
 });
