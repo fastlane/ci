@@ -137,7 +137,7 @@ describe FastlaneCI::XcodeManagerService do
       })
     end
 
-    it "raises an exception if installation is already in progress", nower: true do
+    it "raises an exception if installation is already in progress" do
       version_to_install = Gem::Version.new("8.1")
 
       xcode_manager_service.installing_xcode_versions = {
