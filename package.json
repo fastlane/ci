@@ -6,7 +6,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build --deploy-url=\"/.dist\" --prod",
-    "test": "ng test -sm=false -watch=false",
+    "test": "ng test -sm=false -watch=false --code-coverage",
     "test_watch": "ng test -sm=false",
     "lint": "ng lint",
     "lintfix": "ng lint --fix"

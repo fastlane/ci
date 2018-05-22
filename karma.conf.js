@@ -33,7 +33,7 @@ module.exports = function (config) {
     angularCli: {
       environment: 'dev'
     },
-    reporters: ['progress', 'kjhtml', 'coverage', 'coveralls' ],
+    reporters: ['progress', 'kjhtml', 'coverage-istanbul', 'coverage', 'coveralls' ],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
