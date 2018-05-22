@@ -201,7 +201,7 @@ module FastlaneCI
       @environment_variables_set = []
 
       # Set the CI specific Environment variables first
-      build_url = File.join(Services.dot_keys_variable_service.ci_base_url, "projects", project.id, "builds", build.id)
+      build_url = File.join(Services.dot_keys_variable_service.ci_base_url, "projects", project.id, "builds", build.number)
 
       # We try to follow the existing formats
       # https://wiki.jenkins.io/display/JENKINS/Building+a+software+project
@@ -212,6 +212,7 @@ module FastlaneCI
         GIT_URL: repo.git_config.git_url,
         GIT_SHA: current_build.sha,
         BUILD_URL: build_url,
+        BUILD_ID: build.number,
         CI_NAME: "fastlane.ci",
         CI: true
       }
