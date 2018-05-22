@@ -67,7 +67,9 @@ module FastlaneCI
     #
     # the resulting list is sorted with the most recent release as first element
     def available_xcode_versions
-      return installer.seedlist.reverse
+      apple_id_credentials_block do
+        installer.seedlist.reverse
+      end
     end
 
     # @return [XcodeInstall::InstalledXcode]
@@ -123,6 +125,18 @@ module FastlaneCI
       return Gem::Version.new(current_xcode.fetch_version)
     end
 
+    def apple_id_credentials_block
+      # There is no public interface in xcode-install to pass the Apple ID credentials
+      # So we use environment variables to pass both the username, and the password
+      ENV["XCODE_INSTALL_USER"] = apple_id.user
+      ENV["XCODE_INSTALL_PASSWORD"] = apple_id.password
+
+      yield
+    ensure
+      ENV.delete("XCODE_INSTALL_USER")
+      ENV.delete("XCODE_INSTALL_PASSWORD")
+    end
+
     # ###############################
     # Everything around installation
     # ###############################
@@ -134,9 +148,11 @@ module FastlaneCI
     def install_xcode!(version:, success_block: nil, error_block: nil)
       raise "Please only pass `Gem::Version` to `install_xcode!`" unless version.kind_of?(Gem::Version)
 
-      unless installer.exist?(version)
-        raise "Xcode version '#{version}' is not available in the list of Xcode versions: " \
-              "#{available_xcode_versions.map(&:version).join(', ')}"
+      apple_id_credentials_block do
+        unless installer.exist?(version)
+          raise "Xcode version '#{version}' is not available in the list of Xcode versions: " \
+                "#{available_xcode_versions.map(&:version).join(', ')}"
+        end
       end
 
       if installing_xcode_versions[version]
@@ -153,28 +169,30 @@ module FastlaneCI
         ENV["XCODE_INSTALL_USER"] = apple_id.user
         ENV["XCODE_INSTALL_PASSWORD"] = apple_id.password
         begin
-          installer.install_version(
-            # version: the version to install
-            version,
-            # `should_switch` is false, as we handle it on the fastlane.ci side of things, also
-            #  this will create aliases which we don't need
-            false,
-            # `should_clean` is true, as we don't need to keep old DMG files around
-            false, # false for now for faster debugging
-            # `should_install` is true, as we want to not only download, but also install this version
-            true,
-            # `progress` We pass the custom `progress_block` instead, we don't want to show the
-            #           download progress in stdout
-            false,
-            # `url` is nil, as we don't have a custom source
-            nil,
-            # `show_release_notes` is `false`, as this is a non-interactive machine
-            false,
-            # `progress_block` be updated on the download progress
-            proc do |percent|
-              installing_xcode_versions[version] = percent
-            end
-          )
+          apple_id_credentials_block do
+            installer.install_version(
+              # version: the version to install
+              version,
+              # `should_switch` is false, as we handle it on the fastlane.ci side of things, also
+              #  this will create aliases which we don't need
+              false,
+              # `should_clean` is true, as we don't need to keep old DMG files around
+              false, # false for now for faster debugging
+              # `should_install` is true, as we want to not only download, but also install this version
+              true,
+              # `progress` We pass the custom `progress_block` instead, we don't want to show the
+              #           download progress in stdout
+              false,
+              # `url` is nil, as we don't have a custom source
+              nil,
+              # `show_release_notes` is `false`, as this is a non-interactive machine
+              false,
+              # `progress_block` be updated on the download progress
+              proc do |percent|
+                installing_xcode_versions[version] = percent
+              end
+            )
+          end
           logger.info("Successfully finished Xcode installation of version #{version}")
           success_block.call(version) if success_block
         rescue StandardError => ex

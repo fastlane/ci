@@ -20,8 +20,13 @@ describe FastlaneCI::XcodeManagerService do
 
     allow(FastlaneCI::Services.apple_id_service).to receive(:apple_ids).and_return(apple_ids)
     service = FastlaneCI::XcodeManagerService.new(user: apple_id_email)
+    allow(service.installer).to receive(:exist?).and_return(true)
 
     service
+  end
+
+  before do
+    allow(FastlaneCI.dot_keys).to receive(:encryption_key).and_return("test")
   end
 
   describe "#switch_xcode_version!" do
@@ -90,13 +95,38 @@ describe FastlaneCI::XcodeManagerService do
     end
   end
 
+  describe "#apple_id_credentials_block" do
+    it "properly fills it all required ENV variables without polluting the parent" do
+      expect(ENV["XCODE_INSTALL_USER"]).to eq(nil)
+      expect(ENV["XCODE_INSTALL_PASSWORD"]).to eq(nil)
+
+      xcode_manager_service.apple_id_credentials_block do
+        expect(ENV["XCODE_INSTALL_USER"]).to eq(apple_id_email)
+        expect(ENV["XCODE_INSTALL_PASSWORD"]).to eq(apple_id_password)
+      end
+
+      expect(ENV["XCODE_INSTALL_USER"]).to eq(nil)
+      expect(ENV["XCODE_INSTALL_PASSWORD"]).to eq(nil)
+    end
+
+    it "doesn't swallow exceptions happening in that block & clears ENV variables" do
+      expect(ENV["XCODE_INSTALL_USER"]).to eq(nil)
+      expect(ENV["XCODE_INSTALL_PASSWORD"]).to eq(nil)
+
+      expect do
+        xcode_manager_service.apple_id_credentials_block do
+          raise "yolo"
+        end
+      end.to raise_error("yolo")
+    end
+  end
+
   describe "#installing_xcode_versions" do
     it "returns an empty hash on a new service init" do
       expect(xcode_manager_service.installing_xcode_versions).to eq({})
     end
 
-    # TODO: fix this
-    xit "returns a hash with Xcode versions if installations are in progress" do
+    it "returns a hash with Xcode versions if installations are in progress" do
       version_to_install = Gem::Version.new("8.1")
 
       expect(xcode_manager_service.xcode_queue).to receive(:add_task_async).and_return(nil)
@@ -107,8 +137,7 @@ describe FastlaneCI::XcodeManagerService do
       })
     end
 
-    # TODO: fix this
-    xit "raises an exception if installation is already in progress" do
+    it "raises an exception if installation is already in progress" do
       version_to_install = Gem::Version.new("8.1")
 
       xcode_manager_service.installing_xcode_versions = {
