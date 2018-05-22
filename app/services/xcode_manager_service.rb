@@ -68,7 +68,7 @@ module FastlaneCI
     # the resulting list is sorted with the most recent release as first element
     def available_xcode_versions
       apple_id_credentials_block do
-        return installer.seedlist.reverse
+        installer.seedlist.reverse
       end
     end
 
