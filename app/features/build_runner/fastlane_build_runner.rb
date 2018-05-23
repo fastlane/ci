@@ -322,7 +322,7 @@ module FastlaneCI
         new_row(
           BuildRunnerOutputRow.new(
             type: "important",
-            message: "#{parsed_xcode_version} is defined and installed, switching to using it",
+            message: "Xcode #{parsed_xcode_version} is defined and installed, switching to using it",
             time: Time.now
           )
         )
