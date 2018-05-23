@@ -3,6 +3,7 @@ import 'rxjs/add/operator/switchMap';
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, ParamMap} from '@angular/router';
 
+import {Breadcrumb} from '../common/components/toolbar/toolbar.component';
 import {Project} from '../models/project';
 import {DataService} from '../services/data.service';
 
@@ -16,6 +17,8 @@ export class ProjectComponent implements OnInit {
   isLoading = true;
   project: Project;
   readonly projectId: string;
+  readonly breadcrumbs: Breadcrumb[] =
+      [{label: 'Dashboard', url: '/'}, {hint: 'Project'}];
 
   constructor(
       private readonly dataService: DataService,
@@ -27,7 +30,12 @@ export class ProjectComponent implements OnInit {
             (params: ParamMap) => this.dataService.getProject(params.get('id')))
         .subscribe((project) => {
           this.project = project;
+          this.updateBreadcrumbs(this.project.name);
           this.isLoading = false;
         });
+  }
+
+  private updateBreadcrumbs(projectName: string) {
+    this.breadcrumbs[1].label = projectName;
   }
 }

@@ -1,0 +1,8 @@
+<div>
+  <span>fastlane icon</span>
+  <span class="fci-crumb" *ngFor="let breadcrumb of breadcrumbs; let last = last">
+    <a *ngIf="breadcrumb.url" [routerLink]="breadcrumb.url">{{getDisplayText(breadcrumb)}}</a>
+    <span *ngIf="!breadcrumb.url">{{getDisplayText(breadcrumb)}}</span>
+    <span class="fci-crumb-spacer" *ngIf="!last">></span>
+  </span>
+</div>
