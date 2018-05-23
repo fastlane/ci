@@ -8,6 +8,7 @@ import {DashboardModule} from './dashboard/dashboard.module';
 import {LoginComponent} from './login/login.component';
 import {LoginModule} from './login/login.module';
 import {ProjectComponent} from './project/project.component';
+import {ProjectModule} from './project/project.module';
 
 const routes: Routes = [
   {path: '', redirectTo: '/dashboard', pathMatch: 'full'},
@@ -18,8 +19,10 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports:
-      [DashboardModule, BuildModule, LoginModule, RouterModule.forRoot(routes)],
+  imports: [
+    DashboardModule, ProjectModule, BuildModule, LoginModule,
+    RouterModule.forRoot(routes)
+  ],
   exports: [RouterModule]
 })
 

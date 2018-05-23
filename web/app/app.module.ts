@@ -6,7 +6,6 @@ import {MomentModule} from 'ngx-moment';
 import {AppRoutingModule} from './/app-routing.module';
 import {AppComponent} from './app.component';
 import {CommonComponentsModule} from './common/components/common-components.module';
-import {ProjectComponent} from './project/project.component';
 import {AuthInterceptor} from './services/auth.interceptor';
 import {DataService} from './services/data.service';
 import {SharedMaterialModule} from './shared_material.module';
@@ -14,7 +13,6 @@ import {SharedMaterialModule} from './shared_material.module';
 @NgModule({
   declarations: [
     AppComponent,
-    ProjectComponent,
   ],
   imports: [
     BrowserModule,

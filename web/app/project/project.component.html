@@ -1,8 +1,4 @@
-<mat-toolbar color="primary">
-  <mat-toolbar-row>
-    <span *ngIf="project">{{project.name}}</span>
-  </mat-toolbar-row>
-</mat-toolbar>
+<fci-toolbar [breadcrumbs]="breadcrumbs"></fci-toolbar>
 
 <div fci-grid *ngIf="project">
   <div fci-cell="12">
