@@ -142,7 +142,7 @@ module FastlaneCI
       end
 
       def current_user_provider_credential
-        provider_credential = current_user.provider_credential(type: :github)
+        provider_credential = current_user.provider_credential
         halt(404) unless provider_credential
 
         return provider_credential
