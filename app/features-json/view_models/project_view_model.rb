@@ -3,7 +3,7 @@ require_relative "../../shared/models/project"
 require_relative "../../shared/json_convertible"
 
 module FastlaneCI
-  # View model to expose the basic info about a project.
+  # View model to expose the detailed info about a project.
   class ProjectViewModel
     include FastlaneCI::JSONConvertible
 
