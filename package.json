@@ -5,7 +5,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --prod",
+    "build": "ng build --deploy-url=\"/.dist\" --prod",
     "test": "ng test -sm=false -watch=false",
     "test_watch": "ng test -sm=false",
     "lint": "ng lint",
