@@ -86,7 +86,7 @@ module FastlaneCI
 
       repo.checkout_branch(branch: branch)
 
-      return project
+      return ProjectSummaryViewModel.new(project: project, latest_build: project.builds.first).to_json
     end
 
     def github_service

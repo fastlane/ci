@@ -1,9 +1,11 @@
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Inject, OnInit, ViewChild} from '@angular/core';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 import * as moment from 'moment';
 import {Observable} from 'rxjs/Observable';
 
 import {Lane} from '../../models/lane';
+import {ProjectSummary} from '../../models/project_summary';
 import {Repository} from '../../models/repository';
 import {AddProjectRequest, DataService} from '../../services/data.service';
 
@@ -14,11 +16,6 @@ export interface AddProjectDialogConfig {
 interface TriggerOption {
   viewValue: string;
   value: 'commit'|'nightly';
-}
-
-interface TimeSelectorData {
-  hour: number;
-  isAm: boolean;
 }
 
 const TRIGGER_OPTIONS: TriggerOption[] = [
@@ -38,9 +35,16 @@ const BASE_PROJECT_REQUEST: AddProjectRequest = {
   trigger_type: 'commit',
 };
 
-function timeSelectDataToMilitaryTime(timeData: TimeSelectorData): number {
-  return moment(`${timeData.hour} ${timeData.isAm ? 'AM' : 'PM'}`, 'H:A')
-      .hour();
+
+function buildProjectForm(fb: FormBuilder): FormGroup {
+  return fb.group({
+    'name': [{value: '', disabled: true}, Validators.required],
+    'repo': [{value: '', disabled: true}, Validators.required],
+    'lane': [{value: '', disabled: true}, Validators.required],
+    'trigger': [{value: 'commit', disabled: true}, Validators.required],
+    'hour': [12],
+    'amPm': ['AM'],
+  });
 }
 
 @Component({
@@ -48,57 +52,90 @@ function timeSelectDataToMilitaryTime(timeData: TimeSelectorData): number {
   templateUrl: './add-project-dialog.component.html',
   styleUrls: ['./add-project-dialog.component.scss']
 })
-export class AddProjectDialogComponent implements OnInit {
+export class AddProjectDialogComponent {
+  @ViewChild('projectNameControl') projectNameControl: ElementRef;
   isLoadingRepositories = true;
   isLoadingLanes = false;
   isAddingProject = false;
   repositories: Repository[];
   lanes: string[] = [];
-  readonly timeSelectorData: TimeSelectorData = {hour: 12, isAm: true};
-  readonly project = BASE_PROJECT_REQUEST;
+  readonly form: FormGroup;
   readonly TRIGGER_OPTIONS = TRIGGER_OPTIONS;
   readonly HOURS = HOURS;
+  readonly projectAdded = new EventEmitter<ProjectSummary>();
+  // TODO: Add control for choosing branch
+  private readonly branch = 'master';
 
   constructor(
       @Inject(MAT_DIALOG_DATA) private readonly data: AddProjectDialogConfig,
       private readonly dataService: DataService,
       private readonly dialogRef: MatDialogRef<AddProjectDialogComponent>,
-  ) {}
+      fb: FormBuilder,
+  ) {
+    this.form = buildProjectForm(fb);
+    this.form.get('repo').valueChanges.subscribe(
+        (repo: string) => this.loadRepoLanes(repo));
 
-  ngOnInit(): void {
     this.data.repositories.subscribe((repositories) => {
       this.repositories = repositories;
-      this.project.repo_name = this.repositories[0].fullName;
-      this.loadRepoLanes();
+      this.form.patchValue({'repo': this.repositories[0].fullName});
+
+      // Enable controls now that the initial data is loaded
+      this.form.get('repo').enable();
+      this.form.get('name').enable();
+      this.form.get('trigger').enable();
+
+      this.projectNameControl.nativeElement.focus();
       this.isLoadingRepositories = false;
     });
   }
 
-  loadRepoLanes(): void {
+  loadRepoLanes(repo: string): void {
     this.isLoadingLanes = true;
-    this.dataService.getRepoLanes(this.project.repo_name, this.project.branch)
-        .subscribe((lanes) => {
-          this.lanes = lanes.map((lane) => lane.getFullName());
-          this.project.lane = this.lanes[0];
-          this.isLoadingLanes = false;
-        });
+    this.dataService.getRepoLanes(repo, this.branch).subscribe((lanes) => {
+      this.lanes = lanes.map((lane) => lane.getFullName());
+      this.form.patchValue({'lane': this.lanes[0]});
+      this.form.get('lane').enable();
+      this.isLoadingLanes = false;
+    });
   }
 
   addProject(): void {
-    this.isAddingProject = true;
+    // TODO: figure out why invalid lane does not make the form invalid.
+    if (this.form.valid) {
+      this.isAddingProject = true;
 
-    if (this.project.trigger_type === 'nightly') {
-      this.project.hour = timeSelectDataToMilitaryTime(this.timeSelectorData);
+      const newProjectRequest: AddProjectRequest = {
+        lane: this.form.get('lane').value,
+        repo_org: '',  // TODO: remove this, no longer needed
+        branch: this.branch,
+        repo_name: this.form.get('repo').value,
+        project_name: this.form.get('name').value,
+        trigger_type: this.form.get('trigger').value,
+      };
+
+      if (newProjectRequest.trigger_type === 'nightly') {
+        newProjectRequest.hour = this.getTriggerHours();
+      }
+
+      this.dataService.addProject(newProjectRequest)
+          .subscribe((newProjectSummary) => {
+            // TODO: Show toast that the project was created
+            this.isAddingProject = false;
+            this.projectAdded.emit(newProjectSummary);
+            this.closeDialog();
+          });
     }
-
-    this.dataService.addProject(this.project).subscribe((project) => {
-      // TODO: Show toast that the project was created
-      this.isAddingProject = false;
-      this.closeDialog();
-    });
   }
 
   closeDialog(): void {
     this.dialogRef.close();
+  }
+
+  private getTriggerHours(): number {
+    return moment(
+               `${this.form.get('hour').value} ${this.form.get('amPm').value}`,
+               'H:A')
+        .hour();
   }
 }
