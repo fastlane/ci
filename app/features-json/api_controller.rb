@@ -24,7 +24,7 @@ module FastlaneCI
   #
   # The following settings are provided to subclasses of APIController:
   #
-  # * `authentication`- boolean value that makes every request check authentication in a before filter.
+  # * `authentication`- boolean value that makes every request check authentication before each action.
   #    Disable with: `disable :authentication`. Enabled by default.
   # * `authenticate_via` - which authentication scheme to use. `:jwt` by default.
   # * `jwt_secret` - The key to use in decoding JWT tokens.
@@ -37,6 +37,14 @@ module FastlaneCI
   #   get "/private", authenticate: :jwt do
   #     json({message: "secret"})
   #   end
+  #
+  # You may also selectively disable on a per-route basis by passing `authenticate: false` to the route:
+  #
+  #   get "/public", authenticate: false do
+  #     json({message: "public"})
+  #   end
+  #
+  # This will always bypass any authentication setting.
   #
   # User authentication
   # ===
@@ -67,11 +75,17 @@ module FastlaneCI
 
     # the JWT secret uses the fastlane encryption key
     set(:jwt_secret, FastlaneCI.dot_keys.encryption_key)
+    set(:jwt_algo, "HS256")
 
-    before do
-      if settings.authentication?
-        authenticate!(via: settings.authenticate_via)
+    ##
+    # override the route by injecting the `authenticate` condition.
+    # use this instead of adding a `before` block which are terrible.
+    def self.route(verb, path, options = {}, &block)
+      if settings.authentication? && !options.key?(:authenticate)
+        options[:authenticate] = settings.authenticate_via
       end
+
+      super
     end
 
     helpers do
@@ -100,9 +114,13 @@ module FastlaneCI
 
       # dispatch to the different authentication schemes available.
       def authenticate!(via:)
+        logger.info("Authenticating via #{via}")
+
         case via
         when :jwt
           return jwt
+        when false
+          logger.info("Skipping authentication.")
         else
           raise "`#{via}` is an un-supported authentication scheme."
         end
@@ -121,6 +139,17 @@ module FastlaneCI
 
       def user_logged_in?
         current_user != nil
+      end
+
+      def current_user_provider_credential
+        provider_credential = current_user.provider_credential(type: :github)
+        halt(404) unless provider_credential
+
+        return provider_credential
+      end
+
+      def current_user_config_service
+        FastlaneCI::ConfigService.new(ci_user: current_user)
       end
     end
   end

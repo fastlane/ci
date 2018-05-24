@@ -1,21 +1,20 @@
-require_relative "./json_authenticated_controller_base"
+require_relative "api_controller"
 require_relative "./view_models/repo_view_model"
 require_relative "./view_models/lane_view_model"
 
 module FastlaneCI
   # Controller for providing all data relating to projects
-  class RepositoryJSONController < JSONAuthenticatedControllerBase
+  class RepositoryJSONController < APIController
     HOME = "/data/repos"
 
-    get HOME.to_s do
-      provider_credential = check_and_get_provider_credential
-      repos = FastlaneCI::GitHubService.new(provider_credential: provider_credential).repos
+    get HOME do
+      repos = github_service.repos
 
       all_repos_view_models = repos.map do |repo|
         RepoViewModel.new(repo: repo)
       end
 
-      return all_repos_view_models.to_json
+      json(all_repos_view_models)
     end
 
     # Accepts the repo full name and branch as query params
@@ -23,12 +22,6 @@ module FastlaneCI
     get "#{HOME}/lanes" do
       repo_full_name = params[:repo_full_name]
       branch = params[:branch]
-
-      provider_credential = check_and_get_provider_credential(
-        type: FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
-      )
-
-      github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
 
       selected_repo = github_service.repos.detect do |repo|
         repo_full_name == repo[:full_name]
@@ -39,7 +32,7 @@ module FastlaneCI
       end
 
       fastfile_peeker = FastlaneCI::FastfilePeeker.new(
-        provider_credential: provider_credential,
+        provider_credential: current_user_provider_credential,
         notification_service: FastlaneCI::Services.notification_service
       )
       repo_config = GitHubRepoConfig.from_octokit_repo!(repo: selected_repo)
@@ -49,7 +42,11 @@ module FastlaneCI
         sha_or_branch: branch
       )
 
-      return fetch_available_lanes(fastfile_parser).to_json
+      json(fetch_available_lanes(fastfile_parser))
+    end
+
+    def github_service
+      FastlaneCI::GitHubService.new(provider_credential: current_user_provider_credential)
     end
 
     def fetch_available_lanes(fastfile_parser)

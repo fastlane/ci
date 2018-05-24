@@ -17,6 +17,10 @@ describe FastlaneCI::APIController do
         json({ message: "ok" })
       end
 
+      get("/public", authenticate: false) do
+        json({ message: "ok" })
+      end
+
       get("/private") do
         json({ message: "secret" })
       end
@@ -24,11 +28,17 @@ describe FastlaneCI::APIController do
 
     let(:app) { MySecureApiController.new }
 
-    describe "unathenticated request" do
+    describe "unauthenticated request" do
       it "index is not successful" do
         get("/")
         expect(last_response).to_not(be_ok)
         expect(last_response.body).to eq("A token must be passed.")
+      end
+
+      it "public is successful" do
+        get("/public")
+        expect(last_response).to(be_ok)
+        expect(last_response.body).to eq('{"message":"ok"}')
       end
 
       it "private is not successful" do
