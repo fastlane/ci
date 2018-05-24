@@ -11,7 +11,7 @@ module FastlaneCI
       request.body.rewind
       body = request.body.read
 
-      return super if body.empty?
+      return super if body.to_s.length == 0
 
       @json_params = JSON.parse(body)
       # make the accessor indifferent to strings or procs
