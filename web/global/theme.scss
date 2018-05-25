@@ -12,3 +12,11 @@ button.mat-button,
 button.mat-raised-button {
     text-transform: uppercase;
 }
+
+html,
+body,
+.fci-full-height-container {
+    height: 100%;
+    display: block;
+    position: relative;
+}
