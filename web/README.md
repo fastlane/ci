@@ -32,3 +32,10 @@ Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.
 ## Code scaffolding
 
 Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+
+### Build for production
+
+```
+npm run build
+```
+
