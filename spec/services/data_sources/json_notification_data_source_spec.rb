@@ -50,7 +50,7 @@ describe FastlaneCI::JSONNotificationDataSource do
 
       it "raises an error message and doesn't write to the `notifications.json` file" do
         expect(File).not_to(receive(:write))
-        expect { json_notification_data_source.update_notification!(notification: notification) }.to raise_error
+        expect { json_notification_data_source.update_notification!(notification: notification) }.to raise_error(RuntimeError)
       end
     end
 
