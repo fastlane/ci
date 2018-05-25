@@ -275,7 +275,7 @@ module FastlaneCI
 
     it "Raises exception when required initialization parameters are not found" do
       object_dictionary = { not_the_attribute: "taco" }
-      expect { MockJSONConvertibleWithRequiredParams.from_json!(object_dictionary) }.to(raise_exception)
+      expect { MockJSONConvertibleWithRequiredParams.from_json!(object_dictionary) }.to(raise_exception(TypeError))
     end
 
     it "Allows to decode objects with mixed initialization parameters" do
