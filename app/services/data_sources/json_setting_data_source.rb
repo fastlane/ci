@@ -38,16 +38,17 @@ module FastlaneCI
       return File.join(json_folder_path, path)
     end
 
+    # TODO: make synchronize work again
     def settings
-      JSONSettingDataSource.file_semaphore.synchronize do
+      # JSONSettingDataSource.file_semaphore.synchronize do
         return @settings
-      end
+      # end
     end
 
     def settings=(settings)
       JSONSettingDataSource.file_semaphore.synchronize do
         content_to_store = settings.map do |current_setting|
-          current_setting.to_object_dictionary(ignore_instance_variables: :verify_block)
+          current_setting.to_object_dictionary(ignore_instance_variables: [:@verify_block, :@default_value])
         end
         File.write(setting_file_path, JSON.pretty_generate(content_to_store))
       end
@@ -63,8 +64,16 @@ module FastlaneCI
           return
         end
 
-        @settings = JSON.parse(File.read(setting_file_path)).map do |setting_hash|
-          Setting.from_json!(setting_hash)
+        @settings = AvailableSettings.available_settings
+
+        JSON.parse(File.read(setting_file_path)).each do |setting_hash|
+          user_setting = Setting.from_json!(setting_hash)
+          available_setting = find_setting(setting_key: user_setting.key)
+          if available_setting
+            available_setting.value = user_setting.value
+          else
+            raise "Could not find available_option with key #{user_setting.key}"
+          end
         end
       end
     end
@@ -83,7 +92,7 @@ module FastlaneCI
     # @return [Setting]
     def find_setting(setting_key:)
       return settings.detect do |setting|
-        setting.key == setting_key
+        setting.key.to_sym == setting_key.to_sym
       end
     end
   end

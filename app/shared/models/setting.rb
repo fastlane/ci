@@ -17,8 +17,15 @@ module FastlaneCI
     end
 
     def value=(value)
-      verify_block.call(value) if verify_block
+      if value.to_s.length > 0
+        verify_block.call(value) if verify_block
+      end
+
       @value = value
     end
   end
 end
+
+# TODO:
+# 1) What if the user defines a Setting whose key we don't support
+# 2) I need pre-load the available_settings and then fill in *just the values* from the `settings.json`

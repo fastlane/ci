@@ -6,15 +6,15 @@ module FastlaneCI
     HOME = "/data/settings"
 
     get HOME do
-      return Services.setting_service.settings.to_json
+      return json(Services.setting_service.settings)
     end
 
     post HOME do
-      metrics = Services.setting_service.settings.first
-      metrics.value = false
-      Services.setting_service.update_setting!(setting: metrics)
+      metrics_setting = Services.setting_service.find_setting(setting_key: :metrics_enabled)
+      metrics_setting.value = false
+      Services.setting_service.update_setting!(setting: metrics_setting)
 
-      return {}
+      return json({ status: :success })
     end
   end
 end

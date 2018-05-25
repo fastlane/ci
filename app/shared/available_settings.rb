@@ -14,10 +14,8 @@ module FastlaneCI
           default_value: nil,
           description: "The default Apple ID to use for certain tasks, like installing new versions of Xcode",
           verify_block: proc do |value|
-            if value.to_s.length > 0
-              apple_id = Services.apple_id_service.apple_ids.find { |a| a.user == value }
-              raise "Couldn't find Apple ID with email '#{value}'" if apple_id.nil?
-            end
+            apple_id = Services.apple_id_service.apple_ids.find { |a| a.user == value }
+            raise "Couldn't find Apple ID with email '#{value}'" if apple_id.nil?
           end
         )
       ]

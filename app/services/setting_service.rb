@@ -29,9 +29,6 @@ module FastlaneCI
       end
 
       self.setting_data_source = setting_data_source
-
-      # TODO: be smart about loading things, and merge the "interface" with the user values only
-      self.setting_data_source.settings = AvailableSettings.available_settings
     end
 
     #####################################################
@@ -39,7 +36,11 @@ module FastlaneCI
     #####################################################
 
     def settings
-      setting_data_source.settings
+      return setting_data_source.settings
+    end
+
+    def find_setting(setting_key:)
+      return setting_data_source.find_setting(setting_key: setting_key)
     end
 
     def update_setting!(setting:)
