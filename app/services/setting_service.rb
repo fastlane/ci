@@ -4,6 +4,9 @@ require_relative "../shared/available_settings"
 require_relative "./services"
 
 module FastlaneCI
+  class SettingServiceKeyNotFoundError < FastlaneCIError
+  end
+
   # Provides access to system settings
   class SettingService
     include FastlaneCI::Logging
@@ -43,11 +46,20 @@ module FastlaneCI
       return setting_data_source.find_setting(setting_key: setting_key)
     end
 
+    def reset_setting!(setting_key:)
+      setting = setting_data_source.find_setting(setting_key: setting_key)
+      raise SettingServiceKeyNotFoundError if setting.nil?
+
+      setting.reset!
+      setting_data_source.update_setting!(setting: setting)
+      return true
+    end
+
     def update_setting!(setting:)
       key = setting.key
 
       if setting_data_source.find_setting(setting_key: key).nil?
-        logger.info("No setting variable with key #{key} found")
+        raise SettingServiceKeyNotFound
       end
 
       setting_data_source.update_setting!(setting: setting)

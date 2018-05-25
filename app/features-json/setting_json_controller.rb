@@ -16,5 +16,14 @@ module FastlaneCI
 
       return json({ status: :success })
     end
+
+    delete "#{HOME}/:setting_key" do
+      begin
+        Services.setting_service.reset_setting!(setting_key: params[:setting_key])
+        return json({status: :ok})
+      rescue SettingServiceKeyNotFoundError
+        return json({status: :key_not_found})
+      end
+    end
   end
 end

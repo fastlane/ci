@@ -23,9 +23,12 @@ module FastlaneCI
 
       @value = value
     end
+
+    def reset!
+      self.value = nil # nil won't trigger the `verify_block` anyway
+    end
   end
 end
 
 # TODO:
 # 1) What if the user defines a Setting whose key we don't support
-# 2) I need pre-load the available_settings and then fill in *just the values* from the `settings.json`
