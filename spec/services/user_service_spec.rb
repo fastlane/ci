@@ -53,8 +53,8 @@ describe FastlaneCI::UserService do
 
     context "user exists" do
       before(:each) do
-        subject.stub(:find_user).with(id: user_id) { user }
-        subject.stub(:update_user!).with(user: updated_user)
+        allow(subject).to receive(:find_user).with(id: user_id) { user }
+        allow(subject).to receive(:update_user!).with(user: updated_user)
       end
 
       # TODO: Need to rethink how to accomplish this now that we're not returning exactly the same object,

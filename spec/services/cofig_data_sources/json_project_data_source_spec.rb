@@ -73,7 +73,7 @@ describe FastlaneCI::JSONProjectDataSource do
 
       it "raises an error message and doesn't write to the `projects.json` file" do
         expect(File).not_to(receive(:write))
-        expect { subject.update_project!(project: project) }.to raise_error
+        expect { subject.update_project!(project: project) }.to raise_error(RuntimeError, "Couldn't update project project-1 because it doesn't exists")
       end
     end
 
@@ -106,7 +106,7 @@ describe FastlaneCI::JSONProjectDataSource do
 
       it "raises an error message and doesn't write to the `projects.json` file" do
         expect(File).not_to(receive(:write))
-        expect { subject.delete_project!(project: project) }.to raise_error
+        expect { subject.delete_project!(project: project) }.to raise_error(RuntimeError)
       end
     end
 
