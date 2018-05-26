@@ -1,6 +1,6 @@
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
-import {MatCardModule, MatProgressSpinnerModule} from '@angular/material';
+import {MatButtonModule, MatCardModule, MatIconModule, MatProgressSpinnerModule} from '@angular/material';
 import {MomentModule} from 'ngx-moment';
 
 import {CommonComponentsModule} from '../common/components/common-components.module';
@@ -18,7 +18,7 @@ import {BuildComponent} from './build.component';
     /** Internal Imports */
     ToolbarModule, CommonComponentsModule,
     /** Angular Material Imports */
-    MatCardModule, MatProgressSpinnerModule,
+    MatCardModule, MatProgressSpinnerModule, MatButtonModule, MatIconModule,
     /** Third-Party Module Imports */
     MomentModule
   ],

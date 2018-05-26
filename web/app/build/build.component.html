@@ -1,4 +1,12 @@
-<fci-toolbar [breadcrumbs]="breadcrumbs"></fci-toolbar>
+<fci-toolbar [breadcrumbs]="breadcrumbs">
+  <div fci-toolbar-right>
+    <button mat-raised-button color="primary">Rebuild</button>
+    <button mat-icon-button>
+      <mat-icon>settings</mat-icon>
+    </button>
+  </div>
+</fci-toolbar>
+
 <div class="fci-build-container">
   <div class="fci-left-container">
     <div class="fci-build-header">
