@@ -154,8 +154,7 @@ describe('BuildComponent', () => {
 
         const iconsEl = headerEl.queryAll(By.css('fci-status-icon'));
         expect(iconsEl.length).toBe(1);
-        expect(iconsEl[0].nativeElement.innerText)
-            .toBe('sentiment_very_dissatisfied');
+        expect(iconsEl[0].nativeElement.innerText).toBe('warning');
       });
 
       it('should show build number in title after loading', () => {
