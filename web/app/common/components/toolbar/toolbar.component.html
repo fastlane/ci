@@ -1,8 +1,13 @@
-<div>
-  <span>fastlane icon</span>
-  <span class="fci-crumb" *ngFor="let breadcrumb of breadcrumbs; let last = last">
-    <a *ngIf="breadcrumb.url" [routerLink]="breadcrumb.url">{{getDisplayText(breadcrumb)}}</a>
-    <span *ngIf="!breadcrumb.url">{{getDisplayText(breadcrumb)}}</span>
-    <span class="fci-crumb-spacer" *ngIf="!last">></span>
-  </span>
+<div class="fci-toolbar-container">
+  <div class="fci-fastlane-logo"></div>
+  <div class="fci-crumbtainer">
+    <ng-container *ngFor="let breadcrumb of breadcrumbs; let last = last">
+      <a class="fci-crumb" *ngIf="breadcrumb.url" [routerLink]="breadcrumb.url">{{getDisplayText(breadcrumb)}}</a>
+      <span class="fci-crumb" *ngIf="!breadcrumb.url">{{getDisplayText(breadcrumb)}}</span>
+      <mat-icon class="fci-crumb-spacer" *ngIf="!last">chevron_right</mat-icon>
+    </ng-container>
+  </div>
+  <div class="fci-right-container">
+    <ng-content select="[fci-toolbar-right]"></ng-content>
+  </div>
 </div>

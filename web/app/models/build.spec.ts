@@ -24,7 +24,7 @@ describe('Build Model', () => {
     expect(build.cloneUrl).toBe('https://github.com/nakhbari/HelloWorld.git');
     expect(build.branch).toBe('test-branch');
     expect(build.ref).toBe('pull/1/head');
-    expect(build.buildTools).toBe({'xcode_version': '9.1'});
+    expect(build.buildTools).toEqual({'xcode_version': '9.1'});
 
     // TODO: update this with real values once implemented on backend
     expect(build.parameters).toBe(null);

@@ -1,11 +1,7 @@
-$TOOLBAR_HEIGHT:40px;
-fci-toolbar {
-    height: $TOOLBAR_HEIGHT;
-}
-
+$TOOLBAR_HEIGHT:80px;
 .fci-build-container {
     display: flex;
-    padding: 50px 16px 16px 16px;
+    padding: 24px 92px 0 92px;
     height: calc(100% - #{$TOOLBAR_HEIGHT});
     box-sizing: border-box;
     .fci-left-container {
