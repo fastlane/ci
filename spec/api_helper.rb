@@ -16,7 +16,5 @@ RSpec.configure do |config|
   end
   config.before(:each, type: :api) do
     FastlaneCI::APIController.set(:jwt_secret, jwt_secret)
-
-    # allow(FastlaneCI::APIController).to receive(:current_user).and_return()
   end
 end
