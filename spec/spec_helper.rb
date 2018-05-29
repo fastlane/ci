@@ -6,7 +6,10 @@ Coveralls.wear!
 
 require "rack/test"
 require "rspec"
+require "webmock/rspec"
+
 require "stub_helpers"
+require "api_helper"
 require "helper_functions"
 
 ENV["RACK_ENV"] = "test"
