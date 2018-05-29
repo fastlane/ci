@@ -11,33 +11,20 @@ interface ExpectedIcon {
 const EXPECTED_STATUSES = new Map<BuildStatus, ExpectedIcon>([
   [
     BuildStatus.SUCCESS,
-    {iconString: 'sentiment_very_satisfied', class: 'fci-status-icon-success'}
+    {iconString: 'check_circle', class: 'fci-status-icon-success'}
   ],
   [
     BuildStatus.PENDING,
-    {iconString: 'sentiment_neutral', class: 'fci-status-icon-pending'}
+    {iconString: 'timelapse', class: 'fci-status-icon-pending'}
+  ],
+  [BuildStatus.FAILED, {iconString: 'cancel', class: 'fci-status-icon-failed'}],
+  [
+    BuildStatus.INTERNAL_ISSUE,
+    {iconString: 'warning', class: 'fci-status-icon-internal'}
   ],
   [
-    BuildStatus.FAILED, {
-      iconString: 'sentiment_very_dissatisfied',
-      class: 'fci-status-icon-failed'
-    }
-  ],
-  [
-    BuildStatus.INTERNAL_ISSUE, {
-      iconString: 'sentiment_very_dissatisfied',
-      class: 'fci-status-icon-failed'
-    }
-  ],
-  [
-    BuildStatus.MISSING_FASTFILE, {
-      iconString: 'sentiment_very_dissatisfied',
-      class: 'fci-status-icon-failed'
-    }
-  ],
-  [
-    undefined,
-    {iconString: 'sentiment_satisfied', class: 'fci-status-icon-default'}
+    BuildStatus.MISSING_FASTFILE,
+    {iconString: 'cancel', class: 'fci-status-icon-failed'}
   ]
 ]);
 
