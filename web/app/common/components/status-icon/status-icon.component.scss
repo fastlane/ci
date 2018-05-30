@@ -1,3 +1,14 @@
+:host {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    .mat-icon {
+        width: inherit;
+        height: inherit;
+        font-size: inherit;
+    }
+}
+
 .fci-status-icon-success {
     color: #00897b;
 }

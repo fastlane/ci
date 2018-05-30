@@ -13,7 +13,8 @@ import {DataService} from '../services/data.service';
   styleUrls: ['./project.component.scss']
 })
 export class ProjectComponent implements OnInit {
-  readonly DISPLAYED_COLUMNS: string[] = ['number', 'date', 'sha'];
+  readonly DISPLAYED_COLUMNS: string[] =
+      ['number', 'started', 'duration', 'branch', 'sha'];
   isLoading = true;
   project: Project;
   readonly projectId: string;

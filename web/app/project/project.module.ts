@@ -1,6 +1,6 @@
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
-import {MatCardModule, MatTableModule} from '@angular/material';
+import {MatButtonModule, MatCardModule, MatIconModule, MatProgressSpinnerModule, MatTableModule} from '@angular/material';
 import {RouterModule} from '@angular/router';
 import {MomentModule} from 'ngx-moment';
 
@@ -23,7 +23,8 @@ import {DataService} from '../services/data.service';
     /** Internal Imports */
     CommonComponentsModule, ToolbarModule,
     /** Angular Material Imports */
-    MatCardModule, MatTableModule,
+    MatCardModule, MatProgressSpinnerModule, MatTableModule, MatIconModule,
+    MatButtonModule,
     /** Third-Party Module Imports */
     MomentModule,  // For Date relative time pipes
   ],

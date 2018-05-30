@@ -1,39 +1,69 @@
 <fci-toolbar [breadcrumbs]="breadcrumbs"></fci-toolbar>
-
-<div fci-grid *ngIf="project">
-  <div fci-cell="12">
-    <mat-card class="fci-build-table">
+<div class="fci-project-container">
+  <div class="fci-left-container">
+    <div *ngIf="project" class="fci-project-header">{{project.name}}</div>
+    <div *ngIf="project" class="fci-build-table">
       <mat-table [dataSource]="project.builds">
         <!-- Number Column -->
         <ng-container matColumnDef="number">
-          <mat-header-cell *matHeaderCellDef> Build </mat-header-cell>
+          <mat-header-cell *matHeaderCellDef>Build</mat-header-cell>
           <mat-cell *matCellDef="let build">
             <fci-status-icon [status]="build.status"></fci-status-icon>
             <span>{{build.number}}</span>
           </mat-cell>
         </ng-container>
 
-        <!-- Date Column -->
-        <ng-container matColumnDef="date">
-          <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
-          <!-- TODO: Pipe this into a relative time pipe -->
+        <!-- Start Date Column -->
+        <ng-container matColumnDef="started">
+          <mat-header-cell *matHeaderCellDef>Started</mat-header-cell>
           <mat-cell *matCellDef="let build">{{build.date | amTimeAgo}}</mat-cell>
         </ng-container>
 
-        <!-- Lane Column -->
+        <!-- Duration Column -->
+        <ng-container matColumnDef="duration">
+          <mat-header-cell *matHeaderCellDef>Duration</mat-header-cell>
+          <mat-cell *matCellDef="let build">{{build.duration > -1 ? (build.duration| amDuration: 'seconds') : "&mdash;"}}</mat-cell>
+        </ng-container>
+
+        <!-- Branch Column -->
+        <ng-container matColumnDef="branch">
+          <mat-header-cell *matHeaderCellDef>Branch</mat-header-cell>
+          <mat-cell *matCellDef="let build">{{build.branch}}</mat-cell>
+        </ng-container>
+
+        <!-- SHA Column -->
         <ng-container matColumnDef="sha">
-          <mat-header-cell *matHeaderCellDef>Commit Sha</mat-header-cell>
+          <mat-header-cell *matHeaderCellDef>Sha</mat-header-cell>
           <mat-cell *matCellDef="let build">
             <a [attr.href]="build.linkToSha" target="_blank">
               {{build.shortSha}}
             </a>
+            <button mat-button>
+              <mat-icon>refresh</mat-icon>Rebuild</button>
           </mat-cell>
         </ng-container>
 
         <mat-header-row *matHeaderRowDef="DISPLAYED_COLUMNS"></mat-header-row>
         <mat-row *matRowDef="let row; columns: DISPLAYED_COLUMNS;"></mat-row>
       </mat-table>
+      <mat-progress-spinner mode="indeterminate" *ngIf="isLoading" class="fci-loading-spinner" diameter="30"></mat-progress-spinner>
       <!-- TODO: paginate this table -->
+    </div>
+  </div>
+  <div class="fci-right-container">
+    <mat-card class="fci-project-details">
+      <h3>Project Info</h3>
+      <mat-spinner *ngIf="!project" mode="indeterminate"></mat-spinner>
+      <ng-container *ngIf="project">
+        <h5>Repo</h5>
+        <div>{{project.repoName}}</div>
+        <h5>Lane</h5>
+        <div>{{project.lane}}</div>
+        <h5>Last Successful Build</h5>
+        <div>{{project.lastSuccessfulBuild() ? project.lastSuccessfulBuild().number : "&mdash;"}}</div>
+        <h5>Last Failed Build</h5>
+        <div>{{project.lastFailedBuild() ? project.lastFailedBuild().number : "&mdash;"}}</div>
+      </ng-container>
     </mat-card>
   </div>
 </div>

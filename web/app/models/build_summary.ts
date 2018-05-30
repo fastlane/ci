@@ -9,6 +9,7 @@ export interface BuildSummaryResponse {
   sha: string;
   link_to_sha: string;
   timestamp: string;
+  branch: string;
 }
 
 export class BuildSummary {
@@ -18,6 +19,7 @@ export class BuildSummary {
   readonly sha: string;
   readonly shortSha: string;
   readonly linkToSha: string;
+  readonly branch: string;
   readonly date: Date;
 
   constructor(buildSummary: BuildSummaryResponse) {
@@ -28,5 +30,6 @@ export class BuildSummary {
     this.shortSha = this.sha.slice(0, SHORT_SHA_LENGTH);
     this.status = fastlaneStatusToEnum(buildSummary.status);
     this.date = new Date(buildSummary.timestamp);
+    this.branch = buildSummary.branch;
   }
 }
