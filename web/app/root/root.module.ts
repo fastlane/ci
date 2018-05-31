@@ -14,7 +14,7 @@ import {SharedMaterialModule} from './shared_material.module';
 
 export function initializationProviderFactory(
     provider: InitializationProvider) {
-  return provider.initialize();
+  return () => provider.initialize();
 }
 
 @NgModule({
@@ -32,13 +32,15 @@ export function initializationProviderFactory(
     MomentModule,
   ],
   providers: [
-    DataService, InitializationProvider, {
+    DataService,
+    InitializationProvider,
+    {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},
+    {
       provide: APP_INITIALIZER,
       useFactory: initializationProviderFactory,
       deps: [InitializationProvider],
       multi: true
-    }
-
+    },
   ],
   bootstrap: [RootComponent]
 })
