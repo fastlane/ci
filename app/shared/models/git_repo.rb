@@ -527,17 +527,20 @@ module FastlaneCI
     end
 
     # This method commits and pushes all changes
-    # if `file_to_commit` is `nil`, all files will be added
+    # if `files_to_commit` is empty or nil, all files will be added
     # TODO: this method isn't actually tested yet
-    def commit_changes!(commit_message: nil, push_after_commit: true, file_to_commit: nil, repo_auth: self.repo_auth)
+    def commit_changes!(commit_message: nil, push_after_commit: true, files_to_commit: [], repo_auth: self.repo_auth)
       git_action_with_queue do
         logger.debug("Starting commit_changes! #{git_config.git_url} for #{repo_auth.username}")
-        raise "file_to_commit not yet implemented" if file_to_commit
         commit_message ||= "Automatic commit by fastlane.ci"
 
         setup_author(full_name: repo_auth.full_name, username: repo_auth.username)
 
-        git.add(all: true) # TODO: for now we only add all files
+        if files_to_commit.nil? || files_to_commit.empty?
+          git.add(all: true)
+        else
+          git.add(files_to_commit)
+        end
         changed = git.status.changed
         added = git.status.added
         deleted = git.status.deleted

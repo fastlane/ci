@@ -403,7 +403,7 @@ module FastlaneCI
     private
 
     def save_build_status_locally!
-      # Create or update the local build file in the config directory
+      # Create local build file in the config directory
       Services.build_service.add_build!(
         project: project,
         build: current_build
