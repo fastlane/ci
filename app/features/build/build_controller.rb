@@ -83,7 +83,7 @@ module FastlaneCI
       )
 
       if current_build_runner
-        existing_rows = current_build_runner.all_build_output_log_rows.map(&:html).join("\n")
+        existing_rows = [] #current_build_runner.all_build_output_log_rows.map(&:html).join("\n")
       else
         # `current_build_runner` is only defined if the build was just run a while back
         # if the server was restarted, we're gonna end here in this code block

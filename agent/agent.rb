@@ -15,6 +15,7 @@ module FastlaneCI
     VERSION = "0.0.0-alpha"
     HOST = "0.0.0.0"
     PORT = "8089"
+    NULL_CHAR = "\0"
     EOT_CHAR = "\4" # end-of-transmission character.
   end
 end

@@ -22,6 +22,7 @@ module FastlaneCI
             yielder.yield(io.gets) while thread.alive?
             io.close
             yielder.yield(EOT_CHAR, thread.value.exitstatus)
+            #yielder.yield("EOT\n\n", thread.value.exitstatus)
           end
         end
       end
@@ -56,7 +57,7 @@ module FastlaneCI
         # convert every line from io to a Log object in a lazy stream
         output_enumerator.lazy.flat_map do |line, status|
           # proto3 doesn't have nullable fields, afaik
-          Log.new(message: line, status: (status || 0))
+          Log.new(message: (line || NULL_CHAR), status: (status || 0))
         end
       end
     end

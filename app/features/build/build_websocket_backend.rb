@@ -57,6 +57,7 @@ module FastlaneCI
           project_id: project_id,
           build_number: build_number
         )
+
         next if current_build_runner.nil? # this is the case if the build was run a while ago
 
         # TODO: Think this through, do we properly add new listener, and notify them of line changes, etc.
