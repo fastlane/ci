@@ -1,6 +1,7 @@
 import 'rxjs/add/operator/switchMap';
 
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {MatCardModule, MatTableModule} from '@angular/material';
 import {By} from '@angular/platform-browser';
 import {ActivatedRoute, convertToParamMap} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
@@ -13,7 +14,6 @@ import {ToolbarModule} from '../common/components/toolbar/toolbar.module';
 import {mockProject} from '../common/test_helpers/mock_project_data';
 import {Project} from '../models/project';
 import {DataService} from '../services/data.service';
-import {SharedMaterialModule} from '../shared_material.module';
 
 import {ProjectComponent} from './project.component';
 
@@ -33,8 +33,9 @@ describe('ProjectComponent', () => {
     TestBed
         .configureTestingModule({
           imports: [
-            CommonComponentsModule, SharedMaterialModule, MomentModule,
-            ToolbarModule, RouterTestingModule
+            CommonComponentsModule, MomentModule, ToolbarModule,
+            RouterTestingModule, MatCardModule, MatTableModule
+
           ],
           declarations: [
             ProjectComponent,

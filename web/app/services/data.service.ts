@@ -64,4 +64,9 @@ export class DataService {
     return this.http.get<RepositoryResponse[]>(url).pipe(
         map((repos) => repos.map((repo) => new Repository(repo))));
   }
+
+  isServerConfigured(): Observable<boolean> {
+    const url = `${HOSTNAME}/setup/configured`;
+    return this.http.get<boolean>(url);
+  }
 }
