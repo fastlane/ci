@@ -212,6 +212,7 @@ module FastlaneCI
         GIT_SHA: current_build.sha,
         BUILD_URL: "https://fastlane.ci", # TODO: actually build the URL, we don't know our own host, right?
         CI_NAME: "fastlane.ci",
+        FASTLANE_CI: true,
         CI: true
       }
 
