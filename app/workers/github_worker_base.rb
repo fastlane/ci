@@ -21,7 +21,7 @@ module FastlaneCI
       return FastlaneCI::ProviderCredential::PROVIDER_CREDENTIAL_TYPES[:github]
     end
 
-    def initialize(provider_credential: nil, project: nil, notification_service:)
+    def initialize(provider_credential:, project:, notification_service:)
       @provider_credential = provider_credential
       @github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
       @project = project
@@ -84,6 +84,10 @@ module FastlaneCI
     end
 
     def trigger_type
+      not_implemented(__method__)
+    end
+
+    def work
       not_implemented(__method__)
     end
   end

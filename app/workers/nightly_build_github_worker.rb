@@ -11,7 +11,7 @@ module FastlaneCI
     attr_reader :scheduler
     attr_reader :trigger_type
 
-    def initialize(provider_credential: nil, project: nil, notification_service:)
+    def initialize(provider_credential:, project:, notification_service:)
       @trigger_type = FastlaneCI::JobTrigger::TRIGGER_TYPE[:nightly]
       @scheduler = WorkerScheduler.new(cron_schedule: NIGHTLY_CRON_TIME)
       @notification_service = notification_service

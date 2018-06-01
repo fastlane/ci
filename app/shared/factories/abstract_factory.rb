@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module FastlaneCI
-  # AbstractFactory
+  # An abstract factory following the abstract factory design pattern.
   class AbstractFactory
     def create(params: {})
       not_implemented(__method__)

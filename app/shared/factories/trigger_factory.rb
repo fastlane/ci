@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "abstract_factory"
+
 module FastlaneCI
   # TODO: Until we make a proper interface to attach JobTriggers to a Project, let's add a manual one for the
   # selected branch.

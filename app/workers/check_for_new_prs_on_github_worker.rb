@@ -8,11 +8,8 @@ require "time"
 require "set"
 
 module FastlaneCI
-  # Responsible for checking if there have been new commits
-  # We have to poll, as there is no easy way to hear about
-  # new commits from web events, as the CI system might be behind
-  # firewalls
-  class CheckForNewCommitsOnGithubWorker < GitHubWorkerBase
+  # Responsible for checking if there are new pull requests via polling.
+  class CheckForNewPullRequestsOnGithubWorker < GitHubWorkerBase
     include FastlaneCI::Logging
 
     attr_reader :trigger_type
@@ -20,7 +17,7 @@ module FastlaneCI
     attr_reader :github_service
 
     def initialize(provider_credential:, project:, notification_service:)
-      @trigger_type = FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit]
+      @trigger_type = FastlaneCI::JobTrigger::TRIGGER_TYPE[:pull_request]
       @scheduler = WorkerScheduler.new(interval_time: 10)
       @github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
 
@@ -33,36 +30,30 @@ module FastlaneCI
     end
 
     def work
-      check_for_new_commits_on_branch
+      check_for_new_pull_requests
     end
 
     private
 
-    def check_for_new_commits_on_branches
+    def check_for_new_pull_requests
       repo_full_name = project.repo_config.full_name
       logger.debug("Checking for new commits: #{project.project_name} (#{repo_full_name})")
       build_service = FastlaneCI::Services.build_service
 
-      # Sorted by newest timestamps first
+      # Sorted by newest timestamps first.
       builds = build_service.list_builds(project: project)
 
-      # All the shas for builds we have run and dump it to a set so we can filter with it
+      # All the shas for builds we have run and dump it to a set so we can filter with it.
       local_build_shas_set = builds.map(&:sha).to_set
 
-      # Get all branches for all commit triggers
-      branches = project.find_triggers_of_type(trigger_type: :commit).map(&:branch)
+      # Get all commits from the open PRs.
+      open_pull_requests = github_service.open_pull_requests(repo_full_name: repo_full_name)
 
-      # Get all commits from the open PRs given a set of branches
-      open_pull_requests = github_service.open_pull_requests(
-        repo_full_name: repo_full_name,
-        branches: branches
-      )
-
-      # Filter out the PR shas that are already in the builds
+      # Filter out the PR shas that are already in the builds.
       new_commit_prs = open_pull_requests.reject { |pr| local_build_shas_set.include?(pr.current_sha) }
 
       if new_commit_prs.empty?
-        logger.debug("No new commits found for #{project.project_name} on branch #{branch_name} (#{repo_full_name})")
+        logger.debug("No new commits found for #{project.project_name} (#{repo_full_name})")
         return
       end
 
