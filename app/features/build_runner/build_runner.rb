@@ -41,8 +41,8 @@ module FastlaneCI
     # This is an array of hashes
     attr_accessor :all_build_output_log_rows
 
-    # All blocks listening to changes for this build
-    attr_accessor :build_change_observer_blocks
+    # All build change observers that are listening to changes for this build
+    attr_accessor :build_change_listeners
 
     # Work queue where builds should be run
     attr_reader :work_queue
@@ -69,7 +69,7 @@ module FastlaneCI
       @git_fork_config = git_fork_config
 
       self.all_build_output_log_rows = []
-      self.build_change_observer_blocks = []
+      self.build_change_listeners = []
 
       # TODO: provider credential should determine what exact CodeHostingService gets instantiated
       @code_hosting_service = github_service
@@ -365,15 +365,24 @@ module FastlaneCI
       all_build_output_log_rows << row
 
       # 2) Report back to all listeners, usually socket connections
-      build_change_observer_blocks.each do |current_block|
-        current_block.call(row)
+      listeners_done_listening = []
+      build_change_listeners.each do |current_listener|
+        if current_listener.done_listening?
+          listeners_done_listening << current_listener
+          next
+        end
+
+        current_listener.row_received(row)
       end
+
+      # remove any listeners that are done listening
+      self.build_change_listeners -= listeners_done_listening
     end
 
     # Add a listener to get real time updates on new rows (see `new_row`)
     # This is used for the socket connection to the user's browser
-    def add_listener(block)
-      build_change_observer_blocks << block
+    def add_build_change_listener(listener)
+      build_change_listeners << listener
     end
 
     def prepare_build_object(trigger:)
