@@ -13,7 +13,18 @@ module FastlaneCI
     # Access the FastlaneCI::Build of that specific Runner
     attr_reader :current_build
 
-    def initialize(project:, git_fork_config:, trigger:)
+    # All lines that were generated so far, this might not be a complete run
+    # This is an array of hashes
+    attr_accessor :all_build_output_log_rows
+
+    # TODO: Add comment
+    attr_accessor :build_change_observer_blocks
+
+    # TODO: extract this thing out of this class.
+    attr_reader :github_service
+    # TODO add state machine-type impl.
+
+    def initialize(project:, git_fork_config:, trigger:, github_service:)
       @project = project
       @git_fork_config = git_fork_config
       @client = Agent::Client.new("localhost")
@@ -23,8 +34,9 @@ module FastlaneCI
       # The versions of the build tools are set later one, after the repo was checked out
       # and we can read files like the `xcode-version` file
       @current_build.build_tools = {}
-
+      @all_build_output_log_rows = []
       @build_change_observer_blocks = []
+      @github_service = github_service
     end
 
     # Add a listener to get real time updates on new rows (see `new_row`)
@@ -38,26 +50,21 @@ module FastlaneCI
       git_fork_config.sha
     end
 
-
     def start
-      #file = File.open("/tmp/fastlane-ci.log", "w")
-      #file.sync = true
-      success = true
       save_build_status_locally!
-      env =  environment_variables_for_worker(current_build: current_build, project: project, git_fork_config: git_fork_config)
+      env = environment_variables_for_worker(current_build: current_build, project: project, git_fork_config: git_fork_config)
+
+      success = true
+      start_time = Time.now.utc
 
       logs = @client.request_spawn("rake", "fastlane[#{@project.platform} #{@project.lane}]", env: env)
       logs.each do |log|
-        #file.write({message: log.message, level: log.level, status: log.status}.to_json)
-        @build_change_observer_blocks.each do |block|
-          custom_row = BuildRunnerOutputRow.new(
-            type: "message",
-            message: log.message,
-            time: Time.now
-          )
-          block.call(custom_row)
-          logger.info("sent a mesage to the observe")
-        end
+        row = BuildRunnerOutputRow.new(
+          type: :message,
+          message: log.message,
+          time: Time.now
+        )
+        did_receive_new_row(row)
 
         if log.status != 0
          logger.error("WE HAVE AN ERROR!")
@@ -65,9 +72,41 @@ module FastlaneCI
         end
       end
 
-      #file.close
+      current_build.duration = Time.now.utc - start_time
 
+      if success
+        current_build.status = :success
+        current_build.description = "All green"
+        logger.info("fastlane run complete")
+      else
+        current_build.status = :failure
+      end
+
+      did_receive_new_row(BuildRunnerOutputRow.new(
+        type: :last_message,
+        message: nil,
+        time: Time.now
+      ))
+
+      save_build_status!
+#      Services.build_runner_service.remove_build_runner(build_runner: self)
       return success
+    end
+
+    # Handle a new incoming row (log), and alert every stakeholder who is interested
+    def did_receive_new_row(row)
+
+      logger.debug(row.message) if row.message.to_s.length > 0
+
+      # Report back the row
+      # 1)Store in the history of logs for this RemoteRunner (used to access half-built builds)
+      all_build_output_log_rows << row
+
+
+      # 2) Report back to all listeners, usually socket connections
+      build_change_observer_blocks.each do |block|
+        block.call(row)
+      end
     end
 
     def prepare_build(project:, git_fork_config:, trigger:)
@@ -107,7 +146,8 @@ module FastlaneCI
         GIT_SHA: current_build.sha,
         BUILD_URL: "https://fastlane.ci", # TODO: actually build the URL, we don't know our own host, right?
         CI_NAME: "fastlane.ci",
-        CI: true
+        CI: true,
+        FASTLANE_SKIP_DOCS: true
       }
 
       if git_fork_config.branch.to_s.length > 0
@@ -154,6 +194,18 @@ module FastlaneCI
       # - BUILD_TAG
     end
 
+    def fail_build!(start_time:)
+      save_build_status!
+    end
+
+      # Responsible for updating the build status in our local config
+    # and on GitHub
+    def save_build_status!
+      # TODO: update so that we can strip out the SHAs that should never be attempted to be rebuilt
+      save_build_status_locally!
+      save_build_status_source!
+    end
+
     def save_build_status_locally!
       # Create or update the local build file in the config directory
       Services.build_service.add_build!(
@@ -176,5 +228,26 @@ module FastlaneCI
       raise ex
     end
 
+      # Let GitHub know about the current state of the build
+    # Using a `rescue` block here is important
+    # As the build is still green, even though we couldn't set the GH status
+    def save_build_status_source!
+      status_context = project.project_name
+
+      build_path = FastlaneCI::BuildController.build_url(project_id: project.id, build_number: current_build.number)
+      build_url = FastlaneCI.dot_keys.ci_base_url + build_path
+      github_service.set_build_status!(
+        repo: project.repo_config.git_url,
+        sha: sha,
+        state: current_build.status,
+        target_url: build_url,
+        status_context: status_context,
+        description: current_build.description
+      )
+    rescue StandardError => ex
+      logger.error("Error setting the build status on remote service")
+      logger.error(ex)
+    end
   end
+
 end

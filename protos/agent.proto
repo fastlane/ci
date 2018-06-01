@@ -2,16 +2,17 @@
  * proto definitions for auto-generated client, server, and messages to pass using grpc.
  *
  * if you make any changes to this file, run
- *   `rake proto`
+ *   `rake generate_protos`
  * to regenerate the ruby code.
  **/
 
 syntax = "proto3";
 
-package fastlane_c_i;
+package FastlaneCI.Proto;
 
 service Agent {
-  rpc Spawn(Command) returns (stream Log) {}
+  rpc Spawn(Command) returns (stream InvocationResponse) {}
+  rpc RunFastlane(InvocationRequest) returns (stream InvocationResponse) {}
 }
 
 message Log {
@@ -30,6 +31,7 @@ message Log {
 
   // the exit status of the Command. The last `Log` of a stream should contain only a `status` field.
   int32 status = 3;
+  uint32 timestamp = 4;
 }
 
 // A command to be spawned on by the server.
@@ -42,4 +44,58 @@ message Command {
 
   // a map of the environment to be given to the child process.
   map<string,string> env = 3;
+}
+
+// an Invocation is a invocation of Fastlane.
+// TODO: remove Command when we stop shelling out to the fastlane bin
+message InvocationRequest {
+  Command command = 1;
+}
+
+message InvocationResponse {
+
+  message Artifact {
+    string filename = 1;
+    bytes chunk = 2;
+  }
+
+  // Error is used to capture where a particular build failed and for what reason.
+  // This is useful in presenting the error to the user or being able to link to the test cases on the web.
+  // If we have an Error in our stream, we can assume the stream will close.
+  message Error {
+    // in case we don't have a file, line_number, etc we can put a description here.
+    // e.g. Agent cannot clone the repo because of permissions errors.
+    string error_description = 1;
+
+    string file = 2;
+    uint32 line_number = 3;
+    string stacktrace = 4;
+    uint32 exit_status = 5;
+  }
+
+  // the status of the current Build
+  message Status {
+    enum State {
+      PENDING = 0;
+      RUNNING = 1;
+      FINISHING = 2;  // job was successful, but we are still transmitting artifact.
+      BROKEN = 3;
+      SUCCEEDED = 4;
+      FAILED = 5;     // failed is when a test failed, error is when it could not complete the run.
+      REJECTED = 6;
+    }
+
+    State state = 1;
+    string description = 2; // provide more info for rejection.
+  }
+
+  // we can only have an error or an artifact.
+  oneof message_types {
+
+    Error error = 1;
+    Artifact artifact = 2;
+    Status status = 3;
+    Log log = 4;
+  }
+
 }

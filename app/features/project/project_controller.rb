@@ -68,7 +68,9 @@ module FastlaneCI
       remote_runner = RemoteRunner.new(
         project: project,
         git_fork_config: git_fork_config,
-        trigger: trigger)
+        trigger: trigger,
+        github_service: FastlaneCI::GitHubService.new(provider_credential: current_github_provider_credential)
+      )
 
       Services.build_runner_service.add_build_runner(build_runner: remote_runner)
 
