@@ -43,7 +43,7 @@ module FastlaneCI
       end
 
       ws = Faye::WebSocket.new(env, nil, { ping: KEEPALIVE_TIME })
-      web_socket_build_runner_change_listener = WebSocketBuildRunnerChangeListener(web_socket: ws)
+      web_socket_build_runner_change_listener = WebSocketBuildRunnerChangeListener.new(web_socket: ws)
 
       ws.on(:open) do |event|
         logger.debug([:open, ws.object_id])
@@ -73,7 +73,6 @@ module FastlaneCI
       end
 
       ws.on(:close) do |event|
-        web_socket_build_change_listener.connection_closed
         logger.debug([:close, ws.object_id, event.code, event.reason])
 
         url_details = fetch_build_details(event)
@@ -81,6 +80,7 @@ module FastlaneCI
         project_id = url_details[:project_id]
 
         websocket_clients[project_id][build_number].delete(ws)
+        web_socket_build_runner_change_listener.connection_closed
         ws = nil
       end
 
