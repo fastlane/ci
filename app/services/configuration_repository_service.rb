@@ -1,6 +1,7 @@
 require "json"
 require_relative "../shared/logging_module"
 require_relative "../shared/github_handler"
+require_relative "../services/services"
 
 module FastlaneCI
   # Provides operations to create and mutate the FastlaneCI configuration
@@ -37,7 +38,7 @@ module FastlaneCI
     #
     def setup_private_configuration_repo
       create_private_remote_configuration_repo
-      add_bot_user_as_collaborator
+      FastlaneCI::Services.collaborator_service.add_bot_user_as_collaborator(repo_shortform: repo_shortform)
       create_remote_configuration_files
     end
 
@@ -95,29 +96,6 @@ module FastlaneCI
       end
     end
 
-    # Adds the bot user as a collaborator to the fastlane.ci configuration
-    # repository
-    #
-    # @return [Boolean] If the user was added successfully
-    def add_bot_user_as_collaborator
-      already_exists = github_action(onboarding_user_client) { |c| c.collaborator?(repo_shortform, bot_user_login) }
-
-      if already_exists
-        logger.debug("Bot user is already a collaborator to #{repo_shortform}, not adding as collaborator.")
-        return true
-      end
-
-      logger.debug("Adding bot user as collaborator to #{repo_shortform}.")
-
-      invitation_id = invite_bot_user_to_configuration_repository
-
-      if !invitation_id.nil?
-        return accept_invitation_to_repository_as_bot_user(invitation_id)
-      else
-        raise "Could not add bot user as a collaborator. Invitation was not sent to collaborate on #{repo_shortform}."
-      end
-    end
-
     # Creates the `users.json` and `projects.json` configuration files to the
     # remote configuration repository as the bot user
     def create_remote_configuration_files
@@ -125,46 +103,6 @@ module FastlaneCI
       create_remote_json_file("users.json", json_string: serialized_users)
       create_remote_json_file("projects.json")
       create_remote_json_file("environment_variables.json")
-    end
-
-    # Adds the bot user as a collaborator to the fastlane.ci configuration
-    # repository
-    #
-    # @return [Integer] `invitation.id`
-    def invite_bot_user_to_configuration_repository
-      logger.debug("Adding the bot user as a collaborator for #{repo_shortform}.")
-
-      return github_action(onboarding_user_client) do |client|
-        invitation = client.invite_user_to_repository(repo_shortform, bot_user_login)
-
-        if invitation
-          logger.debug("Added bot user as collaborator for #{repo_shortform}.")
-          invitation.id
-        else
-          logger.error("ERROR: Couldn't add bot user as collaborator for #{repo_shortform}.")
-          nil
-        end
-      end
-    end
-
-    # Accepts the invitation to the fastlane.ci repository as the bot user
-    #
-    # @param  [Integer] invitation_id
-    # @return [Boolean] `true` if the invitation was successfully accepted
-    def accept_invitation_to_repository_as_bot_user(invitation_id)
-      logger.debug("Accepting invitation as bot user for #{repo_shortform}.")
-
-      return github_action(bot_user_client) do |client|
-        bot_accepted = client.accept_repository_invitation(invitation_id)
-
-        if bot_accepted
-          logger.debug("Bot user accepted invitation to #{repo_shortform}.")
-        else
-          logger.error("ERROR: Bot user didn't accept invitation to #{repo_shortform}.")
-        end
-
-        bot_accepted
-      end
     end
 
     # Serializes CI user and its provider credentials to a JSON format.
