@@ -62,7 +62,9 @@ module FastlaneCI
       new_commit_prs = open_pull_requests.reject { |pr| local_build_shas_set.include?(pr.current_sha) }
 
       if new_commit_prs.empty?
-        logger.debug("No new commits found for #{project.project_name} on branch #{branch_name} (#{repo_full_name})")
+        logger.debug(
+          "No new commits found for #{project.project_name} (#{repo_full_name}) for branches <#{branches.join(', ')}>"
+        )
         return
       end
 
