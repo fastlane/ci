@@ -25,19 +25,18 @@ module FastlaneCI
 
     def self.map_enumerable_type(enumerable_property_name: nil, current_json_object: nil)
       if enumerable_property_name == :@job_triggers
-        type = current_json_object["type"]
-        # currently only supports 3 triggers
-        job_trigger = nil
-        if type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit]
-          job_trigger = CommitJobTrigger.from_json!(current_json_object)
-        elsif type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:nightly]
-          job_trigger = NightlyJobTrigger.from_json!(current_json_object)
-        elsif type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual]
-          job_trigger = ManualJobTrigger.from_json!(current_json_object)
-        else
-          raise "Unable to parse JobTrigger type: #{type} from #{current_json_object}"
-        end
-        job_trigger
+        return case current_json_object["type"]
+               when FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit]
+                 CommitJobTrigger.from_json!(current_json_object)
+               when FastlaneCI::JobTrigger::TRIGGER_TYPE[:pull_request]
+                 PullRequestJobTrigger.from_json!(current_json_object)
+               when FastlaneCI::JobTrigger::TRIGGER_TYPE[:nightly]
+                 NightlyJobTrigger.from_json!(current_json_object)
+               when FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual]
+                 ManualJobTrigger.from_json!(current_json_object)
+               else
+                 raise "Unable to parse JobTrigger type: #{type} from #{current_json_object}"
+               end
       end
     end
 
