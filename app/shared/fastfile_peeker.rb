@@ -11,6 +11,10 @@ module FastlaneCI
     include FastlaneCI::GitHubHandler
     include FastlaneCI::Logging
 
+    # Error subclass for all errors in this class
+    class FastfilePeekerError < FastlaneCIError
+    end
+
     def initialize(provider_credential: nil, notification_service: nil)
       @provider_credential = provider_credential
       @notification_service = notification_service
@@ -67,31 +71,32 @@ module FastlaneCI
     private
 
     def fastfile_from_contents_map(contents_map)
-      github_action(@client) do |_client|
-        return nil if contents_map.nil?
+      return nil if contents_map.nil?
 
-        if contents_map
-          content = contents_map[:content]
-          return contents_map[:encoding] == "base64" ? Base64.decode64(content) : content
-        end
-        return nil
-      end
+      content = contents_map[:content]
+      return contents_map[:encoding] == "base64" ? Base64.decode64(content) : content
     end
 
     def remote_paths(repo_full_name:, sha_or_branch:)
-      github_action(@client) do
+      action_result = github_action(@client) do
         begin
-          logger.debug("Checking for fastfile in #{repo_full_name}")
+          logger.debug("Checking for fastfiles in #{repo_full_name}")
           result = @client.tree(repo_full_name, sha_or_branch, { recursive: true })
           return result[:tree].map { |resource| resource[:path] } || []
         rescue Octokit::NotFound
           return []
         end
       end
+
+      unless action_result.success?
+        raise FastfilePeekerError, "Unable check for fastfiles in #{repo_full_name}: #{sha_or_branch}"
+      end
+
+      return action_result.value
     end
 
     def remote_file_contents_map(repo_full_name: nil, sha_or_branch:, path:)
-      github_action(@client) do |client|
+      action_result = github_action(@client) do |client|
         begin
           logger.debug("Checking for fastfile in #{repo_full_name}/fastlane/Fastfile")
           contents_map = client.contents(repo_full_name, path: path, ref: sha_or_branch)
@@ -100,6 +105,12 @@ module FastlaneCI
           return nil
         end
       end
+
+      unless action_result.success?
+        raise FastfilePeekerError, "Unable check for fastfiles in #{repo_full_name}: #{sha_or_branch}: #{path}"
+      end
+
+      return action_result.value
     end
 
     def fastfile_from_github(repo_full_name: nil, sha_or_branch:)
