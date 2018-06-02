@@ -1,6 +1,7 @@
 require "json"
 require_relative "../shared/logging_module"
 require_relative "../shared/github_handler"
+require_relative "../shared/fastlane_ci_error"
 
 module FastlaneCI
   # Provides operations to create and mutate the FastlaneCI configuration

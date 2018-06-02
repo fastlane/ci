@@ -1,5 +1,6 @@
 require_relative "../../shared/logging_module"
 require_relative "../../shared/github_handler"
+require_relative "../../shared/fastlane_ci_error"
 require_relative "code_hosting_service"
 require_relative "github_open_pr"
 
