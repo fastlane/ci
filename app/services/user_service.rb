@@ -50,7 +50,7 @@ module FastlaneCI
     end
 
     def update_user!(user:)
-      return user_data_source.update_user!(user: user)
+      user_data_source.update_user!(user: user)
     end
 
     def delete_user!(user:)
