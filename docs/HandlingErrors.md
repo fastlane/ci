@@ -12,6 +12,10 @@ Many different errors can happen at various different points. Having a system to
 
 Some errors are recoverable by just retrying (we do that automatically for things that make sense). Some are recoverable only when somebody logs into the box and fixes the problem. Some problems are not recoverable at all.
 
+This only applies to ci errors (not build errors), some specific examples: if we lost access to something (Google Cloud, GitHub, etc), if something crashed, or `xcode-version` tool doesn't exist. These are all things we need somebody to intervene to fix. Furthermore, we could separate out the errors/warnings by whether we experienced them in the fastlane.ci server process, or build runner process.
+
+The notifications could be a banner of some sort, so it wouldn't fully interrupt your workflow. You could continue to do whatever you were doing.
+
 ## Presenting Errors
 
 Current thinking about errors, they:
