@@ -1,5 +1,6 @@
 require_relative "./file_writers/keys_writer"
 require_relative "./services"
+require_relative "../shared/dot_keys_variables"
 
 module FastlaneCI
   # Logic pertaining to .keys environment variable configuration, this only includes the .keys file
@@ -23,6 +24,10 @@ module FastlaneCI
       new_dot_key_variables = FastlaneCI.dot_keys.all.merge(non_nil_new_env_variables)
       KeysWriter.new(path: keys_file_path, locals: new_dot_key_variables).write!
       reload_dot_env!
+    end
+
+    def keys
+      return DotKeysVariables.new
     end
 
     # Reloads the dot key variables and resets the memoized services that
