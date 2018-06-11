@@ -1,7 +1,7 @@
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 
-import {SharedMaterialModule} from '../../shared_material.module';
+import {SharedMaterialModule} from '../../root/shared_material.module';
 
 import {StatusIconComponent} from './status-icon/status-icon.component';
 
