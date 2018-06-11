@@ -13,7 +13,7 @@ import {ToolbarModule} from '../common/components/toolbar/toolbar.module';
 import {mockProject} from '../common/test_helpers/mock_project_data';
 import {Project} from '../models/project';
 import {DataService} from '../services/data.service';
-import {SharedMaterialModule} from '../shared_material.module';
+import {SharedMaterialModule} from '../root/shared_material.module';
 
 import {ProjectComponent} from './project.component';
 
