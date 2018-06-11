@@ -5,7 +5,7 @@
 # proto definitions for auto-generated client, server, and messages to pass using grpc.
 #
 # if you make any changes to this file, run
-#   `rake proto`
+#   `rake generate_protos`
 # to regenerate the ruby code.
 #
 
