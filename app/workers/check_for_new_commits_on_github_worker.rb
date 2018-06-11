@@ -33,7 +33,9 @@ module FastlaneCI
     end
 
     def work
-      check_for_new_commits_on_branch
+      self.busy = true
+      check_for_new_commits
+      self.busy = false
     end
 
     private

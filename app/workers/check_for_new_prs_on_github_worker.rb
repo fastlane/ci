@@ -30,7 +30,9 @@ module FastlaneCI
     end
 
     def work
+      self.busy = true
       check_for_new_pull_requests
+      self.busy = false
     end
 
     private
