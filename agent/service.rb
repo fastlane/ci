@@ -59,7 +59,6 @@ module FastlaneCI
         # convert every line from io to a Log object in a lazy stream
         output_enumerator.lazy.flat_map do |line, status|
           # proto3 doesn't have nullable fields, afaik
-          puts line
           log = FastlaneCI::Proto::Log.new(message: (line || NULL_CHAR), status: (status || 0))
           FastlaneCI::Proto::InvocationResponse.new(log: log)
         end
