@@ -41,7 +41,7 @@ module FastlaneCI
     # TODO: make synchronize work again
     def settings
       # JSONSettingDataSource.file_semaphore.synchronize do
-        return @settings
+      return @settings
       # end
     end
 
