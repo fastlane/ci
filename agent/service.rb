@@ -66,7 +66,7 @@ module FastlaneCI
 
       def run_fastlane(invocation_request, _call)
         command = invocation_request.command
-        logger.info("RCP run_fastlane: #{command.bin} #{command.parameters}, env: #{command.env.to_h}")
+        logger.info("RPC run_fastlane: #{command.bin} #{command.parameters}, env: #{command.env.to_h}")
 
         # fastlane actions are not thread-safe and we must not run more than 1 at a time.
         # because the grpc server is multi-threaded we may lock the invocation with a mutex
