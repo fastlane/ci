@@ -60,7 +60,8 @@ module FastlaneCI
         output_enumerator.lazy.flat_map do |line, status|
           # proto3 doesn't have nullable fields, afaik
           puts line
-          Proto::Log.new(message: (line || NULL_CHAR), status: (status || 0))
+          log = FastlaneCI::Proto::Log.new(message: (line || NULL_CHAR), status: (status || 0))
+          FastlaneCI::Proto::InvocationResponse.new(log: log)
         end
       end
 

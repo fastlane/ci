@@ -9,15 +9,23 @@ describe FastlaneCI::Agent::Service do
   end
 
   describe "#spawn" do
-    let(:command) { instance_double("FastlaneCI::Agent::Command", env: {}, bin: "/bin/echo", parameters: ["hello world"]) }
+    echo_message = "hello world"
+    let(:command) { instance_double("FastlaneCI::Agent::Command", env: {}, bin: "/bin/echo", parameters: [echo_message]) }
     let(:call) { double("GRP Call") }
+
     it "spawns a command with the environment and parameters" do
       expect(Open3).to receive(:popen2e).and_call_original
       service.spawn(command, call)
     end
 
     it "returns a ProcessEnumerator that contains the output of the command" do
-      expect(service.spawn(command, call)).to be_instance_of(Enumerator::Lazy)
+      responses = service.spawn(command, call)
+      expect(responses).to be_instance_of(Enumerator::Lazy)
+      expect(responses.peek.log.message).to start_with(echo_message)
+      responses.each do |response|
+        expect(response).to be_instance_of(FastlaneCI::Proto::InvocationResponse)
+        expect(response.log).to be_instance_of(FastlaneCI::Proto::Log)
+      end
     end
   end
 

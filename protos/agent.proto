@@ -11,7 +11,7 @@ syntax = "proto3";
 package FastlaneCI.Proto;
 
 service Agent {
-  rpc Spawn(Command) returns (stream Log) {}
+  rpc Spawn(Command) returns (stream InvocationResponse) {}
   rpc RunFastlane(InvocationRequest) returns (stream InvocationResponse) {}
 }
 
