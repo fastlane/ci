@@ -46,7 +46,7 @@ module FastlaneCI
 
       unless manual_triggers_allowed
         status(403) # Forbidden
-        body("Cannot build. There is no manual build trigger, for this branch, associated with this project.")
+        halt(403, "Cannot build. There is no manual build trigger, for this branch, associated with this project")
         return
       end
 
@@ -71,10 +71,8 @@ module FastlaneCI
       build_runner.setup(parameters: nil)
       Services.build_runner_service.add_build_runner(build_runner: build_runner)
 
-      json({
-        status: :success,
-        build_number: build_runner.current_build.number
-      })
+      build_view_model = BuildViewModel.new(build: build_runner.current_build)
+      json(build_view_model)
     end
 
     def current_project
