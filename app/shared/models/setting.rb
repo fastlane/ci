@@ -29,6 +29,3 @@ module FastlaneCI
     end
   end
 end
-
-# TODO:
-# 1) What if the user defines a Setting whose key we don't support

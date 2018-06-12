@@ -55,6 +55,9 @@ module FastlaneCI
       return true
     end
 
+    # TODO: think more about error handling
+    # 1) key not found
+    # 2) other errors
     def update_setting!(setting:)
       key = setting.key
 
