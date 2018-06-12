@@ -14,9 +14,9 @@ GIT
 
 GIT
   remote: https://github.com/fastlane/fastlane
-  revision: 72eb1a40dd982985828a7d1de2d1bf91184191e1
+  revision: e3afc4105988d3aaf4b2bef746f4101eeb441af9
   specs:
-    fastlane (2.95.0)
+    fastlane (2.97.0)
       CFPropertyList (>= 2.3, < 4.0.0)
       addressable (>= 2.3, < 3.0.0)
       babosa (>= 1.0.2, < 2.0.0)
@@ -40,7 +40,7 @@ GIT
       multipart-post (~> 2.0.0)
       plist (>= 3.1.0, < 4.0.0)
       public_suffix (~> 2.0.0)
-      rubyzip (>= 1.1.0, < 2.0.0)
+      rubyzip (>= 1.2.1, < 2.0.0)
       security (= 0.1.3)
       simctl (~> 1.6.3)
       slack-notifier (>= 2.0.0, < 3.0.0)
@@ -61,7 +61,7 @@ GIT
 
 GIT
   remote: https://github.com/krausefx/google-cloud-ruby
-  revision: f71ec2e7a1eaf43c15312d611dd1cc4de530f823
+  revision: aa500d5afab2631e21d690e6c76e982845ada179
   branch: patch-1
   specs:
     google-cloud-core (1.2.0)
@@ -119,11 +119,11 @@ GEM
     emoji_regex (0.1.1)
     equalizer (0.0.11)
     equatable (0.5.0)
-    et-orbi (1.1.1)
+    et-orbi (1.1.2)
       tzinfo
     eventmachine (1.2.7)
     excon (0.62.0)
-    faraday (0.15.1)
+    faraday (0.15.2)
       multipart-post (>= 1.2, < 3)
     faraday-cookie_jar (0.0.6)
       faraday (>= 0.7.4)
@@ -188,7 +188,7 @@ GEM
     multipart-post (2.0.0)
     mustermann (1.0.2)
     nanaimo (0.2.5)
-    naturally (2.1.0)
+    naturally (2.2.0)
     octokit (4.9.0)
       sawyer (~> 0.8.0, >= 0.5.3)
     os (0.9.6)
@@ -199,7 +199,7 @@ GEM
       equatable (~> 0.5.0)
       tty-color (~> 0.4.0)
     plist (3.4.0)
-    powerpack (0.1.1)
+    powerpack (0.1.2)
     procto (0.0.3)
     pry (0.11.3)
       coderay (~> 1.1.0)
@@ -220,7 +220,7 @@ GEM
       declarative (< 0.1.0)
       declarative-option (< 0.2.0)
       uber (< 0.2.0)
-    retriable (3.1.1)
+    retriable (3.1.2)
     rouge (2.0.7)
     rspec (3.7.0)
       rspec-core (~> 3.7.0)
@@ -305,7 +305,7 @@ GEM
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.7.5)
-    unicode-display_width (1.3.2)
+    unicode-display_width (1.4.0)
     unparser (0.2.7)
       abstract_type (~> 0.0.7)
       adamantium (~> 0.2.0)
@@ -314,7 +314,7 @@ GEM
       equalizer (~> 0.0.9)
       parser (>= 2.3.1.2, < 2.6)
       procto (~> 0.0.2)
-    webmock (3.4.1)
+    webmock (3.4.2)
       addressable (>= 2.3.6)
       crack (>= 0.3.2)
       hashdiff
@@ -322,7 +322,7 @@ GEM
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.3)
     word_wrap (1.0.0)
-    xcode-install (2.4.0)
+    xcode-install (2.4.1)
       claide (>= 0.9.1, < 1.1.0)
       fastlane (>= 2.1.0, < 3.0.0)
     xcodeproj (1.5.9)
@@ -361,7 +361,7 @@ DEPENDENCIES
   rspec
   rubocop
   rufus-scheduler (>= 3.5.0, < 4.0.0)
-  sinatra (>= 2.0.1, < 3.0.0)
+  sinatra (= 2.0.1)
   sinatra-contrib (>= 2.0.0, < 3.0.0)
   sinatra-flash
   taskqueue!

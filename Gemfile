@@ -14,7 +14,7 @@ source("https://rubygems.org")
 
 # Sinatra
 gem "faye-websocket", ">= 0.10.7", "< 1.0.0" # web socket connection for Sinatra
-gem "sinatra", ">= 2.0.1", "< 3.0.0" # Our web application library
+gem "sinatra", "= 2.0.1" # Our web application library
 gem "sinatra-contrib", ">= 2.0.0", "< 3.0.0" # includes some Sinatra helper methods
 gem "sinatra-flash" # renders error messages in the browser - remove once we switched to new frontend
 
