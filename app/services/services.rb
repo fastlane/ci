@@ -127,7 +127,8 @@ module FastlaneCI
         project_data_source: FastlaneCI::JSONProjectDataSource.create(
           ci_config_git_repo_path,
           git_config: ci_config_repo,
-          user: ci_user
+          user: ci_user,
+          notification_service: Services.notification_service
         )
       )
     end
