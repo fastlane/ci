@@ -34,10 +34,11 @@ module FastlaneCI::Agent
 
       Recipes.setup_repo(git_url)
 
-      unless has_required_xcode_version?
-        reject(RuntimeError.new("Does not have required xcode version!. This is hardcode to be random."))
-        return
-      end
+      # TODO: ensure we are able to satisfy the request
+      # unless has_required_xcode_version?
+      #   reject(RuntimeError.new("Does not have required xcode version!. This is hardcode to be random."))
+      #   return
+      # end
 
       if Recipes.run_fastlane(@invocation_request.command.env.to_h)
         finish
