@@ -72,9 +72,9 @@ message InvocationResponse {
     uint32 exit_status = 5;
   }
 
-  // the current state of the build
+  // the current state of the invocation
   enum State {
-    PENDING = 0;
+    PENDING = 0;    // default state, we should never transition *to* the PENDING state
     RUNNING = 1;
     FINISHING = 2;  // job was successful, but we are still transmitting artifact.
     BROKEN = 3;

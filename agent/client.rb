@@ -34,7 +34,7 @@ if $0 == __FILE__
   response.each do |r|
     puts("Log: #{r.log.message}") if r.log
 
-    puts("State: #{r.state}") if r.state
+    puts("State: #{r.state}") if r.state != :PENDING
 
     puts("Error: #{r.error.description} #{r.error.stacktrace}") if r.error
 
