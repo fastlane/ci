@@ -39,7 +39,7 @@ module FastlaneCI::Agent
 
     def send_state(event, payload)
       logger.debug("Event `#{event}` causing state change to #{state}. #{payload}")
-      super if defined?(super)
+      super
     end
 
     def run
@@ -49,7 +49,7 @@ module FastlaneCI::Agent
         return
       end
 
-      super if defined?(super)
+      super
     end
 
     def finish
@@ -59,7 +59,7 @@ module FastlaneCI::Agent
         return
       end
 
-      super if defined?(super)
+      super
     end
 
     def succeed
@@ -69,7 +69,7 @@ module FastlaneCI::Agent
         return
       end
 
-      super if defined?(super)
+      super
     end
 
     def reject(exception)
@@ -79,7 +79,7 @@ module FastlaneCI::Agent
         return
       end
 
-      super if defined?(super)
+      super
     end
 
     def fail
@@ -89,7 +89,7 @@ module FastlaneCI::Agent
         return
       end
 
-      super if defined?(super)
+      super
     end
 
     def throw(exception)
@@ -99,7 +99,7 @@ module FastlaneCI::Agent
         return
       end
 
-      super if defined?(super)
+      super
     end
   end
 end

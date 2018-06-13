@@ -6,6 +6,10 @@ describe FastlaneCI::Agent::StateMachine do
   class Invocation
     prepend FastlaneCI::Agent::StateMachine
 
+    def send_state(_event, _payload)
+      # no-op
+    end
+
     def run
       "some return value"
     end

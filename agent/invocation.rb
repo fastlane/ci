@@ -21,7 +21,10 @@ module FastlaneCI::Agent
       Recipes.output_queue = @output_queue
     end
 
-    ## state machine actions
+    ## 
+    # StateMachine actions
+    # These methods run as hooks whenever a transition was successful.
+    ##
 
     def run
       # send logs that get put on the output queue.
@@ -56,6 +59,18 @@ module FastlaneCI::Agent
       file_path = Recipes.archive_artifacts(artifact_path)
       send_file(file_path)
       succeed
+    end
+
+    # the `succeed` method has no special action
+    # the StateMachine requires it's implemented as it's called after a successful transition
+    def succeed
+      # no-op
+    end
+
+    # the `fail` method has no special action
+    # the StateMachine requires it's implemented as it's called after a successful transition
+    def fail
+      # no-op
     end
 
     def throw(exception)
