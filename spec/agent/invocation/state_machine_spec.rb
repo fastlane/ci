@@ -22,8 +22,8 @@ describe FastlaneCI::Agent::StateMachine do
     expect(invocation.states).to contain_exactly("pending", "running", "finishing", "succeeded", "rejected", "failed", "broken")
   end
 
-  it "attempts to call `send_status` on a transition" do
-    expect(invocation).to receive(:send_status).with(:run, nil)
+  it "attempts to call `send_state` on a transition" do
+    expect(invocation).to receive(:send_state).with(:run, nil)
     invocation.run
   end
 

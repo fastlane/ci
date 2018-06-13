@@ -35,7 +35,7 @@ module FastlaneCI::Agent
       Recipes.setup_repo(git_url)
 
       unless has_required_xcode_version?
-        reject("Does not have required xcode version!. This is hardcode to be random.")
+        reject(RuntimeError.new("Does not have required xcode version!. This is hardcode to be random."))
         return
       end
 
@@ -62,7 +62,16 @@ module FastlaneCI::Agent
 
       error = FastlaneCI::Proto::InvocationResponse::Error.new
       error.stacktrace = exception.backtrace.join("\n")
-      error.error_description = exception.message
+      error.description = exception.message
+
+      @yielder << FastlaneCI::Proto::InvocationResponse.new(error: error)
+    end
+
+    def reject(exception)
+      logger.info("Invocation rejected: #{exception}")
+
+      error = FastlaneCI::Proto::InvocationResponse::Error.new
+      error.description = exception.message
 
       @yielder << FastlaneCI::Proto::InvocationResponse.new(error: error)
     end
@@ -76,14 +85,10 @@ module FastlaneCI::Agent
 
     # responder methods
 
-    def send_status(event, payload)
-      logger.debug("Status changed. Event `#{event}` => #{state}")
+    def send_state(event, _payload)
+      logger.debug("State changed. Event `#{event}` => #{state}")
 
-      status = FastlaneCI::Proto::InvocationResponse::Status.new
-      status.state = state.to_s.upcase.to_sym
-      status.description = payload.to_s unless payload.nil?
-
-      @yielder << FastlaneCI::Proto::InvocationResponse.new(status: status)
+      @yielder << FastlaneCI::Proto::InvocationResponse.new(state: state.to_s.upcase.to_sym)
     end
 
     ##

@@ -11,7 +11,7 @@ module FastlaneCI::Agent
   # Methods for each transition are defined, and will only be called in the containing class
   # if the transition is valid.
   #
-  # On every transition `send_status` will be attempted to be called.
+  # On every transition `send_state` will be attempted to be called.
   module StateMachine
     include Logging
     extend Forwardable
@@ -32,12 +32,12 @@ module FastlaneCI::Agent
 
         # send update whenever we transition states.
         fsm.on(:any) do |event, payload|
-          send_status(event, payload)
+          send_state(event, payload)
         end
       end
     end
 
-    def send_status(event, payload)
+    def send_state(event, payload)
       logger.debug("Event `#{event}` causing state change to #{state}. #{payload}")
       super if defined?(super)
     end
@@ -72,8 +72,8 @@ module FastlaneCI::Agent
       super if defined?(super)
     end
 
-    def reject(reason)
-      unless state_machine.trigger(:reject, reason)
+    def reject(exception)
+      unless state_machine.trigger(:reject, exception)
         valid = state_machine.triggerable_events.inspect
         logger.error("`reject` could not transition from `#{state}`. #{valid} are the only valid events.")
         return

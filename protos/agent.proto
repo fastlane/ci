@@ -65,37 +65,30 @@ message InvocationResponse {
   message Error {
     // in case we don't have a file, line_number, etc we can put a description here.
     // e.g. Agent cannot clone the repo because of permissions errors.
-    string error_description = 1;
-
+    string description = 1;
     string file = 2;
     uint32 line_number = 3;
     string stacktrace = 4;
     uint32 exit_status = 5;
   }
 
-  // the status of the current Build
-  message Status {
-    enum State {
-      PENDING = 0;
-      RUNNING = 1;
-      FINISHING = 2;  // job was successful, but we are still transmitting artifact.
-      BROKEN = 3;
-      SUCCEEDED = 4;
-      FAILED = 5;     // failed is when a test failed, error is when it could not complete the run.
-      REJECTED = 6;
-    }
-
-    State state = 1;
-    string description = 2; // provide more info for rejection.
+  // the current state of the build
+  enum State {
+    PENDING = 0;
+    RUNNING = 1;
+    FINISHING = 2;  // job was successful, but we are still transmitting artifact.
+    BROKEN = 3;
+    SUCCEEDED = 4;
+    FAILED = 5;     // failed is when a test failed, error is when it could not complete the run.
+    REJECTED = 6;
   }
 
-  // we can only have an error or an artifact.
+  // we can only one sub-message at a time.
   oneof message_types {
-
-    Error error = 1;
-    Artifact artifact = 2;
-    Status status = 3;
-    Log log = 4;
+    State state = 1;
+    Log log = 2;
+    Artifact artifact = 3;
+    Error error = 4;
   }
 
 }

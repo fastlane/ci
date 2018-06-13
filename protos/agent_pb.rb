@@ -27,10 +27,10 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
   end
   add_message "FastlaneCI.Proto.InvocationResponse" do
     oneof :message_types do
-      optional :error, :message, 1, "FastlaneCI.Proto.InvocationResponse.Error"
-      optional :artifact, :message, 2, "FastlaneCI.Proto.InvocationResponse.Artifact"
-      optional :status, :message, 3, "FastlaneCI.Proto.InvocationResponse.Status"
-      optional :log, :message, 4, "FastlaneCI.Proto.Log"
+      optional :state, :enum, 1, "FastlaneCI.Proto.InvocationResponse.State"
+      optional :log, :message, 2, "FastlaneCI.Proto.Log"
+      optional :artifact, :message, 3, "FastlaneCI.Proto.InvocationResponse.Artifact"
+      optional :error, :message, 4, "FastlaneCI.Proto.InvocationResponse.Error"
     end
   end
   add_message "FastlaneCI.Proto.InvocationResponse.Artifact" do
@@ -38,17 +38,13 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     optional :chunk, :bytes, 2
   end
   add_message "FastlaneCI.Proto.InvocationResponse.Error" do
-    optional :error_description, :string, 1
+    optional :description, :string, 1
     optional :file, :string, 2
     optional :line_number, :uint32, 3
     optional :stacktrace, :string, 4
     optional :exit_status, :uint32, 5
   end
-  add_message "FastlaneCI.Proto.InvocationResponse.Status" do
-    optional :state, :enum, 1, "FastlaneCI.Proto.InvocationResponse.Status.State"
-    optional :description, :string, 2
-  end
-  add_enum "FastlaneCI.Proto.InvocationResponse.Status.State" do
+  add_enum "FastlaneCI.Proto.InvocationResponse.State" do
     value :PENDING, 0
     value :RUNNING, 1
     value :FINISHING, 2
@@ -68,7 +64,6 @@ module FastlaneCI
     InvocationResponse = Google::Protobuf::DescriptorPool.generated_pool.lookup("FastlaneCI.Proto.InvocationResponse").msgclass
     InvocationResponse::Artifact = Google::Protobuf::DescriptorPool.generated_pool.lookup("FastlaneCI.Proto.InvocationResponse.Artifact").msgclass
     InvocationResponse::Error = Google::Protobuf::DescriptorPool.generated_pool.lookup("FastlaneCI.Proto.InvocationResponse.Error").msgclass
-    InvocationResponse::Status = Google::Protobuf::DescriptorPool.generated_pool.lookup("FastlaneCI.Proto.InvocationResponse.Status").msgclass
-    InvocationResponse::Status::State = Google::Protobuf::DescriptorPool.generated_pool.lookup("FastlaneCI.Proto.InvocationResponse.Status.State").enummodule
+    InvocationResponse::State = Google::Protobuf::DescriptorPool.generated_pool.lookup("FastlaneCI.Proto.InvocationResponse.State").enummodule
   end
 end

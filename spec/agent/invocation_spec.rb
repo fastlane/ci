@@ -15,14 +15,14 @@ describe FastlaneCI::Agent::Invocation do
   let(:invocation) { described_class.new(invocation_request, yielder) }
 
   it "has states that are defined in the proto" do
-    proto_states = FastlaneCI::Proto::InvocationResponse::Status::State.constants
+    proto_states = FastlaneCI::Proto::InvocationResponse::State.constants
     proto_states.map! { |s| s.downcase.to_s }
     expect(invocation.states).to contain_exactly(*proto_states)
   end
 
   describe "#throw" do
     it "sends a state change and an exception back to the client" do
-      expect(yielder).to receive(:<<).with(proto_message(status: { state: :BROKEN, description: "my dog hates technology" }))
+      expect(yielder).to receive(:<<).with(proto_message(state: :BROKEN))
       expect(yielder).to receive(:<<).with(proto_message(:error))
       begin
         raise "my dog hates technology"
@@ -32,10 +32,24 @@ describe FastlaneCI::Agent::Invocation do
     end
   end
 
-  describe "#send_status" do
+  describe "#reject" do
+    before do
+      allow(yielder).to receive(:<<).with(proto_message(state: :RUNNING))
+      # can only transition to rejected after it's run
+      invocation.state_machine.trigger(:run)
+    end
+
+    it "sends a state change and an exception back to the client" do
+      expect(yielder).to receive(:<<).with(proto_message(state: :REJECTED))
+      expect(yielder).to receive(:<<).with(proto_message(:error))
+      invocation.reject(RuntimeError.new("my dog hates technology"))
+    end
+  end
+
+  describe "#send_state" do
     it "sends the current state to the yielder triggered by a state change transition" do
-      expect(yielder).to receive(:<<).with(proto_message(status: { state: :PENDING, description: "" }))
-      invocation.send_status("run", nil)
+      expect(yielder).to receive(:<<).with(proto_message(state: :PENDING))
+      invocation.send_state("run", nil)
     end
   end
 
