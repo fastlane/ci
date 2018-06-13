@@ -24,7 +24,8 @@ module FastlaneCI::Agent
         fsm.when(:run,     "pending"   => "running")
         fsm.when(:finish,  "running"   => "finishing")
         fsm.when(:succeed, "finishing" => "succeeded")
-        fsm.when(:reject,  "running"   => "rejected")
+        fsm.when(:reject,  "pending"   => "rejected",
+                           "running"   => "rejected")
         fsm.when(:fail,    "running"   => "failed")
         fsm.when(:throw,   "pending"   => "broken",
                            "running"   => "broken",

@@ -37,7 +37,12 @@ module FastlaneCI
       end
 
       def initialize
-        @invocation_mutex = Mutex.new
+        # fastlane actions are not thread-safe and we must not run more than 1 at a time.
+        @busy = false
+      end
+
+      def busy?
+        @busy
       end
 
       ##
@@ -67,17 +72,19 @@ module FastlaneCI
       def run_fastlane(invocation_request, _call)
         command = invocation_request.command
         logger.info("RPC run_fastlane: #{command.bin} #{command.parameters}, env: #{command.env.to_h}")
-
-        # fastlane actions are not thread-safe and we must not run more than 1 at a time.
-        # because the grpc server is multi-threaded we may lock the invocation with a mutex
-        @invocation_mutex.synchronize do
-          Enumerator.new do |yielder|
-            begin
-              invocation = Invocation.new(invocation_request, yielder)
-              invocation.run
-            rescue StandardError => exception
-              invocation.throw(exception)
+        Enumerator.new do |yielder|
+          begin
+            invocation = Invocation.new(invocation_request, yielder)
+            if busy?
+              invocation.reject(RuntimeError.new("I am busy"))
+              next
             end
+            @busy = true
+            invocation.run
+            @busy = false
+          rescue StandardError => exception
+            invocation.throw(exception)
+            @busy = false
           end
         end
       end
