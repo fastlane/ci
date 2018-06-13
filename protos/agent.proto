@@ -63,8 +63,6 @@ message InvocationResponse {
   // This is useful in presenting the error to the user or being able to link to the test cases on the web.
   // If we have an Error in our stream, we can assume the stream will close.
   message Error {
-    // in case we don't have a file, line_number, etc we can put a description here.
-    // e.g. Agent cannot clone the repo because of permissions errors.
     string description = 1;
     string file = 2;
     uint32 line_number = 3;
