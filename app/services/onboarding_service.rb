@@ -8,6 +8,11 @@ module FastlaneCI
   class OnboardingService
     include FastlaneCI::Logging
 
+    # File names that should be present in configuration repository.
+    #
+    # @return [Array[String]]
+    CONFIGURATION_FILES = ["users.json", "projects.json", "environment_variables.json"].freeze
+
     # Triggers the initial clone of the remote configuration repository, to the
     # local fastlane configuration repository in `~/.fastlane/ci`
     #
@@ -62,12 +67,20 @@ module FastlaneCI
       return @setup_correctly
     end
 
-    # Returns `true` if the local configuration repository exists
+    # Returns `true` if the local configuration repository exists, and all
+    # required files are present
     #
     # @return [Boolean]
     def local_configuration_repo_exists?
       unless Dir.exist?(Services.ci_config_git_repo_path)
         logger.debug("local configuration repo doesn't exist")
+        return false
+      end
+
+      configuration_repo_contents = Dir[File.join(Services.ci_config_git_repo_path, "*")]
+
+      unless CONFIGURATION_FILES.all? { |f| configuration_repo_contents.include?(f) }
+        logger.debug("local configuration repo doesn't contain required configuration files")
         return false
       end
 
