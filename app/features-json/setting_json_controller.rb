@@ -15,7 +15,7 @@ module FastlaneCI
 
       setting = Services.setting_service.find_setting(setting_key: key.to_sym)
       # TODO: use right exit code below & update tests
-      return json({error: "`#{params[:setting_key]}` not found."}) if setting.nil?
+      return json({ error: "`#{params[:setting_key]}` not found." }) if setting.nil?
 
       # TODO: security aspect, how do we make sure this can't be abused?
       # We don't want to hash/encrypt all of them, as this would make it harder for
@@ -32,7 +32,7 @@ module FastlaneCI
 
     delete "#{HOME}/:setting_key" do
       begin
-        # TODO: security for parameters as above
+        # TODO: security for parameters as in the POST code
         Services.setting_service.reset_setting!(setting_key: params[:setting_key])
         return json({ status: :success })
       rescue SettingServiceKeyNotFoundError

@@ -3,8 +3,8 @@ require "app/features-json/setting_json_controller"
 
 describe FastlaneCI::SettingJSONController do
   let(:app) { described_class.new }
-  let(:json) { JSON.parse( last_response.body) }
-  
+  let(:json) { JSON.parse(last_response.body) }
+
   before do
     header("Authorization", bearer_token)
   end
@@ -30,13 +30,41 @@ describe FastlaneCI::SettingJSONController do
   end
 
   describe "POST /data/settings/:setting_key" do
-    
+    it "successfully updates the setting" do
+      metrics_key = "metrics_enabled"
+      new_value = "true"
+
+      setting = FastlaneCI::Services.setting_service.find_setting(setting_key: metrics_key.to_sym)
+      setting.value = "false"
+      FastlaneCI::Services.setting_service.update_setting!(setting: setting)
+      expect(FastlaneCI::Services.setting_service.find_setting(setting_key: metrics_key.to_sym).value).to eq("false")
+
+      post("/data/settings/#{metrics_key}?value=#{new_value}")
+      expect(json).to eq({ "status" => "success" })
+
+      expect(FastlaneCI::Services.setting_service.find_setting(setting_key: metrics_key.to_sym).value).to eq("true")
+    end
+
     it "returns an error if key doesn't exist" do
       non_existent_key = "non_existent_key"
       post("/data/settings/#{non_existent_key}")
       # expect(last_response).to_not be_ok # TODO: use right exit code
       expect(json["error"].to_s.length).to be > 0
       expect(json["error"]).to eq("`non_existent_key` not found.")
+    end
+  end
+
+  describe "DELETE /data/settings/:setting_key" do
+    it "works" do
+      metrics_key = "metrics_enabled"
+      setting = FastlaneCI::Services.setting_service.find_setting(setting_key: metrics_key.to_sym)
+      setting.value = "true"
+      FastlaneCI::Services.setting_service.update_setting!(setting: setting)
+
+      delete("/data/settings/#{metrics_key}")
+      expect(json).to eq({ "status" => "success" })
+
+      expect(FastlaneCI::Services.setting_service.find_setting(setting_key: metrics_key.to_sym).value).to eq(nil)
     end
   end
 end
