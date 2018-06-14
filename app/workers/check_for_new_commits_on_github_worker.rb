@@ -74,7 +74,9 @@ module FastlaneCI
     end
 
     def work
+      self.busy = true
       check_for_new_commits
+      self.busy = false
     end
   end
 end

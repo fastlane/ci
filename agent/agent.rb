@@ -19,6 +19,8 @@ module FastlaneCI
     NULL_CHAR = "\0"
     EOT_CHAR = "\4" # end-of-transmission character.
 
+    ##
+    # Logging module to expose the logger.
     module Logging
       def logger
         return @logger if defined?(@logger)

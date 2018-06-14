@@ -11,12 +11,12 @@ module FastlaneCI::Agent
   # Methods for each transition are defined, and will only be called in the containing class
   # if the transition is valid.
   #
-  # On every transition `send_status` will be attempted to be called.
+  # On every transition `send_state` will be attempted to be called.
   module StateMachine
     include Logging
     extend Forwardable
 
-    #forward methods to the state machine
+    # forward methods to the state machine
     def_delegators :state_machine, :state, :events, :states
 
     def state_machine
@@ -32,68 +32,74 @@ module FastlaneCI::Agent
 
         # send update whenever we transition states.
         fsm.on(:any) do |event, payload|
-          send_status(event, payload)
+          send_state(event, payload)
         end
       end
     end
 
-    def send_status(event, payload)
+    def send_state(event, payload)
       logger.debug("Event `#{event}` causing state change to #{state}. #{payload}")
-      super if defined?(super)
+      super
     end
 
     def run
       unless state_machine.trigger(:run)
-        logger.error("`run` could not transition from `#{state}`. #{state_machine.triggerable_events.inspect} are the only valid events.")
+        valid = state_machine.triggerable_events.inspect
+        logger.error("`run` could not transition from `#{state}`. #{valid} are the only valid events.")
         return
       end
 
-      super if defined?(super)
+      super
     end
 
     def finish
       unless state_machine.trigger(:finish)
-        logger.error("`finish` could not transition from `#{state}`. #{state_machine.triggerable_events.inspect} are the only valid events.")
+        valid = state_machine.triggerable_events.inspect
+        logger.error("`finish` could not transition from `#{state}`. #{valid} are the only valid events.")
         return
       end
 
-      super if defined?(super)
+      super
     end
 
     def succeed
       unless state_machine.trigger(:finish)
-        logger.error("`succeed` could not transition from `#{state}`. #{state_machine.triggerable_events.inspect} are the only valid events.")
+        valid = state_machine.triggerable_events.inspect
+        logger.error("`succeed` could not transition from `#{state}`. #{valid} are the only valid events.")
         return
       end
 
-      super if defined?(super)
+      super
     end
 
-    def reject(reason)
-      unless state_machine.trigger(:reject, reason)
-        logger.error("`reject` could not transition from `#{state}`. #{state_machine.triggerable_events.inspect} are the only valid events.")
+    def reject(exception)
+      unless state_machine.trigger(:reject, exception)
+        valid = state_machine.triggerable_events.inspect
+        logger.error("`reject` could not transition from `#{state}`. #{valid} are the only valid events.")
         return
       end
 
-      super if defined?(super)
+      super
     end
 
     def fail
       unless state_machine.trigger(:fail)
-        logger.error("`fail` could not transition from `#{state}`. #{state_machine.triggerable_events.inspect} are the only valid events.")
+        valid = state_machine.triggerable_events.inspect
+        logger.error("`fail` could not transition from `#{state}`. #{valid} are the only valid events.")
         return
       end
 
-      super if defined?(super)
+      super
     end
 
     def throw(exception)
       unless state_machine.trigger(:throw, exception)
-        logger.error("`throw` could not transition from `#{state}`. #{state_machine.triggerable_events.inspect} are the only valid events.")
+        valid = state_machine.triggerable_events.inspect
+        logger.error("`throw` could not transition from `#{state}`. #{valid} are the only valid events.")
         return
       end
 
-      super if defined?(super)
+      super
     end
   end
 end

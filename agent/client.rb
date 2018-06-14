@@ -20,25 +20,29 @@ module FastlaneCI
       end
     end
   end
+  @file && @file.close
 end
 
 if $0 == __FILE__
   client = FastlaneCI::Agent::Client.new("localhost")
-  response = client.request_run_fastlane("actions", env: {'FASTLANE_CI_ARTIFACTS' => 'artifacts', 'GIT_URL' => 'https://github.com/snatchev/themoji-ios'})
+  env = {
+    "FASTLANE_CI_ARTIFACTS" => "artifacts",
+    "GIT_URL" => "https://github.com/snatchev/themoji-ios"
+  }
+  response = client.request_run_fastlane("actions", env: env)
+
   @file = nil
   response.each do |r|
-    puts "Log: #{r.log.message}" if r.log
+    puts("Log: #{r.log.message}") if r.log
 
-    puts "Status: #{r.status.state}" if r.status
+    puts("State: #{r.state}") if r.state != :PENDING
 
+    puts("Error: #{r.error.description} #{r.error.stacktrace}") if r.error
 
-    puts "Error: #{r.error.error_description} #{r.error.stacktrace}" if r.error
-
-    if r.artifact
-      puts "Chunk: writing to #{r.artifact.filename}"
-      @file ||= File.new(r.artifact.filename, 'wb')
-      @file.write(r.artifact.chunk)
-    end
+    next unless r.artifact
+    puts("Chunk: writing to #{r.artifact.filename}")
+    @file ||= File.new(r.artifact.filename, "wb")
+    @file.write(r.artifact.chunk)
   end
   @file && @file.close
 end

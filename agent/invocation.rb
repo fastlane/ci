@@ -3,6 +3,13 @@ require_relative "invocation/recipes"
 require_relative "invocation/state_machine"
 
 module FastlaneCI::Agent
+  ##
+  # the Invocation models a fastlane invocation.
+  # It has states and state transitions
+  # streams update to state, logs, and artifacts via the `yielder`
+  #
+  #
+  #
   class Invocation
     include Logging
     prepend StateMachine
@@ -14,7 +21,10 @@ module FastlaneCI::Agent
       Recipes.output_queue = @output_queue
     end
 
-    ## state machine actions
+    ## 
+    # StateMachine actions
+    # These methods run as hooks whenever a transition was successful.
+    ##
 
     def run
       # send logs that get put on the output queue.
@@ -27,10 +37,11 @@ module FastlaneCI::Agent
 
       Recipes.setup_repo(git_url)
 
-      unless has_required_xcode_version?
-        reject("Does not have required xcode version!. This is hardcode to be random.")
-        return
-      end
+      # TODO: ensure we are able to satisfy the request
+      # unless has_required_xcode_version?
+      #   reject(RuntimeError.new("Does not have required xcode version!. This is hardcode to be random."))
+      #   return
+      # end
 
       if Recipes.run_fastlane(@invocation_request.command.env.to_h)
         finish
@@ -38,6 +49,7 @@ module FastlaneCI::Agent
         # fail is a keyword, so we must call self.
         # rubocop:disable Style/RedundantSelf
         self.fail
+        # rubocop:enable Style/RedundantSelf
       end
     end
 
@@ -49,13 +61,16 @@ module FastlaneCI::Agent
       succeed
     end
 
-    def fail
-    end
-
+    # the `succeed` method has no special action
+    # the StateMachine requires it's implemented as it's called after a successful transition
     def succeed
+      # no-op
     end
 
-    def reject(reason)
+    # the `fail` method has no special action
+    # the StateMachine requires it's implemented as it's called after a successful transition
+    def fail
+      # no-op
     end
 
     def throw(exception)
@@ -63,7 +78,16 @@ module FastlaneCI::Agent
 
       error = FastlaneCI::Proto::InvocationResponse::Error.new
       error.stacktrace = exception.backtrace.join("\n")
-      error.error_description = exception.message
+      error.description = exception.message
+
+      @yielder << FastlaneCI::Proto::InvocationResponse.new(error: error)
+    end
+
+    def reject(exception)
+      logger.info("Invocation rejected: #{exception}")
+
+      error = FastlaneCI::Proto::InvocationResponse::Error.new
+      error.description = exception.message
 
       @yielder << FastlaneCI::Proto::InvocationResponse.new(error: error)
     end
@@ -77,14 +101,10 @@ module FastlaneCI::Agent
 
     # responder methods
 
-    def send_status(event, payload)
-      logger.debug("Status changed. Event `#{event}` => #{state}")
+    def send_state(event, _payload)
+      logger.debug("State changed. Event `#{event}` => #{state}")
 
-      status = FastlaneCI::Proto::InvocationResponse::Status.new
-      status.state = state.to_s.upcase.to_sym
-      status.description = payload.to_s unless payload.nil?
-
-      @yielder << FastlaneCI::Proto::InvocationResponse.new(status: status)
+      @yielder << FastlaneCI::Proto::InvocationResponse.new(state: state.to_s.upcase.to_sym)
     end
 
     ##
@@ -125,7 +145,7 @@ module FastlaneCI::Agent
 
     def parse_log_line(line)
       re = /^[A-Z], \[([0-9:T\.-]+) #(\d+)\] (\w+) -- (\w*?): (.*)$/
-      if match_data = re.match(line)
+      if (match_data = re.match(line))
         return match_data.captures
       end
     end

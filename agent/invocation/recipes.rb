@@ -1,8 +1,7 @@
-require 'tmpdir'
+require "tmpdir"
 require_relative "../agent"
 
 module FastlaneCI::Agent
-
   ##
   # stateless invocation recipes go here
   module Recipes
@@ -68,7 +67,7 @@ module FastlaneCI::Agent
       stdin.close
 
       # `gets` on a pipe will block until the pipe is closed, then returns nil.
-      while line = stdouterr.gets
+      while (line = stdouterr.gets)
         logger.debug(line)
         @output_queue.push(line)
       end

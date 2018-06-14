@@ -2,7 +2,6 @@ require "spec_helper"
 require "agent/invocation/recipes"
 
 describe FastlaneCI::Agent::Recipes do
-
   let(:queue) { Queue.new }
 
   before do
@@ -20,8 +19,8 @@ describe FastlaneCI::Agent::Recipes do
   end
 
   it "raises an exception if a command exits non-zero" do
-    expect {
+    expect do
       FastlaneCI::Agent::Recipes.sh("false")
-    }.to raise_error(SystemCallError)
+    end.to raise_error(SystemCallError)
   end
 end

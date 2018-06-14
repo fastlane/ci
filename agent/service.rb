@@ -59,14 +59,14 @@ module FastlaneCI
         # convert every line from io to a Log object in a lazy stream
         output_enumerator.lazy.flat_map do |line, status|
           # proto3 doesn't have nullable fields, afaik
-          puts line
           log = FastlaneCI::Proto::Log.new(message: (line || NULL_CHAR), status: (status || 0))
           FastlaneCI::Proto::InvocationResponse.new(log: log)
         end
       end
 
       def run_fastlane(invocation_request, _call)
-        logger.info("RCP run_fastlane: #{invocation_request.command.bin} #{invocation_request.command.parameters}, env: #{invocation_request.command.env.to_h}")
+        command = invocation_request.command
+        logger.info("RPC run_fastlane: #{command.bin} #{command.parameters}, env: #{command.env.to_h}")
 
         # fastlane actions are not thread-safe and we must not run more than 1 at a time.
         # because the grpc server is multi-threaded we may lock the invocation with a mutex
@@ -81,9 +81,12 @@ module FastlaneCI
           end
         end
       end
-    end # Service
-  end # Agent
-end # FastlaneCI
+      # Service
+    end
+    # Agent
+  end
+  # FastlaneCI
+end
 
 if $0 == __FILE__
   server = FastlaneCI::Agent::Service.server

@@ -16,7 +16,21 @@ module FastlaneCI
       return @thread[:thread_id]
     end
 
+    def busy?
+      @mutex.synchronize do
+        return @busy
+      end
+    end
+
+    def busy=(busy)
+      @mutex.synchronize do
+        @busy = busy
+      end
+    end
+
     def initialize
+      @mutex = Mutex.new
+      @busy = false
       # TODO: do we need a thread here to do the work or does `scheduler.schedule` handle that?
       @thread = Thread.new do
         begin
@@ -26,7 +40,11 @@ module FastlaneCI
             begin
               # This can cause an exception, in production mode, we don't re-raise the exception
               # in development mode, we re-raise so we can catch it and understand how to handle it
-              work
+              if busy?
+                logger.debug("#{thread_id} is still busy, skipping a scheduled run")
+              else
+                work
+              end
               # If we're running in debug mode, don't run these things continuously
               if ENV["FASTLANE_CI_THREAD_DEBUG_MODE"]
                 logger.debug("Stopping worker after this work unit")
