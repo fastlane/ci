@@ -1,16 +1,12 @@
 .fci-status-icon-success {
-    color: #4CAF50;
+    color: #00897b;
 }
 
-.fci-status-icon-pending {
-    color: #FFEB3B;
+.fci-status-icon-pending,
+.fci-status-icon-internal {
+    color: #757575;
 }
 
 .fci-status-icon-failed {
-    color: #DD2C00;
-}
-
-.fci-status-icon-default {
-    color: black;
-    opacity: 0.1;
+    color: #d50000;
 }

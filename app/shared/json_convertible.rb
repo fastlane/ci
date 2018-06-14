@@ -214,7 +214,7 @@ module FastlaneCI
             # classes that include `JSONConvertible` take precedence over custom mapping.
             var_value = attribute_to_type_map[var_name].from_json!(val)
           else
-            raise "#{var_name} does not implement `FastlaneCI::JSONConvertible`"
+            raise TypeError, "#{var_name} does not implement `FastlaneCI::JSONConvertible`"
           end
         elsif is_iterable
           # This is only intended for array properties, it passes the final variable name and a single object of
@@ -231,7 +231,7 @@ module FastlaneCI
                                        .select { |arg| arg[0] == :keyreq }
                                        .map(&:last)
         unless (required_init_params - json_object.keys).empty?
-          raise "Required initialization parameters not found in the object: #{json_object}"
+          raise TypeError, "Required initialization parameters not found in the object: #{json_object}"
         end
         init_params_hash = json_object.select { |key, _value| required_init_params.include?(key) }
         if instance.method(:initialize).parameters.empty?

@@ -3,21 +3,22 @@ import {NgModule} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 import {MomentModule} from 'ngx-moment';
 
-import {AppRoutingModule} from './/app-routing.module';
-import {AppComponent} from './app.component';
-import {CommonComponentsModule} from './common/components/common-components.module';
-import {AuthInterceptor} from './services/auth.interceptor';
-import {DataService} from './services/data.service';
+import {CommonComponentsModule} from '../common/components/common-components.module';
+import {AuthInterceptor} from '../services/auth.interceptor';
+import {DataService} from '../services/data.service';
+
+import {RootComponent} from './root.component';
+import {RoutingModule} from './routing.module';
 import {SharedMaterialModule} from './shared_material.module';
 
 @NgModule({
   declarations: [
-    AppComponent,
+    RootComponent,
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
-    AppRoutingModule,
+    RoutingModule,
     CommonComponentsModule,
     /** Angular Material Imports */
     SharedMaterialModule,
@@ -26,9 +27,8 @@ import {SharedMaterialModule} from './shared_material.module';
   ],
   providers: [
     DataService,
-    {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true}
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [RootComponent]
 })
-export class AppModule {
+export class RootModule {
 }

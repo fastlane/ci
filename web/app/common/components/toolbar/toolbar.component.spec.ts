@@ -1,8 +1,9 @@
 import {DebugElement} from '@angular/core';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {MatIconModule} from '@angular/material';
 import {By} from '@angular/platform-browser';
-
 import {RouterTestingModule} from '@angular/router/testing';
+
 import {ToolbarComponent} from './toolbar.component';
 
 describe('ToolbarComponent', () => {
@@ -17,13 +18,15 @@ describe('ToolbarComponent', () => {
     const crumbsEl = getCrumbs();
     expect(crumbsEl.length).toBe(1);
 
-    return crumbsEl[0].query(By.css('a,span')).nativeElement;
+    return crumbsEl[0].nativeElement;
   }
 
   beforeEach(() => {
     TestBed
-        .configureTestingModule(
-            {declarations: [ToolbarComponent], imports: [RouterTestingModule]})
+        .configureTestingModule({
+          declarations: [ToolbarComponent],
+          imports: [RouterTestingModule, MatIconModule]
+        })
         .compileComponents();
 
     fixture = TestBed.createComponent(ToolbarComponent);
@@ -31,7 +34,12 @@ describe('ToolbarComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should breadcrumbs correctly', () => {
+  it('should show fastlane logo', () => {
+    const logosEl = fixture.debugElement.queryAll(By.css('.fci-fastlane-logo'));
+    expect(logosEl.length).toBe(1);
+  });
+
+  it('should show breadcrumbs correctly', () => {
     component.breadcrumbs = [{label: 'parent'}, {label: 'child'}];
     fixture.detectChanges();
 
@@ -60,14 +68,14 @@ describe('ToolbarComponent', () => {
        expect(firstCrumbEl.hasAttribute('href')).toBe(false);
      });
 
-  it('should add arrow between crumbs', () => {
+  it('should add right chevron between crumbs', () => {
     component.breadcrumbs = [{label: 'parent'}, {label: 'child'}];
     fixture.detectChanges();
 
-    const crumbsEl = getCrumbs();
-    expect(crumbsEl.length).toBe(2);
-    expect(crumbsEl[0].nativeElement.innerText).toBe('parent > ');
-    expect(crumbsEl[1].nativeElement.innerText).toBe('child');
+    const crumbContainerEl =
+        fixture.debugElement.query(By.css('.fci-crumbtainer')).nativeElement;
+    expect(crumbContainerEl.innerText)
+        .toContain('parent\nchevron_right\nchild');
   });
 
   it('should show hint if the label is not ready yet', () => {

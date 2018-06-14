@@ -5,14 +5,8 @@ describe FastlaneCI::APIController do
   ##
   # some example usages of APIController, with default authentication and with authentication disabled.
   #
-  let(:bearer_token) do
-    "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwidXNlciI6IjEiLCJpYXQiOjEsImlzcyI6ImZhc3RsYW5lLmNpIn0.m2uYMjhLlRuA2TVr_5c5-xdWjSf3r7Ge0b53-cgJtdg"
-  end
-
   describe "by default" do
     class MySecureApiController < FastlaneCI::APIController
-      set(:jwt_secret, "fastlane-ci-test")
-
       get("/") do
         json({ message: "ok" })
       end
@@ -69,7 +63,6 @@ describe FastlaneCI::APIController do
 
   describe "with authentication disabled" do
     class MyMixedAuthApiController < FastlaneCI::APIController
-      set(:jwt_secret, "fastlane-ci-test")
       disable(:authentication)
 
       get("/") do
@@ -120,7 +113,7 @@ describe FastlaneCI::APIController do
     let(:app) { FastlaneCI::APIController.new }
 
     before do
-      app.settings.jwt_secret = "fastlane-ci-test"
+      app.settings.jwt_secret = jwt_secret
       # test helper methods outside the request/response cycle.
       # we are setting up a request like this.
       app.helpers.request = Sinatra::Request.new(Rack::MockRequest.env_for("/", { "HTTP_AUTHORIZATION" => bearer_token }))
@@ -133,7 +126,12 @@ describe FastlaneCI::APIController do
       end
 
       it "will halt with an error if the token is not valid" do
-        app.helpers.request = Sinatra::Request.new(Rack::MockRequest.env_for("/", { "HTTP_AUTHORIZATION" => "" }))
+        app.helpers.request = Sinatra::Request.new(Rack::MockRequest.env_for("/", { "HTTP_AUTHORIZATION" => "Bearer something-else" }))
+        expect do
+          app.helpers.authenticate!(via: :jwt)
+        end.to throw_symbol(:halt)
+
+        app.helpers.request = Sinatra::Request.new(Rack::MockRequest.env_for("/", {}))
         expect do
           app.helpers.authenticate!(via: :jwt)
         end.to throw_symbol(:halt)
@@ -146,7 +144,7 @@ describe FastlaneCI::APIController do
       end
 
       it "return a user from the user service" do
-        expect(FastlaneCI::Services.user_service).to receive(:find_user).with(id: "1")
+        expect(FastlaneCI::Services.user_service).to receive(:find_user).with(id: "1").and_return(double("User"))
         app.helpers.current_user
       end
     end

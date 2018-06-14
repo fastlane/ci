@@ -1,5 +1,6 @@
 require "faye/websocket"
 require_relative "../../shared/logging_module"
+require_relative "../build_runner/web_socket_build_runner_change_listener"
 
 Faye::WebSocket.load_adapter("thin")
 
@@ -42,6 +43,8 @@ module FastlaneCI
       end
 
       ws = Faye::WebSocket.new(env, nil, { ping: KEEPALIVE_TIME })
+      web_socket_build_runner_change_listener = WebSocketBuildRunnerChangeListener.new(web_socket: ws)
+
       ws.on(:open) do |event|
         logger.debug([:open, ws.object_id])
 
@@ -61,12 +64,7 @@ module FastlaneCI
 
         # TODO: Think this through, do we properly add new listener, and notify them of line changes, etc.
         #       Also how does the "offboarding" of runners work once the tests are finished
-        current_build_runner.add_listener(proc do |row|
-          # TODO: Add auth check here, so a user isn't able to get the log from another build
-          unless ws.send(row.to_json)
-            logger.error("Something failed when sending the current row via a web socket connection")
-          end
-        end)
+        current_build_runner.add_build_change_listener(web_socket_build_runner_change_listener)
       end
 
       ws.on(:message) do |event|
@@ -82,6 +80,7 @@ module FastlaneCI
         project_id = url_details[:project_id]
 
         websocket_clients[project_id][build_number].delete(ws)
+        web_socket_build_runner_change_listener.connection_closed
         ws = nil
       end
 
