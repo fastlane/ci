@@ -14,7 +14,8 @@ module FastlaneCI
       value = params[:value]
 
       setting = Services.setting_service.find_setting(setting_key: key.to_sym)
-      halt(404, "`#{params[:setting_key]}` not found.") if setting.nil?
+      # TODO: use right exit code below & update tests
+      return json({error: "`#{params[:setting_key]}` not found."}) if setting.nil?
 
       # TODO: security aspect, how do we make sure this can't be abused?
       # We don't want to hash/encrypt all of them, as this would make it harder for
