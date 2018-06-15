@@ -8,24 +8,6 @@ module FastlaneCI
     # A simple implementation of the agent service.
     class Service < FastlaneCI::Proto::Agent::Service
       include FastlaneCI::Agent::Logging
-      ##
-      # this class is used to create a lazy enumerator
-      # that will yield back lines from the stdout/err of the process
-      # as well as the exit status when it is complete.
-      class ProcessOutputEnumerator
-        extend Forwardable
-        include Enumerable
-
-        def_delegators :@enumerator, :each, :next
-
-        def initialize(io, thread)
-          @enumerator = Enumerator.new do |yielder|
-            yielder.yield(io.gets) while thread.alive?
-            io.close
-            yielder.yield(EOT_CHAR, thread.value.exitstatus)
-          end
-        end
-      end
 
       ##
       # returns a configured GRPC server ready to listen for connections.
