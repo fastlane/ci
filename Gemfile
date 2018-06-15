@@ -14,7 +14,7 @@ source("https://rubygems.org")
 
 # Sinatra
 gem "faye-websocket", ">= 0.10.7", "< 1.0.0" # web socket connection for Sinatra
-gem "sinatra", ">= 2.0.1", "< 3.0.0" # Our web application library
+gem "sinatra", "= 2.0.1" # Our web application library
 gem "sinatra-contrib", ">= 2.0.0", "< 3.0.0" # includes some Sinatra helper methods
 gem "sinatra-flash" # renders error messages in the browser - remove once we switched to new frontend
 
@@ -64,6 +64,9 @@ gem "xcode-install", ">= 2.4.0", "< 3.0.0"
 # Interprocess communication
 gem "grpc", ">= 1.11.0", "< 2.0.0"
 
+# state machine for ruby objects
+gem "micromachine", ">= 3.0.0", "< 4.0.0"
+
 # Internal projects
 gem "fastfile-parser", git: "https://github.com/fastlane/fastfile-parser", require: false
 gem "fastlane", git: "https://github.com/fastlane/fastlane"
@@ -80,5 +83,6 @@ group :test, :development do
   gem "rack-test", require: "rack/test"
   gem "rake"
   gem "rspec"
+  gem "timecop", ">= 0.9.1", "< 1.0.0"
   gem "webmock", ">= 3.4.1", "< 3.5.0"
 end

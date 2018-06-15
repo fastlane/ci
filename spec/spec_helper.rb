@@ -11,6 +11,7 @@ require "webmock/rspec"
 require "stub_helpers"
 require "api_helper"
 require "helper_functions"
+require "timecop"
 
 ENV["RACK_ENV"] = "test"
 require File.expand_path("../../fastlane_app.rb", __FILE__)

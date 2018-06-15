@@ -33,6 +33,17 @@ The Agent may have to fetch resources (such as source code) from other services 
 ## Permission model
 The Agent will be required to run arbitrary Ruby code on the Worker. It may also be required to perform operations that require root such as installing Xcode. While there will be other security mechanisms that will enforce strict security against malicious users, we can help ourselves by preventing accidental (or incidental) damage to the Worker by running the Agents under a special user that belongs to the sudoers group. This will allow us to whitelist the commands and permissions the user can perform on a Worker.
 
+## Rejecting a job
+An Agent must be able to reject a job from the server. This is needed for a common situation around Xcode
+1. Server wants to build a PR
+1. Agent gets job assigned, checks out the repo, and finds an updated `.xcode-version` file specifying an Xcode beta release
+1. Agent checks if the specific Xcode beta is installed on its machine
+    1. If available, use that version to run _fastlane_
+    1. If not available, Agent triggers installation of given Xcode beta release
+        1. Agent notifies Server that it can't handle this particular build right now
+        1. Server puts task back on the task queue and tries to distribute this task again later
+        1. While Agent installs new Xcode (which might take multiple hours), Agent is free to run other jobs
+
 ## Throttling
 Each agent is capable of spawning as many processes to handle the requests as it wants, but there are stability considerations that we should take into account. Lane execution  may be very resource heavy and launching too many of them may make the Worker kill the process prematurely. There are two possibilities for implementing throttling:
 1. Implement a serial queue on the Agent

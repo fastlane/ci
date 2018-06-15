@@ -9,7 +9,7 @@ import {CommonComponentsModule} from '../common/components/common-components.mod
 import {DashboardComponent} from '../dashboard/dashboard.component';
 import {ProjectComponent} from '../project/project.component';
 import {DataService} from '../services/data.service';
-import {SharedMaterialModule} from '../shared_material.module';
+import {SharedMaterialModule} from '../root/shared_material.module';
 import {AddProjectDialogComponent} from './add-project-dialog/add-project-dialog.component';
 import {AddProjectDialogModule} from './add-project-dialog/add-project-dialog.modules';
 

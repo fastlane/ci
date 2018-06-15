@@ -197,14 +197,24 @@ module FastlaneCI
           details: user_unfriendly_message
         )
 
+      # Sometimes we try to commit something and it fails because there was nothing added to the change set.
+      elsif user_unfriendly_message.include?("no changes added to commit")
+        priority = Notification::PRIORITIES[:warn]
+        notification_service.create_notification!(
+          priority: priority,
+          name: "Repo syncing warning: no changes in added to commit error",
+          message: "Unable to perform sync, the there are no changes added to the commit for #{git_config.git_url}",
+          details: user_unfriendly_message
+        )
+
       # Sometimes a repo is told to do something like commit when nothing is added to the change set
       # It's weird, and indicative of a race condition somewhere, so let's log it and move on
       elsif user_unfriendly_message.include?("Your branch is up to date with")
         priority = Notification::PRIORITIES[:warn]
         notification_service.create_notification!(
           priority: priority,
-          name: "Up to date repo error",
-          message: "Unable to perform action, the repo is already up to date #{git_config.git_url}",
+          name: "Repo syncing warning: up to date repo error",
+          message: "Unable to perform sync, the repo is already up to date #{git_config.git_url}",
           details: user_unfriendly_message
         )
 
@@ -213,7 +223,7 @@ module FastlaneCI
         priority = Notification::PRIORITIES[:urgent]
         notification_service.create_notification!(
           priority: priority,
-          name: "Merge conflict",
+          name: "Repo syncing error: merge conflict",
           message: "Unable to build #{git_config.git_url}",
           details: "#{user_unfriendly_message}, context: #{exception_context}"
         )
