@@ -641,7 +641,7 @@ module FastlaneCI
         logger.debug("Switching to branch #{branch} from forked repo: #{clone_url} (pulling into #{local_branch_name})")
 
         begin
-          git.branch(local_branch_name)
+          git.branch(local_branch_name).checkout
           git.pull(clone_url, branch)
           return true
         rescue StandardError => ex
@@ -668,6 +668,7 @@ module FastlaneCI
           logger.debug("Switching to new branch from ref #{ref} (pulling into #{local_branch_name})")
           git.fetch(GitRepo::DEFAULT_REMOTE, ref, {})
           git.branch(local_branch_name)
+          git.checkout(local_branch_name)
           return true
         rescue StandardError => ex
           exception_context = {
