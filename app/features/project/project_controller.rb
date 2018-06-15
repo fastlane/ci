@@ -74,7 +74,8 @@ module FastlaneCI
         notification_service: FastlaneCI::Services.notification_service,
         work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
         trigger: project.find_triggers_of_type(trigger_type: :manual).first,
-        git_fork_config: git_fork_config
+        git_fork_config: git_fork_config,
+        local_build_folder: checkout_folder
       )
       build_runner.setup(parameters: nil)
       Services.build_runner_service.add_build_runner(build_runner: build_runner)
