@@ -20,13 +20,17 @@ module FastlaneCI
     # @return [ArtifactProvider] The reference to the ArtifactProvider that stores the artifact
     attr_reader :provider
 
-    def initialize(artifact:)
+    # @return An URI to download the given artifact
+    attr_reader :uri
+
+    def initialize(artifact:, uri:)
       raise "Incorrect object type. Expected Artifact, got #{artifact.class}" unless artifact.kind_of?(Artifact)
 
       @id = artifact.id
       @type = artifact.type
       @reference = artifact.reference
       @provider = artifact.provider
+      @uri = uri
     end
   end
 end

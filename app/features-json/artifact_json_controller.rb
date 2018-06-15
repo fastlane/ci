@@ -1,23 +1,23 @@
-require_relative "./json_authenticated_controller_base"
 require_relative "./view_models/artifact_view_model"
 
 module FastlaneCI
   # Controller for providing all data relating to artifacts
-  class ArtifactJSONController < JSONAuthenticatedControllerBase
+  class ArtifactJSONController < APIController
     HOME = "/data/project/:project_id/build/:build_number/artifact"
 
     class ArtifactNotFoundError < FastlaneCIError
     end
 
     # Fetch all the available metadata for a given artifact, the return data is JSON
-    get "#{HOME}/:artifact_id/info" do |project_id, build_number, artifact_id|
+    # This will include a download URL
+    get "#{HOME}/:artifact_id" do |project_id, build_number, artifact_id|
       begin
-        artifact, = fetch_artifact_details(
+        artifact, uri = fetch_artifact_details(
           project_id: project_id,
           build_number: build_number,
           artifact_id: artifact_id
         )
-        return ArtifactViewModel.new(artifact: artifact).to_json
+        return ArtifactViewModel.new(artifact: artifact, uri: uri).to_json
       rescue ArtifactNotFoundError
         return { error: "Couldn't find artifact" }.to_json
       end
@@ -25,39 +25,39 @@ module FastlaneCI
 
     # Download the given artifact, the return data could be anything
     # If the artifact isn't available, you'll get an error message via the JSON format
-    get "#{HOME}/:artifact_id/download" do |project_id, build_number, artifact_id|
-      begin
-        _, artifact_reference, uri = fetch_artifact_details(
-          project_id: project_id,
-          build_number: build_number,
-          artifact_id: artifact_id
-        )
-
-        if uri.scheme.nil?
-          unless File.exist?(artifact_reference)
-            return { error: "Couldn't find artifact" }.to_json
-          end
-
-          if File.directory?(artifact_reference)
-            # TODO: we probably never ever want to store directories as artifacts anyway
-            return { error: "Artifact is a directory", details: artifact_reference }.to_json
-          end
-
-          send_file(artifact_reference, filename: artifact_reference, type: "Application/octet-stream")
-        else
-          return {
-            url: artifact_reference
-          }.to_json
-        end
-      rescue ArtifactNotFoundError
-        return { error: "Couldn't find artifact" }.to_json
-      end
-    end
+    #
+    # TODO: The code below should work, in case we decide to provide a `download` feature
+    #
+    # get "#{HOME}/:artifact_id/download" do |project_id, build_number, artifact_id|
+    #   begin
+    #     _, artifact_reference, uri = fetch_artifact_details(
+    #       project_id: project_id,
+    #       build_number: build_number,
+    #       artifact_id: artifact_id
+    #     )
+    #     if uri.scheme.nil?
+    #       unless File.exist?(artifact_reference)
+    #         return { error: "Couldn't find artifact" }.to_json
+    #       end
+    #       if File.directory?(artifact_reference)
+    #         # TODO: we probably never ever want to store directories as artifacts anyway
+    #         return { error: "Artifact is a directory", details: artifact_reference }.to_json
+    #       end
+    #       send_file(artifact_reference, filename: artifact_reference, type: "Application/octet-stream")
+    #     else
+    #       return {
+    #         url: artifact_reference
+    #       }.to_json
+    #     end
+    #   rescue ArtifactNotFoundError
+    #     return { error: "Couldn't find artifact" }.to_json
+    #   end
+    # end
 
     private
 
     def fetch_artifact_details(project_id:, build_number:, artifact_id:)
-      project = user_project_with_id(project_id: project_id)
+      project = current_project
       build = project.builds.find { |b| b.number == build_number.to_i }
 
       artifact = build.artifacts.find { |find_artifact| find_artifact.id == artifact_id }
@@ -74,6 +74,13 @@ module FastlaneCI
       uri = URI.parse(artifact_reference)
 
       return artifact, artifact_reference, uri
+    end
+
+    def current_project
+      current_project = FastlaneCI::Services.project_service.project_by_id(params[:project_id])
+      halt(404) unless current_project
+
+      return current_project
     end
   end
 end
