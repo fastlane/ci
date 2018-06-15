@@ -6,6 +6,7 @@ require_relative "./data_sources/json_build_data_source"
 require_relative "./data_sources/json_user_data_source"
 require_relative "./dot_keys_variable_service"
 require_relative "./environment_variable_service"
+require_relative "./setting_service"
 require_relative "./onboarding_service"
 require_relative "./project_service"
 require_relative "./notification_service"
@@ -48,6 +49,7 @@ module FastlaneCI
       @_configuration_repository_service = nil
       @_update_fastlane_ci_service = nil
       @_environment_variable_service = nil
+      @_setting_service = nil
       @_dot_keys_variable_service = nil
       @_xcode_manager_service = nil
       @_apple_id_service = nil
@@ -127,7 +129,8 @@ module FastlaneCI
         project_data_source: FastlaneCI::JSONProjectDataSource.create(
           ci_config_git_repo_path,
           git_config: ci_config_repo,
-          user: ci_user
+          user: ci_user,
+          notification_service: Services.notification_service
         )
       )
     end
@@ -196,6 +199,12 @@ module FastlaneCI
     def self.environment_variable_service
       @_environment_variable_service ||= FastlaneCI::EnvironmentVariableService.new(
         environment_variable_data_source: JSONEnvironmentDataSource.create(ci_config_git_repo_path)
+      )
+    end
+
+    def self.setting_service
+      @_setting_service ||= FastlaneCI::SettingService.new(
+        setting_data_source: JSONSettingDataSource.create(ci_config_git_repo_path)
       )
     end
 

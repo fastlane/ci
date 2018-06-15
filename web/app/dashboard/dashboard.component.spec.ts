@@ -15,6 +15,7 @@ import {mockProjectSummary, mockProjectSummaryList} from '../common/test_helpers
 import {ProjectSummary} from '../models/project_summary';
 import {SharedMaterialModule} from '../root/shared_material.module';
 import {DataService} from '../services/data.service';
+import {SharedMaterialModule} from '../root/shared_material.module';
 
 import {DashboardComponent} from './dashboard.component';
 
