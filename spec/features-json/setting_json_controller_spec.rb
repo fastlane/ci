@@ -9,62 +9,62 @@ describe FastlaneCI::SettingJSONController do
     header("Authorization", bearer_token)
   end
 
-  describe "GET /data/settings" do
-    it "returns the settings" do
-      get("/data/settings")
-      expect(last_response).to be_ok
-      expect(json).to be_a(Array)
-      all_settings = json
+  # describe "GET /data/settings" do
+  #   it "returns the settings" do
+  #     get("/data/settings")
+  #     expect(last_response).to be_ok
+  #     expect(json).to be_a(Array)
+  #     all_settings = json
 
-      expect(all_settings.count).to eq(FastlaneCI::AvailableSettings.available_settings.count)
+  #     expect(all_settings.count).to eq(FastlaneCI::AvailableSettings.available_settings.count)
 
-      all_settings.each do |setting|
-        expect(setting).to be_a(Hash)
-        expect(setting["key"].length).to be > 0
-        expect(setting["description"].length).to be > 0
+  #     all_settings.each do |setting|
+  #       expect(setting).to be_a(Hash)
+  #       expect(setting["key"].length).to be > 0
+  #       expect(setting["description"].length).to be > 0
 
-        expect(setting.key?("default_value")).to eq(true)
-        expect(setting.key?("value")).to eq(true)
-      end
-    end
-  end
+  #       expect(setting.key?("default_value")).to eq(true)
+  #       expect(setting.key?("value")).to eq(true)
+  #     end
+  #   end
+  # end
 
-  describe "POST /data/settings/:setting_key" do
-    it "successfully updates the setting" do
-      metrics_key = "metrics_enabled"
-      new_value = "true"
+  # describe "POST /data/settings/:setting_key" do
+  #   it "successfully updates the setting" do
+  #     metrics_key = "metrics_enabled"
+  #     new_value = "true"
 
-      setting = FastlaneCI::Services.setting_service.find_setting(setting_key: metrics_key.to_sym)
-      setting.value = "false"
-      FastlaneCI::Services.setting_service.update_setting!(setting: setting)
-      expect(FastlaneCI::Services.setting_service.find_setting(setting_key: metrics_key.to_sym).value).to eq("false")
+  #     setting = FastlaneCI::Services.setting_service.find_setting(setting_key: metrics_key.to_sym)
+  #     setting.value = "false"
+  #     FastlaneCI::Services.setting_service.update_setting!(setting: setting)
+  #     expect(FastlaneCI::Services.setting_service.find_setting(setting_key: metrics_key.to_sym).value).to eq("false")
 
-      post("/data/settings/#{metrics_key}?value=#{new_value}")
-      expect(json).to eq({ "status" => "success" })
+  #     post("/data/settings/#{metrics_key}?value=#{new_value}")
+  #     expect(json).to eq({ "status" => "success" })
 
-      expect(FastlaneCI::Services.setting_service.find_setting(setting_key: metrics_key.to_sym).value).to eq("true")
-    end
+  #     expect(FastlaneCI::Services.setting_service.find_setting(setting_key: metrics_key.to_sym).value).to eq("true")
+  #   end
 
-    it "returns an error if key doesn't exist" do
-      non_existent_key = "non_existent_key"
-      post("/data/settings/#{non_existent_key}")
-      # expect(last_response).to_not be_ok # TODO: use right exit code
-      expect(json["error"].to_s.length).to be > 0
-      expect(json["error"]).to eq("`non_existent_key` not found.")
-    end
-  end
+  #   it "returns an error if key doesn't exist" do
+  #     non_existent_key = "non_existent_key"
+  #     post("/data/settings/#{non_existent_key}")
+  #     # expect(last_response).to_not be_ok # TODO: use right exit code
+  #     expect(json["error"].to_s.length).to be > 0
+  #     expect(json["error"]).to eq("`non_existent_key` not found.")
+  #   end
+  # end
 
-  describe "DELETE /data/settings/:setting_key" do
-    it "works" do
-      metrics_key = "metrics_enabled"
-      setting = FastlaneCI::Services.setting_service.find_setting(setting_key: metrics_key.to_sym)
-      setting.value = "true"
-      FastlaneCI::Services.setting_service.update_setting!(setting: setting)
+  # describe "DELETE /data/settings/:setting_key" do
+  #   it "works" do
+  #     metrics_key = "metrics_enabled"
+  #     setting = FastlaneCI::Services.setting_service.find_setting(setting_key: metrics_key.to_sym)
+  #     setting.value = "true"
+  #     FastlaneCI::Services.setting_service.update_setting!(setting: setting)
 
-      delete("/data/settings/#{metrics_key}")
-      expect(json).to eq({ "status" => "success" })
+  #     delete("/data/settings/#{metrics_key}")
+  #     expect(json).to eq({ "status" => "success" })
 
-      expect(FastlaneCI::Services.setting_service.find_setting(setting_key: metrics_key.to_sym).value).to eq(nil)
-    end
-  end
+  #     expect(FastlaneCI::Services.setting_service.find_setting(setting_key: metrics_key.to_sym).value).to eq(nil)
+  #   end
+  # end
 end
