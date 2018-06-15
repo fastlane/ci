@@ -65,7 +65,6 @@ module FastlaneCI
       if trigger.nil?
         raise "No trigger provided, this is probably caused by a build being triggered, " \
               "but then the project not having this particular build trigger associated"
-        # rubocop:enable Metrics/LineLength
       end
 
       if git_fork_config.nil?
