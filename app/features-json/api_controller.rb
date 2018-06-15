@@ -151,10 +151,10 @@ module FastlaneCI
       def json_error(error_message:, error_key:, error_code: 400)
         status(error_code)
 
-        return json({
+        halt(error_code, json({
           error: error_message,
           error_code: error_key
-        })
+        }))
       end
 
       def current_user_provider_credential

@@ -16,7 +16,7 @@ module FastlaneCI
       setting = Services.setting_service.find_setting(setting_key: key.to_sym)
 
       if setting.nil?
-        return json_error(
+        json_error(
           error_message: "`#{params[:setting_key]}` not found.",
           error_key: "InvalidParameter.KeyNotFound"
         )
@@ -41,7 +41,7 @@ module FastlaneCI
         Services.setting_service.reset_setting!(setting_key: params[:setting_key])
         return json({ status: :success })
       rescue SettingServiceKeyNotFoundError
-        return json_error(
+        json_error(
           error_message: "`#{params[:setting_key]}` not found.",
           error_key: "InvalidParameter.KeyNotFound"
         )
