@@ -7,6 +7,7 @@ module FastlaneCI
     #
     # @return [Hash]
     PRIORITIES = {
+      warn: "warn",
       urgent: "urgent",
       normal: "normal",
       success: "success"

@@ -1,4 +1,33 @@
 <fci-toolbar [breadcrumbs]="breadcrumbs"></fci-toolbar>
-
-<h4>Logs:</h4>
-<pre>{{logs}}</pre>
+<div class="fci-build-container">
+  <div class="fci-left-container">
+    <div class="fci-build-header">
+      <fci-status-icon *ngIf="build" [status]="build.status"></fci-status-icon>
+      <span class="fci-build-title">Build {{build ? build.number : ''}}</span>
+      <span *ngIf="build && build.description" class="fci-build-description">{{build.description}}</span>
+    </div>
+    <div class="fci-build-logs">
+      {{logs.length > 0 ? logs : 'Connecting...'}}
+    </div>
+  </div>
+  <div class="fci-right-container">
+    <mat-card class="fci-build-details">
+      <h3>Build Info</h3>
+      <mat-spinner *ngIf="!build" mode="indeterminate"></mat-spinner>
+      <ng-container *ngIf="build">
+        <h5>Trigger</h5>
+        <div>{{build.trigger}}</div>
+        <h5>Branch</h5>
+        <div>{{build.branch}}</div>
+        <h5>SHA</h5>
+        <div>{{build.shortSha}}</div>
+        <h5>Started</h5>
+        <div>{{build.date | amTimeAgo}}</div>
+        <ng-container *ngIf="build.status !== BuildStatus.PENDING">
+          <h5>Duration</h5>
+          <div>{{build.duration| amDuration: 'seconds'}}</div>
+        </ng-container>
+      </ng-container>
+    </mat-card>
+  </div>
+</div>

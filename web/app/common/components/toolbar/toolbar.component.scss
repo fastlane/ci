@@ -1,0 +1,42 @@
+.fci-toolbar-container {
+    background-color: #9b9b9b;
+    padding-left: 92px;
+    height: 80px;
+    display: flex;
+    margin-bottom: 0;
+    align-items: center;
+    .fci-fastlane-logo {
+        background: url(/assets/fastlane_logo.png);
+        background-repeat: no-repeat;
+        background-size: contain;
+        height: 24px;
+        width: 24px;
+    }
+    .fci-crumbtainer {
+        display: flex;
+        align-items: center;
+        .fci-crumb {
+            font-size: 20px;
+            margin: 0 2px;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.7);
+            &:first-child {
+                margin-left: 16px;
+            }
+            &:last-child {
+                color: #ffffff;
+            }
+        }
+        .fci-crumb-spacer {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 36px;
+            height: 36px;
+            width: 36px;
+        }
+    }
+    .fci-right-container {
+        flex: 1;
+        display: flex;
+        justify-content: flex-end;
+    }
+}

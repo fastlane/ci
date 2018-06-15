@@ -1,33 +1,41 @@
 require "spec_helper"
-require "agent/server"
+require "agent/service"
 
-describe FastlaneCI::Agent::Server do
-  let(:server) { FastlaneCI::Agent::Server.new }
+describe FastlaneCI::Agent::Service do
+  let(:service) { FastlaneCI::Agent::Service.new }
 
-  it "creates a new grpc server with .server" do
-    expect(FastlaneCI::Agent::Server.server).to be_instance_of(GRPC::RpcServer)
+  it "creates a new grpc service with .server" do
+    expect(FastlaneCI::Agent::Service.server).to be_instance_of(GRPC::RpcServer)
   end
 
   describe "#spawn" do
-    let(:command) { instance_double("FastlaneCI::Agent::Command", env: {}, bin: "/bin/echo", parameters: ["hello world"]) }
+    echo_message = "hello world"
+    let(:command) { instance_double("FastlaneCI::Agent::Command", env: {}, bin: "/bin/echo", parameters: [echo_message]) }
     let(:call) { double("GRP Call") }
+
     it "spawns a command with the environment and parameters" do
       expect(Open3).to receive(:popen2e).and_call_original
-      server.spawn(command, call)
+      service.spawn(command, call)
     end
 
     it "returns a ProcessEnumerator that contains the output of the command" do
-      expect(server.spawn(command, call)).to be_instance_of(Enumerator::Lazy)
+      responses = service.spawn(command, call)
+      expect(responses).to be_instance_of(Enumerator::Lazy)
+      expect(responses.peek.log.message).to start_with(echo_message)
+      responses.each do |response|
+        expect(response).to be_instance_of(FastlaneCI::Proto::InvocationResponse)
+        expect(response.log).to be_instance_of(FastlaneCI::Proto::Log)
+      end
     end
   end
 
-  describe FastlaneCI::Agent::Server::ProcessOutputEnumerator do
+  describe FastlaneCI::Agent::Service::ProcessOutputEnumerator do
     let(:io) { double("IO-like", gets: "this is a line of text\n") }
 
     let(:thread_value) { double("thread value") }
     let(:thread) { double("Thread", alive?: true, value: thread_value) }
 
-    let(:output_enumerator) { FastlaneCI::Agent::Server::ProcessOutputEnumerator.new(io, thread) }
+    let(:output_enumerator) { FastlaneCI::Agent::Service::ProcessOutputEnumerator.new(io, thread) }
 
     it "will return lines of text from the file" do
       expect(output_enumerator.next).to eq("this is a line of text\n")

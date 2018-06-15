@@ -7,7 +7,8 @@ module FastlaneCI
         Setting.new(
           key: :metrics_enabled,
           default_value: true,
-          description: "Set this to false to opt out of all metrics tracking, more information on https://github.com/fastlane/ci"
+          description: "Set this to false to opt out of all metrics tracking, more information on " \
+                       "https://github.com/fastlane/ci"
         ),
         Setting.new(
           key: :default_apple_id,

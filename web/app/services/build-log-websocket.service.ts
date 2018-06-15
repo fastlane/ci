@@ -16,9 +16,9 @@ export class BuildLogWebsocketService {
     this.API_ROOT = `ws://${document.location.host}/data`;
   }
 
-  connect(projectId: string, buildId: string):
+  connect(projectId: string, buildNumber: number):
       Observable<BuildLogMessageEvent> {
-    const socket = this.createSocket(projectId, buildId);
+    const socket = this.createSocket(projectId, buildNumber);
     const observable =
         Observable.create((observer: Observer<BuildLogMessageEvent>) => {
           socket.onmessage = observer.next.bind(observer);
@@ -31,11 +31,12 @@ export class BuildLogWebsocketService {
   }
 
   /** Public for testing */
-  createSocket(projectId: string, buildId: string): WebSocket {
-    return new WebSocket(this.createSocketUrl(projectId, buildId));
+  createSocket(projectId: string, buildNumber: number): WebSocket {
+    return new WebSocket(this.createSocketUrl(projectId, buildNumber));
   }
 
-  private createSocketUrl(projectId: string, buildId: string) {
-    return `${this.API_ROOT}/projects/${projectId}/builds/${buildId}/log.ws`;
+  private createSocketUrl(projectId: string, buildNumber: number) {
+    return `${this.API_ROOT}/projects/${projectId}/builds/${
+        buildNumber}/log.ws`;
   }
 }

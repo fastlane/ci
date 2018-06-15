@@ -19,9 +19,9 @@ describe('BuildLogWebsocketService', () => {
   });
 
   it('should attempt to connect to correct socket', () => {
-    const socket = buildLogWebsocketService.createSocket('pId', 'bId');
+    const socket = buildLogWebsocketService.createSocket('pId', 3);
     socket.close();
-    expect(socket.url).toBe('ws://host/data/projects/pId/builds/bId/log.ws');
+    expect(socket.url).toBe('ws://host/data/projects/pId/builds/3/log.ws');
   });
 
   describe('socket connection', () => {
@@ -36,7 +36,7 @@ describe('BuildLogWebsocketService', () => {
     it('should call observer on message updates', async(() => {
          let data: string;
 
-         buildLogWebsocketService.connect('pId', 'bId').subscribe((message) => {
+         buildLogWebsocketService.connect('pId', 3).subscribe((message) => {
            data = message.data;
          });
 
@@ -50,10 +50,9 @@ describe('BuildLogWebsocketService', () => {
     it('should emit error to observer on error message', async(() => {
          let event: Event;
 
-         buildLogWebsocketService.connect('pId', 'bId')
-             .subscribe(null, (error) => {
-               event = error;
-             });
+         buildLogWebsocketService.connect('pId', 3).subscribe(null, (error) => {
+           event = error;
+         });
 
          mockSocket.onerror(new Event('error'));
          expect(event.type).toBe('error');
@@ -62,8 +61,8 @@ describe('BuildLogWebsocketService', () => {
     it('should emit complete to observer on close message', async(() => {
          let isComplete: boolean;
 
-         buildLogWebsocketService.connect('pId', 'bId')
-             .subscribe(null, null, () => {
+         buildLogWebsocketService.connect('pId', 3).subscribe(
+             null, null, () => {
                isComplete = true;
              });
 
@@ -73,7 +72,7 @@ describe('BuildLogWebsocketService', () => {
 
     it('should close socket when observable is unsubscribed', async(() => {
          const observable =
-             buildLogWebsocketService.connect('pId', 'bId').subscribe();
+             buildLogWebsocketService.connect('pId', 3).subscribe();
 
          observable.unsubscribe();
          expect(mockSocket.close).toHaveBeenCalled();

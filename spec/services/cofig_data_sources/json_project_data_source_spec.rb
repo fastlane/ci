@@ -19,7 +19,7 @@ describe FastlaneCI::JSONProjectDataSource do
 
   describe "#project_exist?" do
     before(:each) do
-      subject.stub(:projects).and_return(projects)
+      allow(subject).to receive(:projects).and_return(projects)
     end
 
     context "project doesn't exist" do
@@ -37,7 +37,7 @@ describe FastlaneCI::JSONProjectDataSource do
 
   describe "#create_project!" do
     before(:each) do
-      subject.stub(:projects).and_return(projects)
+      allow(subject).to receive(:projects).and_return(projects)
     end
 
     context "project doesn't exist" do
@@ -68,18 +68,18 @@ describe FastlaneCI::JSONProjectDataSource do
 
     context "project doesn't exist" do
       before(:each) do
-        subject.stub(:projects).and_return([])
+        allow(subject).to receive(:projects).and_return([])
       end
 
       it "raises an error message and doesn't write to the `projects.json` file" do
         expect(File).not_to(receive(:write))
-        expect { subject.update_project!(project: project) }.to raise_error
+        expect { subject.update_project!(project: project) }.to raise_error(RuntimeError, "Couldn't update project project-1 because it doesn't exists")
       end
     end
 
     context "project exists" do
       before(:each) do
-        subject.stub(:projects).and_return(projects)
+        allow(subject).to receive(:projects).and_return(projects)
       end
 
       let(:updated_project_name) { "updated_project_name" }
@@ -101,18 +101,18 @@ describe FastlaneCI::JSONProjectDataSource do
 
     context "project doesn't exist" do
       before(:each) do
-        subject.stub(:projects).and_return([])
+        allow(subject).to receive(:projects).and_return([])
       end
 
       it "raises an error message and doesn't write to the `projects.json` file" do
         expect(File).not_to(receive(:write))
-        expect { subject.delete_project!(project: project) }.to raise_error
+        expect { subject.delete_project!(project: project) }.to raise_error(RuntimeError)
       end
     end
 
     context "project exists" do
       before(:each) do
-        subject.stub(:projects).and_return(projects)
+        allow(subject).to receive(:projects).and_return(projects)
       end
 
       it "removes the `project` from the `projects.json` file" do

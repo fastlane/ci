@@ -2,7 +2,7 @@ module FastlaneCI
   # Setting model representing a single entry of a fastlane.ci system setting
   class Setting
     attr_accessor :key
-    attr_accessor :value
+    attr_reader :value
     attr_accessor :verify_block
     attr_accessor :default_value
     attr_accessor :description

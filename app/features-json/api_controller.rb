@@ -61,6 +61,10 @@ module FastlaneCI
       register Sinatra::Reloader
     end
 
+    configure(:production, :development) do
+      enable(:logging)
+    end
+
     # to disabled authentication for the entire controller use:
     # disable(:authentication)
     set(:authentication, true)
@@ -132,9 +136,12 @@ module FastlaneCI
         return payload["user"]
       end
 
-      # provides access to the User model.
+      # provides access to the User model. Memoize @current_user so we don't do unnecessary i/o.
       def current_user
         @current_user ||= FastlaneCI::Services.user_service.find_user(id: user_id)
+        halt(404, "User not found.") unless @current_user
+
+        return @current_user
       end
 
       def user_logged_in?
@@ -143,7 +150,7 @@ module FastlaneCI
 
       def current_user_provider_credential
         provider_credential = current_user.provider_credential
-        halt(404) unless provider_credential
+        halt(404, "Provider Credential not found.") unless provider_credential
 
         return provider_credential
       end
