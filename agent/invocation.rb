@@ -12,13 +12,14 @@ module FastlaneCI::Agent
   #
   class Invocation
     include Logging
+    include Recipes
     prepend StateMachine
 
     def initialize(invocation_request, yielder)
       @invocation_request = invocation_request
       @yielder = yielder
       @output_queue = Queue.new
-      Recipes.output_queue = @output_queue
+      self.output_queue = @output_queue
     end
 
     ## 
@@ -35,7 +36,7 @@ module FastlaneCI::Agent
 
       git_url = command_env(:GIT_URL)
 
-      Recipes.setup_repo(git_url)
+      setup_repo(git_url)
 
       # TODO: ensure we are able to satisfy the request
       # unless has_required_xcode_version?
@@ -43,7 +44,7 @@ module FastlaneCI::Agent
       #   return
       # end
 
-      if Recipes.run_fastlane(@invocation_request.command.env.to_h)
+      if run_fastlane(@invocation_request.command.env.to_h)
         finish
       else
         # fail is a keyword, so we must call self.
@@ -56,7 +57,7 @@ module FastlaneCI::Agent
     def finish
       artifact_path = command_env(:FASTLANE_CI_ARTIFACTS)
 
-      file_path = Recipes.archive_artifacts(artifact_path)
+      file_path = archive_artifacts(artifact_path)
       send_file(file_path)
       succeed
     end

@@ -73,17 +73,17 @@ module FastlaneCI
         command = invocation_request.command
         logger.info("RPC run_fastlane: #{command.bin} #{command.parameters}, env: #{command.env.to_h}")
         Enumerator.new do |yielder|
+          invocation = Invocation.new(invocation_request, yielder)
+          if busy?
+            invocation.reject(RuntimeError.new("I am busy"))
+            next
+          end
           begin
-            invocation = Invocation.new(invocation_request, yielder)
-            if busy?
-              invocation.reject(RuntimeError.new("I am busy"))
-              next
-            end
             @busy = true
             invocation.run
-            @busy = false
           rescue StandardError => exception
             invocation.throw(exception)
+          ensure
             @busy = false
           end
         end
