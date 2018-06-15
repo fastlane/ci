@@ -30,7 +30,7 @@ module FastlaneCI
     def use_apple_id(apple_id: nil, user: nil)
       # use the user (email) to identify to make sure the account is
       # persisted and can be used
-      user ||= apple_id.user
+      user ||= apple_id.user if apple_id
 
       @apple_id = Services.apple_id_service.apple_ids.find { |a| a.user == user } if user
       if self.apple_id.nil?
