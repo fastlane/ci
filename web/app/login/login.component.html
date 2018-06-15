@@ -8,6 +8,11 @@
       <label>Password</label>
       <input [(ngModel)]="password" type="password">
     </div>
+
     <button mat-raised-button color="primary" (click)="login()" [disabled]="isLoggingIn">Login</button>
+
+    <span *ngIf="hasError" class="form-error">
+      Could not log you in. Please try again.
+    </span>
   </div>
 </div>

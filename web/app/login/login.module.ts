@@ -1,3 +1,4 @@
+import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material';
@@ -15,7 +16,7 @@ import {LoginComponent} from './login.component';
   ],
   imports: [
     /** Angular Library Imports */
-    FormsModule,
+    CommonModule, FormsModule,
     /** Internal Imports */
     /** Angular Material Imports */
     MatButtonModule,

@@ -18,6 +18,7 @@ describe('LoginComponent', () => {
   let loginButtonEl: DebugElement;
   let emailEl: DebugElement;
   let passwordEl: DebugElement;
+  let errorEl: DebugElement;
   let loginSubject: Subject<LoginResponse>;
 
   beforeEach(async(() => {
@@ -85,5 +86,39 @@ describe('LoginComponent', () => {
     fixture.detectChanges();
 
     expect(loginButtonEl.nativeElement.disabled).toBe(false);
+  });
+
+  it('should re-enable login button after a failed login', () => {
+    expect(loginButtonEl.nativeElement.disabled).toBe(false);
+
+    loginButtonEl.triggerEventHandler('click', null);
+    fixture.detectChanges();
+
+    expect(loginButtonEl.nativeElement.disabled).toBe(true);
+
+    loginSubject.error(null);
+    fixture.detectChanges();
+
+    expect(loginButtonEl.nativeElement.disabled).toBe(false);
+  });
+
+  it('should show an error message after a failed login attempt', () => {
+    function getFormErrorEl() {
+      return fixture.debugElement.query(By.css('.form-error'));
+    }
+
+    expect(getFormErrorEl()).toBeNull();
+
+    loginButtonEl.triggerEventHandler('click', null);
+    fixture.detectChanges();
+
+    expect(getFormErrorEl()).toBeNull();
+
+    loginSubject.error(null);
+    fixture.detectChanges();
+
+    errorEl = getFormErrorEl();
+    expect(errorEl).not.toBeNull();
+    expect(errorEl.nativeElement.textContent.trim()).toBe('Could not log you in. Please try again.');
   });
 });
