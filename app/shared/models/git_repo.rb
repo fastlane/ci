@@ -472,7 +472,7 @@ module FastlaneCI
     end
 
     def pull(repo_auth: self.repo_auth, use_global_git_mutex: true)
-      logger.debug("Enqueuing a pull on `master` (with mutex?: #{use_global_git_mutex}) for #{git_config.git_url}")
+      logger.debug("Enqueuing a pull (with mutex?: #{use_global_git_mutex}) for #{git_config.git_url}")
       perform_block(use_global_git_mutex: use_global_git_mutex) do
         logger.info("Starting pull #{git_config.git_url}")
         setup_auth(repo_auth: repo_auth)

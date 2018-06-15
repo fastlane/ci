@@ -34,14 +34,20 @@ module FastlaneCI
       else
         checkout_folder = File.join(File.expand_path(project.local_repo_path), "manual_build_#{sha_or_uuid}")
       end
+
       # TODO: This should be hidden in a service
-      repo = FastlaneCI::GitRepo.new(
-        git_config: project.repo_config,
-        local_folder: checkout_folder,
-        provider_credential: current_github_provider_credential,
-        notification_service: FastlaneCI::Services.notification_service
-      )
-      current_sha ||= repo.most_recent_commit.sha
+      unless current_sha
+        # If we still don't know the sha, we'll need to grab the most current because
+        # we just triggered a build from the Project page instead of a specific build
+        repo = FastlaneCI::GitRepo.new(
+          git_config: project.repo_config,
+          local_folder: checkout_folder,
+          provider_credential: current_github_provider_credential,
+          notification_service: FastlaneCI::Services.notification_service
+        )
+        current_sha ||= repo.most_recent_commit.sha
+      end
+
       manual_triggers_allowed = project.job_triggers.any? do |trigger|
         trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual]
       end

@@ -44,11 +44,10 @@ module FastlaneCI
       # and we can read files like the `xcode-version` file
       current_build.build_tools = {}
 
-      # The call below could be optimized, as it will also set the status
-      # on the GitHub remote. We want to store the lane, platform and parameters
-      # that's why we call it here in the `setup` method again, as well as in
-      # `BuildRunner#prepare_build_object`
-      save_build_status!
+      # We want to store the lane, platform and parameters
+      # that's why we call it here as well as implicitly in
+      # `BuildRunner#prepare_build_object` with save_build_status!
+      save_build_status_locally!
     end
 
     # completion_block is called with an array of artifacts
