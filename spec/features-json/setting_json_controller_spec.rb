@@ -48,9 +48,10 @@ describe FastlaneCI::SettingJSONController do
     it "returns an error if key doesn't exist" do
       non_existent_key = "non_existent_key"
       post("/data/settings/#{non_existent_key}")
-      # expect(last_response).to_not be_ok # TODO: use right exit code
-      expect(json["error"].to_s.length).to be > 0
+
+      expect(last_response).to_not(be_ok)
       expect(json["error"]).to eq("`non_existent_key` not found.")
+      expect(json["error_code"]).to eq("InvalidParameter.KeyNotFound")
     end
   end
 
@@ -65,6 +66,15 @@ describe FastlaneCI::SettingJSONController do
       expect(json).to eq({ "status" => "success" })
 
       expect(FastlaneCI::Services.setting_service.find_setting(setting_key: metrics_key.to_sym).value).to eq(nil)
+    end
+
+    it "returns an error if key can't be found" do
+      non_existent_key = "non_existent_key"
+      delete("/data/settings/#{non_existent_key}")
+
+      expect(last_response).to_not(be_ok)
+      expect(json["error"]).to eq("`non_existent_key` not found.")
+      expect(json["error_code"]).to eq("InvalidParameter.KeyNotFound")
     end
   end
 end
