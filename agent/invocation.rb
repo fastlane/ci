@@ -22,7 +22,7 @@ module FastlaneCI::Agent
       self.output_queue = @output_queue
     end
 
-    ## 
+    ##
     # StateMachine actions
     # These methods run as hooks whenever a transition was successful.
     ##

@@ -45,19 +45,19 @@ describe FastlaneCI::Agent::Service do
       # reading the first InvocationResponse puts the agent into busy mode.
       responses.next
 
-      2.times do 
+      2.times do
         busy_responses = service.run_fastlane(request, call)
         expect(busy_responses.next.state).to eq(:REJECTED)
         loop { busy_responses.next }
       end
-      
+
       # Finish the task by reading the rest of the response stream;
       # This should put the agent back in non-busy mode.
       loop { responses.next }
 
       # Let's validate that once the running invocation is done we can accept new requests
       responses = service.run_fastlane(request, call)
-      expect(responses.next.state).not_to eq(:REJECTED)
+      expect(responses.next.state).not_to(eq(:REJECTED))
       loop { responses.next }
     end
   end
