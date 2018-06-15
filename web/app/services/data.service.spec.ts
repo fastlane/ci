@@ -2,9 +2,11 @@ import {HttpClientTestingModule, HttpTestingController} from '@angular/common/ht
 import {fakeAsync, TestBed, tick} from '@angular/core/testing';
 
 import {BuildStatus} from '../common/constants';
+import {mockBuildResponse} from '../common/test_helpers/mock_build_data';
 import {mockLanesResponse} from '../common/test_helpers/mock_lane_data';
-import {mockProjectListResponse, mockProjectResponse} from '../common/test_helpers/mock_project_data';
+import {mockProjectListResponse, mockProjectResponse, mockProjectSummaryResponse} from '../common/test_helpers/mock_project_data';
 import {mockRepositoryListResponse, mockRepositoryResponse} from '../common/test_helpers/mock_repository_data';
+import {Build} from '../models/build';
 import {Lane} from '../models/lane';
 import {Project} from '../models/project';
 import {ProjectSummary} from '../models/project_summary';
@@ -71,6 +73,21 @@ describe('DataService', () => {
     });
   });
 
+  describe('#getBuild', () => {
+    it('should return response mapped to Build model', () => {
+      let build: Build;
+      dataService.getBuild('some-id', 3).subscribe((buildRespone) => {
+        build = buildRespone;
+      });
+
+      const buildRequest = mockHttp.expectOne('/data/projects/some-id/build/3');
+      buildRequest.flush(mockBuildResponse);
+
+      expect(build.number).toBe(3);
+      expect(build.sha).toBe('5903a0a7d2238846218c08ad9d5e278db7cf46c7');
+    });
+  });
+
   describe('#getRepoLanes', () => {
     it('should return response mapped to Lane model', () => {
       let lanes: Lane[];
@@ -93,7 +110,7 @@ describe('DataService', () => {
 
   describe('#addProject', () => {
     it('should add project with commit trigger', () => {
-      let project: Project;
+      let project: ProjectSummary;
       dataService.addProject(COMMIT_TRIGGER_PROJECT_REQUEST)
           .subscribe((projectRespone) => {
             project = projectRespone;
@@ -101,12 +118,11 @@ describe('DataService', () => {
 
       const projectsRequest = mockHttp.expectOne('/data/projects');
       expect(projectsRequest.request.body).toBe(COMMIT_TRIGGER_PROJECT_REQUEST);
-      projectsRequest.flush(mockProjectResponse);
+      projectsRequest.flush(mockProjectSummaryResponse);
 
-      expect(project.id).toBe('12');
-      expect(project.builds.length).toBe(2);
-      expect(project.builds[0].status).toBe(BuildStatus.SUCCESS);
-      expect(project.builds[1].status).toBe(BuildStatus.FAILED);
+      expect(project.id).toBe('1');
+      expect(project.name).toBe('the coolest project');
+      expect(project.lane).toBe('ios test');
     });
   });
 

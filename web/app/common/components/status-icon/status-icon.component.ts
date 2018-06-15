@@ -2,9 +2,8 @@ import {Component, HostBinding, Input, OnInit} from '@angular/core';
 
 import {BuildStatus} from '../../constants';
 
-const FAILED_STATUSES: BuildStatus[] = [
-  BuildStatus.FAILED, BuildStatus.INTERNAL_ISSUE, BuildStatus.MISSING_FASTFILE
-];
+const FAILED_STATUSES: BuildStatus[] =
+    [BuildStatus.FAILED, BuildStatus.MISSING_FASTFILE];
 
 @Component({
   selector: 'fci-status-icon',

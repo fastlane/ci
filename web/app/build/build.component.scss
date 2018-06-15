@@ -1,0 +1,46 @@
+$TOOLBAR_HEIGHT:80px;
+.fci-build-container {
+    display: flex;
+    padding: 24px 92px 0 92px;
+    height: calc(100% - #{$TOOLBAR_HEIGHT});
+    box-sizing: border-box;
+    .fci-left-container {
+        display: flex;
+        flex: 1;
+        flex-flow: column;
+        .fci-build-logs {
+            flex: 1;
+            padding: 8px;
+            color: #859900;
+            background-color: #073642;
+            min-width: 926px;
+        }
+        .fci-build-header {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            fci-status-icon {
+                width: 24px;
+                height: 24px;
+                margin-right: 2px;
+            }
+            .fci-build-title {
+                font-size: 32px;
+                line-height: 1;
+            }
+            .fci-build-description {
+                margin-left: 16px;
+            }
+        }
+    }
+    .fci-right-container {
+        padding-left: 16px;
+        .fci-build-details {
+            width: 296px;
+            h5 {
+                margin-bottom: 0;
+                text-transform: uppercase;
+            }
+        }
+    }
+}

@@ -57,3 +57,8 @@ fastlane/report.xml
 
 # Vagrant VM
 .vagrant
+
+# Various IDE
+.idea
+*.iml
+

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "logger"
 require "grpc"
 # put ./protos in the load path. this is required because they are auto-generated and have specific `require` paths
 proto_path = File.expand_path("../protos", File.dirname(__FILE__))
@@ -15,6 +16,20 @@ module FastlaneCI
     VERSION = "0.0.0-alpha"
     HOST = "0.0.0.0"
     PORT = "8089"
+    NULL_CHAR = "\0"
     EOT_CHAR = "\4" # end-of-transmission character.
+
+    ##
+    # Logging module to expose the logger.
+    module Logging
+      def logger
+        return @logger if defined?(@logger)
+
+        @logger = Logger.new(STDOUT)
+        @logger.level = Logger::DEBUG
+
+        @logger
+      end
+    end
   end
 end

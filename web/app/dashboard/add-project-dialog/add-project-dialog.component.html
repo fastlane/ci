@@ -1,54 +1,56 @@
 <fci-form-spinner *ngIf="isLoadingRepositories || isAddingProject"></fci-form-spinner>
 <div mat-dialog-title>Add a project</div>
-<div mat-dialog-content>
-  <div class="fci-dialog-form-section fci-input-container">
-    <div class="fci-section-title">For my project</div>
-    <input placeholder="Project Name" [(ngModel)]="project.project_name">
-  </div>
-  <div class="fci-dialog-form-section fci-input-container">
-    <div class="fci-section-title">With the repo</div>
-    <mat-select class="fci-repo-select" [(value)]="project.repo_name" (selectionChange)="loadRepoLanes()">
-      <mat-option *ngFor="let repo of repositories" [value]="repo.fullName">
-        {{repo.fullName}}
-      </mat-option>
-    </mat-select>
-  </div>
-  <div class="fci-dialog-form-section fci-input-container">
-    <div class="fci-section-title">I want to run the lane</div>
-    <div class="fci-lane-form">
-      <mat-select class="fci-lane-select" [(value)]="project.lane" [disabled]="isLoadingLanes || lanes.length === 0">
-        <mat-option *ngFor="let lane of lanes" [value]="lane">
-          {{lane}}
+<form [formGroup]="form" (ngSubmit)="addProject()">
+  <div mat-dialog-content>
+    <div class="fci-dialog-form-section fci-input-container">
+      <div class="fci-section-title">For my project</div>
+      <input #projectNameControl formControlName="name" placeholder="Project Name">
+    </div>
+    <div class="fci-dialog-form-section fci-input-container">
+      <div class="fci-section-title">With the repo</div>
+      <mat-select formControlName="repo" class="fci-repo-select">
+        <mat-option *ngFor="let repo of repositories" [value]="repo.fullName">
+          {{repo.fullName}}
         </mat-option>
       </mat-select>
-      <mat-spinner *ngIf="isLoadingLanes" mode="indeterminate" diameter="25"></mat-spinner>
+    </div>
+    <div class="fci-dialog-form-section fci-input-container">
+      <div class="fci-section-title">I want to run the lane</div>
+      <div class="fci-lane-form">
+        <mat-select formControlName="lane" class="fci-lane-select">
+          <mat-option *ngFor="let lane of lanes" [value]="lane">
+            {{lane}}
+          </mat-option>
+        </mat-select>
+        <mat-spinner *ngIf="isLoadingLanes" mode="indeterminate" diameter="25"></mat-spinner>
+      </div>
+    </div>
+    <div class="fci-dialog-form-section fci-input-container">
+      <div class="fci-section-title">With builds being triggered</div>
+      <mat-select formControlName="trigger" class="fci-trigger-select">
+        <mat-option *ngFor="let triggerOption of TRIGGER_OPTIONS" [value]="triggerOption.value">
+          {{triggerOption.viewValue}}
+        </mat-option>
+      </mat-select>
+      <ng-container *ngIf="form.get('trigger').value === 'nightly'">
+        <span class="fci-at-time">at</span>
+        <mat-select formControlName="hour" class="fci-hour-select">
+          <mat-option *ngFor="let hour of HOURS" [value]="hour">
+            {{hour}}
+          </mat-option>
+        </mat-select>
+        <mat-select formControlName="amPm" class="fci-am-pm-select">
+          <mat-option value="AM">AM</mat-option>
+          <mat-option value="PM">PM</mat-option>
+        </mat-select>
+      </ng-container>
     </div>
   </div>
-  <div class="fci-dialog-form-section fci-input-container">
-    <div class="fci-section-title">With builds being triggered</div>
-    <mat-select class="fci-trigger-select" [(value)]="project.trigger_type">
-      <mat-option *ngFor="let triggerOption of TRIGGER_OPTIONS" [value]="triggerOption.value">
-        {{triggerOption.viewValue}}
-      </mat-option>
-    </mat-select>
-    <ng-container *ngIf="project.trigger_type === 'nightly'">
-      <span class="fci-at-time">at</span>
-      <mat-select class="fci-hour-select" [(value)]="timeSelectorData.hour">
-        <mat-option *ngFor="let hour of HOURS" [value]="hour">
-          {{hour}}
-        </mat-option>
-      </mat-select>
-      <mat-select class="fci-am-pm-select" [(value)]="timeSelectorData.isAm">
-        <mat-option [value]="true">AM</mat-option>
-        <mat-option [value]="false">PM</mat-option>
-      </mat-select>
-    </ng-container>
+  <div mat-dialog-actions>
+    <button mat-button (click)="closeDialog()" type="button">Close</button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="!form.valid">Add Project</button>
   </div>
-</div>
-<div mat-dialog-actions>
-  <button mat-button (click)="closeDialog()">Close</button>
-  <button mat-raised-button color="primary" (click)="addProject()">Add Project</button>
-</div>
-<button mat-icon-button class="fci-dialog-icon-close-button" (click)="closeDialog()">
+</form>
+<button mat-icon-button class="fci-dialog-icon-close-button" (click)="closeDialog()" type="button">
   <mat-icon>close</mat-icon>
 </button>

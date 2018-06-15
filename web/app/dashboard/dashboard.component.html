@@ -12,7 +12,7 @@
 
 <div fci-grid>
   <div fci-cell="12">
-    <mat-table class="fci-project-table" [dataSource]="projects">
+    <mat-table #projectsTable class="fci-project-table" [dataSource]="projects">
       <!-- Name Column -->
       <ng-container matColumnDef="name">
         <mat-header-cell *matHeaderCellDef>Project Name</mat-header-cell>

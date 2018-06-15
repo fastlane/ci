@@ -10,19 +10,23 @@ module FastlaneCI
 
       request.body.rewind
       body = request.body.read
-      unless body.empty?
-        @json_params = JSON.parse(body)
-        # make the accessor indifferent to strings or procs
-        @json_params.default_proc = proc do |hash, key|
-          if hash.key?(key.to_s)
-            hash[key.to_s]
-          end
+
+      return super if body.to_s.length == 0
+
+      @json_params = JSON.parse(body)
+      # make the accessor indifferent to strings or procs
+      @json_params.default_proc = proc do |hash, key|
+        if hash.key?(key.to_s)
+          hash[key.to_s]
         end
-
-        @json_params.merge!(super)
-
-        return @json_params
       end
+
+      query_params = super
+      if query_params
+        @json_params.merge!(query_params)
+      end
+
+      return @json_params
     end
   end
 end
