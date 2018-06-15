@@ -82,9 +82,8 @@ module FastlaneCI
       configuration_repo_contents = Dir[File.join(Services.ci_config_git_repo_path, "*")]
       configuration_files = CONFIGURATION_FILES.map { |f| File.join(Services.ci_config_git_repo_path, f) }
 
-      configuration_files.each do |f|
-        next unless configuration_repo_contents.include?(f)
-        logger.debug("ci-config repo doesn't contain required configuration file '#{f}' - please create an empty file in your repo")
+      unless configuration_files.all? { |f| configuration_repo_contents.include?(f) }
+        logger.debug("local configuration repo doesn't contain required configuration files")
         return false
       end
 
