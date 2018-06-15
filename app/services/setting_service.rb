@@ -67,7 +67,5 @@ module FastlaneCI
 
       setting_data_source.update_setting!(setting: setting)
     end
-
-    # TODO: Provide reset feature
   end
 end
