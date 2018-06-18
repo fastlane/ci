@@ -50,7 +50,8 @@ module FastlaneCI
     # Array of env variables that were set, that we need to unset after the run
     attr_accessor :environment_variables_set
 
-    attr_accessor :local_build_folder
+    # Folder where the code will be checked out to, and where the build will happen
+    attr_reader :local_build_folder
 
     def initialize(
       project:,
