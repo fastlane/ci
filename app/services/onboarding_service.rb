@@ -11,7 +11,7 @@ module FastlaneCI
     # File names that should be present in configuration repository.
     #
     # @return [Array[String]]
-    CONFIGURATION_FILES = ["users.json", "projects.json", "environment_variables.json"].freeze
+    CONFIGURATION_FILES = ["users.json", "projects.json"].freeze
 
     # Triggers the initial clone of the remote configuration repository, to the
     # local fastlane configuration repository in `~/.fastlane/ci`
