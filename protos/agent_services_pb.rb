@@ -23,7 +23,6 @@ module FastlaneCI
         self.unmarshal_class_method = :decode
         self.service_name = 'FastlaneCI.Proto.Agent'
 
-        rpc :Spawn, Command, stream(InvocationResponse)
         rpc :RunFastlane, InvocationRequest, stream(InvocationResponse)
       end
 
