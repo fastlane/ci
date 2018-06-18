@@ -1,5 +1,7 @@
+import {HttpResponse} from '@angular/common/http';
 import {HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
 import {fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {Observable} from 'rxjs/Observable';
 
 import {BuildStatus} from '../common/constants';
 import {mockBuildResponse} from '../common/test_helpers/mock_build_data';
@@ -140,6 +142,20 @@ describe('DataService', () => {
       expect(repositories[0].fullName).toBe('fastlane/ci');
       expect(repositories[2].url)
           .toBe('https://github.com/fastlane/onboarding');
+    });
+  });
+
+  describe('#isServerConfigured', () => {
+    it('should make request to correct URL', () => {
+      let isConfigured: boolean;
+      dataService.isServerConfigured().subscribe((response) => {
+        isConfigured = response;
+      });
+
+      const request = mockHttp.expectOne('/data/setup/configured');
+      request.event(new HttpResponse<boolean>({body: true}));
+
+      expect(isConfigured).toBe(true);
     });
   });
 });

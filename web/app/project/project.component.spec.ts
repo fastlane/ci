@@ -1,6 +1,7 @@
 import 'rxjs/add/operator/switchMap';
 
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {MatCardModule, MatTableModule} from '@angular/material';
 import {By} from '@angular/platform-browser';
 import {ActivatedRoute, convertToParamMap} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
@@ -33,8 +34,9 @@ describe('ProjectComponent', () => {
     TestBed
         .configureTestingModule({
           imports: [
-            CommonComponentsModule, SharedMaterialModule, MomentModule,
-            ToolbarModule, RouterTestingModule
+            CommonComponentsModule, MomentModule, ToolbarModule,
+            RouterTestingModule, MatCardModule, MatTableModule
+
           ],
           declarations: [
             ProjectComponent,
