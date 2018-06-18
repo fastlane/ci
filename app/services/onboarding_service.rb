@@ -11,7 +11,7 @@ module FastlaneCI
     # File names that should be present in configuration repository.
     #
     # @return [Array[String]]
-    CONFIGURATION_FILES = ["users.json", "projects.json", "environment_variables.json"].freeze
+    CONFIGURATION_FILES = ["users.json", "projects.json"].freeze
 
     # Triggers the initial clone of the remote configuration repository, to the
     # local fastlane configuration repository in `~/.fastlane/ci`
@@ -69,6 +69,8 @@ module FastlaneCI
 
     # Returns `true` if the local configuration repository exists, and all
     # required files are present
+    # This method will only check for the really required files, most config
+    # files can be generated on the fly
     #
     # @return [Boolean]
     def local_configuration_repo_exists?
@@ -81,7 +83,7 @@ module FastlaneCI
       configuration_files = CONFIGURATION_FILES.map { |f| File.join(Services.ci_config_git_repo_path, f) }
 
       unless configuration_files.all? { |f| configuration_repo_contents.include?(f) }
-        logger.debug("local configuration repo doesn't contain required configuration files")
+        logger.debug("local configuration repo doesn't contain required configuration files: #{CONFIGURATION_FILES.join(', ')}")
         return false
       end
 
