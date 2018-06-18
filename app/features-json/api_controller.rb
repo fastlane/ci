@@ -148,6 +148,10 @@ module FastlaneCI
         current_user != nil
       end
 
+      # @param error_message [String]: A human readable error message
+      # @param error_key [String]: a machine readable error code, nested with .
+      #                            check out docs/API.md for more information
+      # @param error_message [String]: optional, HTTP error code
       def json_error(error_message:, error_key:, error_code: 400)
         status(error_code)
 
