@@ -472,7 +472,7 @@ module FastlaneCI
     end
 
     def pull(repo_auth: self.repo_auth, use_global_git_mutex: true)
-      logger.debug("Enqueuing a pull on `master` (with mutex?: #{use_global_git_mutex}) for #{git_config.git_url}")
+      logger.debug("Enqueuing a pull (with mutex?: #{use_global_git_mutex}) for #{git_config.git_url}")
       perform_block(use_global_git_mutex: use_global_git_mutex) do
         logger.info("Starting pull #{git_config.git_url}")
         setup_auth(repo_auth: repo_auth)
@@ -641,7 +641,7 @@ module FastlaneCI
         logger.debug("Switching to branch #{branch} from forked repo: #{clone_url} (pulling into #{local_branch_name})")
 
         begin
-          git.branch(local_branch_name)
+          git.branch(local_branch_name).checkout
           git.pull(clone_url, branch)
           return true
         rescue StandardError => ex
@@ -668,6 +668,7 @@ module FastlaneCI
           logger.debug("Switching to new branch from ref #{ref} (pulling into #{local_branch_name})")
           git.fetch(GitRepo::DEFAULT_REMOTE, ref, {})
           git.branch(local_branch_name)
+          git.checkout(local_branch_name)
           return true
         rescue StandardError => ex
           exception_context = {

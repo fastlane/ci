@@ -34,14 +34,20 @@ module FastlaneCI
       else
         checkout_folder = File.join(File.expand_path(project.local_repo_path), "manual_build_#{sha_or_uuid}")
       end
+
       # TODO: This should be hidden in a service
-      repo = FastlaneCI::GitRepo.new(
-        git_config: project.repo_config,
-        local_folder: checkout_folder,
-        provider_credential: current_github_provider_credential,
-        notification_service: FastlaneCI::Services.notification_service
-      )
-      current_sha ||= repo.most_recent_commit.sha
+      unless current_sha
+        # If we still don't know the sha, we'll need to grab the most current because
+        # we just triggered a build from the Project page instead of a specific build
+        repo = FastlaneCI::GitRepo.new(
+          git_config: project.repo_config,
+          local_folder: checkout_folder,
+          provider_credential: current_github_provider_credential,
+          notification_service: FastlaneCI::Services.notification_service
+        )
+        current_sha ||= repo.most_recent_commit.sha
+      end
+
       manual_triggers_allowed = project.job_triggers.any? do |trigger|
         trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual]
       end
@@ -68,7 +74,8 @@ module FastlaneCI
         notification_service: FastlaneCI::Services.notification_service,
         work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
         trigger: project.find_triggers_of_type(trigger_type: :manual).first,
-        git_fork_config: git_fork_config
+        git_fork_config: git_fork_config,
+        local_build_folder: checkout_folder
       )
       build_runner.setup(parameters: nil)
       Services.build_runner_service.add_build_runner(build_runner: build_runner)

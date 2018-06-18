@@ -256,6 +256,8 @@ module FastlaneCI
             ref: matching_open_pr.git_ref
           )
 
+          # TODO: should make sure we don't already have a checkout, if we do, we need to adjust
+          # the local_build_folder for the BuildRunner
           build_runner = FastlaneBuildRunner.new(
             project: project,
             sha: sha,
