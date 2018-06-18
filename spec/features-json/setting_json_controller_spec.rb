@@ -49,7 +49,7 @@ describe FastlaneCI::SettingJSONController do
       non_existent_key = "non_existent_key"
       post("/data/settings/#{non_existent_key}")
 
-      expect(last_response.status).to eq(400)
+      expect(last_response.status).to eq(404)
       expect(json["error"]).to eq("`non_existent_key` not found.")
       expect(json["error_code"]).to eq("InvalidParameter.KeyNotFound")
     end
@@ -72,7 +72,7 @@ describe FastlaneCI::SettingJSONController do
       non_existent_key = "non_existent_key"
       delete("/data/settings/#{non_existent_key}")
 
-      expect(last_response.status).to eq(400)
+      expect(last_response.status).to eq(404)
       expect(json["error"]).to eq("`non_existent_key` not found.")
       expect(json["error_code"]).to eq("InvalidParameter.KeyNotFound")
     end

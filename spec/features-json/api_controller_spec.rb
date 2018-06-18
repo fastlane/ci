@@ -2,6 +2,8 @@ require "spec_helper"
 require "app/features-json/api_controller"
 
 describe FastlaneCI::APIController do
+  let(:json) { JSON.parse(last_response.body) }
+
   ##
   # some example usages of APIController, with default authentication and with authentication disabled.
   #
@@ -25,20 +27,22 @@ describe FastlaneCI::APIController do
     describe "unauthenticated request" do
       it "index is not successful" do
         get("/")
-        expect(last_response).to_not(be_ok)
-        expect(last_response.body).to eq("A token must be passed.")
+        expect(last_response.status).to eq(401)
+        expect(json["error"]).to eq("A token must be passed")
+        expect(json["error_code"]).to eq("Authentication.Token.Missing")
       end
 
       it "public is successful" do
         get("/public")
-        expect(last_response).to(be_ok)
-        expect(last_response.body).to eq('{"message":"ok"}')
+        expect(last_response.status).to eq(200)
+        expect(json["message"]).to eq("ok")
       end
 
       it "private is not successful" do
         get("/private")
-        expect(last_response).to_not(be_ok)
-        expect(last_response.body).to eq("A token must be passed.")
+        expect(last_response.status).to eq(401)
+        expect(json["error"]).to eq("A token must be passed")
+        expect(json["error_code"]).to eq("Authentication.Token.Missing")
       end
     end
 
@@ -85,8 +89,9 @@ describe FastlaneCI::APIController do
 
       it "private is not successful" do
         get("/private")
-        expect(last_response).to_not(be_ok)
-        expect(last_response.body).to eq("A token must be passed.")
+        expect(last_response.status).to eq(401)
+        expect(json["error"]).to eq("A token must be passed")
+        expect(json["error_code"]).to eq("Authentication.Token.Missing")
       end
     end
 
@@ -125,7 +130,7 @@ describe FastlaneCI::APIController do
         expect(payload).to include("iss", "sub", "user", "iat")
       end
 
-      it "will halt with an error if the token is not valid" do
+      it "will halt with an error if the token is not valid", now: true do
         app.helpers.request = Sinatra::Request.new(Rack::MockRequest.env_for("/", { "HTTP_AUTHORIZATION" => "Bearer something-else" }))
         expect do
           app.helpers.authenticate!(via: :jwt)
