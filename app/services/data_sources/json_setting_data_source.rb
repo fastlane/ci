@@ -59,12 +59,13 @@ module FastlaneCI
 
     def reload_settings
       JSONSettingDataSource.file_semaphore.synchronize do
+        @settings = AvailableSettings.available_settings
+
         unless File.exist?(setting_file_path)
-          @settings = []
+          # No custom configuration yet
+          # We still to return the defaults
           return
         end
-
-        @settings = AvailableSettings.available_settings
 
         JSON.parse(File.read(setting_file_path)).each do |setting_hash|
           user_setting = Setting.from_json!(setting_hash)
@@ -84,8 +85,6 @@ module FastlaneCI
       existing.value = setting.value
       self.settings = settings
     end
-
-    # TODO: provide a `reset_setting` method
 
     # Finds setting with a given key
     #
