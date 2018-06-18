@@ -8,6 +8,7 @@ import {MomentModule} from 'ngx-moment';
 import {CommonComponentsModule} from '../common/components/common-components.module';
 import {DashboardComponent} from '../dashboard/dashboard.component';
 import {ProjectComponent} from '../project/project.component';
+import {SharedMaterialModule} from '../root/shared_material.module';
 import {DataService} from '../services/data.service';
 import {SharedMaterialModule} from '../root/shared_material.module';
 import {AddProjectDialogComponent} from './add-project-dialog/add-project-dialog.component';

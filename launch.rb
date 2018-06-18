@@ -134,7 +134,6 @@ module FastlaneCI
         FastlaneCI::FastlaneApp.use(FastlaneCI::ConfigurationController)
         FastlaneCI::FastlaneApp.use(FastlaneCI::DashboardController)
         FastlaneCI::FastlaneApp.use(FastlaneCI::NotificationsController)
-        FastlaneCI::FastlaneApp.use(FastlaneCI::OnboardingController)
         FastlaneCI::FastlaneApp.use(FastlaneCI::ProviderCredentialsController)
         FastlaneCI::FastlaneApp.use(FastlaneCI::UsersController)
         FastlaneCI::FastlaneApp.use(FastlaneCI::EnvironmentVariablesController)
@@ -142,8 +141,9 @@ module FastlaneCI
         FastlaneCI::FastlaneApp.use(FastlaneCI::AppleIDController)
       end
 
-      # TODO: Only load this with ERB_CLIENT env once Web app has login support
+      # TODO: Only load this with ERB_CLIENT env once Web app has login/onboarding support
       FastlaneCI::FastlaneApp.use(FastlaneCI::LoginController)
+      FastlaneCI::FastlaneApp.use(FastlaneCI::OnboardingController)
 
       # Load JSON controllers
       require_relative "app/features-json/project_json_controller"
@@ -151,6 +151,7 @@ module FastlaneCI
       require_relative "app/features-json/login_json_controller"
       require_relative "app/features-json/build_json_controller"
       require_relative "app/features-json/artifact_json_controller"
+      require_relative "app/features-json/setup_json_controller"
       require_relative "app/features-json/setting_json_controller"
 
       FastlaneCI::FastlaneApp.use(FastlaneCI::LoginJSONController)
@@ -158,6 +159,7 @@ module FastlaneCI
       FastlaneCI::FastlaneApp.use(FastlaneCI::RepositoryJSONController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::BuildJSONController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::ArtifactJSONController)
+      FastlaneCI::FastlaneApp.use(FastlaneCI::SetupJSONController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::SettingJSONController)
     end
 
