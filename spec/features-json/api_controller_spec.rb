@@ -139,7 +139,7 @@ describe FastlaneCI::APIController do
       #   expect do
       #     app.helpers.authenticate!(via: :jwt)
       #   end.to throw_symbol(:halt)
- 
+
       #   app.helpers.request = Sinatra::Request.new(Rack::MockRequest.env_for("/", {}))
       #   expect do
       #     app.helpers.authenticate!(via: :jwt)
