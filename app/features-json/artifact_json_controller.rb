@@ -19,7 +19,11 @@ module FastlaneCI
         )
         return ArtifactViewModel.new(artifact: artifact, uri: uri).to_json
       rescue ArtifactNotFoundError
-        return { error: "Couldn't find artifact" }.to_json
+        json_error!(
+          error_message: "Couldn't find artifact",
+          error_key: "Artifact.Missing",
+          error_code: 404
+        )
       end
     end
 
@@ -78,7 +82,13 @@ module FastlaneCI
 
     def current_project
       current_project = FastlaneCI::Services.project_service.project_by_id(params[:project_id])
-      halt(404) unless current_project
+      unless current_project
+        json_error!(
+          error_message: "Can't find project with ID #{params[:project_id]}",
+          error_key: "Project.Missing",
+          error_code: 404
+        )
+      end
 
       return current_project
     end
