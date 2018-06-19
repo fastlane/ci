@@ -12,7 +12,8 @@ module FastlaneCI
     # @return [UUID] The id of the artifact.
     attr_reader :id
 
-    # type is just a String that refers to the kind of data that the Artifact represents (i.e., ipa, apk, log, etc.)
+    # String that refers to the kind of data that the Artifact represents
+    # (i.e., ipa, apk, log, SCAN_DERIVED_DATA_PATH, etc.)
     # @return [String] The type or kind of artifact.
     attr_reader :type
 
