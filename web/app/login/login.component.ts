@@ -20,19 +20,19 @@ export class LoginComponent {
       private readonly router: Router) {}
 
   login(): void {
-    this.isLoggingIn = true
-    this.hasError = false
+    this.isLoggingIn = true;
+    this.hasError = false;
 
     this.authService.login({email: this.email, password: this.password})
         .subscribe(() => {
-          this.isLoggingIn = false
+          this.isLoggingIn = false;
 
           // TODO: preserve user's state and return to that instead
           // Logged-in go back to landing page
           this.router.navigate(['/']);
         }, () => {
-          this.isLoggingIn = false
-          this.hasError = true
+          this.isLoggingIn = false;
+          this.hasError = true;
         });
   }
 }
