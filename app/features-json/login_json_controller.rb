@@ -11,7 +11,13 @@ module FastlaneCI
 
     post HOME.to_s do
       user = Services.user_service.login(email: params[:email], password: params[:password])
-      halt(401) unless user
+      if user.nil?
+        json_error!(
+          error_message: "Invalid username or password",
+          error_key: "Authentication.InvalidLogin",
+          error_code: 401
+        )
+      end
 
       json({ token: token(user) })
     end

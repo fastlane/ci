@@ -5,10 +5,7 @@ module FastlaneCI::Agent
   ##
   # stateless invocation recipes go here
   module Recipes
-    extend Logging
-
-    # all method below this are module functions, callable on the module directly.
-    module_function
+    include Logging
 
     ##
     # set up a Queue that is used to push output from stdout/err from commands that shell out.

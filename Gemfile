@@ -14,8 +14,8 @@ source("https://rubygems.org")
 
 # Sinatra
 gem "faye-websocket", ">= 0.10.7", "< 1.0.0" # web socket connection for Sinatra
-gem "sinatra", "= 2.0.1" # Our web application library
-gem "sinatra-contrib", ">= 2.0.0", "< 3.0.0" # includes some Sinatra helper methods
+gem "sinatra", "= 2.0.3" # Our web application library
+gem "sinatra-contrib", ">= 2.0.3", "< 3.0.0" # includes some Sinatra helper methods
 gem "sinatra-flash" # renders error messages in the browser - remove once we switched to new frontend
 
 # web server that we need to support web socket connections with sinatra
@@ -83,7 +83,6 @@ group :test, :development do
   gem "rack-test", require: "rack/test"
   gem "rake"
   gem "rspec"
-  gem "timecop", ">= 0.9.1", "< 1.0.0"
   gem "webmock", ">= 3.4.1", "< 3.5.0"
   gem "timecop", ">= 0.9.1", "< 1.0.0"
 end

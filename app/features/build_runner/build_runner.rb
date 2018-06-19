@@ -50,11 +50,22 @@ module FastlaneCI
     # Array of env variables that were set, that we need to unset after the run
     attr_accessor :environment_variables_set
 
-    def initialize(project:, sha:, github_service:, notification_service:, work_queue:, trigger:, git_fork_config:)
+    # Folder where the code will be checked out to, and where the build will happen
+    attr_reader :local_build_folder
+
+    def initialize(
+      project:,
+      sha:,
+      github_service:,
+      notification_service:,
+      work_queue:,
+      trigger:,
+      git_fork_config:,
+      local_build_folder: nil
+    )
       if trigger.nil?
         raise "No trigger provided, this is probably caused by a build being triggered, " \
               "but then the project not having this particular build trigger associated"
-        # rubocop:enable Metrics/LineLength
       end
 
       if git_fork_config.nil?
@@ -67,6 +78,7 @@ module FastlaneCI
       @project = project
       @sha = sha
       @git_fork_config = git_fork_config
+      @local_build_folder = local_build_folder
 
       self.all_build_output_log_rows = []
       self.build_change_listeners = []
@@ -78,10 +90,11 @@ module FastlaneCI
 
       prepare_build_object(trigger: trigger)
 
+      local_folder = @local_build_folder || File.join(project.local_repo_path, "builds", sha)
       @repo = GitRepo.new(
         git_config: project.repo_config,
         provider_credential: github_service.provider_credential,
-        local_folder: File.join(project.local_repo_path, "builds", sha),
+        local_folder: local_folder,
         notification_service: notification_service,
         async_start: false
       )

@@ -8,12 +8,23 @@ module FastlaneCI
 
     get "#{HOME}/:build_number" do |project_id, build_number|
       build = current_project.builds.find { |b| b.number == build_number.to_i }
+      if build.nil?
+        json_error!(
+          error_message: "Can't find build with ID #{build_number} for project #{project_id}",
+          error_key: "Build.Missing",
+          error_code: 404
+        )
+      end
       build_view_model = BuildViewModel.new(build: build)
 
       json(build_view_model)
     end
 
     post "#{HOME}/:build_number/rebuild" do |project_id, build_number|
+      # TODO: We're not using `build_number` anywhere here
+      # Seems like we make use of just the `sha` value, if so, maybe the `build_number`
+      # shouldn't be here?
+
       # passing a specific sha is optional, so this might be nil
       current_sha = params[:sha] if params[:sha].to_s.length > 0
 
@@ -45,8 +56,11 @@ module FastlaneCI
       end
 
       unless manual_triggers_allowed
-        status(403) # Forbidden
-        body("Cannot build. There is no manual build trigger, for this branch, associated with this project.")
+        json_error!(
+          error_message: "Cannot build. There is no manual build trigger, for this branch" \
+          "associated with this project",
+          error_code: 403
+        )
         return
       end
 
@@ -71,15 +85,19 @@ module FastlaneCI
       build_runner.setup(parameters: nil)
       Services.build_runner_service.add_build_runner(build_runner: build_runner)
 
-      json({
-        status: :success,
-        build_number: build_runner.current_build.number
-      })
+      build_view_model = BuildViewModel.new(build: build_runner.current_build)
+      json(build_view_model)
     end
 
     def current_project
       current_project = FastlaneCI::Services.project_service.project_by_id(params[:project_id])
-      halt(404) unless current_project
+      unless current_project
+        json_error!(
+          error_message: "Can't find project with ID #{params[:project_id]}",
+          error_key: "Project.Missing",
+          error_code: 404
+        )
+      end
 
       return current_project
     end

@@ -134,7 +134,6 @@ module FastlaneCI
         FastlaneCI::FastlaneApp.use(FastlaneCI::ConfigurationController)
         FastlaneCI::FastlaneApp.use(FastlaneCI::DashboardController)
         FastlaneCI::FastlaneApp.use(FastlaneCI::NotificationsController)
-        FastlaneCI::FastlaneApp.use(FastlaneCI::OnboardingController)
         FastlaneCI::FastlaneApp.use(FastlaneCI::ProviderCredentialsController)
         FastlaneCI::FastlaneApp.use(FastlaneCI::UsersController)
         FastlaneCI::FastlaneApp.use(FastlaneCI::EnvironmentVariablesController)
@@ -142,19 +141,26 @@ module FastlaneCI
         FastlaneCI::FastlaneApp.use(FastlaneCI::AppleIDController)
       end
 
-      # TODO: Only load this with ERB_CLIENT env once Web app has login support
+      # TODO: Only load this with ERB_CLIENT env once Web app has login/onboarding support
       FastlaneCI::FastlaneApp.use(FastlaneCI::LoginController)
+      FastlaneCI::FastlaneApp.use(FastlaneCI::OnboardingController)
 
       # Load JSON controllers
       require_relative "app/features-json/project_json_controller"
       require_relative "app/features-json/repos_json_controller"
       require_relative "app/features-json/login_json_controller"
       require_relative "app/features-json/build_json_controller"
+      require_relative "app/features-json/artifact_json_controller"
+      require_relative "app/features-json/setup_json_controller"
+      require_relative "app/features-json/setting_json_controller"
 
       FastlaneCI::FastlaneApp.use(FastlaneCI::LoginJSONController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::ProjectJSONController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::RepositoryJSONController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::BuildJSONController)
+      FastlaneCI::FastlaneApp.use(FastlaneCI::ArtifactJSONController)
+      FastlaneCI::FastlaneApp.use(FastlaneCI::SetupJSONController)
+      FastlaneCI::FastlaneApp.use(FastlaneCI::SettingJSONController)
     end
 
     def self.start_github_workers
@@ -252,6 +258,8 @@ module FastlaneCI
             ref: matching_open_pr.git_ref
           )
 
+          # TODO: should make sure we don't already have a checkout, if we do, we need to adjust
+          # the local_build_folder for the BuildRunner
           build_runner = FastlaneBuildRunner.new(
             project: project,
             sha: sha,
