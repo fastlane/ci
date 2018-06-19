@@ -16,23 +16,20 @@ module FastlaneCI
       setting = Services.setting_service.find_setting(setting_key: key.to_sym)
 
       if setting.nil?
-        json_error(
+        json_error!(
           error_message: "`#{params[:setting_key]}` not found.",
-          error_key: "InvalidParameter.KeyNotFound"
+          error_key: "InvalidParameter.KeyNotFound",
+          error_code: 404
         )
       end
 
       # TODO: security aspect, how do we make sure this can't be abused?
       # We don't want to hash/encrypt all of them, as this would make it harder for
       # people to manually update those files
-      begin
-        setting.value = value
-        Services.setting_service.update_setting!(setting: setting)
+      setting.value = value
+      Services.setting_service.update_setting!(setting: setting)
 
-        return json({ status: :success })
-      rescue StandardError => ex
-        halt(404, ex.to_s)
-      end
+      return json({ status: :success })
     end
 
     delete "#{HOME}/:setting_key" do
@@ -41,9 +38,10 @@ module FastlaneCI
         Services.setting_service.reset_setting!(setting_key: params[:setting_key])
         return json({ status: :success })
       rescue SettingServiceKeyNotFoundError
-        json_error(
+        json_error!(
           error_message: "`#{params[:setting_key]}` not found.",
-          error_key: "InvalidParameter.KeyNotFound"
+          error_key: "InvalidParameter.KeyNotFound",
+          error_code: 404
         )
       end
     end

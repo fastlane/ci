@@ -107,13 +107,29 @@ module FastlaneCI
 
         return payload
       rescue JWT::InvalidIssuerError
-        halt(403, { "Content-Type" => "text/plain" }, "The token does not have a valid issuer.")
+        json_error!(
+          error_message: "The token does not have a valid issuer",
+          error_key: "Authentication.Token.InvalidIssuer",
+          error_code: 403
+        )
       rescue JWT::InvalidIatError
-        halt(403, { "Content-Type" => "text/plain" }, 'The token does not have a valid "issued at" time.')
+        json_error!(
+          error_message: "The token does not have a valid 'issued at' time",
+          error_key: "Authentication.Token.MissingIssuedTime",
+          error_code: 403
+        )
       rescue JWT::ExpiredSignature
-        halt(401, { "Content-Type" => "text/plain" }, "The token has expired.")
+        json_error!(
+          error_message: "The token has expired",
+          error_key: "Authentication.Token.Expired",
+          error_code: 401
+        )
       rescue JWT::DecodeError
-        halt(401, { "Content-Type" => "text/plain" }, "A token must be passed.")
+        json_error!(
+          error_message: "A token must be passed",
+          error_key: "Authentication.Token.Missing",
+          error_code: 401
+        )
       end
 
       # dispatch to the different authentication schemes available.
@@ -139,7 +155,13 @@ module FastlaneCI
       # provides access to the User model. Memoize @current_user so we don't do unnecessary i/o.
       def current_user
         @current_user ||= FastlaneCI::Services.user_service.find_user(id: user_id)
-        halt(404, "User not found.") unless @current_user
+        unless @current_user
+          json_error!(
+            error_message: "User not found",
+            error_key: "Authentication.UserNotFound",
+            error_code: 404
+          )
+        end
 
         return @current_user
       end
@@ -148,18 +170,36 @@ module FastlaneCI
         current_user != nil
       end
 
-      def json_error(error_message:, error_key:, error_code: 400)
+      # @param error_message [String]: A human readable error message
+      # @param error_key [String]: a machine readable error code, nested with .
+      #                            check out docs/API.md for more information
+      # @param error_message [String]: optional, HTTP error code
+      def json_error!(error_message:, error_key:, error_code: 400)
+        logger.info("Error #{error_key} (#{error_code})")
+
+        # Better have "Unknown" than an empty string or `nil`
+        error_key = "Unknown" if error_key.to_s.length == 0
+
+        # Set the HTTP status for Sinatra
         status(error_code)
 
+        # Use `halt` to immediately return the error
+        # to the client
         halt(error_code, json({
-          error: error_message,
-          error_code: error_key
+          message: error_message,
+          key: error_key
         }))
       end
 
       def current_user_provider_credential
         provider_credential = current_user.provider_credential
-        halt(404, "Provider Credential not found.") unless provider_credential
+        unless provider_credential
+          json_error!(
+            error_message: "Provider Credential not found",
+            error_key: "Authentication.ProviderCredentialNotFound",
+            error_code: 404
+          )
+        end
 
         return provider_credential
       end
