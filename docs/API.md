@@ -7,10 +7,11 @@ This document covers the documentation for the API the Sinatra service provides.
 Status Code | Description
 ------------|--------------
 200			| All good
-400			| Something went wrong
+400			| Bad request
 401			| Unauthorized
 403			| Forbidden
 404			| Resource not found
+500			| Server error
 
 ## Error descriptions
 
