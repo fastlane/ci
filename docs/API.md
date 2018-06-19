@@ -18,18 +18,18 @@ The server returns error messages in a unified format:
 
 ```json
 {
-	"error": "Provided key is invalid",
-	"error_code": "InvalidParameter.KeyNotFound"
+	"message": "Provided key is invalid",
+	"key": "InvalidParameter.KeyNotFound"
 }
 ```
 
-### `error`
+### `message`
 
 A human-readable error string describing what went wrong. This is the message you want to show to the user
 
-### `error_code`
+### `key`
 
-The error code uses a notation that allows you to parse it at a precision level of your choosing. Each level is marked using a `.`
+The error key uses a notation that allows you to parse it at a precision level of your choosing. Each level is marked using a `.`
 
 e.g. `InvalidParameter.KeyNotFound`
 
@@ -38,7 +38,7 @@ e.g. `InvalidParameter.KeyNotFound`
 
 There might be any number of nested errors, with any strings using camel case.
 
-As the API client you can now parse the first word before the first `.` and detect `InvalidParameter` and handle it as such. If you want to see why the `InvalidParameter` error was returned, you look at the error code that's behind the first `.`.
+As the API client you can now parse the first word before the first `.` and detect `InvalidParameter` and handle it as such. If you want to see why the `InvalidParameter` error was returned, you look at the error key that's behind the first `.`.
 
 #### Available Error Codes
 

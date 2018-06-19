@@ -186,8 +186,8 @@ module FastlaneCI
         # Use `halt` to immediately return the error
         # to the client
         halt(error_code, json({
-          error: error_message,
-          error_code: error_key
+          message: error_message,
+          key: error_key
         }))
       end
 
