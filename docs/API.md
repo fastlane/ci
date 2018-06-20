@@ -56,6 +56,8 @@ As the API client you can now parse the first word before the first `.` and dete
 	- `KeyNotFound`
 - `Build`
 	- `Missing`
+- `Artifact`
+	- `Missing`
 - `Project`
 	- `Missing`
 - `Unknown`
