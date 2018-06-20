@@ -89,7 +89,7 @@ module FastlaneCI
       ))
 
       save_build_status!
-#      Services.build_runner_service.remove_build_runner(build_runner: self)
+      Services.build_runner_service.remove_build_runner(build_runner: self)
       return success
     end
 
