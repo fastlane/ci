@@ -5,11 +5,11 @@ source("https://rubygems.org")
 # gem "gem_name", ">= 1.3.4", "< 2.0.0" # comment on why we need this dependency
 #
 # Note:
-# 	- Always add a comment on why this dependency is needed
-# 	- Always use `>=` and `<` to define a version range:
-# 		- This way we can require a minimum version, including a hotfix while also
-# 		- defining a maximum version (major = breaking)
-# 		- If we used `~>` we can't define a patch release without being too strict with our locking
+#   - Always add a comment on why this dependency is needed
+#   - Always use `>=` and `<` to define a version range:
+#     - This way we can require a minimum version, including a hotfix while also
+#     - defining a maximum version (major = breaking)
+#     - If we used `~>` we can't define a patch release without being too strict with our locking
 #
 
 # Sinatra
@@ -78,6 +78,7 @@ gem "git", git: "https://github.com/fastlane/ruby-git", require: false # Interac
 group :test, :development do
   gem "coveralls"
   gem "grpc-tools"
+  gem "overcommit"
   gem "pry"
   gem "pry-byebug"
   gem "rack-test", require: "rack/test"
