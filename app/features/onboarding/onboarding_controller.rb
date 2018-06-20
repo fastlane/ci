@@ -7,6 +7,7 @@ module FastlaneCI
   # Controller to help with onboarding a first-time user to fastlane.ci
   class OnboardingController < ControllerBase
     HOME = "/onboarding_erb"
+    DEFAULT_REPO_URL = "fastlane-ci-config"
 
     # After a POST request where a status is set, clear the session[:method]
     # variable to avoid displaying the same message multiple times
@@ -175,24 +176,16 @@ module FastlaneCI
     #
     # 2) Redirect back to `/configuration`
     post "#{HOME}/git_repo" do
-      if valid_params?(params, post_parameter_list_for_git_repo_validation)
-        Services.dot_keys_variable_service.write_keys_file!(
-          locals: format_params(
-            params, post_parameter_list_for_git_repo_validation
-          )
-        )
-        Services.configuration_repository_service.setup_private_configuration_repo
-        Services.onboarding_service.clone_remote_repository_locally
-        Launch.start_github_workers
+      repo_url = params[:repo_url]&.strip! || DEFAULT_REPO_URL
+      Services.dot_keys_variable_service.write_keys_file!(
+        locals: { repo_url: repo_url }
+      )
+      Services.configuration_repository_service.setup_private_configuration_repo
+      Services.onboarding_service.clone_remote_repository_locally
+      Launch.start_github_workers
 
-        flash[:success] = <<~HTML
-          Remote repo #{params[:repo_url]} successfully created
-        HTML
-      else
-        flash[:error] = <<~HTML
-          Remote repository was not successfully created
-        HTML
-      end
+      # TODO: we should probably catch errors and display a more sensible error than a 5xx page
+      flash[:success] = "Remote repo #{params[:repo_url]} successfully created"
 
       redirect("#{HOME}/git_repo")
     end
@@ -275,11 +268,6 @@ module FastlaneCI
     # @return [Set[String]]
     def post_parameter_list_for_onboarding_user_validation
       return Set.new(%w(initial_onboarding_user_api_token))
-    end
-
-    # @return [Set[String]]
-    def post_parameter_list_for_git_repo_validation
-      return Set.new(%w(repo_url))
     end
 
     #####################################################
