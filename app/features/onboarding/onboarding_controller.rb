@@ -151,6 +151,7 @@ module FastlaneCI
           scopes, required = scope_validation_error
           scopes_list_wording = scopes.count > 0 ? scopes.map { |scope| "\"#{scope}\"" }.join(",") : "empty"
           scopes_wording = scopes.count > 1 ? "scopes" : "scope"
+          # rubocop:disable Metrics/LineLength
           error_message = "Token should be in \"#{required}\" scope, currently it's in #{scopes_list_wording} #{scopes_wording}."
           # rubocop:enable Metrics/LineLength
           flash[:error] = "#{error_message} See the image below."
@@ -175,10 +176,9 @@ module FastlaneCI
     #
     # 2) Redirect back to `/configuration`
     post "#{HOME}/git_repo" do
-    repo_url = params[:repo_url] || DEFAULT_REPO_URL
+      repo_url = params[:repo_url]&.strip! || DEFAULT_REPO_URL
       Services.dot_keys_variable_service.write_keys_file!(
-        locals: { :repo_url => repo_url }
-        )
+        locals: { repo_url: repo_url }
       )
       Services.configuration_repository_service.setup_private_configuration_repo
       Services.onboarding_service.clone_remote_repository_locally
