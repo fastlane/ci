@@ -6,6 +6,8 @@ module FastlaneCI
   class BuildJSONController < APIController
     HOME = "/data/projects/:project_id/build"
 
+    use(FastlaneCI::BuildWebsocketBackend)
+
     get "#{HOME}/:build_number" do |project_id, build_number|
       build = current_project.builds.find { |b| b.number == build_number.to_i }
       if build.nil?
