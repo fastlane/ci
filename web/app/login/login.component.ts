@@ -21,7 +21,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     if (this.authService.isLoggedIn()) {
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/']);
     }
   }
 
@@ -30,15 +30,17 @@ export class LoginComponent implements OnInit {
     this.hasError = false;
 
     this.authService.login({email: this.email, password: this.password})
-        .subscribe(() => {
-          this.isLoggingIn = false;
+        .subscribe(
+            () => {
+              this.isLoggingIn = false;
 
-          // TODO: preserve user's state and return to that instead
-          // Logged-in go back to landing page
-          this.router.navigate(['/']);
-        }, () => {
-          this.isLoggingIn = false;
-          this.hasError = true;
-        });
+              // TODO: preserve user's state and return to that instead
+              // Logged-in go back to landing page
+              this.router.navigate(['/']);
+            },
+            () => {
+              this.isLoggingIn = false;
+              this.hasError = true;
+            });
   }
 }
