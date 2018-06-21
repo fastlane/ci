@@ -23,8 +23,12 @@ $TOOLBAR_HEIGHT:80px;
             .mat-row {
                 height: 43px;
                 padding: 0;
-                &:hover .mat-cell.mat-column-sha .mat-button {
-                    visibility: visible;
+                cursor: pointer;
+                &:hover {
+                    background-color: #F3E5F5;
+                    .mat-cell.mat-column-sha .mat-button {
+                        visibility: visible;
+                    }
                 }
                 .mat-cell {
                     align-items: center;

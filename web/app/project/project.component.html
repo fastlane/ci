@@ -3,7 +3,7 @@
   <div class="fci-left-container">
     <div *ngIf="project" class="fci-project-header">{{project.name}}</div>
     <div *ngIf="project" class="fci-build-table">
-      <mat-table [dataSource]="project.builds">
+      <mat-table #buildsTable [dataSource]="project.builds">
         <!-- Number Column -->
         <ng-container matColumnDef="number">
           <mat-header-cell *matHeaderCellDef>Build</mat-header-cell>
@@ -38,13 +38,13 @@
             <a [attr.href]="build.linkToSha" target="_blank">
               {{build.shortSha}}
             </a>
-            <button mat-button>
+            <button mat-button (click)="rebuild($event, build)">
               <mat-icon>refresh</mat-icon>Rebuild</button>
           </mat-cell>
         </ng-container>
 
         <mat-header-row *matHeaderRowDef="DISPLAYED_COLUMNS"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: DISPLAYED_COLUMNS;"></mat-row>
+        <mat-row *matRowDef="let row; columns: DISPLAYED_COLUMNS;let build;" [routerLink]="['/project', project.id, 'build', build.number]"></mat-row>
       </mat-table>
       <mat-progress-spinner mode="indeterminate" *ngIf="isLoading" class="fci-loading-spinner" diameter="30"></mat-progress-spinner>
       <!-- TODO: paginate this table -->

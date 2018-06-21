@@ -19,6 +19,7 @@ import {DataService} from '../services/data.service';
   ],
   imports: [
     /** Angular Library Imports */
+    RouterModule,  // For routerLink directive
     CommonModule,
     /** Internal Imports */
     CommonComponentsModule, ToolbarModule,
