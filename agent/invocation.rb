@@ -44,7 +44,7 @@ module FastlaneCI::Agent
       #   return
       # end
 
-      if run_fastlane(@invocation_request.command.env.to_h)
+      if run_fastlane(@invocation_request.command)
         finish
       else
         # fail is a keyword, so we must call self.

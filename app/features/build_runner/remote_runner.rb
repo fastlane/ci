@@ -41,7 +41,7 @@ module FastlaneCI
 
     # Add a listener to get real time updates on new rows (see `new_row`)
     # This is used for the socket connection to the user's browser
-    def add_listener(block)
+    def add_build_change_listener(block)
       @build_change_observer_blocks << block
     end
 
@@ -57,19 +57,25 @@ module FastlaneCI
       success = true
       start_time = Time.now.utc
 
-      logs = @client.request_spawn("rake", "fastlane[#{@project.platform} #{@project.lane}]", env: env)
-      logs.each do |log|
-        row = BuildRunnerOutputRow.new(
-          type: :message,
-          message: log.message,
-          time: Time.now
-        )
-        did_receive_new_row(row)
-
-        if log.status != 0
-         logger.error("WE HAVE AN ERROR!")
-         success = false
-        end
+      env = {
+        "GIT_URL" => @project.repo_config.git_url,
+        "FASTLANE_CI_ARTIFACTS" => "artifacts"
+      }
+      responses = @client.request_run_fastlane("fastlane", project.platform, project.lane, env: env)
+      responses.each do |response|
+        # TODO: handle all types of responses, included the state ones
+        did_receive_new_row(
+          BuildRunnerOutputRow.new(
+            type: :message,
+            message: response.log.message,
+            time: Time.now
+        )) if response.log 
+        did_receive_new_row(
+          BuildRunnerOutputRow.new(
+            type: :build_error,
+            message: response.error.description,
+            time: Time.now)) if response.error
+        success = false if response.error
       end
 
       current_build.duration = Time.now.utc - start_time
@@ -102,10 +108,10 @@ module FastlaneCI
       # 1)Store in the history of logs for this RemoteRunner (used to access half-built builds)
       all_build_output_log_rows << row
 
-
+      
       # 2) Report back to all listeners, usually socket connections
       build_change_observer_blocks.each do |block|
-        block.call(row)
+        block.row_received(row)
       end
     end
 

@@ -28,10 +28,11 @@ module FastlaneCI::Agent
       sh("pod install")
     end
 
-    def run_fastlane(env)
-      logger.debug("invoking fastlane.")
+    def run_fastlane(command)
+      command_string = "#{command.bin} #{command.parameters.join(" ")}"
+      logger.debug("invoking #{command_string}")
       # TODO: send the env to fastlane.
-      sh("bundle exec fastlane actions")
+      sh(command_string)
 
       true
     end
