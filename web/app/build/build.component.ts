@@ -48,7 +48,7 @@ export class BuildComponent implements OnInit {
     this.buildLogSocketService.connect(projectId, buildNumber)
         .subscribe((message) => {
           // TODO: define a log line model.
-          this.logs.push(message.data);
+          this.logs.push(JSON.parse(message.data));
         });
   }
 

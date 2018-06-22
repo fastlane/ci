@@ -7,7 +7,11 @@
       <span *ngIf="build && build.description" class="fci-build-description">{{build.description}}</span>
     </div>
     <div class="fci-build-logs">
-      {{logs.length > 0 ? logs : 'Connecting...'}}
+      <ng-container *ngIf="logs.length <= 0; else hasLogs">Connecting...</ng-container>
+      <ng-container #hasLogs *ngFor="let log of logs">
+        {{log.message}}
+        <br>
+      </ng-container>
     </div>
   </div>
   <div class="fci-right-container">
