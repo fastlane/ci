@@ -13,9 +13,7 @@ module FastlaneCI
       erb(:apple_ids, locals: locals, layout: FastlaneCI.default_layout)
     end
 
-    # When the `/environment_variables/create` form is submitted:
-    #
-    # - creates a new ENV variables
+    # Create a new Apple ID on fastlane.ci
     post "#{HOME}/create" do
       new_apple_id = nil
       if valid_params?(params, post_parameter_list_for_validation)
