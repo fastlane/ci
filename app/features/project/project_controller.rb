@@ -67,8 +67,8 @@ module FastlaneCI
         clone_url: project.repo_config.git_url
         # we don't need to pass a `ref`, as the sha and branch is all we need
       )
-      trigger = project.job_triggers.find do |trigger|
-        trigger.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual]
+      trigger = project.job_triggers.find do |t|
+        t.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual]
       end
 
       remote_runner = RemoteRunner.new(

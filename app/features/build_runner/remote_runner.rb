@@ -1,6 +1,8 @@
 require_relative "../../../agent/client"
 
 module FastlaneCI
+  # RemoteRunner class
+  #
   class RemoteRunner
     include FastlaneCI::Logging
 
@@ -13,6 +15,9 @@ module FastlaneCI
     # Access the FastlaneCI::Build of that specific Runner
     attr_reader :current_build
 
+    # The commit sha we want to run the build for
+    attr_reader :sha
+
     # All lines that were generated so far, this might not be a complete run
     # This is an array of hashes
     attr_accessor :all_build_output_log_rows
@@ -22,18 +27,15 @@ module FastlaneCI
 
     # TODO: extract this thing out of this class.
     attr_reader :github_service
-    # TODO add state machine-type impl.
+    # TODO: add state machine-type impl.
 
     def initialize(project:, git_fork_config:, trigger:, github_service:)
       @project = project
       @git_fork_config = git_fork_config
+
+      prepare_build_object(trigger: trigger)
       @client = Agent::Client.new("localhost")
 
-      @current_build = prepare_build(project: project, git_fork_config: git_fork_config, trigger: trigger)
-
-      # The versions of the build tools are set later one, after the repo was checked out
-      # and we can read files like the `xcode-version` file
-      @current_build.build_tools = {}
       @all_build_output_log_rows = []
       @build_change_observer_blocks = []
       @github_service = github_service
@@ -45,36 +47,36 @@ module FastlaneCI
       @build_change_observer_blocks << block
     end
 
-    #
-    def sha
-      git_fork_config.sha
-    end
-
     def start
-      save_build_status_locally!
-      env = environment_variables_for_worker(current_build: current_build, project: project, git_fork_config: git_fork_config)
+      env = environment_variables_for_worker(
+        current_build: current_build,
+        project: project,
+        git_fork_config: git_fork_config
+      )
 
       success = true
       start_time = Time.now.utc
 
-      env = {
-        "GIT_URL" => @project.repo_config.git_url,
-        "FASTLANE_CI_ARTIFACTS" => "artifacts"
-      }
       responses = @client.request_run_fastlane("fastlane", project.platform, project.lane, env: env)
       responses.each do |response|
         # TODO: handle all types of responses, included the state ones
-        did_receive_new_row(
-          BuildRunnerOutputRow.new(
-            type: :message,
-            message: response.log.message,
-            time: Time.now
-        )) if response.log 
-        did_receive_new_row(
-          BuildRunnerOutputRow.new(
-            type: :build_error,
-            message: response.error.description,
-            time: Time.now)) if response.error
+        if response.log
+          did_receive_new_row(
+            BuildRunnerOutputRow.new(
+              type: :message,
+              message: response.log.message,
+              time: Time.now
+            )
+          )
+        elsif response.error
+          did_receive_new_row(
+            BuildRunnerOutputRow.new(
+              type: :build_error,
+              message: response.error.description,
+              time: Time.now
+            )
+          )
+        end
         success = false if response.error
       end
 
@@ -88,11 +90,13 @@ module FastlaneCI
         current_build.status = :failure
       end
 
-      did_receive_new_row(BuildRunnerOutputRow.new(
-        type: :last_message,
-        message: nil,
-        time: Time.now
-      ))
+      did_receive_new_row(
+        BuildRunnerOutputRow.new(
+          type: :last_message,
+          message: nil,
+          time: Time.now
+        )
+      )
 
       save_build_status!
       Services.build_runner_service.remove_build_runner(build_runner: self)
@@ -101,21 +105,19 @@ module FastlaneCI
 
     # Handle a new incoming row (log), and alert every stakeholder who is interested
     def did_receive_new_row(row)
-
       logger.debug(row.message) if row.message.to_s.length > 0
 
       # Report back the row
       # 1)Store in the history of logs for this RemoteRunner (used to access half-built builds)
       all_build_output_log_rows << row
 
-      
       # 2) Report back to all listeners, usually socket connections
       build_change_observer_blocks.each do |block|
         block.row_received(row)
       end
     end
 
-    def prepare_build(project:, git_fork_config:, trigger:)
+    def prepare_build_object(trigger:)
       # TODO: move this into the service
       builds = Services.build_service.list_builds(project: project)
 
@@ -125,7 +127,7 @@ module FastlaneCI
         new_build_number = 1 # We start with build number 1
       end
 
-      return FastlaneCI::Build.new(
+      @current_build = FastlaneCI::Build.new(
         project: project,
         number: new_build_number,
         status: :pending,
@@ -135,8 +137,14 @@ module FastlaneCI
         timestamp: Time.now.utc,
         duration: -1,
         trigger: trigger.type,
-        git_fork_config: git_fork_config
+        lane: project.lane,
+        platform: project.platform,
+        git_fork_config: git_fork_config,
+        # The versions of the build tools are set later one, after the repo was checked out
+        # and we can read files like the `xcode-version` file
+        build_tools: {}
       )
+      save_build_status!
     end
 
     def environment_variables_for_worker(current_build:, project:, git_fork_config:)
@@ -153,7 +161,8 @@ module FastlaneCI
         BUILD_URL: "https://fastlane.ci", # TODO: actually build the URL, we don't know our own host, right?
         CI_NAME: "fastlane.ci",
         CI: true,
-        FASTLANE_SKIP_DOCS: true
+        FASTLANE_SKIP_DOCS: true,
+        FASTLANE_CI_ARTIFACTS: "artifacts"
       }
 
       if git_fork_config.branch.to_s.length > 0
@@ -193,7 +202,7 @@ module FastlaneCI
       # Here we'll set the branch specific environment variables once this is implemented
       # This might not be top priority for a v1
 
-      return env_mapping.map {|k,v| [k.to_s, v.to_s]}.to_h
+      return env_mapping.map { |k, v| [k.to_s, v.to_s] }.to_h
 
       # TODO: to add potentially
       # - BUILD_ID
@@ -204,7 +213,7 @@ module FastlaneCI
       save_build_status!
     end
 
-      # Responsible for updating the build status in our local config
+    # Responsible for updating the build status in our local config
     # and on GitHub
     def save_build_status!
       # TODO: update so that we can strip out the SHAs that should never be attempted to be rebuilt
@@ -234,7 +243,7 @@ module FastlaneCI
       raise ex
     end
 
-      # Let GitHub know about the current state of the build
+    # Let GitHub know about the current state of the build
     # Using a `rescue` block here is important
     # As the build is still green, even though we couldn't set the GH status
     def save_build_status_source!
@@ -244,7 +253,7 @@ module FastlaneCI
       build_url = FastlaneCI.dot_keys.ci_base_url + build_path
       github_service.set_build_status!(
         repo: project.repo_config.git_url,
-        sha: sha,
+        sha: current_build.sha,
         state: current_build.status,
         target_url: build_url,
         status_context: status_context,
@@ -255,5 +264,4 @@ module FastlaneCI
       logger.error(ex)
     end
   end
-
 end
