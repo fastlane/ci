@@ -144,6 +144,9 @@ module FastlaneCI
         # and we can read files like the `xcode-version` file
         build_tools: {}
       )
+      # This build needs to be saved during initialization because RemoteRunner.start
+      # is called by a TaskQueue and could potentially happen after the BuildController tries to
+      # fetch this build.
       save_build_status!
     end
 
