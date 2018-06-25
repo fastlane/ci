@@ -13,6 +13,7 @@ import {CommonComponentsModule} from '../common/components/common-components.mod
 import {BuildStatus} from '../common/constants';
 import {mockProjectSummary, mockProjectSummaryList} from '../common/test_helpers/mock_project_data';
 import {ProjectSummary} from '../models/project_summary';
+import {SharedMaterialModule} from '../root/shared_material.module';
 import {DataService} from '../services/data.service';
 import {SharedMaterialModule} from '../root/shared_material.module';
 

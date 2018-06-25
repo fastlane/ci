@@ -19,11 +19,11 @@ npm install
 ## Development server
 
 1. Run fastlane.ci
-1. continuously build the web application with the follow command. If you only want to build once remove `-w`.
+2. continuously build the web application with the follow command. 
 ```
-ng build --deploy-url="/.dist" --dev -w
+npm run build_watch
 ```
-Navigate to [http://localhost:8080](http://localhost:8080). The app will automatically reload if you change any of the source files.
+3. Navigate to [http://localhost:8080](http://localhost:8080). The app will automatically reload if you change any of the source files.
 
 ## Running unit tests
 

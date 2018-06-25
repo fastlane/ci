@@ -6,7 +6,7 @@ GIT
 
 GIT
   remote: https://github.com/fastlane/fastfile-parser
-  revision: a9707d87eb6bfdc74c9fc3125f7eec917c8c1e49
+  revision: 231cb18ea44974cffe9502fbfb7b42ebf7d25bc5
   specs:
     fastfile-parser (0.0.0)
       parser (>= 2.4.0.2, < 2.5.0.0)
@@ -14,9 +14,9 @@ GIT
 
 GIT
   remote: https://github.com/fastlane/fastlane
-  revision: 72eb1a40dd982985828a7d1de2d1bf91184191e1
+  revision: 99ad76701a3b0839419107c297a1ca5fa1fff0bd
   specs:
-    fastlane (2.95.0)
+    fastlane (2.98.0)
       CFPropertyList (>= 2.3, < 4.0.0)
       addressable (>= 2.3, < 3.0.0)
       babosa (>= 1.0.2, < 2.0.0)
@@ -40,7 +40,7 @@ GIT
       multipart-post (~> 2.0.0)
       plist (>= 3.1.0, < 4.0.0)
       public_suffix (~> 2.0.0)
-      rubyzip (>= 1.1.0, < 2.0.0)
+      rubyzip (>= 1.2.1, < 2.0.0)
       security (= 0.1.3)
       simctl (~> 1.6.3)
       slack-notifier (>= 2.0.0, < 3.0.0)
@@ -50,18 +50,18 @@ GIT
       tty-spinner (>= 0.8.0, < 1.0.0)
       word_wrap (~> 1.0.0)
       xcodeproj (>= 1.5.7, < 2.0.0)
-      xcpretty (>= 0.2.4, < 1.0.0)
+      xcpretty (~> 0.2.8)
       xcpretty-travis-formatter (>= 0.0.3)
 
 GIT
   remote: https://github.com/fastlane/ruby-git
-  revision: 166273eac44ac787dcdf53226e53d7505e4deea3
+  revision: d595bf802aa9d95fdb62e1b5be03c05560bf85ed
   specs:
-    git (1.3.0)
+    git (1.4.0)
 
 GIT
   remote: https://github.com/krausefx/google-cloud-ruby
-  revision: f71ec2e7a1eaf43c15312d611dd1cc4de530f823
+  revision: aa500d5afab2631e21d690e6c76e982845ada179
   branch: patch-1
   specs:
     google-cloud-core (1.2.0)
@@ -79,6 +79,11 @@ GEM
   specs:
     CFPropertyList (3.0.0)
     abstract_type (0.0.7)
+    activesupport (5.2.0)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      i18n (>= 0.7, < 2)
+      minitest (~> 5.1)
+      tzinfo (~> 1.1)
     adamantium (0.2.0)
       ice_nine (~> 0.11.0)
       memoizable (~> 0.4.0)
@@ -90,6 +95,8 @@ GEM
     backports (3.11.3)
     bcrypt (3.1.12)
     byebug (10.0.2)
+    childprocess (0.9.0)
+      ffi (~> 1.0, >= 1.0.11)
     claide (1.0.2)
     coderay (1.1.2)
     colored (1.2)
@@ -99,6 +106,7 @@ GEM
     concord (0.1.5)
       adamantium (~> 0.2.0)
       equalizer (~> 0.0.9)
+    concurrent-ruby (1.0.5)
     coveralls (0.8.21)
       json (>= 1.8, < 3)
       simplecov (~> 0.14.1)
@@ -119,11 +127,11 @@ GEM
     emoji_regex (0.1.1)
     equalizer (0.0.11)
     equatable (0.5.0)
-    et-orbi (1.1.1)
+    et-orbi (1.1.2)
       tzinfo
     eventmachine (1.2.7)
     excon (0.62.0)
-    faraday (0.15.1)
+    faraday (0.15.2)
       multipart-post (>= 1.2, < 3)
     faraday-cookie_jar (0.0.6)
       faraday (>= 0.7.4)
@@ -136,6 +144,7 @@ GEM
     faye-websocket (0.10.7)
       eventmachine (>= 0.12.0)
       websocket-driver (>= 0.5.1)
+    ffi (1.9.25)
     fugit (1.1.1)
       et-orbi (~> 1.1, >= 1.1.1)
       raabro (~> 1.1)
@@ -168,7 +177,10 @@ GEM
     http-cookie (1.0.3)
       domain_name (~> 0.5)
     httpclient (2.8.3)
+    i18n (1.0.1)
+      concurrent-ruby (~> 1.0)
     ice_nine (0.11.2)
+    iniparse (1.4.4)
     json (2.1.0)
     jwt (2.1.0)
     little-plugger (1.1.4)
@@ -179,19 +191,24 @@ GEM
     memoizable (0.4.2)
       thread_safe (~> 0.3, >= 0.3.1)
     method_source (0.9.0)
+    micromachine (3.0.0)
     mime-types (3.1)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2016.0521)
     mini_magick (4.5.1)
+    minitest (5.11.3)
     multi_json (1.13.1)
     multi_xml (0.6.0)
     multipart-post (2.0.0)
     mustermann (1.0.2)
     nanaimo (0.2.5)
-    naturally (2.1.0)
+    naturally (2.2.0)
     octokit (4.9.0)
       sawyer (~> 0.8.0, >= 0.5.3)
     os (0.9.6)
+    overcommit (0.45.0)
+      childprocess (~> 0.6, >= 0.6.3)
+      iniparse (~> 1.4)
     parallel (1.12.1)
     parser (2.4.0.2)
       ast (~> 2.3)
@@ -199,7 +216,7 @@ GEM
       equatable (~> 0.5.0)
       tty-color (~> 0.4.0)
     plist (3.4.0)
-    powerpack (0.1.1)
+    powerpack (0.1.2)
     procto (0.0.3)
     pry (0.11.3)
       coderay (~> 1.1.0)
@@ -210,7 +227,7 @@ GEM
     public_suffix (2.0.5)
     raabro (1.1.5)
     rack (2.0.5)
-    rack-protection (2.0.1)
+    rack-protection (2.0.3)
       rack
     rack-test (1.0.0)
       rack (>= 1.0, < 3)
@@ -220,7 +237,7 @@ GEM
       declarative (< 0.1.0)
       declarative-option (< 0.2.0)
       uber (< 0.2.0)
-    retriable (3.1.1)
+    retriable (3.1.2)
     rouge (2.0.7)
     rspec (3.7.0)
       rspec-core (~> 3.7.0)
@@ -264,17 +281,18 @@ GEM
       json (>= 1.8, < 3)
       simplecov-html (~> 0.10.0)
     simplecov-html (0.10.2)
-    sinatra (2.0.1)
+    sinatra (2.0.3)
       mustermann (~> 1.0)
       rack (~> 2.0)
-      rack-protection (= 2.0.1)
+      rack-protection (= 2.0.3)
       tilt (~> 2.0)
-    sinatra-contrib (2.0.1)
-      backports (>= 2.0)
+    sinatra-contrib (2.0.3)
+      activesupport (>= 4.0.0)
+      backports (>= 2.8.2)
       multi_json
       mustermann (~> 1.0)
-      rack-protection (= 2.0.1)
-      sinatra (= 2.0.1)
+      rack-protection (= 2.0.3)
+      sinatra (= 2.0.3)
       tilt (>= 1.3, < 3)
     sinatra-flash (0.3.0)
       sinatra (>= 1.0.0)
@@ -291,6 +309,7 @@ GEM
     thor (0.19.4)
     thread_safe (0.3.6)
     tilt (2.0.8)
+    timecop (0.9.1)
     tins (1.16.3)
     tty-color (0.4.2)
     tty-command (0.8.1)
@@ -305,7 +324,7 @@ GEM
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.7.5)
-    unicode-display_width (1.3.2)
+    unicode-display_width (1.4.0)
     unparser (0.2.7)
       abstract_type (~> 0.0.7)
       adamantium (~> 0.2.0)
@@ -314,7 +333,7 @@ GEM
       equalizer (~> 0.0.9)
       parser (>= 2.3.1.2, < 2.6)
       procto (~> 0.0.2)
-    webmock (3.4.1)
+    webmock (3.4.2)
       addressable (>= 2.3.6)
       crack (>= 0.3.2)
       hashdiff
@@ -322,7 +341,7 @@ GEM
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.3)
     word_wrap (1.0.0)
-    xcode-install (2.4.0)
+    xcode-install (2.4.1)
       claide (>= 0.9.1, < 1.1.0)
       fastlane (>= 2.1.0, < 3.0.0)
     xcodeproj (1.5.9)
@@ -353,7 +372,9 @@ DEPENDENCIES
   grpc (>= 1.11.0, < 2.0.0)
   grpc-tools
   jwt (>= 2.1.0, < 3.0.0)
+  micromachine (>= 3.0.0, < 4.0.0)
   octokit (>= 4.8.0, < 5.0.0)
+  overcommit
   pry
   pry-byebug
   rack-test
@@ -361,11 +382,12 @@ DEPENDENCIES
   rspec
   rubocop
   rufus-scheduler (>= 3.5.0, < 4.0.0)
-  sinatra (>= 2.0.1, < 3.0.0)
-  sinatra-contrib (>= 2.0.0, < 3.0.0)
+  sinatra (= 2.0.3)
+  sinatra-contrib (>= 2.0.3, < 3.0.0)
   sinatra-flash
   taskqueue!
   thin (>= 1.7.2, < 2.0.0)
+  timecop (>= 0.9.1, < 1.0.0)
   tty-command (>= 0.7.0, < 1.0.0)
   webmock (>= 3.4.1, < 3.5.0)
   xcode-install (>= 2.4.0, < 3.0.0)
