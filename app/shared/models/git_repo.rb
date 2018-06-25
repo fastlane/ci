@@ -666,7 +666,7 @@ module FastlaneCI
         begin
           ref = "#{git_fork_config.ref}:#{local_branch_name}"
           logger.debug("Switching to new branch from ref #{ref} (pulling into #{local_branch_name})")
-          git.fetch(GitRepo::DEFAULT_REMOTE, ref, {})
+          git.fetch(GitRepo::DEFAULT_REMOTE, { ref: ref })
           git.branch(local_branch_name)
           git.checkout(local_branch_name)
           return true
