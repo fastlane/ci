@@ -20,7 +20,7 @@ describe('Build Summary Model', () => {
     const FAILED_STATUSES: FastlaneStatus[] =
         ['failure', 'missing_fastfile', 'ci_problem'];
 
-    for (let status of FAILED_STATUSES) {
+    for (const status of FAILED_STATUSES) {
       it(`should be true for status: ${status}`, () => {
         const summaryResponse =
             Object.assign({}, mockBuildSummaryResponse_success);

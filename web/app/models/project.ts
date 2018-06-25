@@ -25,13 +25,12 @@ export class Project {
     this.builds = project.builds.map((build) => new BuildSummary(build));
   }
 
-  lastSuccessfulBuild(): BuildSummary {
-    return this.builds.find((build) => build.status === BuildStatus.SUCCESS);
+  lastSuccessfulBuild(): BuildSummary|null {
+    return this.builds.find((build) => build.status === BuildStatus.SUCCESS) ||
+        null;
   }
 
-  lastFailedBuild(): BuildSummary {
-    return this.builds.find(
-        (build) => [BuildStatus.FAILED, BuildStatus.MISSING_FASTFILE].indexOf(
-                       build.status) > -1);
+  lastFailedBuild(): BuildSummary|null {
+    return this.builds.find((build) => build.isFailure()) || null;
   }
 }
