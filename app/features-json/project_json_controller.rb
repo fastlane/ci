@@ -78,7 +78,7 @@ module FastlaneCI
       # to the project details only when this task is finished.
       repo = GitRepo.new(
         git_config: repo_config,
-        provider_credential: provider_credential,
+        provider_credential: current_user_provider_credential,
         local_folder: project.local_repo_path,
         async_start: false,
         notification_service: FastlaneCI::Services.notification_service
