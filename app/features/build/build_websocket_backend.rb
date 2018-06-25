@@ -38,9 +38,9 @@ module FastlaneCI
       ws.on(:open) do |event|
         logger.debug([:open, ws.object_id])
 
-        params = Rack::Request.new(env).params
-        build_number = params["build"].to_i
-        project_id = params["project"]
+        request_params = Rack::Request.new(env).params
+        build_number = request_params["build_number"].to_i
+        project_id = request_params["project_id"]
 
         websocket_clients[project_id] ||= {}
         websocket_clients[project_id][build_number] ||= []
@@ -65,9 +65,9 @@ module FastlaneCI
       ws.on(:close) do |event|
         logger.debug([:close, ws.object_id, event.code, event.reason])
 
-        params = Rack::Request.new(env).params
-        build_number = params["build"].to_i
-        project_id = params["project"]
+        request_params = Rack::Request.new(env).params
+        build_number = request_params["build_number"].to_i
+        project_id = request_params["project_id"]
 
         websocket_clients[project_id][build_number].delete(ws)
         web_socket_build_runner_change_listener.connection_closed

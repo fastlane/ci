@@ -21,7 +21,7 @@ describe('BuildLogWebsocketService', () => {
   it('should attempt to connect to correct socket', () => {
     const socket = buildLogWebsocketService.createSocket('pId', 3);
     socket.close();
-    expect(socket.url).toBe('ws://host/?project=pId&build=3');
+    expect(socket.url).toBe('ws://host/?project_id=pId&build_number=3');
   });
 
   describe('socket connection', () => {

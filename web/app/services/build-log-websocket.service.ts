@@ -36,6 +36,7 @@ export class BuildLogWebsocketService {
   }
 
   private createSocketUrl(projectId: string, buildNumber: number) {
-    return `${this.API_ROOT}?project=${projectId}&build=${buildNumber}`;
+    return `${this.API_ROOT}?project_id=${projectId}&build_number=${
+        buildNumber}`;
   }
 }
