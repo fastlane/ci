@@ -1,5 +1,5 @@
 import {Build, BuildArtifactResponse, BuildResponse} from '../../models/build';
-import {BuildSummaryResponse} from '../../models/build_summary';
+import {BuildSummary, BuildSummaryResponse} from '../../models/build_summary';
 
 // TODO: move all these mocks to common/ since they're being re-used.
 export const mockBuildSummaryResponse_failure: BuildSummaryResponse = {
@@ -50,3 +50,6 @@ export const mockBuildResponse: BuildResponse = {
 };
 
 export const mockBuild: Build = new Build(mockBuildResponse);
+
+export const mockBuildSummary_success =
+    new BuildSummary(mockBuildSummaryResponse_success);

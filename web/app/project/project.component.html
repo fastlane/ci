@@ -2,8 +2,8 @@
 <div class="fci-project-container">
   <div class="fci-left-container">
     <div *ngIf="project" class="fci-project-header">{{project.name}}</div>
-    <div *ngIf="project" class="fci-build-table">
-      <mat-table #buildsTable [dataSource]="project.builds">
+    <div class="fci-build-table">
+      <mat-table #buildsTable [dataSource]="tableDataSource">
         <!-- Number Column -->
         <ng-container matColumnDef="number">
           <mat-header-cell *matHeaderCellDef>Build</mat-header-cell>
@@ -35,11 +35,10 @@
         <ng-container matColumnDef="sha">
           <mat-header-cell *matHeaderCellDef>Sha</mat-header-cell>
           <mat-cell *matCellDef="let build">
-            <a [attr.href]="build.linkToSha" target="_blank">
+            <a [attr.href]="build.linkToSha" target="_blank" (click)="$event.stopPropagation()">
               {{build.shortSha}}
             </a>
-            <button mat-button (click)="rebuild($event, build)">
-              <mat-icon>refresh</mat-icon>Rebuild</button>
+            <button mat-button (click)="rebuild($event, build)" [class.fci-button-visible]="build.isFailure()">Rebuild</button>
           </mat-cell>
         </ng-container>
 
@@ -53,7 +52,7 @@
   <div class="fci-right-container">
     <mat-card class="fci-project-details">
       <h3>Project Info</h3>
-      <mat-spinner *ngIf="!project" mode="indeterminate"></mat-spinner>
+      <mat-spinner *ngIf="!project" mode="indeterminate" class="fci-loading-spinner"></mat-spinner>
       <ng-container *ngIf="project">
         <h5>Repo</h5>
         <div>{{project.repoName}}</div>

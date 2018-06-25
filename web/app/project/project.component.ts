@@ -21,6 +21,7 @@ export class ProjectComponent implements OnInit {
       ['number', 'started', 'duration', 'branch', 'sha'];
   isLoading = true;
   project: Project;
+  tableDataSource: BuildSummary[];
   readonly projectId: string;
   readonly breadcrumbs: Breadcrumb[] =
       [{label: 'Dashboard', url: '/'}, {hint: 'Project'}];
@@ -35,6 +36,7 @@ export class ProjectComponent implements OnInit {
             (params: ParamMap) => this.dataService.getProject(params.get('id')))
         .subscribe((project) => {
           this.project = project;
+          this.tableDataSource = this.project.builds;
           this.updateBreadcrumbs(this.project.name);
           this.isLoading = false;
         });

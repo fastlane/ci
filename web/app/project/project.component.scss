@@ -4,6 +4,9 @@ $TOOLBAR_HEIGHT:80px;
     padding: 24px 92px 0 92px;
     height: calc(100% - #{$TOOLBAR_HEIGHT});
     box-sizing: border-box;
+    .fci-loading-spinner {
+        margin: 32px auto;
+    }
     .fci-left-container {
         flex: 1;
         .fci-project-header {
@@ -25,8 +28,8 @@ $TOOLBAR_HEIGHT:80px;
                 padding: 0;
                 cursor: pointer;
                 &:hover {
-                    background-color: #F3E5F5;
-                    .mat-cell.mat-column-sha .mat-button {
+                    background-color: #d8d8d8;
+                    .mat-cell.mat-column-sha button {
                         visibility: visible;
                     }
                 }
@@ -46,20 +49,22 @@ $TOOLBAR_HEIGHT:80px;
                     font-weight: 500;
                 }
                 .mat-column-sha {
-                    a,
                     .mat-icon {
                         padding-right: 8px;
                     }
-                    .mat-button {
+                    a {
+                        padding-right: 30px;
+                    }
+                    button {
                         font-size: 14px;
                         visibility: hidden;
                         color: #6c6d6e;
                         text-transform: uppercase;
+                        &.fci-button-visible {
+                            visibility: visible;
+                        }
                     }
                 }
-            }
-            .fci-loading-spinner {
-                margin: 32px auto;
             }
         }
     }

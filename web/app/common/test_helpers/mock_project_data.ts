@@ -61,4 +61,4 @@ export const mockProjectResponse: ProjectResponse = {
   builds: [mockBuildSummaryResponse_success, mockBuildSummaryResponse_failure]
 };
 
-export const mockProject = new Project(mockProjectResponse);
+export const getMockProject = () => new Project(mockProjectResponse);

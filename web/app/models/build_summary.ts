@@ -32,4 +32,12 @@ export class BuildSummary {
     this.date = new Date(buildSummary.timestamp);
     this.branch = buildSummary.branch;
   }
+
+  isFailure(): boolean {
+    return [
+      BuildStatus.FAILED,
+      BuildStatus.MISSING_FASTFILE,
+      BuildStatus.INTERNAL_ISSUE,
+    ].includes(this.status);
+  }
 }
