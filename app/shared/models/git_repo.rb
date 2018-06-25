@@ -70,6 +70,9 @@ module FastlaneCI
     # @return [proc(GitRepo)]
     attr_accessor :callback
 
+    # Each repo has a serial queue for actions that need to be ordered
+    attr_reader :git_action_queue
+
     class << self
       def pushes_disabled?
         push_state = ENV["FASTLANE_CI_DISABLE_PUSHES"]
@@ -80,8 +83,6 @@ module FastlaneCI
 
         return true
       end
-
-      attr_reader :git_action_queue
 
       # Loads the octokit cache stack for speed-up calls to github service.
       # As explained in: https://github.com/octokit/octokit.rb#caching
@@ -95,8 +96,6 @@ module FastlaneCI
         Octokit.middleware = @stack
       end
     end
-
-    @git_action_queue = TaskQueue::TaskQueue.new(name: "GitRepo task queue")
 
     # Initializer for GitRepo class
     # @param git_config [GitConfig]
@@ -114,6 +113,7 @@ module FastlaneCI
       callback: nil,
       notification_service:
     )
+      @git_action_queue = TaskQueue::TaskQueue.new(name: "GitRepo task queue for #{local_folder}")
       GitRepo.load_octokit_cache_stack
       logger.debug("Creating repo in #{local_folder} for a copy of #{git_config.git_url}")
 
@@ -614,7 +614,7 @@ module FastlaneCI
     # `ensure_block`: block that you want executed after the `&block` finishes executed, even on error
     def git_action_with_queue(ensure_block: nil, &block)
       git_task = TaskQueue::Task.new(work_block: block, ensure_block: ensure_block)
-      GitRepo.git_action_queue.add_task_async(task: git_task)
+      git_action_queue.add_task_async(task: git_task)
       return git_task
     end
 
