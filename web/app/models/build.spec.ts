@@ -25,6 +25,9 @@ describe('Build Model', () => {
     expect(build.branch).toBe('test-branch');
     expect(build.ref).toBe('pull/1/head');
     expect(build.buildTools).toEqual({'xcode_version': '9.1'});
+    expect(build.artifacts.length).toBe(2);
+    expect(build.artifacts[0].id).toBe('12345');
+    expect(build.artifacts[1].name).toBe('hack.exe');
 
     // TODO: update this with real values once implemented on backend
     expect(build.parameters).toBe(null);

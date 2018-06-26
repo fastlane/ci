@@ -35,12 +35,24 @@ $TOOLBAR_HEIGHT:80px;
     }
     .fci-right-container {
         padding-left: 16px;
-        .fci-build-details {
+        .fci-build-details,
+        .fci-artifacts {
             width: 296px;
+            margin-bottom: 25px;
             h5 {
                 margin-bottom: 0;
                 text-transform: uppercase;
             }
+            .fci-artifact {
+                font-size: 14px;
+                &:not(:last-child) {
+                    margin-bottom: 18px;
+                }
+            }
         }
     }
+}
+
+.fci-loading-spinner {
+    margin: 32px auto;
 }

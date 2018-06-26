@@ -17,7 +17,7 @@
   <div class="fci-right-container">
     <mat-card class="fci-build-details">
       <h3>Build Info</h3>
-      <mat-spinner *ngIf="!build" mode="indeterminate"></mat-spinner>
+      <mat-spinner *ngIf="!build" mode="indeterminate" class="fci-loading-spinner"></mat-spinner>
       <ng-container *ngIf="build">
         <h5>Trigger</h5>
         <div>{{build.trigger}}</div>
@@ -31,6 +31,13 @@
           <h5>Duration</h5>
           <div>{{build.duration| amDuration: 'seconds'}}</div>
         </ng-container>
+      </ng-container>
+    </mat-card>
+    <mat-card class="fci-artifacts">
+      <h3>Artifacts</h3>
+      <mat-spinner *ngIf="!build" mode="indeterminate" class="fci-loading-spinner"></mat-spinner>
+      <ng-container *ngIf="build">
+        <div *ngFor="let artifact of build.artifacts" class="fci-artifact">{{artifact.name}}</div>
       </ng-container>
     </mat-card>
   </div>

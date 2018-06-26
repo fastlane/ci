@@ -1,4 +1,4 @@
-import {Build, BuildResponse} from '../../models/build';
+import {Build, BuildArtifactResponse, BuildResponse} from '../../models/build';
 import {BuildSummaryResponse} from '../../models/build_summary';
 
 // TODO: move all these mocks to common/ since they're being re-used.
@@ -22,6 +22,11 @@ export const mockBuildSummaryResponse_success: BuildSummaryResponse = {
   timestamp: '2018-04-04 16:11:58 -0700'
 };
 
+export const mockBuildArtifactResponse_log: BuildArtifactResponse = {
+  id: '12345',
+  type: 'fastlane.log'
+};
+
 export const mockBuildResponse: BuildResponse = {
   project_id: 'a32ef71e-368c-4091-9344-7fdc8c1ff390',
   number: 3,
@@ -38,7 +43,8 @@ export const mockBuildResponse: BuildResponse = {
   branch: 'test-branch',
   clone_url: 'https://github.com/nakhbari/HelloWorld.git',
   ref: 'pull/1/head',
-  sha: '5903a0a7d2238846218c08ad9d5e278db7cf46c7'
+  sha: '5903a0a7d2238846218c08ad9d5e278db7cf46c7',
+  artifacts: [mockBuildArtifactResponse_log, {id: '54321', type: 'hack.exe'}]
 };
 
 export const mockBuild: Build = new Build(mockBuildResponse);
