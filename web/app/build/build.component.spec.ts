@@ -195,12 +195,14 @@ describe('BuildComponent', () => {
       });
 
       it('should show spinner while loading', () => {
-        expect(detailsEl.queryAll(By.css('.mat-spinner')).length).toBe(1);
+        expect(detailsEl.queryAll(By.css('.fci-loading-spinner')).length)
+            .toBe(1);
 
         buildSubject.next(mockBuild);
         fixture.detectChanges();
 
-        expect(detailsEl.queryAll(By.css('.mat-spinner')).length).toBe(0);
+        expect(detailsEl.queryAll(By.css('.fci-loading-spinner')).length)
+            .toBe(0);
       });
 
       describe('after build loaded', () => {
@@ -244,6 +246,38 @@ describe('BuildComponent', () => {
 
           expect(detailsEl.nativeElement.innerText).not.toContain('DURATION');
           expect(detailsEl.nativeElement.innerText).not.toContain('2 minutes');
+        });
+      });
+    });
+
+    describe('artifacts card', () => {
+      let cardEl: DebugElement;
+
+      beforeEach(() => {
+        cardEl = fixture.debugElement.query(By.css('.fci-artifacts'));
+      });
+
+      it('should show spinner while loading', () => {
+        expect(cardEl.queryAll(By.css('.fci-loading-spinner')).length).toBe(1);
+
+        buildSubject.next(mockBuild);
+        fixture.detectChanges();
+
+        expect(cardEl.queryAll(By.css('.fci-loading-spinner')).length).toBe(0);
+      });
+
+      describe('after build loaded', () => {
+        beforeEach(() => {
+          buildSubject.next(mockBuild);
+          fixture.detectChanges();
+        });
+
+        it('should show artifacts', () => {
+          const artifactEls = cardEl.queryAll(By.css('div.fci-artifact'));
+
+          expect(artifactEls.length).toBe(2);
+          expect(artifactEls[0].nativeElement.innerText).toBe('fastlane.log');
+          expect(artifactEls[1].nativeElement.innerText).toBe('hack.exe');
         });
       });
     });
