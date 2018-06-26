@@ -4,7 +4,7 @@ export enum BuildStatus {
   PENDING = 'pending',
   MISSING_FASTFILE = 'missing_fastfile',
   INTERNAL_ISSUE = 'ci_problem',
-  INSTALLING_XCODE = "installing_xcode"
+  INSTALLING_XCODE = 'installing_xcode'
 }
 
 export enum LocalStorageKeys {
@@ -12,7 +12,7 @@ export enum LocalStorageKeys {
 }
 
 export type FastlaneStatus =
-    'failure'|'success'|'ci_problem'|'pending'|'missing_fastfile';
+    'failure'|'success'|'ci_problem'|'pending'|'missing_fastfile'|'installing_xcode';
 
 export function fastlaneStatusToEnum(status: FastlaneStatus): BuildStatus {
   switch (status) {
