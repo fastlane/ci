@@ -69,6 +69,15 @@ module FastlaneCI
       client.login
     end
 
+    # Returns recent shas for a set of branches
+    def recent_commits_for_branch(repo_full_name:, branches:)
+      github_action(client) do |c|
+        branches.map do |branch|
+          [branch, c.commits(repo_full_name, branch)]
+        end.to_h
+      end
+    end
+
     # returns all open pull requests on given repo
     # branches should be nil if you want all branches to be considered
     def open_pull_requests(repo_full_name: nil, branches: nil)
