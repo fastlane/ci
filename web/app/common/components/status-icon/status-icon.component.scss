@@ -2,9 +2,12 @@
     color: #00897b;
 }
 
-.fci-status-icon-pending,
-.fci-status-icon-internal {
+.fci-status-icon-pending {
     color: #757575;
+}
+
+.fci-status-icon-internal {
+    color: #f5a623;
 }
 
 .fci-status-icon-failed {
@@ -13,7 +16,7 @@
 
 .fci-status-icon-running {
     color: #ffff;
-    background-color: rgba(0, 0, 0, 0.54);
+    background-color: #3561d5;
     border-radius: 50%;
     text-align: center;
     font-size: 16px;
