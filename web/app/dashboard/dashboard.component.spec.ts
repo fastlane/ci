@@ -9,7 +9,7 @@ import {MomentModule} from 'ngx-moment';
 import {Observable} from 'rxjs/Observable';
 import {Subject} from 'rxjs/Subject';
 
-import {CommonComponentsModule} from '../common/components/common-components.module';
+import {StatusIconModule} from '../common/components/status-icon/status-icon.module';
 import {BuildStatus} from '../common/constants';
 import {mockProjectSummary, mockProjectSummaryList} from '../common/test_helpers/mock_project_data';
 import {ProjectSummary} from '../models/project_summary';
@@ -46,7 +46,7 @@ describe('DashboardComponent', () => {
         .configureTestingModule({
           imports: [
             SharedMaterialModule,
-            CommonComponentsModule,
+            StatusIconModule,
             MomentModule,
             RouterModule,
             RouterTestingModule,

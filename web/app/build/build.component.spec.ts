@@ -8,7 +8,7 @@ import {MomentModule} from 'ngx-moment';
 import {Observable} from 'rxjs/Observable';
 import {Subject} from 'rxjs/Subject';
 
-import {CommonComponentsModule} from '../common/components/common-components.module';
+import {StatusIconModule} from '../common/components/status-icon/status-icon.module';
 import {ToolbarModule} from '../common/components/toolbar/toolbar.module';
 import {BuildStatus} from '../common/constants';
 import {mockBuild, mockBuildResponse} from '../common/test_helpers/mock_build_data';
@@ -42,8 +42,8 @@ describe('BuildComponent', () => {
         .configureTestingModule({
           declarations: [BuildComponent],
           imports: [
-            ToolbarModule, RouterTestingModule, CommonComponentsModule,
-            MatCardModule, MatProgressSpinnerModule, MomentModule
+            ToolbarModule, RouterTestingModule, StatusIconModule, MatCardModule,
+            MatProgressSpinnerModule, MomentModule
           ],
           providers: [
             {

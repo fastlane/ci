@@ -1,17 +1,17 @@
 <ng-container *ngIf="status" [ngSwitch]="status">
-  <mat-icon *ngSwitchCase="BuildStatus.SUCCESS" class="fci-status-icon-success">
+  <mat-icon *ngSwitchCase="BuildStatus.SUCCESS" class="fci-status-icon-success" [matTooltip]="getTooltipString()" matTooltipPosition="above">
     check_circle
   </mat-icon>
-  <mat-icon *ngSwitchCase="BuildStatus.PENDING" class="fci-status-icon-pending">
+  <mat-icon *ngSwitchCase="BuildStatus.PENDING" class="fci-status-icon-pending" [matTooltip]="getTooltipString()" matTooltipPosition="above">
     timelapse
   </mat-icon>
-  <mat-icon *ngSwitchCase="isRunningState()" class="fci-status-icon-running">
+  <mat-icon *ngSwitchCase="isRunningState()" class="fci-status-icon-running" [matTooltip]="getTooltipString()" matTooltipPosition="above">
     directions_run
   </mat-icon>
-  <mat-icon *ngSwitchCase="BuildStatus.INTERNAL_ISSUE" class="fci-status-icon-internal">
+  <mat-icon *ngSwitchCase="BuildStatus.INTERNAL_ISSUE" class="fci-status-icon-internal" [matTooltip]="getTooltipString()" matTooltipPosition="above">
     warning
   </mat-icon>
-  <mat-icon *ngSwitchCase="isFailedState()" class="fci-status-icon-failed">
+  <mat-icon *ngSwitchCase="isFailedState()" class="fci-status-icon-failed" [matTooltip]="getTooltipString()" matTooltipPosition="above">
     cancel
   </mat-icon>
 </ng-container>
