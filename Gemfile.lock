@@ -55,7 +55,7 @@ GIT
 
 GIT
   remote: https://github.com/fastlane/ruby-git
-  revision: d595bf802aa9d95fdb62e1b5be03c05560bf85ed
+  revision: fcbf92632e47c8a4a57061877c839a805c07cd54
   specs:
     git (1.4.0)
 
