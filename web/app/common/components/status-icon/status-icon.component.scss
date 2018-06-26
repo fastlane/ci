@@ -10,3 +10,14 @@
 .fci-status-icon-failed {
     color: #d50000;
 }
+
+.fci-status-icon-running {
+    color: #ffff;
+    background-color: rgba(0, 0, 0, 0.54);
+    border-radius: 50%;
+    text-align: center;
+    font-size: 16px;
+    line-height: 24px;
+    padding-left: 2px;
+    box-sizing: border-box;
+}

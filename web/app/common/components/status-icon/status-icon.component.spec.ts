@@ -25,6 +25,10 @@ const EXPECTED_STATUSES = new Map<BuildStatus, ExpectedIcon>([
   [
     BuildStatus.MISSING_FASTFILE,
     {iconString: 'cancel', class: 'fci-status-icon-failed'}
+  ],
+  [
+    BuildStatus.INSTALLING_XCODE,
+    {iconString: 'directions_run', class: 'fci-status-icon-running'}
   ]
 ]);
 
