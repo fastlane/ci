@@ -268,8 +268,9 @@ module FastlaneCI
             # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
             work_queue: FastlaneCI::GitRepo.git_action_queue,
             git_fork_config: git_fork_config,
-            trigger: project.find_triggers_of_type(trigger_type: :commit).first
+            trigger: project.find_triggers_of_type(trigger_type: :pull_request).first
           )
+
           build_runner.setup(parameters: nil)
           Services.build_runner_service.add_build_runner(build_runner: build_runner)
         end
@@ -321,8 +322,9 @@ module FastlaneCI
             # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
             work_queue: FastlaneCI::GitRepo.git_action_queue,
             git_fork_config: git_fork_config,
-            trigger: project.find_triggers_of_type(trigger_type: :commit).first
+            trigger: project.find_triggers_of_type(trigger_type: :pull_request).first
           )
+
           build_runner.setup(parameters: nil)
           Services.build_runner_service.add_build_runner(build_runner: build_runner)
         end
