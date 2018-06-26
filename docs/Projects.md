@@ -1,6 +1,6 @@
 # Projects
 
-A project in fastlane.ci is defined as a combination of a git repo + a trigger.
+A project in fastlane.ci is defined as a combination of a git repo (+ sometimes a branch) + a trigger.
 
 - A git repo can have any number of projects associated
 - You can have any number of projects using the same git repo and trigger **type**
