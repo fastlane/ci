@@ -5,6 +5,9 @@
   <mat-icon *ngSwitchCase="BuildStatus.PENDING" class="fci-status-icon-pending">
     timelapse
   </mat-icon>
+  <mat-icon *ngSwitchCase="isRunningState()" class="fci-status-icon-running">
+    directions_run
+  </mat-icon>
   <mat-icon *ngSwitchCase="BuildStatus.INTERNAL_ISSUE" class="fci-status-icon-internal">
     warning
   </mat-icon>
