@@ -18,7 +18,7 @@ export class BuildComponent implements OnInit {
   @HostBinding('class') classes = ['fci-full-height-container'];
   build: Build;
   // TODO: define interface for the logs
-  logs: string[] = [];
+  logs: Object[] = [];
   readonly BuildStatus = BuildStatus;
 
   readonly breadcrumbs: Breadcrumb[] =

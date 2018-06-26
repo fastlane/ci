@@ -83,10 +83,12 @@ describe('BuildComponent', () => {
     it('should update logs as they come in', () => {
       fixture.detectChanges();
       expect(component.logs).toEqual([]);
-      socketSubject.next(new MessageEvent('type', {data: 'log1'}));
-      expect(component.logs).toEqual(['log1']);
-      socketSubject.next(new MessageEvent('type', {data: 'log2'}));
-      expect(component.logs).toEqual(['log1', 'log2']);
+      socketSubject.next(
+          new MessageEvent('type', {data: '{"message": "log1"}'}));
+      expect(component.logs).toEqual([{message: 'log1'}]);
+      socketSubject.next(
+          new MessageEvent('type', {data: '{"message": "log2"}'}));
+      expect(component.logs).toEqual([{message: 'log1'}, {message: 'log2'}]);
     });
 
     it('should update breadcrumb urls after loading params', () => {
@@ -133,10 +135,11 @@ describe('BuildComponent', () => {
       expect(component.logs.length).toBe(0);
       expect(logsEl.innerText).toBe('Connecting...');
 
-      socketSubject.next(new MessageEvent('type', {data: 'this is a log'}));
+      socketSubject.next(
+          new MessageEvent('type', {data: '{"message": "this is a log"}'}));
       fixture.detectChanges();
 
-      expect(logsEl.innerText).toBe('this is a log');
+      expect(logsEl.innerText.trim()).toBe('this is a log');
     });
 
     describe('header', () => {
