@@ -25,16 +25,6 @@ module FastlaneCI
       self.websocket_clients = {}
     end
 
-    def fetch_build_details(event)
-      url = event.target.url
-      parameters = Rack::Utils.parse_query(url)
-
-      return {
-        project_id: parameters["project"],
-        build_number: parameters["build"].to_i
-      }
-    end
-
     def call(env)
       unless Faye::WebSocket.websocket?(env)
         # This is a regular HTTP call (no socket connection)
@@ -48,9 +38,9 @@ module FastlaneCI
       ws.on(:open) do |event|
         logger.debug([:open, ws.object_id])
 
-        url_details = fetch_build_details(event)
-        build_number = url_details[:build_number]
-        project_id = url_details[:project_id]
+        request_params = Rack::Request.new(env).params
+        build_number = request_params["build_number"].to_i
+        project_id = request_params["project_id"]
 
         websocket_clients[project_id] ||= {}
         websocket_clients[project_id][build_number] ||= []
@@ -75,9 +65,9 @@ module FastlaneCI
       ws.on(:close) do |event|
         logger.debug([:close, ws.object_id, event.code, event.reason])
 
-        url_details = fetch_build_details(event)
-        build_number = url_details[:build_number]
-        project_id = url_details[:project_id]
+        request_params = Rack::Request.new(env).params
+        build_number = request_params["build_number"].to_i
+        project_id = request_params["project_id"]
 
         websocket_clients[project_id][build_number].delete(ws)
         web_socket_build_runner_change_listener.connection_closed
