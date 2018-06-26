@@ -22,7 +22,7 @@ module FastlaneCI
 
   # When a pull request is created, this will trigger
   class PullRequestJobTrigger < JobTrigger
-    def initialize(branch:)
+    def initialize(branch: nil)
       super(type: TRIGGER_TYPE[:pull_request], branch: branch)
     end
   end
