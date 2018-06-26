@@ -37,7 +37,8 @@ module FastlaneCI
         # Think about the user flow on how this would be shown, we probably want to check
         # for the existance of the Apple ID earlier, and then not even show the button,
         # or make the button redirect to the Apple ID login instead
-        raise "No registered Apple ID found with user #{user}, make sure to add your Apple account to fastlane.ci"
+        logger.error("No registered Apple ID found with user #{user}, make sure to add your Apple account to fastlane.ci")
+        return false
       end
       return true
     end
