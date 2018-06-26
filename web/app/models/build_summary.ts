@@ -34,10 +34,11 @@ export class BuildSummary {
   }
 
   isFailure(): boolean {
-    return [
-      BuildStatus.FAILED,
-      BuildStatus.MISSING_FASTFILE,
-      BuildStatus.INTERNAL_ISSUE,
-    ].includes(this.status);
+    return new Set([
+             BuildStatus.FAILED,
+             BuildStatus.MISSING_FASTFILE,
+             BuildStatus.INTERNAL_ISSUE,
+           ])
+        .has(this.status);
   }
 }
