@@ -1,4 +1,5 @@
 require_relative "api_controller"
+require_relative "./view_models/build_summary_view_model"
 require_relative "./view_models/build_view_model"
 
 module FastlaneCI
@@ -87,8 +88,8 @@ module FastlaneCI
       build_runner.setup(parameters: nil)
       Services.build_runner_service.add_build_runner(build_runner: build_runner)
 
-      build_view_model = BuildViewModel.new(build: build_runner.current_build)
-      json(build_view_model)
+      build_summary_view_model = BuildSummaryViewModel.new(build: build_runner.current_build)
+      json(build_summary_view_model)
     end
 
     def current_project

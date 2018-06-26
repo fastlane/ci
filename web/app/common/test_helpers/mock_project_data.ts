@@ -55,8 +55,10 @@ export const mockProjectSummary =
 
 export const mockProjectResponse: ProjectResponse = {
   id: '12',
+  repo_name: 'fastlane/TacoRocat',
+  lane: 'ios test',
   name: 'the most coolest project',
   builds: [mockBuildSummaryResponse_success, mockBuildSummaryResponse_failure]
 };
 
-export const mockProject = new Project(mockProjectResponse);
+export const getMockProject = () => new Project(mockProjectResponse);

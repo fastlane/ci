@@ -24,6 +24,9 @@ module FastlaneCI
     # @return [DateTime] Start time
     attr_reader :timestamp
 
+    # @return [String] The git branch
+    attr_reader :branch
+
     def initialize(build:)
       raise "Incorrect object type. Expected Build, got #{build.class}" unless build.kind_of?(Build)
 
@@ -33,6 +36,7 @@ module FastlaneCI
       @sha = build.sha
       @link_to_sha = build.link_to_remote_commit
       @timestamp = build.timestamp
+      @branch = build.git_fork_config.branch
     end
   end
 end
