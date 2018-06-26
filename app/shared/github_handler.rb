@@ -3,6 +3,7 @@ require "faraday"
 require "socket"
 require "net/http"
 require_relative "logging_module"
+require_relative "models/result"
 
 # TODO: eventually we'll want to consider handling all these:
 # when 400      Octokit::BadRequest
@@ -38,10 +39,19 @@ module FastlaneCI
   module GitHubHandler
     include FastlaneCI::Logging
 
+    ACTION_RECOVERY_HINT_TYPE = {
+      retryable: "retryable",
+      impossible: "impossible",
+      maybe: "maybe"
+    }
+
     def self.included(klass)
       klass.extend(self)
     end
 
+    # This always returns a Result when we explicitly handle either a successful action,
+    # or we encounter a StandardError that we automatically handle at this level.
+    # NOTE: If we experience a StandardError that we don't handle, it will be re-raised.
     def github_action(client, &block)
       if client.kind_of?(Octokit::Client)
         # Inject Faraday::Request::Retry to the client if necessary
@@ -60,7 +70,7 @@ module FastlaneCI
           # We want to die now, since this is a server config issue
           # Ultimately, this shouldn't kill the server, but rather, send a notification
           # TODO: accomplish the above ^
-          raise ex
+          return Result.new(success: false, value: GitHubHandler::ACTION_RECOVERY_HINT_TYPE[:impossible])
         rescue Octokit::ServerError, Octokit::TooManyRequests, Faraday::ConnectionFailed => ex
           if (rate_limit_retry_count += 1) < 5
             rate_limit_sleep_length = 2**rate_limit_retry_count
@@ -70,16 +80,14 @@ module FastlaneCI
             retry
           end
           logger.debug("Unable to get rate limit after retrying multiple time, failing")
-          # Ultimately, this shouldn't kill the server, but rather, send a notification
-          # TODO: accomplish the above ^
-          raise ex
+          return Result.new(success: false, value: GitHubHandler::ACTION_RECOVERY_HINT_TYPE[:retryable])
         end
       end
 
       # `retry_count` retains the variables through iterations so we assign to 0 the first time.
       retry_count ||= 0
       begin
-        return block.call(client)
+        return Result.new(success: true, value: block.call(client))
       rescue Octokit::ServerError, Octokit::TooManyRequests, Faraday::ConnectionFailed => ex
         if (retry_count += 1) < 5
           # exponential backoff
@@ -90,15 +98,11 @@ module FastlaneCI
           retry
         end
         logger.debug("Unable to perform GitHub action after retrying multiple time, failing")
-        # Ultimately, this shouldn't kill the server, but rather, send a notification
-        # TODO: accomplish the above ^
-        raise ex
+        return Result.new(success: false, value: GitHubHandler::ACTION_RECOVERY_HINT_TYPE[:retryable])
       rescue Octokit::Unauthorized => ex # Maybe the token does not give access to rate limits.
         logger.error("Your GitHub Personal Auth Token is unauthorized to perform the github action")
         logger.error(ex)
-        # Ultimately, this shouldn't kill the server, but rather, send a notification
-        # TODO: accomplish the above ^
-        raise ex
+        return Result.new(success: false, value: GitHubHandler::ACTION_RECOVERY_HINT_TYPE[:impossible])
       end
     end
 

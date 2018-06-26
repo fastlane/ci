@@ -1,6 +1,7 @@
 require "json"
 require_relative "../shared/logging_module"
 require_relative "../shared/github_handler"
+require_relative "../shared/fastlane_ci_error"
 
 module FastlaneCI
   # Provides operations to create and mutate the FastlaneCI configuration
@@ -8,6 +9,10 @@ module FastlaneCI
   class ConfigurationRepositoryService
     include FastlaneCI::Logging
     include FastlaneCI::GitHubHandler
+
+    # Error subclass for all errors in this class
+    class ConfigurationRepoError < FastlaneCIError
+    end
 
     # An octokit client authenticated with the onboarding user's API token
     #
@@ -100,21 +105,42 @@ module FastlaneCI
     #
     # @return [Boolean] If the user was added successfully
     def add_bot_user_as_collaborator
-      already_exists = github_action(onboarding_user_client) { |c| c.collaborator?(repo_shortform, bot_user_login) }
+      logger.debug("Checking to see if bot user is a collaborator to #{repo_shortform}.")
+      action_result = github_action(onboarding_user_client) { |c| c.collaborator?(repo_shortform, bot_user_login) }
+      unless action_result.success?
+        raise ConfigurationRepoError, "There was an error checking to see if the bot user is a collaborator"
+      end
 
+      already_exists = action_result.value
       if already_exists
         logger.debug("Bot user is already a collaborator to #{repo_shortform}, not adding as collaborator.")
         return true
       end
 
       logger.debug("Adding bot user as collaborator to #{repo_shortform}.")
+      action_result = invite_bot_user_to_configuration_repository
 
-      invitation_id = invite_bot_user_to_configuration_repository
+      invitation_id = nil
+      if action_result.success?
+        invitation_id = action_result.value
+      else
+        logger.error("Encountered an error while adding bot to #{repo_shortform}.")
+      end
 
       if !invitation_id.nil?
-        return accept_invitation_to_repository_as_bot_user(invitation_id)
+        action_result = accept_invitation_to_repository_as_bot_user(invitation_id)
+        unless action_result.success?
+          raise ConfigurationRepoError, "Could not add bot as a collaborator on #{repo_shortform}."
+        end
+
+        bot_accepted = action_result.value
+        if bot_accepted
+          return true
+        else
+          raise ConfigurationRepoError, "Bot failed to accept an invitation to collaborate on #{repo_shortform}."
+        end
       else
-        raise "Could not add bot user as a collaborator. Invitation was not sent to collaborate on #{repo_shortform}."
+        raise ConfigurationRepoError, "Bot was unable to accept an invitation to collaborate on #{repo_shortform}."
       end
     end
 
@@ -130,7 +156,7 @@ module FastlaneCI
     # Adds the bot user as a collaborator to the fastlane.ci configuration
     # repository
     #
-    # @return [Integer] `invitation.id`
+    # @return [Result] whose value may be an `invitation.id`
     def invite_bot_user_to_configuration_repository
       logger.debug("Adding the bot user as a collaborator for #{repo_shortform}.")
 
@@ -150,7 +176,7 @@ module FastlaneCI
     # Accepts the invitation to the fastlane.ci repository as the bot user
     #
     # @param  [Integer] invitation_id
-    # @return [Boolean] `true` if the invitation was successfully accepted
+    # @return [Result] with a value of `true` if the invitation was successfully accepted
     def accept_invitation_to_repository_as_bot_user(invitation_id)
       logger.debug("Accepting invitation as bot user for #{repo_shortform}.")
 
@@ -270,25 +296,41 @@ module FastlaneCI
     #
     # @return [String]
     def bot_user_login
-      return github_action(bot_user_client, &:login)
+      action_result = github_action(bot_user_client, &:login)
+      unless action_result.success?
+        raise ConfigurationRepoError, "Unable to log bot user account into GitHub"
+      end
+
+      return action_result.value
     end
 
     # The email of the fastlane.ci bot account
     #
     # @return [String]
     def bot_user_email
-      return github_action(bot_user_client) do |client|
+      action_result = github_action(bot_user_client) do |client|
         client.emails.find(&:primary).email
       end
+      unless action_result.success?
+        raise ConfigurationRepoError, "Unable to find a primary email for the bot user account"
+      end
+
+      return action_result.value
     end
 
     # The email of the initial onboarding user
     #
     # @return [String]
     def initial_onboarding_user_email
-      return github_action(onboarding_user_client) do |client|
+      action_result = github_action(onboarding_user_client) do |client|
         client.emails.find(&:primary).email
       end
+
+      unless action_result.success?
+        raise ConfigurationRepoError, "Unable to find a primary email for the given user account"
+      end
+
+      return action_result.value
     end
 
     # The name of the configuration repository URL `repo`

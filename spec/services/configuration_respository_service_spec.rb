@@ -30,7 +30,7 @@ describe FastlaneCI::ConfigurationRepositoryService do
 
       expect(user_client).to receive(:collaborator?).and_return(false)
       expect(user_client).to receive(:invite_user_to_repository).and_return(invitation)
-      expect(bot_client).to receive(:accept_repository_invitation).with(invitation.id)
+      expect(bot_client).to receive(:accept_repository_invitation).with(invitation.id).and_return(true)
       service.setup_private_configuration_repo
     end
 

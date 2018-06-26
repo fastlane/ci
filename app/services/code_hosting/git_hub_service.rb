@@ -1,5 +1,6 @@
 require_relative "../../shared/logging_module"
 require_relative "../../shared/github_handler"
+require_relative "../../shared/fastlane_ci_error"
 require_relative "code_hosting_service"
 require_relative "github_open_pr"
 
@@ -11,6 +12,10 @@ module FastlaneCI
   class GitHubService < CodeHostingService
     include FastlaneCI::Logging
     include FastlaneCI::GitHubHandler
+
+    # Error subclass for all errors in this class
+    class GitHubServiceError < FastlaneCIError
+    end
 
     class << self
       attr_accessor :status_context_prefix
@@ -154,31 +159,54 @@ module FastlaneCI
     end
 
     def recent_commits(repo_full_name:, branch:, since_time_utc:)
-      github_action(client) do |c|
+      action_result = github_action(client) do |c|
         next c.commits_since(repo_full_name, since_time_utc, branch)
       end
+      unless action_result.success?
+        raise GitHubServiceError, "Unable to access commits in #{repo_full_name}:#{branch} since #{since_time_utc}"
+      end
+
+      return action_result.value
     end
 
     # TODO: parse those here or in service layer?
     def repos
-      github_action(client) do |c|
+      action_result = github_action(client) do |c|
         next c.repos({}, query: { sort: "asc" })
       end
+
+      unless action_result.success?
+        raise GitHubServiceError, "Unable to access the user's repos"
+      end
+
+      return action_result.value
     end
 
     # @return [Array<String>] names of the branches for the given repo
     def branch_names(repo:)
-      github_action(client) do |c|
+      action_result = github_action(client) do |c|
         next c.branches(repo).map(&:name)
       end
+
+      unless action_result.success?
+        raise GitHubServiceError, "Unable to access branch_names from the selected repo"
+      end
+
+      return action_result.value
     end
 
     # Does the client with the associated credentials have access to the specified repo?
     # @repo [String] Repo URL as string
     def access_to_repo?(repo_url: nil)
-      github_action(client) do |c|
+      action_result = github_action(client) do |c|
         next c.repository?(repo_url.sub("https://github.com/", ""))
       end
+
+      unless action_result.success?
+        raise GitHubServiceError, "Unable to determine if user has access to #{repo_url}"
+      end
+
+      return action_result.value
     end
 
     def description_for_state(state)
@@ -241,12 +269,15 @@ module FastlaneCI
       if remote_status_updates_disabled?
         logger.debug("Remote status updates are disabled, remote build status not updated.")
       else
-        github_action(client) do |c|
+        action_result = github_action(client) do |c|
           c.create_status(repo, sha, state, {
             target_url: target_url,
             description: description,
             context: status_context
           })
+        end
+        unless action_result.success?
+          raise GitHubServiceError, "Unable to create status: #{target_url}: #{sha}: #{state}"
         end
       end
     rescue StandardError => ex
