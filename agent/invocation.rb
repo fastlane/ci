@@ -75,11 +75,12 @@ module FastlaneCI::Agent
     end
 
     def throw(exception)
-      logger.error("Caught Error: #{exception}")
+      logger.error("Caught Error: #{exception.inspect}")
 
       error = FastlaneCI::Proto::InvocationResponse::Error.new
-      error.stacktrace = exception.backtrace.join("\n")
       error.description = exception.message
+      error.stacktrace = exception.backtrace.join("\n")
+      error.exit_status = exception.errno if exception.respond_to?(:errno)
 
       @yielder << FastlaneCI::Proto::InvocationResponse.new(error: error)
     end

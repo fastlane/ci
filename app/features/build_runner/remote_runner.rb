@@ -1,3 +1,4 @@
+require "micromachine"
 require_relative "../../../agent/client"
 
 module FastlaneCI
@@ -27,18 +28,27 @@ module FastlaneCI
 
     # TODO: extract this thing out of this class.
     attr_reader :github_service
-    # TODO: add state machine-type impl.
 
     def initialize(project:, git_fork_config:, trigger:, github_service:)
       @project = project
       @git_fork_config = git_fork_config
 
       prepare_build_object(trigger: trigger)
-      @client = Agent::Client.new("localhost")
 
       @all_build_output_log_rows = []
       @build_change_observer_blocks = []
       @github_service = github_service
+
+      @build_state = MicroMachine.new(:PENDING).tap do |fsm|
+        fsm.when(:RUNNING,   PENDING:   :RUNNING)
+        fsm.when(:REJECTED,  PENDING:   :REJECTED)
+        fsm.when(:FINISHING, RUNNING:   :FINISHING)
+        fsm.when(:SUCCEEDED, FINISHING: :SUCCEEDED)
+        fsm.when(:FAILED,    RUNNING:   :FAILED)
+        fsm.when(:BROKEN,    PENDING:   :BROKEN,
+                             RUNNING:   :BROKEN,
+                             FINISHING: :BROKEN)
+      end
     end
 
     # Add a listener to get real time updates on new rows (see `new_row`)
@@ -48,41 +58,21 @@ module FastlaneCI
     end
 
     def start
-      env = environment_variables_for_worker(
-        current_build: current_build,
-        project: project,
-        git_fork_config: git_fork_config
-      )
+      env = environment_variables_for_worker
 
-      success = true
       start_time = Time.now.utc
 
-      responses = @client.request_run_fastlane("fastlane", project.platform, project.lane, env: env)
+      responses = Agent::Client.new("localhost").request_run_fastlane(
+        "bundle", "exec", "fastlane", project.platform, project.lane, env: env
+      )
       responses.each do |response|
-        # TODO: handle all types of responses, included the state ones
-        if response.log
-          did_receive_new_row(
-            BuildRunnerOutputRow.new(
-              type: :message,
-              message: response.log.message,
-              time: Time.now
-            )
-          )
-        elsif response.error
-          did_receive_new_row(
-            BuildRunnerOutputRow.new(
-              type: :build_error,
-              message: response.error.description,
-              time: Time.now
-            )
-          )
-        end
-        success = false if response.error
+        validate_agent_response(response: response)
+        process_agent_response(response: response)
       end
 
       current_build.duration = Time.now.utc - start_time
 
-      if success
+      if @build_state.state == :SUCCEEDED
         current_build.status = :success
         current_build.description = "All green"
         logger.info("fastlane run complete")
@@ -90,7 +80,7 @@ module FastlaneCI
         current_build.status = :failure
       end
 
-      did_receive_new_row(
+      emit_new_row(
         BuildRunnerOutputRow.new(
           type: :last_message,
           message: nil,
@@ -100,12 +90,54 @@ module FastlaneCI
 
       save_build_status!
       Services.build_runner_service.remove_build_runner(build_runner: self)
-      return success
+      return @build_state.state == :SUCCEEDED
+    end
+
+    def validate_agent_response(response:)
+      if @build_state.state == :PENDING && !response.state
+        raise "First InvocationResponse should change the state from :PENDING"
+      end
+      if response.state != :PENDING
+        unless @build_state.trigger?(response.state)
+          raise "Unexpected state change #{@build_state.state} -> #{response.state}"
+        end
+      elsif @build_state.state == :RUNNING && !response.log
+        raise "Expecting InvocationResponses containing log lines while :RUNNING"
+      elsif (@build_state.state == :BROKEN || @build_state.state == :REJECTED) && !response.error
+        raise "Expecting InvocationResponses containing the error details after :BROKEN or :REJECTED"
+      elsif @build_state.state == :FINISHING && !response.artifact
+        raise "Expecting InvocationResponses containing artifacts while :FINISHING"
+      elsif @build_state.state == :SUCCEEDED || @build_state.state == :FAILED
+        raise "No further InvocationResponse messages expected after :SUCCEEDED or :FAILED"
+      end
+    end
+
+    def process_agent_response(response:)
+      if response.state != :PENDING
+        @build_state.trigger(response.state)
+      else
+        case @build_state.state
+        when :REJECTED
+          # Agent is busy. How do we handle this?
+        when :RUNNING
+          emit_new_row(
+            BuildRunnerOutputRow.new(
+              type: response.log.level,
+              message: response.log.message,
+              time: Time.now
+            )
+          )
+        when :FINISHING
+          # TODO: handle the artifacts
+        when :BROKEN
+          emit_error_response(response.error)
+        end
+      end
     end
 
     # Handle a new incoming row (log), and alert every stakeholder who is interested
-    def did_receive_new_row(row)
-      logger.debug(row.message) if row.message.to_s.length > 0
+    def emit_new_row(row)
+      logger.debug(row.message) unless row.message.to_s.empty?
 
       # Report back the row
       # 1)Store in the history of logs for this RemoteRunner (used to access half-built builds)
@@ -114,6 +146,25 @@ module FastlaneCI
       # 2) Report back to all listeners, usually socket connections
       build_change_observer_blocks.each do |block|
         block.row_received(row)
+      end
+    end
+
+    def emit_error_response(error)
+      error_message = error.description.to_s
+      unless error.file.to_s.empty?
+        error_message += "\n#{error.file}"
+        error_message += " #{error.line_number}" if error.line_number
+      end
+      error_message += "\n#{error.stacktrace}" unless error.stacktrace.to_s.empty?
+      error_message += "\nExitCode: #{error.exit_status}" if error.exit_status
+      error_message.split("\n").each do |message|
+        emit_new_row(
+          BuildRunnerOutputRow.new(
+            type: :ERROR,
+            message: message,
+            time: Time.now
+          )
+        )
       end
     end
 
@@ -150,7 +201,7 @@ module FastlaneCI
       save_build_status!
     end
 
-    def environment_variables_for_worker(current_build:, project:, git_fork_config:)
+    def environment_variables_for_worker
       # Set the CI specific Environment variables first
 
       # We try to follow the existing formats
