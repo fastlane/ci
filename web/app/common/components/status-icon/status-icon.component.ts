@@ -5,6 +5,8 @@ import {BuildStatus} from '../../constants';
 const FAILED_STATUSES: BuildStatus[] =
     [BuildStatus.FAILED, BuildStatus.MISSING_FASTFILE];
 
+const RUNNING_STATUSES: BuildStatus[] = [BuildStatus.INSTALLING_XCODE];
+
 @Component({
   selector: 'fci-status-icon',
   templateUrl: './status-icon.component.html',
@@ -21,5 +23,9 @@ export class StatusIconComponent {
    */
   isFailedState(): BuildStatus|false {
     return FAILED_STATUSES.includes(this.status) ? this.status : false;
+  }
+
+  isRunningState(): BuildStatus|false {
+    return RUNNING_STATUSES.includes(this.status) ? this.status : false;
   }
 }

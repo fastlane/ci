@@ -11,6 +11,7 @@ module FastlaneCI
       :missing_fastfile,
       :failure,
       :installing_xcode,
+      :running,
       :ci_problem
     ]
 
