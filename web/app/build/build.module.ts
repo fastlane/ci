@@ -3,7 +3,7 @@ import {NgModule} from '@angular/core';
 import {MatCardModule, MatProgressSpinnerModule} from '@angular/material';
 import {MomentModule} from 'ngx-moment';
 
-import {CommonComponentsModule} from '../common/components/common-components.module';
+import {StatusIconModule} from '../common/components/status-icon/status-icon.module';
 import {ToolbarModule} from '../common/components/toolbar/toolbar.module';
 import {BuildLogWebsocketService} from '../services/build-log-websocket.service';
 
@@ -16,7 +16,7 @@ import {BuildComponent} from './build.component';
     /** Angular Library Imports */
     CommonModule,
     /** Internal Imports */
-    ToolbarModule, CommonComponentsModule,
+    ToolbarModule, StatusIconModule,
     /** Angular Material Imports */
     MatCardModule, MatProgressSpinnerModule,
     /** Third-Party Module Imports */

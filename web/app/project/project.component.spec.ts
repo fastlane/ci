@@ -11,7 +11,7 @@ import {MomentModule} from 'ngx-moment';
 import {Observable} from 'rxjs/Observable';
 import {Subject} from 'rxjs/Subject';
 
-import {CommonComponentsModule} from '../common/components/common-components.module';
+import {StatusIconModule} from '../common/components/status-icon/status-icon.module';
 import {ToolbarModule} from '../common/components/toolbar/toolbar.module';
 import {DummyComponent} from '../common/test_helpers/dummy.component';
 import {mockBuildSummary_success} from '../common/test_helpers/mock_build_data';
@@ -43,7 +43,7 @@ describe('ProjectComponent', () => {
     TestBed
         .configureTestingModule({
           imports: [
-            CommonComponentsModule, MomentModule, ToolbarModule, MatCardModule,
+            StatusIconModule, MomentModule, ToolbarModule, MatCardModule,
             MatTableModule, MatProgressSpinnerModule,
             RouterTestingModule.withRoutes([
               {
