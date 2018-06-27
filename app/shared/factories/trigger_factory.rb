@@ -22,8 +22,8 @@ module FastlaneCI
       when FastlaneCI::JobTrigger::TRIGGER_TYPE[:nightly]
         triggers_to_add << FastlaneCI::NightlyJobTrigger.new(
           branch: branch,
-          hour: params[:hour].to_i,
-          minute: params[:minute].to_i
+          hour: params[:hour]&.to_i || 0,
+          minute: params[:minute]&.to_i || 0
         )
       else
         raise "Couldn't create a JobTrigger"

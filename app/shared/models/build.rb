@@ -110,6 +110,9 @@ module FastlaneCI
       project.repo_config.link_to_remote_commit(sha)
     end
 
+    # The branch name associated with the `Build`.
+    #
+    # @return [String]
     def branch
       return git_fork_config.branch
     end

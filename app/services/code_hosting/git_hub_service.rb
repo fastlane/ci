@@ -69,7 +69,14 @@ module FastlaneCI
       client.login
     end
 
-    # Returns recent shas for a set of branches
+    # Returns recent commits for a GitHub repository given a set of `branches`
+    # to get the commits from.
+    #
+    # @param [String] repo_full_name: The name of the repository to get the
+    #   commits from.
+    # @param [Array[String]] branches: An array of branches to be
+    # @return [Hash] A mapping of 'branch names' to an array of recent commits
+    #   for the branch. { branch_name => [commit_0, ..., commit_n], ... }
     def recent_commits_for_branch(repo_full_name:, branches:)
       github_action(client) do |c|
         branches.map do |branch|

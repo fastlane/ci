@@ -57,7 +57,7 @@ module FastlaneCI
                                     .each_with_object({}) { |build, hash| (hash[build.branch] ||= []).push(build) }
 
       # Get a hash mapping of 'branch name' to an array of commits which are associated with the given branch.
-      # Get all commits from the branches { branch_name => [commit_0, commit_1, ..., commit_n] }
+      # Get all commits from the branches { branch_name => [commit_0, commit_1, ..., commit_n], ... }
       branch_name_to_commits = github_service.recent_commits_for_branch(
         repo_full_name: repo_full_name, branches: branches
       )
