@@ -95,8 +95,13 @@ module FastlaneCI
       if build_log_artifact
         artifact_file_content = File.read(build_log_artifact.provider.retrieve!(artifact: build_log_artifact))
       else
-        raise "Couldn't load previous output for build #{build_number}"
+        json_error!(
+          error_message: "Logs file missing for build #{build_number}",
+          error_key: "Build.LogsMissing",
+          error_code: 404
+        )
       end
+
       plain_artifact_file_content = convert_ansi_to_plain_text(artifact_file_content)
       log_array = plain_artifact_file_content.split("\n").collect do |log_line|
         {
