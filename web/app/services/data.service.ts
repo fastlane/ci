@@ -3,7 +3,7 @@ import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import {map} from 'rxjs/operators';
 
-import {Build, BuildResponse} from '../models/build';
+import {Build, BuildLogLine, BuildResponse} from '../models/build';
 import {BuildSummary, BuildSummaryResponse} from '../models/build_summary';
 import {Lane, LaneResponse} from '../models/lane';
 import {Project, ProjectResponse} from '../models/project';
@@ -44,6 +44,12 @@ export class DataService {
     const url = `${HOSTNAME}/projects/${projectId}/build/${buildNumber}`;
     return this.http.get<BuildResponse>(url).pipe(
         map((build) => new Build(build)));
+  }
+
+  getBuildLogs(projectId: string, buildNumber: number):
+      Observable<BuildLogLine[]> {
+    const url = `${HOSTNAME}/projects/${projectId}/build/${buildNumber}/logs`;
+    return this.http.get<BuildLogLine[]>(url);
   }
 
   rebuild(projectId: string, buildNumber: number): Observable<BuildSummary> {

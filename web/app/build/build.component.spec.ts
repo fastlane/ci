@@ -12,7 +12,7 @@ import {CommonComponentsModule} from '../common/components/common-components.mod
 import {ToolbarModule} from '../common/components/toolbar/toolbar.module';
 import {BuildStatus} from '../common/constants';
 import {mockBuild, mockBuildResponse} from '../common/test_helpers/mock_build_data';
-import {Build} from '../models/build';
+import {Build, BuildLogLine} from '../models/build';
 import {BuildLogMessageEvent, BuildLogWebsocketService} from '../services/build-log-websocket.service';
 import {DataService} from '../services/data.service';
 
@@ -26,16 +26,21 @@ describe('BuildComponent', () => {
   let dataService: jasmine.SpyObj<Partial<DataService>>;
   let socketSubject: Subject<BuildLogMessageEvent>;
   let buildSubject: Subject<Build>;
+  let buildLogsSubject: Subject<BuildLogLine[]>;
 
   beforeEach(() => {
     socketSubject = new Subject<BuildLogMessageEvent>();
     buildSubject = new Subject<Build>();
+    buildLogsSubject = new Subject<BuildLogLine[]>();
 
     buildLogWebsocketService = {
       connect: jasmine.createSpy().and.returnValue(socketSubject.asObservable())
     };
     dataService = {
-      getBuild: jasmine.createSpy().and.returnValue(buildSubject.asObservable())
+      getBuild:
+          jasmine.createSpy().and.returnValue(buildSubject.asObservable()),
+      getBuildLogs:
+          jasmine.createSpy().and.returnValue(buildLogsSubject.asObservable())
     };
 
     TestBed
@@ -120,6 +125,42 @@ describe('BuildComponent', () => {
       expect(component.breadcrumbs[0].url).toBe('/');
       expect(component.breadcrumbs[1].hint).toBe('Project');
       expect(component.breadcrumbs[2].hint).toBe('Build');
+    });
+
+    it('should unsubscribe websocket if the build is complete', () => {
+      fixture.detectChanges();  // onInit()
+      expect(component.websocketSubscription.closed).toBe(false);
+      buildSubject.next(mockBuild);
+
+      expect(component.websocketSubscription.closed).toBe(true);
+    });
+
+    it('should unsubscribe websocket on destroy', () => {
+      fixture.detectChanges();  // onInit()
+      expect(component.websocketSubscription.closed).toBe(false);
+      fixture.destroy();
+
+      expect(component.websocketSubscription.closed).toBe(true);
+    });
+
+    it('should get build logs if build is complete ', () => {
+      fixture.detectChanges();  // onInit()
+      expect(component.websocketSubscription.closed).toBe(false);
+      buildSubject.next(mockBuild);
+      buildLogsSubject.next([{message: 'some logs'}]);
+
+      expect(component.logs.length).toBe(1);
+      expect(component.logs[0].message).toBe('some logs');
+    });
+
+    it('should not get build logs if build is incomplete ', () => {
+      fixture.detectChanges();  // onInit()
+      spyOn(mockBuild, 'isComplete').and.returnValue(false);
+      expect(component.websocketSubscription.closed).toBe(false);
+      buildSubject.next(mockBuild);
+      buildLogsSubject.next([{message: 'some logs'}]);
+
+      expect(component.logs.length).toBe(0);
     });
   });
 

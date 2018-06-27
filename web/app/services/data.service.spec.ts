@@ -8,7 +8,7 @@ import {mockBuildResponse, mockBuildSummary_success} from '../common/test_helper
 import {mockLanesResponse} from '../common/test_helpers/mock_lane_data';
 import {mockProjectListResponse, mockProjectResponse, mockProjectSummaryResponse} from '../common/test_helpers/mock_project_data';
 import {mockRepositoryListResponse, mockRepositoryResponse} from '../common/test_helpers/mock_repository_data';
-import {Build} from '../models/build';
+import {Build, BuildLogLine} from '../models/build';
 import {BuildSummary} from '../models/build_summary';
 import {Lane} from '../models/lane';
 import {Project} from '../models/project';
@@ -88,6 +88,22 @@ describe('DataService', () => {
 
       expect(build.number).toBe(3);
       expect(build.sha).toBe('5903a0a7d2238846218c08ad9d5e278db7cf46c7');
+    });
+  });
+
+  describe('#getBuildLogs', () => {
+    it('should call correct URL and return data', () => {
+      let logs: BuildLogLine[];
+      dataService.getBuildLogs('some-id', 3).subscribe((logsResponse) => {
+        logs = logsResponse;
+      });
+
+      const logsRequest =
+          mockHttp.expectOne('/data/projects/some-id/build/3/logs');
+      logsRequest.flush([{message: 'message 1'}]);
+
+      expect(logs.length).toBe(1);
+      expect(logs[0].message).toBe('message 1');
     });
   });
 

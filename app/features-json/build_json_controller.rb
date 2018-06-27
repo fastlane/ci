@@ -10,15 +10,7 @@ module FastlaneCI
     use(FastlaneCI::BuildWebsocketBackend)
 
     get "#{HOME}/:build_number" do |project_id, build_number|
-      build = current_project.builds.find { |b| b.number == build_number.to_i }
-      if build.nil?
-        json_error!(
-          error_message: "Can't find build with ID #{build_number} for project #{project_id}",
-          error_key: "Build.Missing",
-          error_code: 404
-        )
-      end
-      build_view_model = BuildViewModel.new(build: build)
+      build_view_model = BuildViewModel.new(build: current_build)
 
       json(build_view_model)
     end
@@ -92,6 +84,42 @@ module FastlaneCI
       json(build_summary_view_model)
     end
 
+    get "#{HOME}/:build_number/logs" do |project_id, build_number|
+      # `current_build_runner` is only defined if the build was just run a while back
+      # if the server was restarted, we're gonna end here in this code block
+      build_log_artifact = current_build.artifacts.find do |current_artifact|
+        # We can improve the detection in the future, to actually mark an artifact as "default output"
+        current_artifact.type.include?("log") && current_artifact.reference.end_with?("fastlane.log")
+      end
+
+      if build_log_artifact
+        artifact_file_content = File.read(build_log_artifact.provider.retrieve!(artifact: build_log_artifact))
+      else
+        raise "Couldn't load previous output for build #{build_number}"
+      end
+      plain_artifact_file_content = convert_ansi_to_plain_text(artifact_file_content)
+      log_array = plain_artifact_file_content.split("\n").collect do |log_line|
+        {
+          message: log_line
+        }
+      end
+
+      return json(log_array)
+    end
+
+    def current_build
+      current_build = current_project.builds.find { |b| b.number == params[:build_number].to_i }
+      if current_build.nil?
+        json_error!(
+          error_message: "Can't find build with ID #{params[:build_number]} for project #{params[:project_id]}",
+          error_key: "Build.Missing",
+          error_code: 404
+        )
+      end
+
+      return current_build
+    end
+
     def current_project
       current_project = FastlaneCI::Services.project_service.project_by_id(params[:project_id])
       unless current_project
@@ -103,6 +131,11 @@ module FastlaneCI
       end
 
       return current_project
+    end
+
+    # convert .log files that include the color information as ANSI code to plain text
+    def convert_ansi_to_plain_text(data)
+      return data.gsub(/\e\[[0-9;]*m/, "")
     end
   end
 end
