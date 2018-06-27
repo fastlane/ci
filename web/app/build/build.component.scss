@@ -20,6 +20,7 @@ $TOOLBAR_HEIGHT:80px;
             margin-bottom: 16px;
             display: flex;
             align-items: center;
+            flex-shrink: 0;
             fci-status-icon {
                 width: 24px;
                 height: 24px;
