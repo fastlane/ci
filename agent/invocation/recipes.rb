@@ -18,6 +18,7 @@ module FastlaneCI::Agent
       Dir.chdir(dir)
       logger.debug("Changing into working directory #{dir}.")
 
+      # TOOD: need Git Credentials for private repos.
       sh("git clone --depth 1 #{git_url} repo")
       # sh("git checkout <get_the_sha_from_env>")
 

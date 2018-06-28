@@ -129,6 +129,7 @@ module FastlaneCI
         case @build_state.state
         when :REJECTED
           # Agent is busy. How do we handle this?
+          emit_error_response(response.error)
         when :RUNNING
           emit_new_row(
             type: response.log.level,
@@ -136,11 +137,16 @@ module FastlaneCI
             time: Time.now
           )
         when :FINISHING
-          emit_new_row(
-            type: :INFO,
-            message: "Receiving #{response.inspect}",
-            time: Time.now
-          )
+          artifact_path = File.join(@artifacts_path, response.artifact.filename)
+          artifact = current_build.artifacts.find { |a| a.reference == artifact_path }
+          unless artifact
+            current_build.artifacts << Artifact.new(
+              type: response.artifact.filename,
+              reference: artifact_path,
+              provider: @project.artifact_provider
+            )
+          end
+          File.open(artifact_path, "a") { |f| f.write(response.artifact.chunk) }
         when :BROKEN
           emit_error_response(response.error)
         end
