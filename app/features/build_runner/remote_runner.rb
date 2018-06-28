@@ -1,5 +1,6 @@
 require "micromachine"
 require_relative "../../../agent/client"
+require_relative "../../shared/models/artifact"
 
 module FastlaneCI
   # RemoteRunner class
@@ -32,12 +33,25 @@ module FastlaneCI
     def initialize(project:, git_fork_config:, trigger:, github_service:)
       @project = project
       @git_fork_config = git_fork_config
-
-      prepare_build_object(trigger: trigger)
-
       @all_build_output_log_rows = []
       @build_change_observer_blocks = []
       @github_service = github_service
+
+      @current_build = prepare_build_object(trigger: trigger)
+      # This build needs to be saved during initialization because RemoteRunner.start
+      # is called by a TaskQueue and could potentially happen after the BuildController tries to
+      # fetch this build.
+      save_build_status_locally!
+
+      @artifacts_path = Dir.mktmpdir
+
+      fastlane_log_path = File.join(@artifacts_path, "fastlane.log")
+      @fastlane_log = Logger.new(fastlane_log_path)
+      @current_build.artifacts << Artifact.new(
+        type: "fastlane.log",
+        reference: fastlane_log_path,
+        provider: @project.artifact_provider
+      )
 
       @build_state = MicroMachine.new(:PENDING).tap do |fsm|
         fsm.when(:RUNNING,   PENDING:   :RUNNING)
@@ -69,9 +83,9 @@ module FastlaneCI
         validate_agent_response(response: response)
         process_agent_response(response: response)
       end
+      emit_new_row(type: :last_message, message: nil, time: Time.now)
 
       current_build.duration = Time.now.utc - start_time
-
       if @build_state.state == :SUCCEEDED
         current_build.status = :success
         current_build.description = "All green"
@@ -80,13 +94,9 @@ module FastlaneCI
         current_build.status = :failure
       end
 
-      emit_new_row(
-        BuildRunnerOutputRow.new(
-          type: :last_message,
-          message: nil,
-          time: Time.now
-        )
-      )
+      @current_build.artifacts.each do |artifact|
+        project.artifact_provider.store!(artifact: artifact, build: current_build, project: project)
+      end
 
       save_build_status!
       Services.build_runner_service.remove_build_runner(build_runner: self)
@@ -121,14 +131,16 @@ module FastlaneCI
           # Agent is busy. How do we handle this?
         when :RUNNING
           emit_new_row(
-            BuildRunnerOutputRow.new(
-              type: response.log.level,
-              message: response.log.message,
-              time: Time.now
-            )
+            type: response.log.level,
+            message: response.log.message,
+            time: Time.now
           )
         when :FINISHING
-          # TODO: handle the artifacts
+          emit_new_row(
+            type: :INFO,
+            message: "Receiving #{response.inspect}",
+            time: Time.now
+          )
         when :BROKEN
           emit_error_response(response.error)
         end
@@ -136,8 +148,10 @@ module FastlaneCI
     end
 
     # Handle a new incoming row (log), and alert every stakeholder who is interested
-    def emit_new_row(row)
-      logger.debug(row.message) unless row.message.to_s.empty?
+    def emit_new_row(type:, message:, time:)
+      logger.debug(message) unless message.to_s.empty?
+
+      row = BuildRunnerOutputRow.new(type: type, message: message, time: time)
 
       # Report back the row
       # 1)Store in the history of logs for this RemoteRunner (used to access half-built builds)
@@ -147,6 +161,10 @@ module FastlaneCI
       build_change_observer_blocks.each do |block|
         block.row_received(row)
       end
+
+      # 3) update the fastlane.log artifact
+      # TODO: respect the type of the log.
+      @fastlane_log.debug(message)
     end
 
     def emit_error_response(error)
@@ -158,13 +176,7 @@ module FastlaneCI
       error_message += "\n#{error.stacktrace}" unless error.stacktrace.to_s.empty?
       error_message += "\nExitCode: #{error.exit_status}" if error.exit_status
       error_message.split("\n").each do |message|
-        emit_new_row(
-          BuildRunnerOutputRow.new(
-            type: :ERROR,
-            message: message,
-            time: Time.now
-          )
-        )
+        emit_new_row(type: :ERROR, message: message, time: Time.now)
       end
     end
 
@@ -178,7 +190,7 @@ module FastlaneCI
         new_build_number = 1 # We start with build number 1
       end
 
-      @current_build = FastlaneCI::Build.new(
+      FastlaneCI::Build.new(
         project: project,
         number: new_build_number,
         status: :pending,
@@ -195,10 +207,6 @@ module FastlaneCI
         # and we can read files like the `xcode-version` file
         build_tools: {}
       )
-      # This build needs to be saved during initialization because RemoteRunner.start
-      # is called by a TaskQueue and could potentially happen after the BuildController tries to
-      # fetch this build.
-      save_build_status!
     end
 
     def environment_variables_for_worker
@@ -215,8 +223,7 @@ module FastlaneCI
         BUILD_URL: "https://fastlane.ci", # TODO: actually build the URL, we don't know our own host, right?
         CI_NAME: "fastlane.ci",
         CI: true,
-        FASTLANE_SKIP_DOCS: true,
-        FASTLANE_CI_ARTIFACTS: "artifacts"
+        FASTLANE_SKIP_DOCS: true
       }
 
       if git_fork_config.branch.to_s.length > 0
@@ -261,10 +268,6 @@ module FastlaneCI
       # TODO: to add potentially
       # - BUILD_ID
       # - BUILD_TAG
-    end
-
-    def fail_build!(start_time:)
-      save_build_status!
     end
 
     # Responsible for updating the build status in our local config

@@ -31,12 +31,22 @@ module FastlaneCI::Agent
       # send logs that get put on the output queue.
       # this needs to be on a separate thread since Queue is a threadsafe blocking queue.
       Thread.new do
-        send_log(@output_queue.pop) while state == "running"
+        while state == "running"
+          # pop is blocking, hence we need another check for the state.
+          log_line = @output_queue.pop
+          send_log(log_line) if state == "running"
+        end
       end
 
       git_url = command_env(:GIT_URL)
 
       setup_repo(git_url)
+
+      @artifact_path = File.expand_path("artifacts")
+      FileUtils.mkdir_p(@artifact_path)
+
+      # TODO: set this properly for the fastlane invocation
+      ENV["FASTLANE_CI_ARTIFACTS"] = @artifact_path
 
       # TODO: ensure we are able to satisfy the request
       # unless has_required_xcode_version?
@@ -55,9 +65,7 @@ module FastlaneCI::Agent
     end
 
     def finish
-      artifact_path = command_env(:FASTLANE_CI_ARTIFACTS)
-
-      file_path = archive_artifacts(artifact_path)
+      file_path = archive_artifacts(@artifact_path)
       send_file(file_path)
       succeed
     end

@@ -19,17 +19,15 @@ module FastlaneCI::Agent
       logger.debug("Changing into working directory #{dir}.")
 
       sh("git clone --depth 1 #{git_url} repo")
+      # sh("git checkout <get_the_sha_from_env>")
 
       Dir.chdir("repo")
       sh("gem install bundler --no-doc")
       sh("bundle install --deployment")
-
-      sh("gem install cocoapods --no-doc")
-      sh("pod install")
     end
 
     def run_fastlane(command)
-      command_string = "#{command.bin} #{command.parameters.join(" ")}"
+      command_string = "#{command.bin} #{command.parameters.join(' ')}"
       logger.debug("invoking #{command_string}")
       # TODO: send the env to fastlane.
       sh(command_string)
@@ -46,13 +44,16 @@ module FastlaneCI::Agent
         logger.debug("No artifacts found in #{File.expand_path(artifact_path)}.")
         return
       end
-      logger.debug("Archiving directory #{artifact_path}")
+      artifact_archive_path = File.join(
+        File.expand_path("..", artifact_path), "Archive.tgz"
+      )
+      logger.debug("Archiving directory #{artifact_path} to #{artifact_archive_path}")
 
       Dir.chdir(artifact_path) do
-        sh("tar -cvzf Archive.tgz .")
+        sh("tar -cvzf #{artifact_archive_path} .")
       end
 
-      return File.join(artifact_path, "Archive.tgz")
+      return artifact_archive_path
     end
 
     ##
