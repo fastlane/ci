@@ -15,10 +15,22 @@ module FastlaneCI
   class CheckForNewCommitsOnGithubWorker < GitHubWorkerBase
     include FastlaneCI::Logging
 
+    # @return [JobTrigger::TRIGGER_TYPE]
     attr_reader :trigger_type
+
+    # Class responsible for scheduling fastlane.ci workers.
+    #
+    # @return [WorkerScheduler]
     attr_reader :scheduler
+
+    # @return [GitHubService]
     attr_reader :github_service
 
+    # Instantiates a new `CheckForNewCommitsOnGithubWorker` object.
+    #
+    # @param [ProviderCredential] provider_credential: The credential needed to communicate with GitHub API.
+    # @param [Project] project: The project you wish to check new `Build`s on.
+    # @param [NotificationService] notification_service: A notification service to inject into new builds to enqueue.
     def initialize(provider_credential:, project:, notification_service:)
       @trigger_type = FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit]
       @scheduler = WorkerScheduler.new(interval_time: 10)
@@ -32,6 +44,7 @@ module FastlaneCI
       )
     end
 
+    # Checks for new commits on branches that correspond to job triggers.
     def work
       self.busy = true
       check_for_new_commits_on_branches
@@ -76,7 +89,7 @@ module FastlaneCI
       enqueue_new_builds(filtered_branch_name_to_commits)
     end
 
-    # Sets up the data needed by the worker
+    # Sets up the data needed by the worker.
     def setup_worker_data
       @repo_full_name = project.repo_config.full_name
       logger.debug("Checking for new commits: #{project.project_name} (#{repo_full_name})")
@@ -103,6 +116,8 @@ module FastlaneCI
     end
 
     # Enqueues new `Build`s for commits that haven't been previously been enqueued in a `Build`.
+    #
+    # @param [Hash] branch_name_to_commits: { branch_name => [commit_0, commit_1, ..., commit_n], ... }
     def enqueue_new_builds(branch_name_to_commits)
       branch_name_to_commits.each do |branch_name, commits|
         commits.each do |commit|
