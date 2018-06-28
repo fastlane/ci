@@ -2,6 +2,14 @@ import {BuildStatus, FastlaneStatus, fastlaneStatusToEnum} from '../common/const
 import {Artifact} from './artifact';
 
 const SHORT_SHA_LENGTH = 6;
+const FINAL_STATES: Set<BuildStatus> = new Set([
+  BuildStatus.FAILED, BuildStatus.INTERNAL_ISSUE, BuildStatus.MISSING_FASTFILE,
+  BuildStatus.SUCCESS
+]);
+
+export interface BuildLogLine {
+  message: string;
+}
 
 export interface BuildArtifactResponse {
   id: string;
@@ -30,7 +38,7 @@ export interface BuildResponse {
 export class Build {
   readonly number: number;
   readonly projectId: string;
-  readonly status: FastlaneStatus;
+  readonly status: BuildStatus;
   readonly duration: number;
   readonly description: string;
   readonly trigger: string;
@@ -64,5 +72,9 @@ export class Build {
     this.status = fastlaneStatusToEnum(build.status);
     this.date = new Date(build.timestamp);
     this.artifacts = build.artifacts.map((artifact) => new Artifact(artifact));
+  }
+
+  isComplete(): boolean {
+    return FINAL_STATES.has(this.status);
   }
 }
