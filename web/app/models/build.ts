@@ -1,6 +1,20 @@
 import {BuildStatus, FastlaneStatus, fastlaneStatusToEnum} from '../common/constants';
+import {Artifact} from './artifact';
 
 const SHORT_SHA_LENGTH = 6;
+const FINAL_STATES: Set<BuildStatus> = new Set([
+  BuildStatus.FAILED, BuildStatus.INTERNAL_ISSUE, BuildStatus.MISSING_FASTFILE,
+  BuildStatus.SUCCESS
+]);
+
+export interface BuildLogLine {
+  message: string;
+}
+
+export interface BuildArtifactResponse {
+  id: string;
+  type: string;
+}
 
 export interface BuildResponse {
   number: number;
@@ -18,12 +32,13 @@ export interface BuildResponse {
   ref: string;
   sha: string;
   timestamp: string;
+  artifacts: BuildArtifactResponse[];
 }
 
 export class Build {
   readonly number: number;
   readonly projectId: string;
-  readonly status: FastlaneStatus;
+  readonly status: BuildStatus;
   readonly duration: number;
   readonly description: string;
   readonly trigger: string;
@@ -37,23 +52,29 @@ export class Build {
   readonly sha: string;
   readonly shortSha: string;
   readonly date: Date;
+  readonly artifacts: Artifact[];
 
-  constructor(buildSummary: BuildResponse) {
-    this.number = buildSummary.number;
-    this.projectId = buildSummary.project_id;
-    this.description = buildSummary.description;
-    this.trigger = buildSummary.trigger;
-    this.lane = buildSummary.lane;
-    this.platform = buildSummary.platform;
-    this.parameters = buildSummary.parameters;
-    this.buildTools = buildSummary.build_tools;
-    this.cloneUrl = buildSummary.clone_url;
-    this.branch = buildSummary.branch;
-    this.ref = buildSummary.ref;
-    this.duration = buildSummary.duration;
-    this.sha = buildSummary.sha;
+  constructor(build: BuildResponse) {
+    this.number = build.number;
+    this.projectId = build.project_id;
+    this.description = build.description;
+    this.trigger = build.trigger;
+    this.lane = build.lane;
+    this.platform = build.platform;
+    this.parameters = build.parameters;
+    this.buildTools = build.build_tools;
+    this.cloneUrl = build.clone_url;
+    this.branch = build.branch;
+    this.ref = build.ref;
+    this.duration = build.duration;
+    this.sha = build.sha;
     this.shortSha = this.sha.slice(0, SHORT_SHA_LENGTH);
-    this.status = fastlaneStatusToEnum(buildSummary.status);
-    this.date = new Date(buildSummary.timestamp);
+    this.status = fastlaneStatusToEnum(build.status);
+    this.date = new Date(build.timestamp);
+    this.artifacts = build.artifacts.map((artifact) => new Artifact(artifact));
+  }
+
+  isComplete(): boolean {
+    return FINAL_STATES.has(this.status);
   }
 }

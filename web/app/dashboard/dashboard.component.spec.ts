@@ -9,13 +9,12 @@ import {MomentModule} from 'ngx-moment';
 import {Observable} from 'rxjs/Observable';
 import {Subject} from 'rxjs/Subject';
 
-import {CommonComponentsModule} from '../common/components/common-components.module';
+import {StatusIconModule} from '../common/components/status-icon/status-icon.module';
 import {BuildStatus} from '../common/constants';
 import {mockProjectSummary, mockProjectSummaryList} from '../common/test_helpers/mock_project_data';
 import {ProjectSummary} from '../models/project_summary';
 import {SharedMaterialModule} from '../root/shared_material.module';
 import {DataService} from '../services/data.service';
-import {SharedMaterialModule} from '../root/shared_material.module';
 
 import {DashboardComponent} from './dashboard.component';
 
@@ -39,8 +38,7 @@ describe('DashboardComponent', () => {
 
     dialog = {
       open: jasmine.createSpy().and.returnValue({
-        componentInstance:
-            {projectAdded: projectAddedSubject.asObservable()}
+        componentInstance: {projectAdded: projectAddedSubject.asObservable()}
       })
     };
 
@@ -48,7 +46,7 @@ describe('DashboardComponent', () => {
         .configureTestingModule({
           imports: [
             SharedMaterialModule,
-            CommonComponentsModule,
+            StatusIconModule,
             MomentModule,
             RouterModule,
             RouterTestingModule,

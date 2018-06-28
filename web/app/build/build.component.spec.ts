@@ -8,11 +8,11 @@ import {MomentModule} from 'ngx-moment';
 import {Observable} from 'rxjs/Observable';
 import {Subject} from 'rxjs/Subject';
 
-import {CommonComponentsModule} from '../common/components/common-components.module';
+import {StatusIconModule} from '../common/components/status-icon/status-icon.module';
 import {ToolbarModule} from '../common/components/toolbar/toolbar.module';
 import {BuildStatus} from '../common/constants';
 import {mockBuild, mockBuildResponse} from '../common/test_helpers/mock_build_data';
-import {Build} from '../models/build';
+import {Build, BuildLogLine} from '../models/build';
 import {BuildLogMessageEvent, BuildLogWebsocketService} from '../services/build-log-websocket.service';
 import {DataService} from '../services/data.service';
 
@@ -26,24 +26,29 @@ describe('BuildComponent', () => {
   let dataService: jasmine.SpyObj<Partial<DataService>>;
   let socketSubject: Subject<BuildLogMessageEvent>;
   let buildSubject: Subject<Build>;
+  let buildLogsSubject: Subject<BuildLogLine[]>;
 
   beforeEach(() => {
     socketSubject = new Subject<BuildLogMessageEvent>();
     buildSubject = new Subject<Build>();
+    buildLogsSubject = new Subject<BuildLogLine[]>();
 
     buildLogWebsocketService = {
       connect: jasmine.createSpy().and.returnValue(socketSubject.asObservable())
     };
     dataService = {
-      getBuild: jasmine.createSpy().and.returnValue(buildSubject.asObservable())
+      getBuild:
+          jasmine.createSpy().and.returnValue(buildSubject.asObservable()),
+      getBuildLogs:
+          jasmine.createSpy().and.returnValue(buildLogsSubject.asObservable())
     };
 
     TestBed
         .configureTestingModule({
           declarations: [BuildComponent],
           imports: [
-            ToolbarModule, RouterTestingModule, CommonComponentsModule,
-            MatCardModule, MatProgressSpinnerModule, MomentModule
+            ToolbarModule, RouterTestingModule, StatusIconModule, MatCardModule,
+            MatProgressSpinnerModule, MomentModule
           ],
           providers: [
             {
@@ -83,10 +88,12 @@ describe('BuildComponent', () => {
     it('should update logs as they come in', () => {
       fixture.detectChanges();
       expect(component.logs).toEqual([]);
-      socketSubject.next(new MessageEvent('type', {data: 'log1'}));
-      expect(component.logs).toEqual(['log1']);
-      socketSubject.next(new MessageEvent('type', {data: 'log2'}));
-      expect(component.logs).toEqual(['log1', 'log2']);
+      socketSubject.next(
+          new MessageEvent('type', {data: '{"message": "log1"}'}));
+      expect(component.logs).toEqual([{message: 'log1'}]);
+      socketSubject.next(
+          new MessageEvent('type', {data: '{"message": "log2"}'}));
+      expect(component.logs).toEqual([{message: 'log1'}, {message: 'log2'}]);
     });
 
     it('should update breadcrumb urls after loading params', () => {
@@ -119,6 +126,42 @@ describe('BuildComponent', () => {
       expect(component.breadcrumbs[1].hint).toBe('Project');
       expect(component.breadcrumbs[2].hint).toBe('Build');
     });
+
+    it('should unsubscribe websocket if the build is complete', () => {
+      fixture.detectChanges();  // onInit()
+      expect(component.websocketSubscription.closed).toBe(false);
+      buildSubject.next(mockBuild);
+
+      expect(component.websocketSubscription.closed).toBe(true);
+    });
+
+    it('should unsubscribe websocket on destroy', () => {
+      fixture.detectChanges();  // onInit()
+      expect(component.websocketSubscription.closed).toBe(false);
+      fixture.destroy();
+
+      expect(component.websocketSubscription.closed).toBe(true);
+    });
+
+    it('should get build logs if build is complete ', () => {
+      fixture.detectChanges();  // onInit()
+      expect(component.websocketSubscription.closed).toBe(false);
+      buildSubject.next(mockBuild);
+      buildLogsSubject.next([{message: 'some logs'}]);
+
+      expect(component.logs.length).toBe(1);
+      expect(component.logs[0].message).toBe('some logs');
+    });
+
+    it('should not get build logs if build is incomplete ', () => {
+      fixture.detectChanges();  // onInit()
+      spyOn(mockBuild, 'isComplete').and.returnValue(false);
+      expect(component.websocketSubscription.closed).toBe(false);
+      buildSubject.next(mockBuild);
+      buildLogsSubject.next([{message: 'some logs'}]);
+
+      expect(component.logs.length).toBe(0);
+    });
   });
 
   describe('shallow tests', () => {
@@ -133,10 +176,11 @@ describe('BuildComponent', () => {
       expect(component.logs.length).toBe(0);
       expect(logsEl.innerText).toBe('Connecting...');
 
-      socketSubject.next(new MessageEvent('type', {data: 'this is a log'}));
+      socketSubject.next(
+          new MessageEvent('type', {data: '{"message": "this is a log"}'}));
       fixture.detectChanges();
 
-      expect(logsEl.innerText).toBe('this is a log');
+      expect(logsEl.innerText.trim()).toBe('this is a log');
     });
 
     describe('header', () => {
@@ -192,12 +236,14 @@ describe('BuildComponent', () => {
       });
 
       it('should show spinner while loading', () => {
-        expect(detailsEl.queryAll(By.css('.mat-spinner')).length).toBe(1);
+        expect(detailsEl.queryAll(By.css('.fci-loading-spinner')).length)
+            .toBe(1);
 
         buildSubject.next(mockBuild);
         fixture.detectChanges();
 
-        expect(detailsEl.queryAll(By.css('.mat-spinner')).length).toBe(0);
+        expect(detailsEl.queryAll(By.css('.fci-loading-spinner')).length)
+            .toBe(0);
       });
 
       describe('after build loaded', () => {
@@ -241,6 +287,38 @@ describe('BuildComponent', () => {
 
           expect(detailsEl.nativeElement.innerText).not.toContain('DURATION');
           expect(detailsEl.nativeElement.innerText).not.toContain('2 minutes');
+        });
+      });
+    });
+
+    describe('artifacts card', () => {
+      let cardEl: DebugElement;
+
+      beforeEach(() => {
+        cardEl = fixture.debugElement.query(By.css('.fci-artifacts'));
+      });
+
+      it('should show spinner while loading', () => {
+        expect(cardEl.queryAll(By.css('.fci-loading-spinner')).length).toBe(1);
+
+        buildSubject.next(mockBuild);
+        fixture.detectChanges();
+
+        expect(cardEl.queryAll(By.css('.fci-loading-spinner')).length).toBe(0);
+      });
+
+      describe('after build loaded', () => {
+        beforeEach(() => {
+          buildSubject.next(mockBuild);
+          fixture.detectChanges();
+        });
+
+        it('should show artifacts', () => {
+          const artifactEls = cardEl.queryAll(By.css('div.fci-artifact'));
+
+          expect(artifactEls.length).toBe(2);
+          expect(artifactEls[0].nativeElement.innerText).toBe('fastlane.log');
+          expect(artifactEls[1].nativeElement.innerText).toBe('hack.exe');
         });
       });
     });

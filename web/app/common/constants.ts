@@ -3,7 +3,8 @@ export enum BuildStatus {
   FAILED = 'failure',
   PENDING = 'pending',
   MISSING_FASTFILE = 'missing_fastfile',
-  INTERNAL_ISSUE = 'ci_problem'
+  INTERNAL_ISSUE = 'ci_problem',
+  INSTALLING_XCODE = 'installing_xcode'
 }
 
 export enum LocalStorageKeys {
@@ -11,7 +12,7 @@ export enum LocalStorageKeys {
 }
 
 export type FastlaneStatus =
-    'failure'|'success'|'ci_problem'|'pending'|'missing_fastfile';
+    'failure'|'success'|'ci_problem'|'pending'|'missing_fastfile'|'installing_xcode';
 
 export function fastlaneStatusToEnum(status: FastlaneStatus): BuildStatus {
   switch (status) {
@@ -25,6 +26,8 @@ export function fastlaneStatusToEnum(status: FastlaneStatus): BuildStatus {
       return BuildStatus.MISSING_FASTFILE;
     case 'ci_problem':
       return BuildStatus.INTERNAL_ISSUE;
+    case 'installing_xcode':
+      return BuildStatus.INSTALLING_XCODE;
     default:
       throw new Error(`Unknown status type ${status}`);
   }

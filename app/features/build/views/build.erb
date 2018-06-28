@@ -119,7 +119,7 @@
   document.addEventListener("DOMContentLoaded", function(event) {
     var scheme = "ws://"
     var uri = scheme + window.document.location.host
-    uri += "/?&project=<%= project.id %>&build=<%= build.number %>"; // we add that extra & to make the Ruby URI parser work
+    uri += "/?&project_id=<%= project.id %>&build_number=<%= build.number %>"; // we add that extra & to make the Ruby URI parser work
     var ws = new WebSocket(uri);
     console.log("Listening to web socket connection now for URL " + uri + "...")
     var firstMessageReceived = <%= existing_rows.to_s.length == 0 ? false : true %>;
