@@ -93,6 +93,7 @@ module FastlaneCI
       end
 
       if build_log_artifact
+        # TODO: This only works for local storage. Add External storage support (ex. Google Cloud Storage)
         artifact_file_content = File.read(build_log_artifact.provider.retrieve!(artifact: build_log_artifact))
       else
         json_error!(
