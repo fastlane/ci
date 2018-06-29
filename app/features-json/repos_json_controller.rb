@@ -19,8 +19,9 @@ module FastlaneCI
       json(all_repos_view_models)
     end
 
+    # Ex. "../repos/user_details?token=123456"
     get "#{HOME}/user_details", authenticate: false do
-      provider_credential = GitHubProviderCredential.new(api_token: params["token"])
+      provider_credential = GitHubProviderCredential.new(api_token: params[:token])
       github_service = GitHubService.new(provider_credential: provider_credential)
 
       begin
@@ -30,6 +31,12 @@ module FastlaneCI
           error_message: "Provided API token needs user email scope",
           error_key: "User.Token.MissingEmailScope",
           error_code: 400
+        )
+      rescue Octokit::Unauthorized
+        json_error!(
+          error_message: "Provided API token is invalid",
+          error_key: "User.Token.Invalid",
+          error_code: 403
         )
       end
 
