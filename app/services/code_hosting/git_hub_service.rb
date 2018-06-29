@@ -66,7 +66,12 @@ module FastlaneCI
     end
 
     def username
-      client.login
+      return client.login
+    end
+
+    # Primary email address of the current GitHub user
+    def email
+      return client.emails.find(&:primary).email
     end
 
     # returns all open pull requests on given repo
