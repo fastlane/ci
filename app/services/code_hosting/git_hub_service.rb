@@ -70,6 +70,7 @@ module FastlaneCI
     end
 
     # Primary email address of the current GitHub user
+    #  Note: This fails if the user.email scope is missing from token
     def email
       return client.emails.find(&:primary).email
     end
