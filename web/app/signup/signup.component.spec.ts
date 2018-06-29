@@ -6,9 +6,8 @@ import {By} from '@angular/platform-browser';
 import {Router} from '@angular/router';
 import {Subject} from 'rxjs/Subject';
 
-import {mockSignupResponse} from '../common/test_helpers/mock_login_data';
 import {UserDetails} from '../common/types';
-import {AuthService, SignupResponse} from '../services/auth.service';
+import {AuthService} from '../services/auth.service';
 import {DataService} from '../services/data.service';
 
 import {SignupComponent} from './signup.component';
