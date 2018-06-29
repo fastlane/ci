@@ -50,7 +50,7 @@ module FastlaneCI
     # display of real-time output
     set(:server, "thin")
     get "/favicon.ico" do
-      send_file(File.join("public", "favicon.ico"))
+      send_file(File.join(File.dirname(__FILE__), "public", "favicon.ico"))
     end
 
     if ENV["FASTLANE_CI_ERB_CLIENT"]
@@ -64,8 +64,8 @@ module FastlaneCI
     else
       # Any route that hasn't already been defined
       get "/*" do
-        # Use Angular Web App instead
-        send_file(File.join("public", ".dist", "index.html"))
+        # Using __FILE__ as root to search relative to this file
+        send_file(File.join(File.dirname(__FILE__), "public", ".dist", "index.html"))
       end
     end
   end
