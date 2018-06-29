@@ -13,16 +13,17 @@ module FastlaneCI::Agent
       @output_queue = value
     end
 
-    def setup_repo(git_url)
+    def setup_repo(git_url, git_sha)
       dir = Dir.mktmpdir("fastlane-ci")
       Dir.chdir(dir)
       logger.debug("Changing into working directory #{dir}.")
 
       # TOOD: need Git Credentials for private repos.
       sh("git clone --depth 1 #{git_url} repo")
-      # sh("git checkout <get_the_sha_from_env>")
-
       Dir.chdir("repo")
+
+      sh("git checkout #{git_sha}")
+      
       sh("gem install bundler --no-doc")
       sh("bundle install --deployment")
     end

@@ -39,8 +39,9 @@ module FastlaneCI::Agent
       end
 
       git_url = command_env(:GIT_URL)
+      git_sha = command_env(:GIT_SHA)
 
-      setup_repo(git_url)
+      setup_repo(git_url, git_sha)
 
       @artifact_path = File.expand_path("artifacts")
       FileUtils.mkdir_p(@artifact_path)
