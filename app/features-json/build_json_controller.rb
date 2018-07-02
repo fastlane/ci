@@ -73,7 +73,6 @@ module FastlaneCI
         sha: current_sha,
         github_service: FastlaneCI::GitHubService.new(provider_credential: current_user_provider_credential),
         notification_service: FastlaneCI::Services.notification_service,
-        work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
         trigger: project.find_triggers_of_type(trigger_type: :manual).first,
         git_fork_config: git_fork_config
       )

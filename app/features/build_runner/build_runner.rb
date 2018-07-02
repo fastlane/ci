@@ -58,7 +58,7 @@ module FastlaneCI
       sha:,
       github_service:,
       notification_service:,
-      work_queue:,
+      work_queue: nil,
       trigger:,
       git_fork_config:,
       local_build_folder: nil
@@ -86,8 +86,6 @@ module FastlaneCI
       # TODO: provider credential should determine what exact CodeHostingService gets instantiated
       @code_hosting_service = github_service
 
-      @work_queue = work_queue
-
       prepare_build_object(trigger: trigger)
 
       local_folder = @local_build_folder || File.join(project.local_repo_path, "builds", sha)
@@ -98,6 +96,8 @@ module FastlaneCI
         notification_service: notification_service,
         async_start: false
       )
+
+      @work_queue = @repo.git_action_queue
     end
 
     # Access the build number of that specific BuildRunner
