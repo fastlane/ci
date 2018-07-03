@@ -1,0 +1,13 @@
+.fci-signup-container {
+    margin-top: 72px;
+    .fci-input-container {
+        label {
+            display: block;
+            padding-bottom: 4px;
+        }
+    }
+
+    .form-error {
+        margin-left: 1rem;
+    }
+}
