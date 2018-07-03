@@ -28,7 +28,53 @@
           </div>
         </mat-step>
         <mat-step label="Set Up your CI bot account">
-          CI bot account set up
+          <p>fastlane.ci needs you to set up a CI bot account to update the build status, etc.</p>
+          <div class="fci-substep">
+            <div class="fci-substep-label">
+              <span class="fci-substep-letter">a</span>
+              Create an account for your fastlane.ci bot on Github
+            </div>
+          </div>
+          <div class="fci-substep">
+            <div class="fci-substep-label">
+              <span class="fci-substep-letter">b</span>
+              Create a personal access token for use with your bot on Github</div>
+            <div class="fci-substep-content">
+              <div>Enable the following permissions
+                <a href="https://github.com" target="_blank">on Github</a>:</div>
+              <div class="fci-github-token-scopes-image"></div>
+            </div>
+          </div>
+          <div class="fci-substep">
+            <div class="fci-substep-label">
+              <span class="fci-substep-letter">c</span>
+              Enter information for your fastlane.ci bot
+            </div>
+            <div class="fci-substep-content">
+              <div class="fci-input-container">
+                <label>CI encryption key</label>
+                <input formControlName="botToken" placeholder="Enter API token" type="text">
+                <div class="fci-input-status">
+                  <mat-spinner *ngIf="isFetchingBotEmail" mode="indeterminate" diameter="24"></mat-spinner>
+                  <mat-icon class="fci-success-icon" *ngIf="botEmail">check_circle</mat-icon>
+                </div>
+              </div>
+              <ng-container *ngIf="botEmail">
+                <div class="fci-input-container">
+                  <label>fastlane.ci username</label>
+                  <span class="fci-username">{{botEmail}}</span>
+                </div>
+                <div class="fci-input-container">
+                  <label>fastlane.ci password</label>
+                  <input formControlName="botPassword" placeholder="Enter fastlane.ci password" type="password">
+                </div>
+              </ng-container>
+            </div>
+            <div>
+              <button mat-button mat-raised-button color="primary" matStepperNext>Next</button>
+              <button mat-button mat-raised-button matStepperPrevious>Back</button>
+            </div>
+          </div>
         </mat-step>
         <mat-step label="Create private Repository for ci-config">
           Repository setup
