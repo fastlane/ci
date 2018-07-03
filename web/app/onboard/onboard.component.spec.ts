@@ -11,7 +11,8 @@ import {DataService} from '../services/data.service';
 
 import {OnboardComponent} from './onboard.component';
 
-const FORM_CONTROL_IDS: string[] = ['encryptionKey', 'botToken', 'botPassword'];
+const FORM_CONTROL_IDS: string[] =
+    ['encryptionKey', 'botToken', 'botPassword', 'configRepo'];
 const FORTY_CHAR_STRING: string = new Array(40 + 1).join('a');
 const THIRY_NINE_CHAR_STRING: string = new Array(39 + 1).join('a');
 
@@ -69,6 +70,13 @@ describe('OnboardComponent', () => {
       expect(component.botEmail).toBeUndefined();
     });
 
+    it('should clear password if the token is changed', () => {
+      component.form.patchValue({botPassword: 'password'});
+      component.form.patchValue({botToken: 'new value'});
+
+      expect(component.form.get('botPassword').value).toBe(null);
+    });
+
     it('should set email from user details request', () => {
       component.form.patchValue({botToken: FORTY_CHAR_STRING});
       userDetailsSubject.next({github: {email: 'best@gmail.com'}});
@@ -89,6 +97,7 @@ describe('OnboardComponent', () => {
 
   describe('Shallow tests', () => {
     let tokenInputEl: HTMLInputElement;
+    let submitButtonEl: HTMLButtonElement;
 
     beforeEach(() => {
       component.botEmail = 'fake@email.com';
@@ -97,6 +106,9 @@ describe('OnboardComponent', () => {
       tokenInputEl = fixture.debugElement
                          .query(By.css('input[formcontrolname="botToken"]'))
                          .nativeElement;
+      submitButtonEl =
+          fixture.debugElement.query(By.css('.fci-form-submit-button'))
+              .nativeElement;
     });
 
     for (const control_id of FORM_CONTROL_IDS) {
@@ -169,6 +181,24 @@ describe('OnboardComponent', () => {
           .nativeElement.click();
 
       expect(component.goToOldOnboarding).toHaveBeenCalled();
+    });
+
+    it('should have submit button disabled when form is invalid', () => {
+      expect(component.form.valid).toBe(false);
+      expect(submitButtonEl.disabled).toBe(true);
+    });
+
+    it('should have submit button enabled when form is valid', () => {
+      component.form.patchValue({
+        botToken: '123',
+        botPassword: '234',
+        configRepo: 'repo',
+        encryptionKey: 'key'
+      });
+      fixture.detectChanges();
+
+      expect(component.form.valid).toBe(true);
+      expect(submitButtonEl.disabled).toBe(false);
     });
   });
 });
