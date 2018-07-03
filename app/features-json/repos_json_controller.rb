@@ -91,7 +91,7 @@ module FastlaneCI
              lane_content[:private] == true
             next
           end
-          lane_platform = platform.nil? ? :no_platform : platform
+          lane_platform = platform.nil? ? "" : platform
           lanes << LaneViewModel.new(lane_name: lane_name, lane_platform: lane_platform)
         end
       end
