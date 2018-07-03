@@ -22,7 +22,7 @@ module FastlaneCI
     end
 
     post HOME do
-      required_params = Set["lane", "repo_org", "repo_name", "project_name", "trigger_type"]
+      required_params = Set["lane", "repo_org", "repo_name", "project_name", "trigger_type", "platform"]
       has_required_params = required_params.subset?(Set.new(params.keys))
 
       # TODO: throw bad request error
@@ -33,8 +33,9 @@ module FastlaneCI
       end
 
       repo_config = GitHubRepoConfig.from_octokit_repo!(repo: selected_repo)
-
-      platform, lane = params["lane"].split(" ") # Split "ios test_lane"
+      lane = params["lane"]
+      # If platform is empty string, means no platform
+      platform = params["platform"] == "" ? :no_platform : params["platform"]
       project_name = params["project_name"]
       branch = params["branch"]
       trigger_type = params["trigger_type"]
