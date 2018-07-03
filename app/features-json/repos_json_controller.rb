@@ -21,11 +21,11 @@ module FastlaneCI
 
     # Ex. "../repos/user_details?token=123456"
     get "#{HOME}/user_details", authenticate: false do
-      provider_credential = GitHubProviderCredential.new(api_token: params[:token])
-      github_service = GitHubService.new(provider_credential: provider_credential)
+      github_client = Octokit::Client.new(access_token: params[:token])
 
       begin
-        email = github_service.email
+        #  Note: This fails if the user.email scope is missing from token
+        email = github_client.emails.find(&:primary).email
       rescue Octokit::NotFound
         json_error!(
           error_message: "Provided API token needs user email scope",
