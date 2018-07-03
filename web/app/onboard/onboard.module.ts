@@ -1,4 +1,5 @@
 import {NgModule} from '@angular/core';
+import {ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule, MatStepperModule} from '@angular/material';
 
 import {OnboardComponent} from './onboard.component';
@@ -13,6 +14,7 @@ import {OnboardComponent} from './onboard.component';
   ],
   imports: [
     /** Angular Library Imports */
+    ReactiveFormsModule,
     /** Internal Imports */
     /** Angular Material Imports */
     MatButtonModule, MatStepperModule,

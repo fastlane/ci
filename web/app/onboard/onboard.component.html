@@ -12,19 +12,28 @@
 <div fci-grid>
   <div fci-cell="12">
     <h6>NOT WORKING - CURRENTLY IN DEVELOPMENT</h6>
-    <mat-vertical-stepper>
-      <mat-step label="Set up your Encryption Key">
-        Encryption key input
-      </mat-step>
-      <mat-step label="Set Up your CI bot account">
-        CI bot account set up
-      </mat-step>
-      <mat-step label="Set up your CI account">
-        User CI account set up
-      </mat-step>
-      <mat-step label="Create private Repository for ci-config">
-        Repository setup
-      </mat-step>
-    </mat-vertical-stepper>
+    <form [formGroup]="form">
+      <mat-vertical-stepper>
+        <mat-step label="Set up your Encryption Key">
+          <p>
+            <b>fastlane.ci</b> uses an encryption key to encrypt your API tokens and passwords written out to the private
+            <b>fastlane.ci</b>
+            configuration repository generated at the end of onboarding.</p>
+          <div class="fci-input-container">
+            <label>CI encryption key</label>
+            <input formControlName="encryptionKey" placeholder="my-encryption-key" type="password">
+          </div>
+          <div>
+            <button mat-button mat-raised-button color="primary" matStepperNext>Next</button>
+          </div>
+        </mat-step>
+        <mat-step label="Set Up your CI bot account">
+          CI bot account set up
+        </mat-step>
+        <mat-step label="Create private Repository for ci-config">
+          Repository setup
+        </mat-step>
+      </mat-vertical-stepper>
+    </form>
   </div>
 </div>
