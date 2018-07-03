@@ -1,5 +1,12 @@
 .fci-input-container {
     padding-bottom: 16px;
+    label {
+        font-family: 'Roboto';
+        color: rgba(0, 0, 0, 0.54);
+        font-size: 13px;
+        display: block;
+        padding-bottom: 8px;
+    }
     input {
         background-color: white;
         border: 0;
