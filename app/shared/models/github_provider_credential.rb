@@ -18,6 +18,7 @@ module FastlaneCI
     # @return [String]
     attr_reader :provider_name
 
+    # TODO: Document what this value is used for
     # @return [String]
     attr_reader :full_name
 
