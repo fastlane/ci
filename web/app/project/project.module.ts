@@ -9,6 +9,7 @@ import {ToolbarModule} from '../common/components/toolbar/toolbar.module';
 import {DashboardComponent} from '../dashboard/dashboard.component';
 import {ProjectComponent} from '../project/project.component';
 import {DataService} from '../services/data.service';
+import {SettingsDialogModule} from './settings-dialog/settings-dialog.modules';
 
 @NgModule({
   declarations: [
@@ -22,10 +23,10 @@ import {DataService} from '../services/data.service';
     RouterModule,  // For routerLink directive
     CommonModule,
     /** Internal Imports */
-    StatusIconModule, ToolbarModule,
+    StatusIconModule, ToolbarModule, SettingsDialogModule,
     /** Angular Material Imports */
     MatCardModule, MatProgressSpinnerModule, MatTableModule, MatIconModule,
-    MatButtonModule,
+    MatButtonModule, MatIconModule,
     /** Third-Party Module Imports */
     MomentModule,  // For Date relative time pipes
   ],
