@@ -10,29 +10,24 @@ module FastlaneCI
     HOME = "/api/user"
 
     post HOME.to_s do
-      email = params[:email]
+      # fetch email based on the API token instead
+      github_client = Octokit::Client.new(access_token: params[:github_token])
 
-      if email.nil?
-        # User didn't provide a custom email address
-        # fetch it based on the API token instead
-        github_client = Octokit::Client.new(access_token: params[:github_token])
-
-        begin
-          # Note: This fails if the user.email scope is missing from token
-          email = github_client.emails.find(&:primary).email
-        rescue Octokit::NotFound
-          json_error!(
-            error_message: "Provided API token needs user email scope",
-            error_key: "User.Token.MissingEmailScope",
-            error_code: 400
-          )
-        rescue Octokit::Unauthorized
-          json_error!(
-            error_message: "Provided API token is invalid",
-            error_key: "User.Token.Invalid",
-            error_code: 403
-          )
-        end
+      begin
+        # Note: This fails if the user.email scope is missing from token
+        email = github_client.emails.find(&:primary).email
+      rescue Octokit::NotFound
+        json_error!(
+          error_message: "Provided API token needs user email scope",
+          error_key: "User.Token.MissingEmailScope",
+          error_code: 400
+        )
+      rescue Octokit::Unauthorized
+        json_error!(
+          error_message: "Provided API token is invalid",
+          error_key: "User.Token.Invalid",
+          error_code: 403
+        )
       end
 
       user = Services.user_service.create_user!(
