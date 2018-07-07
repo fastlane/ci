@@ -6,6 +6,7 @@ import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 import {BuildStatus} from '../../constants';
+import {getElement, getElementText} from '../../test_helpers/element_helper_functions';
 
 import {StatusIconComponent} from './status-icon.component';
 
@@ -87,16 +88,16 @@ describe('StatusIconComponent', () => {
         component.status = status;
         fixture.detectChanges();
 
-        const icon = iconEl.query(By.css('.mat-icon')).nativeElement;
-        expect(icon.textContent.trim()).toBe(expectedIcon.iconString);
-        expect(icon.classList).toContain(expectedIcon.class);
+        const icon = getElement(iconEl, '.mat-icon');
+        expect(getElementText(icon)).toBe(expectedIcon.iconString);
+        expect(icon.nativeElement.classList).toContain(expectedIcon.class);
       });
 
       it('should have expected tooltip String', () => {
         component.status = status;
         fixture.detectChanges();
 
-        const icon = iconEl.query(By.css('.mat-icon'));
+        const icon = getElement(iconEl, '.mat-icon');
         const tooltipDir: MatTooltip =
             icon.injector.get<MatTooltip>(MatTooltip);
 

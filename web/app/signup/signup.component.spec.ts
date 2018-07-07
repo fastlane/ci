@@ -6,6 +6,7 @@ import {By} from '@angular/platform-browser';
 import {Router} from '@angular/router';
 import {Subject} from 'rxjs/Subject';
 
+import {getElement, getElementText} from '../common/test_helpers/element_helper_functions';
 import {UserDetails} from '../common/types';
 import {AuthService} from '../services/auth.service';
 import {DataService} from '../services/data.service';
@@ -72,15 +73,15 @@ describe('SignupComponent', () => {
     beforeEach(() => {
       fixture.detectChanges();
       tokenEl =
-          fixture.debugElement.query(By.css('input[formcontrolname="token"]'))
+          getElement(fixture.debugElement, 'input[formcontrolname="token"]')
               .nativeElement;
     });
 
     for (const control_id of FORM_CONTROL_IDS) {
       it(`should have all the ${control_id} control properly attached`, () => {
         const controlEl: HTMLInputElement =
-            fixture.debugElement
-                .query(By.css(`input[formcontrolname="${control_id}"]`))
+            getElement(
+                fixture.debugElement, `input[formcontrolname="${control_id}"]`)
                 .nativeElement;
 
         controlEl.value = '10';
@@ -109,8 +110,7 @@ describe('SignupComponent', () => {
       userDetailsSubject.error({error: {message: 'ya done messed up'}});
       fixture.detectChanges();
 
-      expect(fixture.debugElement.query(By.css('.form-error'))
-                 .nativeElement.textContent)
+      expect(getElementText(fixture.debugElement, '.form-error'))
           .toBe('ya done messed up');
     });
   });

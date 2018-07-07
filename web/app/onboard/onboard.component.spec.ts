@@ -1,4 +1,5 @@
 import {DOCUMENT} from '@angular/common';
+import {DebugElement} from '@angular/core/src/debug/debug_node';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatStepperModule} from '@angular/material';
@@ -6,6 +7,7 @@ import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {Subject} from 'rxjs/Subject';
 
+import {expectElementNotToExist, expectElementToExist, getElement, getElementText} from '../common/test_helpers/element_helper_functions';
 import {UserDetails} from '../common/types';
 import {DataService} from '../services/data.service';
 
@@ -17,6 +19,7 @@ const THIRY_NINE_CHAR_STRING: string = new Array(39 + 1).join('a');
 
 describe('OnboardComponent', () => {
   let fixture: ComponentFixture<OnboardComponent>;
+  let fixtureEl: DebugElement;
   let component: OnboardComponent;
   let dataService: jasmine.SpyObj<Partial<DataService>>;
   let userDetailsSubject: Subject<UserDetails>;
@@ -44,6 +47,7 @@ describe('OnboardComponent', () => {
         .compileComponents();
 
     fixture = TestBed.createComponent(OnboardComponent);
+    fixtureEl = fixture.debugElement;
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -94,16 +98,14 @@ describe('OnboardComponent', () => {
       component.botEmail = 'fake@email.com';
       fixture.detectChanges();
 
-      tokenInputEl = fixture.debugElement
-                         .query(By.css('input[formcontrolname="botToken"]'))
+      tokenInputEl = getElement(fixtureEl, 'input[formcontrolname="botToken"]')
                          .nativeElement;
     });
 
     for (const control_id of FORM_CONTROL_IDS) {
       it(`should have the ${control_id} control properly attached`, () => {
         const controlEl: HTMLInputElement =
-            fixture.debugElement
-                .query(By.css(`input[formcontrolname="${control_id}"]`))
+            getElement(fixtureEl, `input[formcontrolname="${control_id}"]`)
                 .nativeElement;
 
         controlEl.value = '10';
@@ -121,51 +123,34 @@ describe('OnboardComponent', () => {
 
     it('should show success check mark if bot email exists', () => {
       expect(component.botEmail).toBeDefined();
-      expect(fixture.debugElement
-                 .queryAll(By.css('.fci-input-status .fci-success-icon'))
-                 .length)
-          .toBe(1);
+      expectElementToExist(fixtureEl, '.fci-input-status .fci-success-icon');
     });
 
     it('should hide bot email and password if token changes', () => {
-      expect(fixture.debugElement
-                 .queryAll(By.css('input[formcontrolname="botPassword"]'))
-                 .length)
-          .toBe(1);
-      expect(fixture.debugElement.query(By.css('.fci-username'))
-                 .nativeElement.textContent)
-          .toBe('fake@email.com');
+      expectElementToExist(fixtureEl, 'input[formcontrolname="botPassword"]');
+      expect(getElementText(fixtureEl, '.fci-username')).toBe('fake@email.com');
 
       tokenInputEl.value = FORTY_CHAR_STRING;
       tokenInputEl.dispatchEvent(new Event('input'));
       fixture.detectChanges();
 
-      expect(fixture.debugElement
-                 .queryAll(By.css('input[formcontrolname="botPassword"]'))
-                 .length)
-          .toBe(0);
-      expect(fixture.debugElement.queryAll(By.css('.fci-username')).length)
-          .toBe(0);
+      expectElementNotToExist(
+          fixtureEl, 'input[formcontrolname="botPassword"]');
+      expectElementNotToExist(fixtureEl, '.fci-username');
     });
 
     it('should show spinner when looking for bot email', () => {
-      expect(fixture.debugElement
-                 .queryAll(By.css('.fci-input-status .mat-spinner'))
-                 .length)
-          .toBe(0);
+      expectElementNotToExist(fixtureEl, '.fci-input-status .mat-spinner');
       tokenInputEl.value = FORTY_CHAR_STRING;
       tokenInputEl.dispatchEvent(new Event('input'));
       fixture.detectChanges();
 
-      expect(fixture.debugElement
-                 .queryAll(By.css('.fci-input-status .mat-spinner'))
-                 .length)
-          .toBe(1);
+      expectElementToExist(fixtureEl, '.fci-input-status .mat-spinner');
     });
 
     it('should redirect to old onboarding when button is clicked', () => {
       spyOn(component, 'goToOldOnboarding');
-      fixture.debugElement.query(By.css('.fci-onboard-welcome button'))
+      getElement(fixtureEl, '.fci-onboard-welcome button')
           .nativeElement.click();
 
       expect(component.goToOldOnboarding).toHaveBeenCalled();

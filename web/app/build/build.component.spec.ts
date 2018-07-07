@@ -1,4 +1,4 @@
-import {DebugElement} from '@angular/core/src/debug/debug_node';
+import {DebugElement, getAllDebugNodes} from '@angular/core/src/debug/debug_node';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatCardModule, MatProgressSpinnerModule} from '@angular/material';
 import {By} from '@angular/platform-browser';
@@ -11,6 +11,7 @@ import {Subject} from 'rxjs/Subject';
 import {StatusIconModule} from '../common/components/status-icon/status-icon.module';
 import {ToolbarModule} from '../common/components/toolbar/toolbar.module';
 import {BuildStatus} from '../common/constants';
+import {expectElementNotToExist, expectElementToExist, getAllElements, getElement} from '../common/test_helpers/element_helper_functions';
 import {mockBuild, mockBuildResponse} from '../common/test_helpers/mock_build_data';
 import {Build, BuildLogLine} from '../models/build';
 import {BuildLogMessageEvent, BuildLogWebsocketService} from '../services/build-log-websocket.service';
@@ -21,6 +22,7 @@ import {BuildComponent} from './build.component';
 describe('BuildComponent', () => {
   let component: BuildComponent;
   let fixture: ComponentFixture<BuildComponent>;
+  let fixtureEl: DebugElement;
   let buildLogWebsocketService:
       jasmine.SpyObj<Partial<BuildLogWebsocketService>>;
   let dataService: jasmine.SpyObj<Partial<DataService>>;
@@ -67,6 +69,7 @@ describe('BuildComponent', () => {
         .compileComponents();
 
     fixture = TestBed.createComponent(BuildComponent);
+    fixtureEl = fixture.debugElement;
     component = fixture.componentInstance;
   });
 
@@ -118,8 +121,7 @@ describe('BuildComponent', () => {
       fixture.detectChanges();  // onInit()
 
       // toolbar exists
-      expect(fixture.debugElement.queryAll(By.css('.fci-crumb')).length)
-          .toBe(3);
+      expect(getAllElements(fixtureEl, '.fci-crumb').length).toBe(3);
 
       expect(component.breadcrumbs[0].label).toBe('Dashboard');
       expect(component.breadcrumbs[0].url).toBe('/');
@@ -171,8 +173,7 @@ describe('BuildComponent', () => {
     }));
 
     it('should show connecting while no logs is connecting', () => {
-      const logsEl =
-          fixture.debugElement.query(By.css('.fci-build-logs')).nativeElement;
+      const logsEl = getElement(fixtureEl, '.fci-build-logs').nativeElement;
       expect(component.logs.length).toBe(0);
       expect(logsEl.innerText).toBe('Connecting...');
 
@@ -187,23 +188,22 @@ describe('BuildComponent', () => {
       let headerEl: DebugElement;
 
       beforeEach(() => {
-        headerEl = fixture.debugElement.query(By.css('.fci-build-header'));
+        headerEl = getElement(fixtureEl, '.fci-build-header');
       });
 
       it('should show status icon after loading', () => {
-        expect(headerEl.queryAll(By.css('fci-status-icon')).length).toBe(0);
+        expectElementNotToExist(headerEl, 'fci-status-icon');
 
         buildSubject.next(mockBuild);
         fixture.detectChanges();
 
-        const iconsEl = headerEl.queryAll(By.css('fci-status-icon'));
+        const iconsEl = getAllElements(headerEl, 'fci-status-icon');
         expect(iconsEl.length).toBe(1);
         expect(iconsEl[0].nativeElement.innerText).toBe('warning');
       });
 
       it('should show build number in title after loading', () => {
-        const titleEl =
-            headerEl.query(By.css('.fci-build-title')).nativeElement;
+        const titleEl = getElement(headerEl, '.fci-build-title').nativeElement;
         expect(titleEl.innerText).toBe('Build');
 
         buildSubject.next(mockBuild);
@@ -213,14 +213,13 @@ describe('BuildComponent', () => {
       });
 
       it('should show build description after loading', () => {
-        expect(headerEl.queryAll(By.css('.fci-build-description')).length)
-            .toBe(0);
+        expectElementNotToExist(headerEl, '.fci-build-description');
 
         buildSubject.next(mockBuild);
         fixture.detectChanges();
 
         const descriptionsEl =
-            headerEl.queryAll(By.css('.fci-build-description'));
+            getAllElements(headerEl, '.fci-build-description');
         expect(descriptionsEl.length).toBe(1);
         expect(descriptionsEl[0].nativeElement.innerText)
             .toBe(
@@ -232,18 +231,16 @@ describe('BuildComponent', () => {
       let detailsEl: DebugElement;
 
       beforeEach(() => {
-        detailsEl = fixture.debugElement.query(By.css('.fci-build-details'));
+        detailsEl = getElement(fixtureEl, '.fci-build-details');
       });
 
       it('should show spinner while loading', () => {
-        expect(detailsEl.queryAll(By.css('.fci-loading-spinner')).length)
-            .toBe(1);
+        expectElementToExist(detailsEl, '.fci-loading-spinner');
 
         buildSubject.next(mockBuild);
         fixture.detectChanges();
 
-        expect(detailsEl.queryAll(By.css('.fci-loading-spinner')).length)
-            .toBe(0);
+        expectElementNotToExist(detailsEl, '.fci-loading-spinner');
       });
 
       describe('after build loaded', () => {
@@ -295,16 +292,16 @@ describe('BuildComponent', () => {
       let cardEl: DebugElement;
 
       beforeEach(() => {
-        cardEl = fixture.debugElement.query(By.css('.fci-artifacts'));
+        cardEl = getElement(fixtureEl, '.fci-artifacts');
       });
 
       it('should show spinner while loading', () => {
-        expect(cardEl.queryAll(By.css('.fci-loading-spinner')).length).toBe(1);
+        expectElementToExist(cardEl, '.fci-loading-spinner');
 
         buildSubject.next(mockBuild);
         fixture.detectChanges();
 
-        expect(cardEl.queryAll(By.css('.fci-loading-spinner')).length).toBe(0);
+        expectElementNotToExist(cardEl, '.fci-loading-spinner');
       });
 
       describe('after build loaded', () => {
@@ -314,7 +311,7 @@ describe('BuildComponent', () => {
         });
 
         it('should show artifacts', () => {
-          const artifactEls = cardEl.queryAll(By.css('div.fci-artifact'));
+          const artifactEls = getAllElements(cardEl, 'div.fci-artifact');
 
           expect(artifactEls.length).toBe(2);
           expect(artifactEls[0].nativeElement.innerText).toBe('fastlane.log');

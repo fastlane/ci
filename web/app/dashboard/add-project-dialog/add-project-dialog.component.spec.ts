@@ -1,4 +1,5 @@
 import {CommonModule} from '@angular/common';
+import {DebugElement} from '@angular/core/src/debug/debug_node';
 import {async, ComponentFixture, fakeAsync, TestBed} from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule, MatDialogModule, MatDialogRef, MatIconModule, MatProgressSpinnerModule, MatSelectModule} from '@angular/material';
@@ -8,6 +9,8 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {Subject} from 'rxjs/Subject';
 
 import {FormSpinnerModule} from '../../common/components/form-spinner/form-spinner.module';
+// tslint:disable-next-line:max-line-length
+import {expectElementNotToExist, expectElementToExist, getElement, getElementText} from '../../common/test_helpers/element_helper_functions';
 import {mockLanes, mockLanesResponse} from '../../common/test_helpers/mock_lane_data';
 import {mockProjectSummary} from '../../common/test_helpers/mock_project_data';
 import {mockRepositoryList} from '../../common/test_helpers/mock_repository_data';
@@ -21,6 +24,7 @@ import {AddProjectDialogComponent} from './add-project-dialog.component';
 describe('AddProjectDialogComponent', () => {
   let component: AddProjectDialogComponent;
   let fixture: ComponentFixture<AddProjectDialogComponent>;
+  let fixtureEl: DebugElement;
   let reposSubject: Subject<Repository[]>;
   let projectSubject: Subject<ProjectSummary>;
   let lanesSubject: Subject<Lane[]>;
@@ -64,28 +68,26 @@ describe('AddProjectDialogComponent', () => {
         .compileComponents();
 
     fixture = TestBed.createComponent(AddProjectDialogComponent);
+    fixtureEl = fixture.debugElement;
     component = fixture.componentInstance;
     fixture.detectChanges();
 
-    projectNameEl =
-        fixture.debugElement.query(By.css('input[placeholder="Project Name"]'))
-            .nativeElement;
-    repoSelectEl =
-        fixture.debugElement.query(By.css('.fci-repo-select')).nativeElement;
-    laneSelectEl =
-        fixture.debugElement.query(By.css('.fci-lane-select')).nativeElement;
+    projectNameEl = getElement(fixtureEl, 'input[placeholder="Project Name"]')
+                        .nativeElement;
+    repoSelectEl = getElement(fixtureEl, '.fci-repo-select').nativeElement;
+    laneSelectEl = getElement(fixtureEl, '.fci-lane-select').nativeElement;
     triggerSelectEl =
-        fixture.debugElement.query(By.css('.fci-trigger-select')).nativeElement;
+        getElement(fixtureEl, '.fci-trigger-select').nativeElement;
   }));
 
   it('Should close dialog when close button is clicked', () => {
-    fixture.debugElement.query(By.css('.mat-dialog-actions > .mat-button'))
+    getElement(fixtureEl, '.mat-dialog-actions > .mat-button')
         .nativeElement.click();
     expect(dialogRef.close).toHaveBeenCalled();
   });
 
   it('Should close dialog when X button is clicked', () => {
-    fixture.debugElement.query(By.css('.fci-dialog-icon-close-button'))
+    getElement(fixtureEl, '.fci-dialog-icon-close-button')
         .nativeElement.click();
     expect(dialogRef.close).toHaveBeenCalled();
   });
@@ -187,19 +189,13 @@ describe('AddProjectDialogComponent', () => {
 
     it('should show spinner when lanes are loading', () => {
       expect(component.isLoadingLanes).toBe(true);
-      let laneSpinnerEl =
-          fixture.debugElement.queryAll(By.css('.fci-lane-form .mat-spinner'));
-
-      expect(laneSpinnerEl.length).toBe(1);
+      expectElementToExist(fixtureEl, '.fci-lane-form .mat-spinner');
 
       lanesSubject.next(mockLanes);
       fixture.detectChanges();
 
-      laneSpinnerEl =
-          fixture.debugElement.queryAll(By.css('.fci-lane-form .mat-spinner'));
-
       expect(component.isLoadingLanes).toBe(false);
-      expect(laneSpinnerEl.length).toBe(0);
+      expectElementNotToExist(fixtureEl, '.fci-lane-form .mat-spinner');
     });
   });
 
@@ -228,44 +224,36 @@ describe('AddProjectDialogComponent', () => {
       component.form.patchValue({'trigger': 'nightly'});
       fixture.detectChanges();
 
-      expect(fixture.debugElement.queryAll(By.css('.fci-hour-select')).length)
-          .toBe(1);
-      expect(fixture.debugElement.queryAll(By.css('.fci-am-pm-select')).length)
-          .toBe(1);
+      expectElementToExist(fixtureEl, '.fci-hour-select');
+      expectElementToExist(fixtureEl, '.fci-am-pm-select');
     });
 
     it('should not show time selection when trigger is not nightly', () => {
       component.form.patchValue({'trigger': 'commit'});
       fixture.detectChanges();
 
-      expect(fixture.debugElement.queryAll(By.css('.fci-hour-select')).length)
-          .toBe(0);
-      expect(fixture.debugElement.queryAll(By.css('.fci-am-pm-select')).length)
-          .toBe(0);
+      expectElementNotToExist(fixtureEl, '.fci-hour-select');
+      expectElementNotToExist(fixtureEl, '.fci-am-pm-select');
     });
 
     it('should set nightly time correctly', async(() => {
          component.form.patchValue({'trigger': 'nightly'});
          fixture.detectChanges();
 
-         const hourEl: HTMLElement =
-             fixture.debugElement.query(By.css('.fci-hour-select'))
-                 .nativeElement;
-         const amPmEl: HTMLElement =
-             fixture.debugElement.query(By.css('.fci-am-pm-select'))
-                 .nativeElement;
+         const hourEl = getElement(fixtureEl, '.fci-hour-select');
+         const amPmEl = getElement(fixtureEl, '.fci-am-pm-select');
 
          // I think this is needed to load the hour/amPm select in ngIf block
          fixture.whenStable().then(() => {
            fixture.detectChanges();
-           expect(hourEl.textContent).toBe('12');
-           expect(amPmEl.textContent).toBe('AM');
+           expect(getElementText(hourEl)).toBe('12');
+           expect(getElementText(amPmEl)).toBe('AM');
 
            component.form.patchValue({'hour': 2, 'amPm': 'PM'});
            fixture.detectChanges();
 
-           expect(hourEl.textContent).toBe('2');
-           expect(amPmEl.textContent).toBe('PM');
+           expect(getElementText(hourEl)).toBe('2');
+           expect(getElementText(amPmEl)).toBe('PM');
          });
        }));
   });
@@ -346,21 +334,17 @@ describe('AddProjectDialogComponent', () => {
        });
 
     it('should show spinner while adding project', () => {
-      const spinnerEl = fixture.debugElement.query(By.css('.mat-spinner'));
-      expect(fixture.debugElement.queryAll(By.css('.mat-spinner')).length)
-          .toBe(0);
+      expectElementNotToExist(fixtureEl, '.mat-spinner');
 
       component.addProject();
       fixture.detectChanges();
 
-      expect(fixture.debugElement.queryAll(By.css('.mat-spinner')).length)
-          .toBe(1);
+      expectElementToExist(fixtureEl, '.mat-spinner');
 
       projectSubject.next(mockProjectSummary);
       fixture.detectChanges();
 
-      expect(fixture.debugElement.queryAll(By.css('.mat-spinner')).length)
-          .toBe(0);
+      expectElementNotToExist(fixtureEl, '.mat-spinner');
     });
 
     it('should close dialog on success', async(() => {
