@@ -1,4 +1,4 @@
-import {DebugElement, getAllDebugNodes} from '@angular/core/src/debug/debug_node';
+import {DebugElement} from '@angular/core';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatCardModule, MatProgressSpinnerModule} from '@angular/material';
 import {By} from '@angular/platform-browser';

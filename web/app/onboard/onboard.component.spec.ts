@@ -1,5 +1,5 @@
 import {DOCUMENT} from '@angular/common';
-import {DebugElement} from '@angular/core/src/debug/debug_node';
+import {DebugElement} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatStepperModule} from '@angular/material';

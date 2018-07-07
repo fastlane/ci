@@ -1,6 +1,6 @@
 import 'rxjs/add/observable/of';
 
-import {DebugElement} from '@angular/core/src/debug/debug_node';
+import {DebugElement} from '@angular/core';
 import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {MatDialog, MatDialogModule} from '@angular/material';
 import {By} from '@angular/platform-browser';

@@ -1,4 +1,4 @@
-import {DebugElement} from '@angular/core/src/debug/debug_node';
+import {DebugElement} from '@angular/core';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatTooltip, MatTooltipModule} from '@angular/material';
 import {MatIconModule} from '@angular/material/icon';
