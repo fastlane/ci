@@ -109,15 +109,15 @@ module FastlaneCI
       local_branch_name_to_builds = branch_name_to_builds
 
       return branch_name_to_commits.each_with_object({}) do |(branch_name, branch_commits), hash|
-        builds = local_branch_name_to_builds[branch_name]
+        # Filter out the mappings where the `branch_name` does not belong to the
+        # commit trigger.
+        next unless branches.include?(branch_name)
 
-        # If there exist no builds for the branch_name mapping, filter out all
-        # KVPs for this branch_name.
-        next unless builds
+        builds = local_branch_name_to_builds[branch_name]
 
         # Reject the branch_commits that have already been enqueued in a build.
         hash[branch_name] = branch_commits.reject do |commit|
-          build_shas = builds.map(&:sha).to_set
+          build_shas = builds&.map(&:sha)&.to_set || Set.new
           build_shas.include?(commit.sha)
         end
       end
