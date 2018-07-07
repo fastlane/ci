@@ -76,12 +76,20 @@ module FastlaneCI
     #   commits from.
     # @param [Array[String]] branches: An array of branches to be get commits
     #   from.
+    # @param [Integer] number_of_commits: A limit on the number of commits to
+    #   return for a branch. Will return the last 'n' commits corresponding to
+    #   this number. The reason for this is because otherwise this action
+    #   fetches ALL commits for a branch, so if someone sets up fastlane.ci for
+    #   the first time, and they have 1000 commits for a branch they've created
+    #   a trigger for, it will enqueue 1000 builds starting from the most recent
+    #   commit in the `CheckForNewCommitsOnGithubWorker`, taking a lot of time
+    #   to complete.
     # @return [Hash] A mapping of 'branch names' to an array of recent commits
     #   for the branch. { branch_name => [commit_0, ..., commit_n], ... }
-    def recent_commits_for_branch(repo_full_name:, branches:)
+    def branch_name_to_recent_commits_for_branch(repo_full_name:, branches:, number_of_commits: 20)
       github_action(client) do |c|
         branches.map do |branch|
-          [branch, c.commits(repo_full_name, branch)]
+          [branch, c.commits(repo_full_name, branch).first(number_of_commits).reverse]
         end.to_h
       end
     end

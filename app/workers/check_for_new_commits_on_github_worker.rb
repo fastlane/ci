@@ -159,7 +159,7 @@ module FastlaneCI
     #
     # @return [Hash] { branch_name => [commit_0, commit_1, ..., commit_n], ... }
     def branch_name_to_commits
-      return github_service.recent_commits_for_branch(
+      return github_service.branch_name_to_recent_commits_for_branch(
         repo_full_name: repo_full_name, branches: branches
       )
     end
