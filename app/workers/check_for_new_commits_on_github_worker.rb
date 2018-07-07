@@ -65,7 +65,7 @@ module FastlaneCI
 
     # The branch names associated with all the user defined commit triggers.
     #
-    # @return [Array[String]]
+    # @return [Set[String]]
     attr_reader :branches
 
     # Checks for new commits on branches associated with user-defined job triggers.
@@ -98,7 +98,7 @@ module FastlaneCI
       @builds = FastlaneCI::Services.build_service.list_builds(project: project)
 
       # Get the branch names associated with the user-defined commit triggers.
-      @branches = project.find_triggers_of_type(trigger_type: :commit).map(&:branch)
+      @branches = project.find_triggers_of_type(trigger_type: :commit).map(&:branch).to_set
     end
 
     # Filter down the hash of `branch_name_to commits` by removing KVPs where the `commit.sha` has already been
@@ -106,10 +106,18 @@ module FastlaneCI
     #
     # @return [Hash] { branch_name => [commit_0, commit_1, ..., commit_n], ... }
     def filter_branch_name_to_commits_mapping
-      return branch_name_to_commits.each_with_object({}) do |(branch_name, branch_shas), hash|
-        hash[branch_name] = branch_shas.reject do |commit|
-          builds = branch_name_to_builds[branch_name]
-          build_shas = builds&.map(&:sha) || []
+      local_branch_name_to_builds = branch_name_to_builds
+
+      return branch_name_to_commits.each_with_object({}) do |(branch_name, branch_commits), hash|
+        builds = local_branch_name_to_builds[branch_name]
+
+        # If there exist no builds for the branch_name mapping, filter out all
+        # KVPs for this branch_name.
+        next unless builds
+
+        # Reject the branch_commits that have already been enqueued in a build.
+        hash[branch_name] = branch_commits.reject do |commit|
+          build_shas = builds.map(&:sha).to_set
           build_shas.include?(commit.sha)
         end
       end
@@ -118,8 +126,8 @@ module FastlaneCI
     # Enqueues new `Build`s for commits that haven't been previously been enqueued in a `Build`.
     #
     # @param [Hash] branch_name_to_commits: { branch_name => [commit_0, commit_1, ..., commit_n], ... }
-    def enqueue_new_builds(branch_name_to_commits)
-      branch_name_to_commits.each do |branch_name, commits|
+    def enqueue_new_builds(filtered_branch_name_to_commits)
+      filtered_branch_name_to_commits.each do |branch_name, commits|
         commits.each do |commit|
           new_git_fork_config = GitForkConfig.new(
             sha: commit.sha,

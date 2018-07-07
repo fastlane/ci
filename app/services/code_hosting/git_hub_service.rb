@@ -74,7 +74,8 @@ module FastlaneCI
     #
     # @param [String] repo_full_name: The name of the repository to get the
     #   commits from.
-    # @param [Array[String]] branches: An array of branches to be
+    # @param [Array[String]] branches: An array of branches to be get commits
+    #   from.
     # @return [Hash] A mapping of 'branch names' to an array of recent commits
     #   for the branch. { branch_name => [commit_0, ..., commit_n], ... }
     def recent_commits_for_branch(repo_full_name:, branches:)
