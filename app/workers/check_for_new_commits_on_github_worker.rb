@@ -80,7 +80,7 @@ module FastlaneCI
 
       if filtered_branch_name_to_commits.empty?
         logger.debug(
-          "No new commits found for #{project.project_name} (#{repo_full_name}) for branches <#{branches.join(', ')}>"
+          "No new commits found for #{project.project_name} on branches <#{branches.to_a.join(', ')}>"
         )
         return
       end
