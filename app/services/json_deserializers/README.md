@@ -13,8 +13,6 @@ We can do this by creating a `JSONTriggerDeserializer` concretion implementing t
 #### Concretion Example
 
 ```ruby
-# frozen_string_literal: true
-
 require_relative "json_deserializer"
 
 module FastlaneCI

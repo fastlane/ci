@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module FastlaneCI
   # An abstract factory following the abstract factory design pattern.
   class AbstractFactory
