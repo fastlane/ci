@@ -110,6 +110,13 @@ module FastlaneCI
       project.repo_config.link_to_remote_commit(sha)
     end
 
+    # The branch name associated with the `Build`.
+    #
+    # @return [String]
+    def branch
+      return git_fork_config.branch
+    end
+
     # This method will return the branch name (if available)
     # and automatically fallback to the short (8 char) git sha. Either way
     # you'll have something nice to show to the user

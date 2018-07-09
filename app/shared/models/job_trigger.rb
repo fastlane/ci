@@ -3,6 +3,7 @@ module FastlaneCI
   class JobTrigger
     TRIGGER_TYPE = {
       commit: "commit",
+      pull_request: "pull_request",
       manual: "manual",
       nightly: "nightly"
     }
@@ -16,6 +17,13 @@ module FastlaneCI
     def initialize(type: nil, branch: nil)
       @type = type
       @branch = branch
+    end
+  end
+
+  # When a pull request is created, this will trigger
+  class PullRequestJobTrigger < JobTrigger
+    def initialize(branch: nil)
+      super(type: TRIGGER_TYPE[:pull_request], branch: branch)
     end
   end
 

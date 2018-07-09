@@ -15,12 +15,13 @@ export interface AddProjectDialogConfig {
 
 interface TriggerOption {
   viewValue: string;
-  value: 'commit'|'nightly';
+  value: 'commit' | 'pull_request' | 'nightly';
 }
 
 const TRIGGER_OPTIONS: TriggerOption[] = [
-  {viewValue: 'for every commit and PR', value: 'commit'},
-  {viewValue: 'nightly', value: 'nightly'},
+  { viewValue: 'for every commit', value: 'commit' },
+  { viewValue: 'for every pull request', value: 'pull_request' },
+  { viewValue: 'nightly', value: 'nightly' },
 ];
 
 const HOURS: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
