@@ -15,11 +15,23 @@ module FastlaneCI
   class CheckForNewCommitsOnGithubWorker < GitHubWorkerBase
     include FastlaneCI::Logging
 
+    # @return [JobTrigger::TRIGGER_TYPE]
     attr_reader :trigger_type
+
+    # Class responsible for scheduling fastlane.ci workers.
+    #
+    # @return [WorkerScheduler]
     attr_reader :scheduler
+
+    # @return [GitHubService]
     attr_reader :github_service
 
-    def initialize(provider_credential: nil, project: nil, notification_service:)
+    # Instantiates a new `CheckForNewCommitsOnGithubWorker` object.
+    #
+    # @param [ProviderCredential] provider_credential: The credential needed to communicate with GitHub API.
+    # @param [Project] project: The project you wish to check new `Build`s on.
+    # @param [NotificationService] notification_service: A notification service to inject into new builds to enqueue.
+    def initialize(provider_credential:, project:, notification_service:)
       @trigger_type = FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit]
       @scheduler = WorkerScheduler.new(interval_time: 10)
       @github_service = FastlaneCI::GitHubService.new(provider_credential: provider_credential)
@@ -32,51 +44,124 @@ module FastlaneCI
       )
     end
 
-    def check_for_new_commits
-      repo_full_name = project.repo_config.full_name
-      logger.debug("Checking for new commits: #{project.project_name} (#{repo_full_name})")
-      build_service = FastlaneCI::Services.build_service
+    # Checks for new commits on branches that correspond to job triggers.
+    def work
+      self.busy = true
+      check_for_new_commits_on_branches
+      self.busy = false
+    end
 
-      # Sorted by newest timestamps first
-      builds = build_service.list_builds(project: project)
+    private
 
-      # All the shas for builds we have run and dump it to a set so we can filter with it
-      local_build_shas_set = builds.map(&:sha).to_set
+    # The name of the repository to get the commits from.
+    #
+    # @return [String]
+    attr_reader :repo_full_name
 
-      # Get all commits from the open PRs
-      open_pull_requests = github_service.open_pull_requests(repo_full_name: repo_full_name)
+    # An array of the previous builds executed.
+    #
+    # @return [Array[Build]]
+    attr_reader :builds
 
-      # Filter out the PR shas that are already in the builds
-      new_commit_prs = open_pull_requests.reject { |pr| local_build_shas_set.include?(pr.current_sha) }
+    # The branch names associated with all the user defined commit triggers.
+    #
+    # @return [Set[String]]
+    attr_reader :branches
 
-      if new_commit_prs.length == 0
-        logger.debug("No new commits found for #{project.project_name} (#{repo_full_name})")
+    # Checks for new commits on branches associated with user-defined job triggers.
+    #
+    # 1. Sets up the data needed by the worker
+    # 2. Filters the 'branch name' => 'commits' mapping based on whether the commit sha has already been run.
+    # 3. Checks if no new commits have been found, and returns early if that's the case.
+    # 4. Enqueues new `Build`s for the commits that haven't been previously been enqueued in a `Build`.
+    def check_for_new_commits_on_branches
+      setup_worker_data
+      filtered_branch_name_to_commits = filter_branch_name_to_commits_mapping
+
+      if filtered_branch_name_to_commits.empty?
+        logger.debug(
+          "No new commits found for #{project.project_name} on branches <#{branches.to_a.join(', ')}>"
+        )
         return
       end
+      logger.debug("Creating build task(s) for #{project.project_name} (#{repo_full_name})")
 
-      pr_details = new_commit_prs.map { |pr| "#{pr.repo_full_name}:#{pr.branch}:#{pr.current_sha}" }
-      logger.debug("Creating build task(s) for #{project.project_name} (#{repo_full_name}): #{pr_details}")
+      enqueue_new_builds(filtered_branch_name_to_commits)
+    end
 
-      new_commit_prs.each do |pr|
-        git_fork_config = GitForkConfig.new(
-          sha: pr.current_sha,
-          branch: pr.branch,
-          clone_url: pr.clone_url,
-          ref: pr.git_ref
-        )
-        create_and_queue_build_task(
-          sha: pr.current_sha,
-          trigger: project.find_triggers_of_type(trigger_type: :commit).first,
-          git_fork_config: git_fork_config,
-          notification_service: notification_service
-        )
+    # Sets up the data needed by the worker.
+    def setup_worker_data
+      @repo_full_name = project.repo_config.full_name
+      logger.debug("Checking for new commits: #{project.project_name} (#{repo_full_name})")
+
+      # Get all the most recent builds sorted by newest timestamps.
+      @builds = FastlaneCI::Services.build_service.list_builds(project: project)
+
+      # Get the branch names associated with the user-defined commit triggers.
+      @branches = project.find_triggers_of_type(trigger_type: :commit).map(&:branch).to_set
+    end
+
+    # Filter down the hash of `branch_name_to commits` by removing KVPs where the `commit.sha` has already been
+    # run in an existing build.
+    #
+    # @return [Hash] { branch_name => [commit_0, commit_1, ..., commit_n], ... }
+    def filter_branch_name_to_commits_mapping
+      local_branch_name_to_builds = branch_name_to_builds
+
+      return branch_name_to_commits.each_with_object({}) do |(branch_name, branch_commits), hash|
+        # Filter out the mappings where the `branch_name` does not belong to the
+        # commit trigger.
+        next unless branches.include?(branch_name)
+
+        builds = local_branch_name_to_builds[branch_name]
+
+        # Reject the branch_commits that have already been enqueued in a build.
+        hash[branch_name] = branch_commits.reject do |commit|
+          build_shas = builds&.map(&:sha)&.to_set || Set.new
+          build_shas.include?(commit.sha)
+        end
       end
     end
 
-    def work
-      self.busy = true
-      check_for_new_commits
-      self.busy = false
+    # Enqueues new `Build`s for commits that haven't been previously been enqueued in a `Build`.
+    #
+    # @param [Hash] branch_name_to_commits: { branch_name => [commit_0, commit_1, ..., commit_n], ... }
+    def enqueue_new_builds(filtered_branch_name_to_commits)
+      filtered_branch_name_to_commits.each do |branch_name, commits|
+        commits.each do |commit|
+          new_git_fork_config = GitForkConfig.new(
+            sha: commit.sha,
+            branch: branch_name,
+            clone_url: project.repo_config.git_url
+          )
+
+          create_and_queue_build_task(
+            sha: commit.sha,
+            trigger: project.find_triggers_of_type(trigger_type: :commit).first,
+            git_fork_config: new_git_fork_config,
+            notification_service: notification_service
+          )
+        end
+      end
+    end
+
+    # Get a hash mapping of 'branch name' to an array of `Build`s which are associated with the given branch.
+    # Filter the builds down by the branches that are part of commit triggers.
+    #
+    # @return [Hash] { "branch_name" => [Build_0, Build_1, ..., Build_n], ... }
+    def branch_name_to_builds
+      return builds.select { |build| branches.include?(build.branch) }
+                   .each_with_object({}) { |build, hash| (hash[build.branch] ||= []).push(build) }
+    end
+
+    # Get a hash mapping of 'branch name' to an array of commits which are associated with the given branch.
+    # Get all commits from the branches
+    #
+    # @return [Hash] { branch_name => [commit_0, commit_1, ..., commit_n], ... }
+    def branch_name_to_commits
+      return github_service.branch_name_to_recent_commits_for_branch(
+        repo_full_name: repo_full_name, branches: branches
+      )
     end
   end
 end

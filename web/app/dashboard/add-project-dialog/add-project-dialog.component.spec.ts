@@ -213,11 +213,18 @@ describe('AddProjectDialogComponent', () => {
       expect(triggerSelectEl.textContent).toBe('nightly');
     });
 
-    it('should show correct nightly commit and PR option name', () => {
+    it('should show correct commit option name', () => {
       component.form.patchValue({'trigger': 'commit'});
       fixture.detectChanges();
 
-      expect(triggerSelectEl.textContent).toBe('for every commit and PR');
+      expect(triggerSelectEl.textContent).toBe('for every commit');
+    });
+
+    it('should show correct PR option name', () => {
+      component.form.patchValue({'trigger': 'pull_request'});
+      fixture.detectChanges();
+
+      expect(triggerSelectEl.textContent).toBe('for every pull request');
     });
 
     it('should show time selection when trigger is nightly', () => {

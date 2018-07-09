@@ -1,4 +1,5 @@
 require_relative "../workers/check_for_new_commits_on_github_worker"
+require_relative "../workers/check_for_new_prs_on_github_worker"
 require_relative "../workers/nightly_build_github_worker"
 require_relative "../shared/logging_module"
 require_relative "../shared/models/provider_credential"
@@ -53,6 +54,17 @@ module FastlaneCI
           trigger_type: FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit]
         )
           new_workers << FastlaneCI::CheckForNewCommitsOnGithubWorker.new(
+            provider_credential: provider_credential,
+            project: project,
+            notification_service: notification_service
+          )
+        end
+
+        if project_has_trigger_type?(
+          project: project,
+          trigger_type: FastlaneCI::JobTrigger::TRIGGER_TYPE[:pull_request]
+        )
+          new_workers << FastlaneCI::CheckForNewPullRequestsOnGithubWorker.new(
             provider_credential: provider_credential,
             project: project,
             notification_service: notification_service
