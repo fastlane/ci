@@ -14,6 +14,8 @@ import {Subject} from 'rxjs/Subject';
 import {StatusIconModule} from '../common/components/status-icon/status-icon.module';
 import {ToolbarModule} from '../common/components/toolbar/toolbar.module';
 import {DummyComponent} from '../common/test_helpers/dummy.component';
+// tslint:disable-next-line:max-line-length
+import {expectElementNotToExist, expectElementToExist, getAllElements, getElement, getElementText} from '../common/test_helpers/element_helper_functions';
 import {mockBuildSummary_success} from '../common/test_helpers/mock_build_data';
 import {getMockProject} from '../common/test_helpers/mock_project_data';
 import {BuildSummary} from '../models/build_summary';
@@ -28,6 +30,7 @@ import {SettingsDialogModule} from './settings-dialog/settings-dialog.modules';
 describe('ProjectComponent', () => {
   let component: ProjectComponent;
   let fixture: ComponentFixture<ProjectComponent>;
+  let fixtureEl: DebugElement;
   let dataService: jasmine.SpyObj<Partial<DataService>>;
   let projectSubject: Subject<Project>;
   let rebuildSummarySubject: Subject<BuildSummary>;
@@ -69,6 +72,7 @@ describe('ProjectComponent', () => {
         .compileComponents();
 
     fixture = TestBed.createComponent(ProjectComponent);
+    fixtureEl = fixture.debugElement;
     component = fixture.componentInstance;
   }));
 
@@ -128,24 +132,17 @@ describe('ProjectComponent', () => {
       });
 
       it('should not show project title', () => {
-        expect(
-            fixture.debugElement.queryAll(By.css('.fci-project-header')).length)
-            .toBe(0);
+        expectElementNotToExist(fixtureEl, '.fci-project-header');
       });
 
       it('table should not show loading spinner', () => {
-        expect(fixture.debugElement
-                   .queryAll(By.css('.fci-build-table .fci-loading-spinner'))
-                   .length)
-            .toBe(1);
+        expectElementToExist(
+            fixtureEl, '.fci-build-table .fci-loading-spinner');
       });
 
       it('details card should not show loading spinner', () => {
-        expect(
-            fixture.debugElement
-                .queryAll(By.css('.fci-project-details .fci-loading-spinner'))
-                .length)
-            .toBe(1);
+        expectElementToExist(
+            fixtureEl, '.fci-project-details .fci-loading-spinner');
       });
 
       it('should open settings dialog when settings gear is clicked', () => {
@@ -171,74 +168,57 @@ describe('ProjectComponent', () => {
 
       it('should have toolbar with breadcrumbs', () => {
         // toolbar exists
-        expect(fixture.debugElement.queryAll(By.css('.fci-crumb')).length)
-            .toBe(2);
+        expect(getAllElements(fixtureEl, '.fci-crumb').length).toBe(2);
 
         expect(component.breadcrumbs[0].label).toBe('Dashboard');
         expect(component.breadcrumbs[0].url).toBe('/');
       });
 
       it('should have project title', () => {
-        expect(fixture.debugElement.query(By.css('.fci-project-header'))
-                   .nativeElement.innerText)
+        expect(getElementText(fixtureEl, '.fci-project-header'))
             .toBe('the most coolest project');
       });
 
       describe('table', () => {
         let rowEls: DebugElement[];
         beforeEach(() => {
-          rowEls = fixture.debugElement.queryAll(By.css('.mat-row'));
+          rowEls = getAllElements(fixtureEl, '.mat-row');
           expect(rowEls.length).toBe(2);
         });
 
         it('should not show loading spinner', () => {
-          expect(fixture.debugElement
-                     .queryAll(By.css('.fci-build-table .fci-loading-spinner'))
-                     .length)
-              .toBe(0);
+          expectElementNotToExist(
+              fixtureEl, '.fci-build-table .fci-loading-spinner');
         });
 
         it('should have status icon', () => {
-          expect(rowEls[0]
-                     .query(By.css('.mat-column-number .fci-status-icon'))
-                     .nativeElement.innerText)
+          expect(
+              getElementText(rowEls[0], '.mat-column-number .fci-status-icon'))
               .toBe('check_circle');
-          expect(rowEls[1]
-                     .query(By.css('.mat-column-number .fci-status-icon'))
-                     .nativeElement.innerText)
+          expect(
+              getElementText(rowEls[1], '.mat-column-number .fci-status-icon'))
               .toBe('cancel');
         });
 
         it('should have build number', () => {
-          expect(rowEls[0]
-                     .query(By.css('.mat-column-number span'))
-                     .nativeElement.innerText)
+          expect(getElementText(rowEls[0], '.mat-column-number span'))
               .toBe('2');
-          expect(rowEls[1]
-                     .query(By.css('.mat-column-number span'))
-                     .nativeElement.innerText)
+          expect(getElementText(rowEls[1], '.mat-column-number span'))
               .toBe('1');
         });
 
         it('should have duration', () => {
-          expect(rowEls[0]
-                     .query(By.css('.mat-column-duration'))
-                     .nativeElement.innerText)
+          expect(getElementText(rowEls[0], '.mat-column-duration'))
               .toBe('3 days');
         });
 
         it('should have branch', () => {
-          expect(rowEls[0]
-                     .query(By.css('.mat-column-branch'))
-                     .nativeElement.innerText)
+          expect(getElementText(rowEls[0], '.mat-column-branch'))
               .toBe('master');
         });
 
         it('should have sha link', () => {
-          expect(rowEls[0]
-                     .query(By.css('.mat-column-sha a'))
-                     .nativeElement.innerText)
-              .toBe('asdfsh');
+          expect(getElementText(rowEls[0], '.mat-column-sha a')).toBe('asdfsh');
         });
 
         it('should go to build when clicked', fakeAsync(() => {
@@ -250,23 +230,19 @@ describe('ProjectComponent', () => {
 
         it('should not show rebuild button on successful builds', () => {
           // First row is successful build
-          expect(rowEls[0]
-                     .queryAll(By.css('.mat-column-sha .fci-button-visible'))
-                     .length)
-              .toBe(0);
+          expectElementNotToExist(
+              rowEls[0], '.mat-column-sha .fci-button-visible');
         });
 
         it('should show rebuild button on failed builds', () => {
           // Second row is failed build
-          expect(rowEls[1]
-                     .queryAll(By.css('.mat-column-sha .fci-button-visible'))
-                     .length)
-              .toBe(1);
+          expectElementToExist(
+              rowEls[1], '.mat-column-sha .fci-button-visible');
         });
 
         it('should rebuild when rebuild button is clicked', () => {
           const buttonEl =
-              rowEls[1].query(By.css('.mat-column-sha .fci-button-visible'));
+              getElement(rowEls[1], '.mat-column-sha .fci-button-visible');
 
           buttonEl.nativeElement.click();
           expect(dataService.rebuild).toHaveBeenCalledWith('12', 1);
@@ -274,14 +250,13 @@ describe('ProjectComponent', () => {
 
         it('should add new row after rebuild is complete', () => {
           const buttonEl =
-              rowEls[1].query(By.css('.mat-column-sha .fci-button-visible'));
+              getElement(rowEls[1], '.mat-column-sha .fci-button-visible');
 
           buttonEl.nativeElement.click();
           rebuildSummarySubject.next(mockBuildSummary_success);
           fixture.detectChanges();
 
-          expect(fixture.debugElement.queryAll(By.css('.mat-row')).length)
-              .toBe(3);
+          expect(getAllElements(fixtureEl, '.mat-row').length).toBe(3);
         });
       });
 
@@ -291,37 +266,33 @@ describe('ProjectComponent', () => {
         let contentsEls: DebugElement[];
 
         beforeEach(() => {
-          cardEl = fixture.debugElement.query(By.css('.fci-project-details'));
-          headerEls = cardEl.queryAll(By.css('h5'));
-          contentsEls = cardEl.queryAll(By.css('div'));
+          cardEl = getElement(fixtureEl, '.fci-project-details');
+          headerEls = getAllElements(cardEl, 'h5');
+          contentsEls = getAllElements(cardEl, 'div');
         });
 
         it('should not show loading spinner', () => {
-          expect(cardEl.queryAll(By.css('.fci-loading-spinner')).length)
-              .toBe(0);
+          expectElementNotToExist(cardEl, '.fci-loading-spinner');
         });
 
         it('should show Repo name', () => {
-          expect(headerEls[0].nativeElement.innerText).toBe('REPO');
-          expect(contentsEls[0].nativeElement.innerText)
-              .toBe('fastlane/TacoRocat');
+          expect(getElementText(headerEls[0])).toBe('REPO');
+          expect(getElementText(contentsEls[0])).toBe('fastlane/TacoRocat');
         });
 
         it('should show lane', () => {
-          expect(headerEls[1].nativeElement.innerText).toBe('LANE');
-          expect(contentsEls[1].nativeElement.innerText).toBe('ios test');
+          expect(getElementText(headerEls[1])).toBe('LANE');
+          expect(getElementText(contentsEls[1])).toBe('ios test');
         });
 
         it('should show last successful build number', () => {
-          expect(headerEls[2].nativeElement.innerText)
-              .toBe('LAST SUCCESSFUL BUILD');
-          expect(contentsEls[2].nativeElement.innerText).toBe('2');
+          expect(getElementText(headerEls[2])).toBe('LAST SUCCESSFUL BUILD');
+          expect(getElementText(contentsEls[2])).toBe('2');
         });
 
         it('should show last failed build number', () => {
-          expect(headerEls[3].nativeElement.innerText)
-              .toBe('LAST FAILED BUILD');
-          expect(contentsEls[3].nativeElement.innerText).toBe('1');
+          expect(getElementText(headerEls[3])).toBe('LAST FAILED BUILD');
+          expect(getElementText(contentsEls[3])).toBe('1');
         });
       });
     });

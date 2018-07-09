@@ -2,6 +2,8 @@ import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatProgressSpinnerModule} from '@angular/material';
 import {By} from '@angular/platform-browser';
 
+import {expectElementToExist} from '../../test_helpers/element_helper_functions';
+
 import {FormSpinnerComponent} from './form-spinner.component';
 
 describe('FormSpinnerComponent', () => {
@@ -20,7 +22,6 @@ describe('FormSpinnerComponent', () => {
   });
 
   it('should show spinner and mask', () => {
-    expect(fixture.debugElement.queryAll(By.css('.mat-spinner')).length)
-        .toBe(1);
+    expectElementToExist(fixture.debugElement, '.mat-spinner');
   });
 });
