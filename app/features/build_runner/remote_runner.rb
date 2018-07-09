@@ -75,13 +75,26 @@ module FastlaneCI
       env = environment_variables_for_worker
 
       start_time = Time.now.utc
-
-      responses = Agent::Client.new("localhost").request_run_fastlane(
-        "bundle", "exec", "fastlane", project.platform, project.lane, env: env
-      )
-      responses.each do |response|
-        validate_agent_response(response: response)
-        process_agent_response(response: response)
+      begin
+        responses = Agent::Client.new("localhost").request_run_fastlane(
+          "bundle", "exec", "fastlane", project.platform, project.lane, env: env
+        )
+        responses.each do |response|
+          validate_agent_response(response: response)
+          process_agent_response(response: response)
+        end
+      rescue StandardError => exception
+        emit_error_response(
+          FastlaneCI::Proto::InvocationResponse::Error.new(
+            description: exception.message,
+            stacktrace: exception.backtrace.join("\n")
+          )
+        )
+        emit_new_row(
+          type: :ERROR,
+          message: "Please make sure that the build agent is running!",
+          time: Time.now
+        )
       end
       emit_new_row(type: :last_message, message: nil, time: Time.now)
 
