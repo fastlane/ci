@@ -57,8 +57,6 @@ module FastlaneCI
     attr_reader :artifacts
 
     def initialize(build:)
-      raise "Incorrect object type. Expected Build, got #{build.class}" unless build.kind_of?(Build)
-
       @project_id = build.project.id
       @number = build.number
       @status = build.status
