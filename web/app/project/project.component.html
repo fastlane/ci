@@ -1,4 +1,8 @@
-<fci-toolbar [breadcrumbs]="breadcrumbs"></fci-toolbar>
+<fci-toolbar [breadcrumbs]="breadcrumbs">
+  <button class="fci-settings-button" fci-toolbar-right mat-icon-button (click)="openSettingsDialog()">
+    <mat-icon>settings</mat-icon>
+  </button>
+</fci-toolbar>
 <div class="fci-project-container">
   <div class="fci-left-container">
     <div *ngIf="project" class="fci-project-header">{{project.name}}</div>

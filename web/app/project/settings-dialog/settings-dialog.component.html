@@ -1,0 +1,30 @@
+<fci-master-detail-card>
+  <!-- Master Content -->
+  <div fci-master>
+    <div class="fci-master-section-header">Project settings</div>
+    <div class="fci-master-section-label" *ngFor="let section of masterSections()" [class.fci-master-section-selected]="selectedSection === section"
+      (click)="selectSection(section)">
+      {{MASTER_SECTION_LABELS_MAP.get(section)}}
+    </div>
+  </div>
+  <!-- Detail Content -->
+  <div fci-detail class="fci-detail-container">
+    <ng-container [ngSwitch]="selectedSection">
+      <form *ngSwitchCase="MasterSection.GENERAL" [formGroup]="generalForm" class="fci-general-form">
+        <h3>General
+          <i>(not editable yet)</i>
+        </h3>
+        <mat-form-field>
+          <input matInput placeholder="Project name" formControlName="name">
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Lane to run" formControlName="lane">
+        </mat-form-field>
+        <div class="fci-button-container">
+          <button mat-button (click)="closeDialog()" type="button">Close</button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="!generalForm.valid">Done</button>
+        </div>
+      </form>
+    </ng-container>
+  </div>
+</fci-master-detail-card>
