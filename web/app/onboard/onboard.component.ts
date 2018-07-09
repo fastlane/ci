@@ -11,6 +11,7 @@ function buildProjectForm(fb: FormBuilder): FormGroup {
     'encryptionKey': ['', Validators.required],
     'botToken': ['', Validators.required],
     'botPassword': ['', Validators.required],
+    'configRepo': ['', Validators.required],
   });
 }
 
@@ -33,6 +34,8 @@ export class OnboardComponent {
 
     this.form.get('botToken').valueChanges.subscribe((token) => {
       delete this.botEmail;
+      this.form.get('botPassword').reset();
+
       if (token.length === GITHUB_API_TOKEN_LENGTH) {
         this.isFetchingBotEmail = true;
 
@@ -42,6 +45,12 @@ export class OnboardComponent {
         });
       }
     });
+  }
+
+  submitOnboarding(): void {
+    if (this.form.valid) {
+      console.log('Onboarding is being submitted');
+    }
   }
 
   goToOldOnboarding() {

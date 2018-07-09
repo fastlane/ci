@@ -12,7 +12,7 @@
 <div fci-grid>
   <div fci-cell="12">
     <h6>NOT WORKING - CURRENTLY IN DEVELOPMENT</h6>
-    <form [formGroup]="form">
+    <form [formGroup]="form" (ngSubmit)="submitOnboarding()">
       <mat-vertical-stepper>
         <mat-step label="Set up your Encryption Key">
           <p>
@@ -28,20 +28,21 @@
           </div>
         </mat-step>
         <mat-step label="Set Up your CI bot account">
-          <p>fastlane.ci needs you to set up a CI bot account to update the build status, etc.</p>
+          <p>
+            <b>fastlane.ci</b> needs you to set up a CI bot account to update the build status, etc.</p>
           <div class="fci-substep">
             <div class="fci-substep-label">
               <span class="fci-substep-letter">a</span>
-              Create an account for your fastlane.ci bot on Github
+              Create an account for your fastlane.ci bot on GitHub
             </div>
           </div>
           <div class="fci-substep">
             <div class="fci-substep-label">
               <span class="fci-substep-letter">b</span>
-              Create a personal access token for use with your bot on Github</div>
+              Create a personal access token for use with your bot on GitHub</div>
             <div class="fci-substep-content">
               <div>Enable the following permissions
-                <a href="https://github.com" target="_blank">on Github</a>:</div>
+                <a href="https://github.com" target="_blank">on GitHub</a>:</div>
               <div class="fci-github-token-scopes-image"></div>
             </div>
           </div>
@@ -52,7 +53,7 @@
             </div>
             <div class="fci-substep-content">
               <div class="fci-input-container">
-                <label>CI encryption key</label>
+                <label>CI Bot GitHub API token</label>
                 <input formControlName="botToken" placeholder="Enter API token" type="text">
                 <div class="fci-input-status">
                   <mat-spinner *ngIf="isFetchingBotEmail" mode="indeterminate" diameter="24"></mat-spinner>
@@ -61,11 +62,11 @@
               </div>
               <ng-container *ngIf="botEmail">
                 <div class="fci-input-container">
-                  <label>fastlane.ci username</label>
+                  <label>fastlane.ci bot username</label>
                   <span class="fci-username">{{botEmail}}</span>
                 </div>
                 <div class="fci-input-container">
-                  <label>fastlane.ci password</label>
+                  <label>fastlane.ci bot password</label>
                   <input formControlName="botPassword" placeholder="Enter fastlane.ci password" type="password">
                 </div>
               </ng-container>
@@ -76,8 +77,17 @@
             </div>
           </div>
         </mat-step>
-        <mat-step label="Create private Repository for ci-config">
-          Repository setup
+        <mat-step label="Create private repository for ci-config">
+          <p>
+            <b>fastlane.ci</b> requires you setup a private configuration repository on GitHub</p>
+          <div class="fci-input-container">
+            <label>Enter an existing private repository or create one with the default name</label>
+            <input formControlName="configRepo" placeholder="fastlane/ci-config-repo" type="text">
+          </div>
+          <div>
+            <button class="fci-form-submit-button" mat-button mat-raised-button color="primary" type="submit" [disabled]="!form.valid">Done</button>
+            <button mat-button mat-raised-button matStepperPrevious>Back</button>
+          </div>
         </mat-step>
       </mat-vertical-stepper>
     </form>
