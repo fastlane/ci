@@ -20,6 +20,7 @@ module FastlaneCI
       end
     end
   end
+  @file && @file.close
 end
 
 if $0 == __FILE__
