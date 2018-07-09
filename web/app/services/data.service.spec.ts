@@ -8,6 +8,7 @@ import {mockBuildResponse, mockBuildSummary_success} from '../common/test_helper
 import {mockLanesResponse} from '../common/test_helpers/mock_lane_data';
 import {mockProjectListResponse, mockProjectResponse, mockProjectSummaryResponse} from '../common/test_helpers/mock_project_data';
 import {mockRepositoryListResponse, mockRepositoryResponse} from '../common/test_helpers/mock_repository_data';
+import {UserDetails} from '../common/types';
 import {Build, BuildLogLine} from '../models/build';
 import {BuildSummary} from '../models/build_summary';
 import {Lane} from '../models/lane';
@@ -141,6 +142,21 @@ describe('DataService', () => {
       expect(lanes[0].platform).toBe('ios');
       expect(lanes[1].name).toBe('beta');
       expect(lanes[1].platform).toBe('android');
+    });
+  });
+
+  describe('#getUserDetails', () => {
+    it('should return response mapped to UserDetails', () => {
+      let userDetails: UserDetails;
+      dataService.getUserDetails('some-token').subscribe((response) => {
+        userDetails = response;
+      });
+
+      const detailsRequest =
+          mockHttp.expectOne('/data/repos/user_details?token=some-token');
+      detailsRequest.flush({github: {email: 'wubalubadubdub@gmail.com'}});
+
+      expect(userDetails.github.email).toBe('wubalubadubdub@gmail.com');
     });
   });
 

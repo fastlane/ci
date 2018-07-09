@@ -1,0 +1,34 @@
+/**
+ * These styles are meant to be imported by users of this component so
+ * they can re-use the master labels and detail styles
+ */
+
+fci-master-detail-card {
+    max-width: 1028px;
+    height: 480px;
+    .fci-master-section-header {
+        color: rgba(0, 0, 0, 0.54);
+        font-size: 13px;
+        padding: 16px 20px 4px 20px;
+    }
+    .fci-master-section-label {
+        padding: 8px 65px 8px 20px;
+        line-height: 40px;
+        height: 40px;
+        color: rgba(0, 0, 0, 0.87);
+        font-size: 14px;
+        font-weight: 400;
+        cursor: pointer;
+        &.fci-master-section-selected {
+            cursor: default;
+            background-color: rgba(0, 0, 0, 0.54);
+            color: #ffffff;
+        }
+    }
+    .fci-detail-container {
+        max-width: 732px;
+        box-sizing: border-box;
+        flex: 5;
+        padding: 20px 48px 84px 48px;
+    }
+}

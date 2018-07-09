@@ -1,0 +1,15 @@
+.mat-card {
+    padding: 0;
+    height: inherit;
+    .fci-master-detail-container {
+        display: flex;
+        height: inherit;
+        .fci-master-container {
+            min-width: 200px;
+            max-width: 296px;
+            flex: 1;
+            background-color: #f5f5f5;
+            box-shadow: -1px 0 0 rgba(0, 0, 0, 0.12) inset;
+        }
+    }
+}

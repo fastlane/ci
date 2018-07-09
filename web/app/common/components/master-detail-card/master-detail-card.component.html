@@ -1,0 +1,9 @@
+<mat-card>
+  <ng-content select="fci-card-action-bar"></ng-content>
+  <div class="fci-master-detail-container">
+    <div class="fci-master-container">
+      <ng-content select="[fci-master]"></ng-content>
+    </div>
+    <ng-content select="[fci-detail]"></ng-content>
+  </div>
+</mat-card>

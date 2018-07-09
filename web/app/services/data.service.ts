@@ -3,6 +3,7 @@ import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import {map} from 'rxjs/operators';
 
+import {UserDetails} from '../common/types';
 import {Build, BuildLogLine, BuildResponse} from '../models/build';
 import {BuildSummary, BuildSummaryResponse} from '../models/build_summary';
 import {Lane, LaneResponse} from '../models/lane';
@@ -50,6 +51,12 @@ export class DataService {
       Observable<BuildLogLine[]> {
     const url = `${HOSTNAME}/projects/${projectId}/build/${buildNumber}/logs`;
     return this.http.get<BuildLogLine[]>(url);
+  }
+
+  getUserDetails(apiToken: string): Observable<UserDetails> {
+    const url =
+        `${HOSTNAME}/repos/user_details?token=${encodeURIComponent(apiToken)}`;
+    return this.http.get<UserDetails>(url);
   }
 
   rebuild(projectId: string, buildNumber: number): Observable<BuildSummary> {

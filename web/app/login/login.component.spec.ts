@@ -6,6 +6,7 @@ import {By} from '@angular/platform-browser';
 import {Router} from '@angular/router';
 import {Subject} from 'rxjs/Subject';
 
+import {expectElementNotToExist, expectElementToExist, getElement, getElementText} from '../common/test_helpers/element_helper_functions';
 import {mockLoginResponse} from '../common/test_helpers/mock_login_data';
 import {AuthService, LoginResponse} from '../services/auth.service';
 
@@ -13,12 +14,12 @@ import {LoginComponent} from './login.component';
 
 describe('LoginComponent', () => {
   let fixture: ComponentFixture<LoginComponent>;
+  let fixtureEl: DebugElement;
   let authService: jasmine.SpyObj<Partial<AuthService>>;
   let router: jasmine.SpyObj<Partial<Router>>;
   let loginButtonEl: DebugElement;
   let emailEl: DebugElement;
   let passwordEl: DebugElement;
-  let errorEl: DebugElement;
   let loginSubject: Subject<LoginResponse>;
 
   beforeEach(async(() => {
@@ -44,9 +45,10 @@ describe('LoginComponent', () => {
         .compileComponents();
 
     fixture = TestBed.createComponent(LoginComponent);
-    loginButtonEl = fixture.debugElement.query(By.css('button'));
-    emailEl = fixture.debugElement.query(By.css('input[type=email]'));
-    passwordEl = fixture.debugElement.query(By.css('input[type=password]'));
+    fixtureEl = fixture.debugElement;
+    loginButtonEl = getElement(fixtureEl, 'button');
+    emailEl = getElement(fixtureEl, 'input[type=email]');
+    passwordEl = getElement(fixtureEl, 'input[type=password]');
   }));
 
   describe('OnInit', () => {
@@ -124,23 +126,18 @@ describe('LoginComponent', () => {
     });
 
     it('should show an error message after a failed login attempt', () => {
-      function getFormErrorEl() {
-        return fixture.debugElement.query(By.css('.form-error'));
-      }
-
-      expect(getFormErrorEl()).toBeNull();
+      expectElementNotToExist(fixtureEl, '.form-error');
 
       loginButtonEl.triggerEventHandler('click', null);
       fixture.detectChanges();
 
-      expect(getFormErrorEl()).toBeNull();
+      expectElementNotToExist(fixtureEl, '.form-error');
 
       loginSubject.error(null);
       fixture.detectChanges();
 
-      errorEl = getFormErrorEl();
-      expect(errorEl).not.toBeNull();
-      expect(errorEl.nativeElement.textContent.trim())
+      expectElementToExist(fixtureEl, '.form-error');
+      expect(getElementText(fixtureEl, '.form-error'))
           .toBe('Could not log you in. Please try again.');
     });
   });

@@ -4,14 +4,17 @@ import {MatIconModule} from '@angular/material';
 import {By} from '@angular/platform-browser';
 import {RouterTestingModule} from '@angular/router/testing';
 
+import {getAllElements, getElement} from '../../test_helpers/element_helper_functions';
+
 import {ToolbarComponent} from './toolbar.component';
 
 describe('ToolbarComponent', () => {
   let component: ToolbarComponent;
   let fixture: ComponentFixture<ToolbarComponent>;
+  let fixtureEl: DebugElement;
 
   function getCrumbs(): DebugElement[] {
-    return fixture.debugElement.queryAll(By.css('.fci-crumb'));
+    return getAllElements(fixtureEl, '.fci-crumb');
   }
 
   function getFirstCrumb(): HTMLElement {
@@ -30,12 +33,13 @@ describe('ToolbarComponent', () => {
         .compileComponents();
 
     fixture = TestBed.createComponent(ToolbarComponent);
+    fixtureEl = fixture.debugElement;
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
   it('should show fastlane logo', () => {
-    const logosEl = fixture.debugElement.queryAll(By.css('.fci-fastlane-logo'));
+    const logosEl = getAllElements(fixtureEl, '.fci-fastlane-logo');
     expect(logosEl.length).toBe(1);
   });
 
@@ -73,7 +77,7 @@ describe('ToolbarComponent', () => {
     fixture.detectChanges();
 
     const crumbContainerEl =
-        fixture.debugElement.query(By.css('.fci-crumbtainer')).nativeElement;
+        getElement(fixtureEl, '.fci-crumbtainer').nativeElement;
     expect(crumbContainerEl.innerText)
         .toContain('parent\nchevron_right\nchild');
   });
