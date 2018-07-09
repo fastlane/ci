@@ -1,7 +1,7 @@
 import 'rxjs/add/operator/switchMap';
 
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {MatTable} from '@angular/material';
+import {MatDialog, MatDialogConfig, MatTable} from '@angular/material';
 import {ActivatedRoute, ParamMap} from '@angular/router';
 
 import {Breadcrumb} from '../common/components/toolbar/toolbar.component';
@@ -9,6 +9,8 @@ import {Build} from '../models/build';
 import {BuildSummary} from '../models/build_summary';
 import {Project} from '../models/project';
 import {DataService} from '../services/data.service';
+
+import {SettingsDialogComponent, SettingsDialogData} from './settings-dialog/settings-dialog.component';
 
 @Component({
   selector: 'fci-project',
@@ -28,7 +30,8 @@ export class ProjectComponent implements OnInit {
 
   constructor(
       private readonly dataService: DataService,
-      private readonly route: ActivatedRoute) {}
+      private readonly route: ActivatedRoute,
+      private readonly dialog: MatDialog) {}
 
   ngOnInit() {
     this.route.paramMap
@@ -52,6 +55,16 @@ export class ProjectComponent implements OnInit {
           // Need to re-render rows now that new data is added.
           this.table.renderRows();
         });
+  }
+
+  openSettingsDialog() {
+    const dialogRef =
+        this.dialog.open<SettingsDialogComponent, SettingsDialogData>(
+            SettingsDialogComponent, {
+              panelClass: 'fci-dialog',
+              width: '1028px',
+              data: {project: this.project},
+            });
   }
 
   private updateBreadcrumbs(projectName: string) {

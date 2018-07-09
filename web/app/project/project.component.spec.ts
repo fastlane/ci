@@ -3,7 +3,7 @@ import 'rxjs/add/operator/switchMap';
 import {Location} from '@angular/common';
 import {DebugElement} from '@angular/core';
 import {async, ComponentFixture, fakeAsync, flush, TestBed, tick} from '@angular/core/testing';
-import {MatCardModule, MatProgressSpinnerModule, MatTableModule} from '@angular/material';
+import {MatCardModule, MatDialog, MatIconModule, MatProgressSpinnerModule, MatTableModule} from '@angular/material';
 import {By} from '@angular/platform-browser';
 import {ActivatedRoute, convertToParamMap} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
@@ -22,6 +22,8 @@ import {SharedMaterialModule} from '../root/shared_material.module';
 import {DataService} from '../services/data.service';
 
 import {ProjectComponent} from './project.component';
+import {SettingsDialogComponent} from './settings-dialog/settings-dialog.component';
+import {SettingsDialogModule} from './settings-dialog/settings-dialog.modules';
 
 describe('ProjectComponent', () => {
   let component: ProjectComponent;
@@ -29,6 +31,7 @@ describe('ProjectComponent', () => {
   let dataService: jasmine.SpyObj<Partial<DataService>>;
   let projectSubject: Subject<Project>;
   let rebuildSummarySubject: Subject<BuildSummary>;
+  let dialog: jasmine.SpyObj<Partial<MatDialog>>;
 
   beforeEach(async(() => {
     projectSubject = new Subject<Project>();
@@ -39,13 +42,14 @@ describe('ProjectComponent', () => {
       rebuild: jasmine.createSpy().and.returnValue(
           rebuildSummarySubject.asObservable())
     };
+    dialog = {open: jasmine.createSpy()};
 
     TestBed
         .configureTestingModule({
           imports: [
             StatusIconModule, MomentModule, ToolbarModule, MatCardModule,
-            MatTableModule, MatProgressSpinnerModule,
-            RouterTestingModule.withRoutes([
+            MatTableModule, MatProgressSpinnerModule, SettingsDialogModule,
+            MatIconModule, RouterTestingModule.withRoutes([
               {
                 path: 'project/:projectId/build/:buildId',
                 component: DummyComponent
@@ -58,7 +62,8 @@ describe('ProjectComponent', () => {
               provide: ActivatedRoute,
               useValue:
                   {paramMap: Observable.of(convertToParamMap({id: '123'}))}
-            }
+            },
+            {provide: MatDialog, useValue: dialog}
           ],
         })
         .compileComponents();
@@ -141,6 +146,16 @@ describe('ProjectComponent', () => {
                 .queryAll(By.css('.fci-project-details .fci-loading-spinner'))
                 .length)
             .toBe(1);
+      });
+
+      it('should open settings dialog when settings gear is clicked', () => {
+        fixture.debugElement.query(By.css('.fci-settings-button'))
+            .nativeElement.click();
+        expect(dialog.open).toHaveBeenCalledWith(SettingsDialogComponent, {
+          panelClass: 'fci-dialog',
+          width: '1028px',
+          data: {project: this.project},
+        });
       });
     });
 
