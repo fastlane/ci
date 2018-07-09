@@ -8,6 +8,7 @@ require_relative "../../shared/models/project"
 require_relative "../../shared/models/user"
 require_relative "../../shared/models/provider_credential"
 require_relative "../../shared/logging_module"
+require_relative "../json_deserializers/json_trigger_deserializer"
 
 module FastlaneCI
   # Mixin for JobTrigger which is in an Array on Project
@@ -25,18 +26,10 @@ module FastlaneCI
 
     def self.map_enumerable_type(enumerable_property_name: nil, current_json_object: nil)
       if enumerable_property_name == :@job_triggers
-        return case current_json_object["type"]
-               when FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit]
-                 CommitJobTrigger.from_json!(current_json_object)
-               when FastlaneCI::JobTrigger::TRIGGER_TYPE[:pull_request]
-                 PullRequestJobTrigger.from_json!(current_json_object)
-               when FastlaneCI::JobTrigger::TRIGGER_TYPE[:nightly]
-                 NightlyJobTrigger.from_json!(current_json_object)
-               when FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual]
-                 ManualJobTrigger.from_json!(current_json_object)
-               else
-                 raise "Unable to parse JobTrigger type: #{type} from #{current_json_object}"
-               end
+        return JSONTriggerDeserializer.new.deserialize!(
+          type: current_json_object["type"],
+          object: current_json_object
+        )
       end
     end
 
@@ -130,21 +123,13 @@ module FastlaneCI
     end
 
     def job_triggers_from_hash_array(job_trigger_array: nil)
-      return job_trigger_array.map do |job_trigger_hash|
-        type = job_trigger_hash["type"]
+      deserializer = JSONTriggerDeserializer.new
 
-        case type
-        when FastlaneCI::JobTrigger::TRIGGER_TYPE[:commit]
-          CommitJobTrigger.from_json!(current_json_object)
-        when FastlaneCI::JobTrigger::TRIGGER_TYPE[:pull_request]
-          PullRequestJobTrigger.from_json!(current_json_object)
-        when FastlaneCI::JobTrigger::TRIGGER_TYPE[:nightly]
-          NightlyJobTrigger.from_json!(current_json_object)
-        when FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual]
-          ManualJobTrigger.from_json!(current_json_object)
-        else
-          raise "Unable to parse JobTrigger type: #{type} from #{current_json_object}"
-        end
+      return job_trigger_array.map do |job_trigger_hash|
+        deserializer.deserialize!(
+          type: job_trigger_hash["type"],
+          object: job_trigger_hash
+        )
       end
     end
 

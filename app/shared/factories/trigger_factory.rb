@@ -3,9 +3,7 @@
 require_relative "abstract_factory"
 
 module FastlaneCI
-  # TODO: Until we make a proper interface to attach JobTriggers to a Project, let's add a manual one for the
-  # selected branch.
-  # TODO: get default branch when there is no branch selected
+  # A concrete factory for returning `JobTrigger`s.
   class TriggerFactory < AbstractFactory
     def create(params:)
       branch = params[:branch].nil? ? "master" : params[:branch]
