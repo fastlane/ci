@@ -225,6 +225,9 @@ module FastlaneCI
       logger.debug("Searching all projects for commits with pending status that need a new build")
       # For each project, rerun all builds with the status of "pending"
       projects.each do |project|
+        # Don't enqueue builds for the open pull requests if we don't have a pull request trigger defined for it
+        next if project.find_triggers_of_type(trigger_type: :pull_request).first.nil?
+
         pending_build_shas_needing_rebuilds = Services.build_service.pending_build_shas_needing_rebuilds(
           project: project
         )
@@ -284,6 +287,9 @@ module FastlaneCI
     def self.enqueue_builds_for_open_github_prs_with_no_status(projects: nil, github_service: nil)
       logger.debug("Searching for open PRs with no status and starting a build for them")
       projects.each do |project|
+        # Don't enqueue builds for the open pull requests if we don't have a pull request trigger defined for it
+        next if project.find_triggers_of_type(trigger_type: :pull_request).first.nil?
+
         # TODO: generalize this sort of thing
         credential_type = project.repo_config.provider_credential_type_needed
 
