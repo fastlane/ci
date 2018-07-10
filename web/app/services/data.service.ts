@@ -16,6 +16,7 @@ const HOSTNAME = '/data';
 
 export interface AddProjectRequest {
   lane: string;
+  //platform: string;
   repo_org: string;
   repo_name: string;
   branch: string;
