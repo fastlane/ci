@@ -23,7 +23,7 @@ module FastlaneCI::Agent
       Dir.chdir("repo")
 
       sh("git checkout #{git_sha}")
-      
+
       sh("gem install bundler --no-doc")
       sh("bundle install --deployment")
     end
