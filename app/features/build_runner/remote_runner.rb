@@ -76,7 +76,7 @@ module FastlaneCI
 
       start_time = Time.now.utc
       begin
-        responses = Agent::Client.new("localhost").request_run_fastlane(
+        responses = Agent::Client.new("207.254.45.125").request_run_fastlane(
           "bundle", "exec", "fastlane", project.platform, project.lane, env: env
         )
         responses.each do |response|
