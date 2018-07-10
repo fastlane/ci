@@ -9,7 +9,7 @@ describe FastlaneCI::SetupJSONController do
     header("Authorization", bearer_token)
   end
 
-  describe "POST /data/setup", now: true do
+  describe "POST /data/setup" do
     describe "Successful onboarding" do
       it "works as expected and all values are stored locally" do
         email_entry = "email_entry"
@@ -124,6 +124,73 @@ describe FastlaneCI::SetupJSONController do
             expect(last_response.status).to eq(400)
             expect(json["message"]).to eq("Token should include \"repo\" scope, currently it's in empty scope.")
             expect(json["key"]).to eq("Onboarding.Token.MissingScope")
+          end
+        end
+
+        describe "ci-config repo URL" do
+          before do
+            allow(FastlaneCI::GitHubService).to receive(:token_scope_validation_error).and_return(nil)
+          end
+
+          it "returns an error if the URL doesn't start with https://" do
+            post("/data/setup", {
+              encryption_key: "encryption_key",
+              bot_account: {
+                token: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                password: "password"
+              },
+              config_repo: "git://invalid.url",
+              initial_onboarding_token: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }.to_json)
+
+            expect(last_response.status).to eq(400)
+            expect(json["message"]).to eq("The config repo URL has to start with https://")
+            expect(json["key"]).to eq("Onboarding.ConfigRepo.NoHTTPs")
+          end
+
+          it "returns an error if the ci-config repo can't be cloned" do
+            email_entry = "email_entry"
+            expect(email_entry).to receive(:primary).and_return(true)
+            expect(email_entry).to receive(:email).and_return("email@email.com")
+
+            expect(FastlaneCI::Services.onboarding_user_client).to receive(:emails).and_return([email_entry])
+            expect(FastlaneCI::Services.configuration_repository_service).to receive(:setup_private_configuration_repo).and_return(nil)
+            expect(FastlaneCI::Services.onboarding_service).to receive(:clone_remote_repository_locally).and_raise("Failed to clone")
+            allow(FastlaneCI::Services).to receive(:reset_services!).and_return(nil) # we don't want this, as we stub all the things
+            expect(FastlaneCI::GitHubService).to receive(:token_scope_validation_error).and_return(nil).twice
+
+            keys_writer = "keys_writer"
+            expect(keys_writer).to receive(:write!).and_return(nil).twice
+
+            expected_parameters = {
+              path: "/Users/fkrause/.fastlane/ci/.keys",
+              locals: {
+                ci_base_url: "http://localhost:8080",
+                encryption_key: "encryption_key",
+                ci_user_password: "password",
+                ci_user_api_token: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                repo_url: "https://github.com/fastlane/ci-config",
+                initial_onboarding_user_api_token: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            }
+
+            # TODO: update `with`
+            allow(FastlaneCI::KeysWriter).to receive(:new).and_return(keys_writer)
+            # allow(FastlaneCI::KeysWriter).to receive(:new).with(expected_parameters).and_return(keys_writer)
+
+            post("/data/setup", {
+              encryption_key: "encryption_key",
+              bot_account: {
+                token: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                password: "password"
+              },
+              config_repo: "https://github.com/fastlane/ci-config",
+              initial_onboarding_token: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }.to_json)
+
+            expect(last_response.status).to eq(400)
+            expect(json["message"]).to eq("Failed to clone the ci-config repo, please make sure the bot has access to it")
+            expect(json["key"]).to eq("Onboarding.ConfigRepo.NoAccess")
           end
         end
       end

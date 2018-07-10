@@ -20,7 +20,7 @@ module FastlaneCI
       encryption_key = params["encryption_key"]
       bot_token = params["bot_account"]["token"]
       bot_password = params["bot_account"]["password"] # TODO: What do we need this for
-      config_repo = params["config_repo"]
+      config_repo = params["config_repo"].to_s
       initial_onboarding_token = params["initial_onboarding_token"]
 
       missing_parameters = {
@@ -57,7 +57,7 @@ module FastlaneCI
       dot_keys_values[:encryption_key] = encryption_key
 
       # Step: Validate repo URL
-      # TODO: What do we want to validate here?
+      validate_repo_url!(config_repo)
       dot_keys_values[:repo_url] = config_repo
 
       # The `.write_keys_file!` resets all services we already have running
@@ -69,8 +69,34 @@ module FastlaneCI
       # After validating all the inputs, as well as storing all the inputs
       # using the `dot_keys_variable_service` we can finally launch all
       # the other services we need
-      Services.configuration_repository_service.setup_private_configuration_repo
-      Services.onboarding_service.clone_remote_repository_locally
+      begin
+        Services.configuration_repository_service.setup_private_configuration_repo
+
+        # TODO: Right now this is a blocking HTTP call
+        # as we clone the repo as part of it
+        # We should replace this with a simple check if we have access
+        # and clone async and have a check API to wait for the clone
+        # to be finished
+        Services.onboarding_service.clone_remote_repository_locally
+      rescue StandardError => ex
+        # Onboarding not successful, let's reset the dot files again
+        Services.dot_keys_variable_service.write_keys_file!(locals: {
+          ci_base_url: nil,
+          encryption_key: nil,
+          ci_user_password: nil,
+          ci_user_api_token: nil,
+          repo_url: nil,
+          initial_onboarding_user_api_token: nil
+        })
+
+        logger.error(ex)
+
+        # Return an error message to the user
+        json_error!(
+          error_message: "Failed to clone the ci-config repo, please make sure the bot has access to it",
+          error_key: "Onboarding.ConfigRepo.NoAccess"
+        )
+      end
       Launch.start_github_workers
 
       return json({})
@@ -79,6 +105,8 @@ module FastlaneCI
     #####################################################
     # @!group Input validation
     #####################################################
+
+    private
 
     def validate_api_token_correct!(api_token)
       if api_token.length != 40
@@ -111,6 +139,19 @@ module FastlaneCI
           error_key: "Onboarding.EncryptionKey.TooShort"
         )
       end
+    end
+
+    def validate_repo_url!(repo_url)
+      # We only allow https:// based git repos for now
+      unless repo_url.downcase.start_with?("https://")
+        json_error!(
+          error_message: "The config repo URL has to start with https://",
+          error_key: "Onboarding.ConfigRepo.NoHTTPs"
+        )
+      end
+
+      # We don't have to check if we have permission, as we'll try to
+      # clone the repo as part of `Services.onboarding_service.clone_remote_repository_locally`
     end
   end
 end
