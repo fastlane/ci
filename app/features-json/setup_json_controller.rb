@@ -9,11 +9,18 @@ module FastlaneCI
       return json(Services.onboarding_service.correct_setup?)
     end
 
-    # TODO: we need to protect this API endpoint
-    # one the onboarding user flow, we don't have any accounts yet
-    # however, we need to prohibit sending a POST request to this API endpoint
-    # after CI was already set up
     post HOME.to_s, authenticate: false do
+      # Before doing **anything** we have to make sure the server wasn't previously
+      # set up already. To do so, we'll check for an existing dot files config
+      if Services.onboarding_service.correct_setup?
+        # Well, the set up is running, so somebody was trying to overwrite the
+        # setup. Not something we'll tolerate
+        json_error!(
+          error_message: "fastlane.ci already set up, you can't overwrite the existing configuration",
+          error_key: "Onboarding"
+        )
+      end
+
       # we set this as default so that we don't need duplicate code for error detection
       params["bot_account"] ||= {}
 

@@ -11,6 +11,10 @@ describe FastlaneCI::SetupJSONController do
 
   describe "POST /data/setup" do
     describe "Successful onboarding" do
+      before do
+        expect(FastlaneCI::Services.onboarding_service).to receive(:correct_setup?).and_return(false)
+      end
+
       it "works as expected and all values are stored locally" do
         email_entry = "email_entry"
         expect(email_entry).to receive(:primary).and_return(true)
@@ -59,7 +63,23 @@ describe FastlaneCI::SetupJSONController do
     end
 
     describe "Error cases" do
+      describe "Already setup" do
+        it "should fail immediately if a ci-config repo is already successfully set up on this machine" do
+          expect(FastlaneCI::Services.onboarding_service).to receive(:correct_setup?).and_return(true)
+
+          post("/data/setup")
+
+          expect(last_response.status).to eq(400)
+          expect(json["message"]).to eq("fastlane.ci already set up, you can't overwrite the existing configuration")
+          expect(json["key"]).to eq("Onboarding")
+        end
+      end
+
       describe "Invalid inputs" do
+        before do
+          expect(FastlaneCI::Services.onboarding_service).to receive(:correct_setup?).and_return(false)
+        end
+
         it "Missing parameters" do
           post("/data/setup")
 
@@ -127,7 +147,7 @@ describe FastlaneCI::SetupJSONController do
           end
         end
 
-        describe "ci-config repo URL" do
+        describe "Invalid ci-config repo URL" do
           before do
             allow(FastlaneCI::GitHubService).to receive(:token_scope_validation_error).and_return(nil)
           end
@@ -149,15 +169,8 @@ describe FastlaneCI::SetupJSONController do
           end
 
           it "returns an error if the ci-config repo can't be cloned" do
-            email_entry = "email_entry"
-            expect(email_entry).to receive(:primary).and_return(true)
-            expect(email_entry).to receive(:email).and_return("email@email.com")
-
-            expect(FastlaneCI::Services.onboarding_user_client).to receive(:emails).and_return([email_entry])
-            expect(FastlaneCI::Services.configuration_repository_service).to receive(:setup_private_configuration_repo).and_return(nil)
-            expect(FastlaneCI::Services.onboarding_service).to receive(:clone_remote_repository_locally).and_raise("Failed to clone")
             allow(FastlaneCI::Services).to receive(:reset_services!).and_return(nil) # we don't want this, as we stub all the things
-            expect(FastlaneCI::GitHubService).to receive(:token_scope_validation_error).and_return(nil).twice
+            expect(FastlaneCI::Services.configuration_repository_service).to receive(:setup_private_configuration_repo).and_return(nil)
 
             keys_writer = "keys_writer"
             expect(keys_writer).to receive(:write!).and_return(nil).twice
@@ -174,9 +187,7 @@ describe FastlaneCI::SetupJSONController do
               }
             }
 
-            # TODO: update `with`
-            allow(FastlaneCI::KeysWriter).to receive(:new).and_return(keys_writer)
-            # allow(FastlaneCI::KeysWriter).to receive(:new).with(expected_parameters).and_return(keys_writer)
+            allow(FastlaneCI::KeysWriter).to receive(:new).with(expected_parameters).and_return(keys_writer)
 
             post("/data/setup", {
               encryption_key: "encryption_key",
@@ -188,6 +199,7 @@ describe FastlaneCI::SetupJSONController do
               initial_onboarding_token: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
             }.to_json)
 
+            # Cloning the repo fails because we block the internet connection when running tests
             expect(last_response.status).to eq(400)
             expect(json["message"]).to eq("Failed to clone the ci-config repo, please make sure the bot has access to it")
             expect(json["key"]).to eq("Onboarding.ConfigRepo.NoAccess")
