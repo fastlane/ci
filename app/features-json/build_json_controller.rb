@@ -9,6 +9,10 @@ module FastlaneCI
 
     use(FastlaneCI::BuildWebsocketBackend)
 
+    def self.build_url(project_id:, build_number:)
+      return "/project/#{project_id}/build/#{build_number}"
+    end
+
     get "#{HOME}/:build_number" do |project_id, build_number|
       build_view_model = BuildViewModel.new(build: current_build)
 
