@@ -34,7 +34,7 @@ describe FastlaneCI::SetupJSONController do
         expect(keys_writer).to receive(:write!).and_return(nil)
 
         expected_parameters = {
-          path: "/Users/fkrause/.fastlane/ci/.keys",
+          path: "#{ENV['HOME']}/.fastlane/ci/.keys",
           locals: {
             ci_base_url: "http://localhost:8080",
             encryption_key: "encryption_key",
@@ -176,7 +176,7 @@ describe FastlaneCI::SetupJSONController do
             expect(keys_writer).to receive(:write!).and_return(nil).twice
 
             expected_parameters = {
-              path: "/Users/fkrause/.fastlane/ci/.keys",
+              path: "#{ENV['HOME']}/.fastlane/ci/.keys",
               locals: {
                 ci_base_url: "http://localhost:8080",
                 encryption_key: "encryption_key",
