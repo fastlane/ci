@@ -36,7 +36,7 @@ describe FastlaneCI::SetupJSONController do
         expected_parameters = {
           path: "#{ENV['HOME']}/.fastlane/ci/.keys",
           locals: {
-            ci_base_url: "http://localhost:8080",
+            ci_base_url: FastlaneCI.dot_keys.ci_base_url,
             encryption_key: "encryption_key",
             ci_user_password: "password",
             ci_user_api_token: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -178,7 +178,7 @@ describe FastlaneCI::SetupJSONController do
             expected_parameters = {
               path: "#{ENV['HOME']}/.fastlane/ci/.keys",
               locals: {
-                ci_base_url: "http://localhost:8080",
+                ci_base_url: FastlaneCI.dot_keys.ci_base_url,
                 encryption_key: "encryption_key",
                 ci_user_password: "password",
                 ci_user_api_token: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
