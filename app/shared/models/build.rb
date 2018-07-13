@@ -11,6 +11,7 @@ module FastlaneCI
       :missing_fastfile,
       :failure,
       :installing_xcode,
+      :running,
       :ci_problem
     ]
 
@@ -107,6 +108,13 @@ module FastlaneCI
 
     def link_to_remote_commit
       project.repo_config.link_to_remote_commit(sha)
+    end
+
+    # The branch name associated with the `Build`.
+    #
+    # @return [String]
+    def branch
+      return git_fork_config.branch
     end
 
     # This method will return the branch name (if available)

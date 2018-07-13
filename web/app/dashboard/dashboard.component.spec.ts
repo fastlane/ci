@@ -1,5 +1,6 @@
 import 'rxjs/add/observable/of';
 
+import {DebugElement} from '@angular/core';
 import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {MatDialog, MatDialogModule} from '@angular/material';
 import {By} from '@angular/platform-browser';
@@ -9,18 +10,20 @@ import {MomentModule} from 'ngx-moment';
 import {Observable} from 'rxjs/Observable';
 import {Subject} from 'rxjs/Subject';
 
-import {CommonComponentsModule} from '../common/components/common-components.module';
+import {StatusIconModule} from '../common/components/status-icon/status-icon.module';
 import {BuildStatus} from '../common/constants';
+import {getAllElements, getElement, getElementText} from '../common/test_helpers/element_helper_functions';
 import {mockProjectSummary, mockProjectSummaryList} from '../common/test_helpers/mock_project_data';
 import {ProjectSummary} from '../models/project_summary';
+import {SharedMaterialModule} from '../root/shared_material.module';
 import {DataService} from '../services/data.service';
-import {SharedMaterialModule} from '../shared_material.module';
 
 import {DashboardComponent} from './dashboard.component';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
   let fixture: ComponentFixture<DashboardComponent>;
+  let fixtureEl: DebugElement;
   let dataService: jasmine.SpyObj<Partial<DataService>>;
   let dialog: jasmine.SpyObj<Partial<MatDialog>>;
   let projectListSubject: Subject<ProjectSummary[]>;
@@ -38,8 +41,7 @@ describe('DashboardComponent', () => {
 
     dialog = {
       open: jasmine.createSpy().and.returnValue({
-        componentInstance:
-            {projectAdded: projectAddedSubject.asObservable()}
+        componentInstance: {projectAdded: projectAddedSubject.asObservable()}
       })
     };
 
@@ -47,7 +49,7 @@ describe('DashboardComponent', () => {
         .configureTestingModule({
           imports: [
             SharedMaterialModule,
-            CommonComponentsModule,
+            StatusIconModule,
             MomentModule,
             RouterModule,
             RouterTestingModule,
@@ -63,6 +65,7 @@ describe('DashboardComponent', () => {
         .compileComponents();
 
     fixture = TestBed.createComponent(DashboardComponent);
+    fixtureEl = fixture.debugElement;
     component = fixture.componentInstance;
   });
 
@@ -90,21 +93,20 @@ describe('DashboardComponent', () => {
     });
 
     it('should add new project to project table', () => {
-      let tableRowsEl = fixture.debugElement.queryAll(By.css('.mat-row'));
+      let tableRowsEl = getAllElements(fixtureEl, '.mat-row');
       expect(tableRowsEl.length).toBe(4);
 
       component.openAddProjectDialog();
       projectAddedSubject.next(mockProjectSummary);
       fixture.detectChanges();
 
-      tableRowsEl = fixture.debugElement.queryAll(By.css('.mat-row'));
+      tableRowsEl = getAllElements(fixtureEl, '.mat-row');
       expect(tableRowsEl.length).toBe(5);
-      expect(tableRowsEl[4].nativeElement.innerText)
-          .toContain('the coolest project');
+      expect(getElementText(tableRowsEl[4])).toContain('the coolest project');
     });
 
     it('should open add project dialog when new project is clicked', () => {
-      fixture.debugElement.query(By.css('.fci-dashboard-welcome button'))
+      getElement(fixtureEl, '.fci-dashboard-welcome button')
           .nativeElement.click();
       expect(dialog.open).toHaveBeenCalled();
     });

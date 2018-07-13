@@ -13,7 +13,7 @@ export class BuildLogWebsocketService {
   private readonly API_ROOT: string;
 
   constructor(@Inject(DOCUMENT) document: Document) {
-    this.API_ROOT = `ws://${document.location.host}/data`;
+    this.API_ROOT = `ws://${document.location.host}/`;
   }
 
   connect(projectId: string, buildNumber: number):
@@ -36,7 +36,7 @@ export class BuildLogWebsocketService {
   }
 
   private createSocketUrl(projectId: string, buildNumber: number) {
-    return `${this.API_ROOT}/projects/${projectId}/builds/${
-        buildNumber}/log.ws`;
+    return `${this.API_ROOT}?project_id=${projectId}&build_number=${
+        buildNumber}`;
   }
 }

@@ -6,6 +6,7 @@ import {By} from '@angular/platform-browser';
 import {Router} from '@angular/router';
 import {Subject} from 'rxjs/Subject';
 
+import {expectElementNotToExist, expectElementToExist, getElement, getElementText} from '../common/test_helpers/element_helper_functions';
 import {mockLoginResponse} from '../common/test_helpers/mock_login_data';
 import {AuthService, LoginResponse} from '../services/auth.service';
 
@@ -13,6 +14,7 @@ import {LoginComponent} from './login.component';
 
 describe('LoginComponent', () => {
   let fixture: ComponentFixture<LoginComponent>;
+  let fixtureEl: DebugElement;
   let authService: jasmine.SpyObj<Partial<AuthService>>;
   let router: jasmine.SpyObj<Partial<Router>>;
   let loginButtonEl: DebugElement;
@@ -23,7 +25,8 @@ describe('LoginComponent', () => {
   beforeEach(async(() => {
     loginSubject = new Subject<LoginResponse>();
     authService = {
-      login: jasmine.createSpy().and.returnValue(loginSubject.asObservable())
+      login: jasmine.createSpy().and.returnValue(loginSubject.asObservable()),
+      isLoggedIn: jasmine.createSpy().and.returnValue(false)
     };
     router = {navigate: jasmine.createSpy()};
 
@@ -42,48 +45,100 @@ describe('LoginComponent', () => {
         .compileComponents();
 
     fixture = TestBed.createComponent(LoginComponent);
-    fixture.detectChanges();
-    loginButtonEl = fixture.debugElement.query(By.css('button'));
-    emailEl = fixture.debugElement.query(By.css('input[type=email]'));
-    passwordEl = fixture.debugElement.query(By.css('input[type=password]'));
+    fixtureEl = fixture.debugElement;
+    loginButtonEl = getElement(fixtureEl, 'button');
+    emailEl = getElement(fixtureEl, 'input[type=email]');
+    passwordEl = getElement(fixtureEl, 'input[type=password]');
   }));
 
-  it('should call authService to login when login is clicked', () => {
-    // Set Input values
-    emailEl.nativeElement.value = 'tacoRocat@fastlane.com';
-    passwordEl.nativeElement.value = 'whermeydogsat';
+  describe('OnInit', () => {
+    it('should route to home page if already logged in', () => {
+      authService.isLoggedIn.and.returnValue(true);
+      fixture.detectChanges();
 
-    // Dispatch events to notify framework of input value changes
-    emailEl.nativeElement.dispatchEvent(new Event('input'));
-    passwordEl.nativeElement.dispatchEvent(new Event('input'));
-    fixture.detectChanges();  // detect these events and update the component
+      expect(router.navigate).toHaveBeenCalledWith(['/']);
+    });
 
-    loginButtonEl.triggerEventHandler('click', null);
+    it('should not route to home page if not logged in', () => {
+      authService.isLoggedIn.and.returnValue(false);
+      fixture.detectChanges();
 
-    expect(authService.login).toHaveBeenCalledWith({
-      email: 'tacoRocat@fastlane.com',
-      password: 'whermeydogsat'
+      expect(router.navigate).not.toHaveBeenCalledWith(['/']);
     });
   });
 
-  it('should route to home page when login is complete', () => {
-    loginButtonEl.triggerEventHandler('click', null);
-    loginSubject.next(mockLoginResponse);
+  describe('after OnInit', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+    });
 
-    expect(router.navigate).toHaveBeenCalledWith(['/']);
-  });
+    it('should call authService to login when login is clicked', () => {
+      // Set Input values
+      emailEl.nativeElement.value = 'tacoRocat@fastlane.com';
+      passwordEl.nativeElement.value = 'whermeydogsat';
 
-  it('should disable login button while logging in', () => {
-    expect(loginButtonEl.nativeElement.disabled).toBe(false);
+      // Dispatch events to notify framework of input value changes
+      emailEl.nativeElement.dispatchEvent(new Event('input'));
+      passwordEl.nativeElement.dispatchEvent(new Event('input'));
+      fixture.detectChanges();  // detect these events and update the component
 
-    loginButtonEl.triggerEventHandler('click', null);
-    fixture.detectChanges();
+      loginButtonEl.triggerEventHandler('click', null);
 
-    expect(loginButtonEl.nativeElement.disabled).toBe(true);
+      expect(authService.login).toHaveBeenCalledWith({
+        email: 'tacoRocat@fastlane.com',
+        password: 'whermeydogsat'
+      });
+    });
 
-    loginSubject.next(mockLoginResponse);
-    fixture.detectChanges();
+    it('should route to home page when login is complete', () => {
+      loginButtonEl.triggerEventHandler('click', null);
+      loginSubject.next(mockLoginResponse);
 
-    expect(loginButtonEl.nativeElement.disabled).toBe(false);
+      expect(router.navigate).toHaveBeenCalledWith(['/']);
+    });
+
+    it('should disable login button while logging in', () => {
+      expect(loginButtonEl.nativeElement.disabled).toBe(false);
+
+      loginButtonEl.triggerEventHandler('click', null);
+      fixture.detectChanges();
+
+      expect(loginButtonEl.nativeElement.disabled).toBe(true);
+
+      loginSubject.next(mockLoginResponse);
+      fixture.detectChanges();
+
+      expect(loginButtonEl.nativeElement.disabled).toBe(false);
+    });
+
+    it('should re-enable login button after a failed login', () => {
+      expect(loginButtonEl.nativeElement.disabled).toBe(false);
+
+      loginButtonEl.triggerEventHandler('click', null);
+      fixture.detectChanges();
+
+      expect(loginButtonEl.nativeElement.disabled).toBe(true);
+
+      loginSubject.error(null);
+      fixture.detectChanges();
+
+      expect(loginButtonEl.nativeElement.disabled).toBe(false);
+    });
+
+    it('should show an error message after a failed login attempt', () => {
+      expectElementNotToExist(fixtureEl, '.form-error');
+
+      loginButtonEl.triggerEventHandler('click', null);
+      fixture.detectChanges();
+
+      expectElementNotToExist(fixtureEl, '.form-error');
+
+      loginSubject.error(null);
+      fixture.detectChanges();
+
+      expectElementToExist(fixtureEl, '.form-error');
+      expect(getElementText(fixtureEl, '.form-error'))
+          .toBe('Could not log you in. Please try again.');
+    });
   });
 });

@@ -37,4 +37,22 @@ module HelperFunctions
       initial_onboarding_user_api_token: "initial_onboarding_user_api_token"
     }
   end
+
+  # A notification service to use for tests.
+  #
+  # @return [NotificationService]
+  def notification_service
+    FastlaneCI::NotificationService.new(
+      notification_data_source: FastlaneCI::JSONNotificationDataSource.create(
+        fixture_path
+      )
+    )
+  end
+
+  def expect_json_error(message:, key:, status: nil)
+    expect(last_response.status).to eq(status) if status
+
+    expect(json["message"]).to eq(message)
+    expect(json["key"]).to eq(key)
+  end
 end

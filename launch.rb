@@ -134,7 +134,6 @@ module FastlaneCI
         FastlaneCI::FastlaneApp.use(FastlaneCI::ConfigurationController)
         FastlaneCI::FastlaneApp.use(FastlaneCI::DashboardController)
         FastlaneCI::FastlaneApp.use(FastlaneCI::NotificationsController)
-        FastlaneCI::FastlaneApp.use(FastlaneCI::OnboardingController)
         FastlaneCI::FastlaneApp.use(FastlaneCI::ProviderCredentialsController)
         FastlaneCI::FastlaneApp.use(FastlaneCI::UsersController)
         FastlaneCI::FastlaneApp.use(FastlaneCI::EnvironmentVariablesController)
@@ -142,19 +141,28 @@ module FastlaneCI
         FastlaneCI::FastlaneApp.use(FastlaneCI::AppleIDController)
       end
 
-      # TODO: Only load this with ERB_CLIENT env once Web app has login support
+      # TODO: Only load this with ERB_CLIENT env once Web app has login/onboarding support
       FastlaneCI::FastlaneApp.use(FastlaneCI::LoginController)
+      FastlaneCI::FastlaneApp.use(FastlaneCI::OnboardingController)
 
       # Load JSON controllers
       require_relative "app/features-json/project_json_controller"
       require_relative "app/features-json/repos_json_controller"
       require_relative "app/features-json/login_json_controller"
+      require_relative "app/features-json/user_json_controller"
       require_relative "app/features-json/build_json_controller"
+      require_relative "app/features-json/artifact_json_controller"
+      require_relative "app/features-json/setup_json_controller"
+      require_relative "app/features-json/setting_json_controller"
 
       FastlaneCI::FastlaneApp.use(FastlaneCI::LoginJSONController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::ProjectJSONController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::RepositoryJSONController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::BuildJSONController)
+      FastlaneCI::FastlaneApp.use(FastlaneCI::ArtifactJSONController)
+      FastlaneCI::FastlaneApp.use(FastlaneCI::SetupJSONController)
+      FastlaneCI::FastlaneApp.use(FastlaneCI::SettingJSONController)
+      FastlaneCI::FastlaneApp.use(FastlaneCI::UserJSONController)
     end
 
     def self.start_github_workers
@@ -217,6 +225,9 @@ module FastlaneCI
       logger.debug("Searching all projects for commits with pending status that need a new build")
       # For each project, rerun all builds with the status of "pending"
       projects.each do |project|
+        # Don't enqueue builds for the open pull requests if we don't have a pull request trigger defined for it
+        next if project.find_triggers_of_type(trigger_type: :pull_request).first.nil?
+
         pending_build_shas_needing_rebuilds = Services.build_service.pending_build_shas_needing_rebuilds(
           project: project
         )
@@ -252,6 +263,8 @@ module FastlaneCI
             ref: matching_open_pr.git_ref
           )
 
+          # TODO: should make sure we don't already have a checkout, if we do, we need to adjust
+          # the local_build_folder for the BuildRunner
           build_runner = FastlaneBuildRunner.new(
             project: project,
             sha: sha,
@@ -260,8 +273,9 @@ module FastlaneCI
             # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
             work_queue: FastlaneCI::GitRepo.git_action_queue,
             git_fork_config: git_fork_config,
-            trigger: project.find_triggers_of_type(trigger_type: :commit).first
+            trigger: project.find_triggers_of_type(trigger_type: :pull_request).first
           )
+
           build_runner.setup(parameters: nil)
           Services.build_runner_service.add_build_runner(build_runner: build_runner)
         end
@@ -273,6 +287,9 @@ module FastlaneCI
     def self.enqueue_builds_for_open_github_prs_with_no_status(projects: nil, github_service: nil)
       logger.debug("Searching for open PRs with no status and starting a build for them")
       projects.each do |project|
+        # Don't enqueue builds for the open pull requests if we don't have a pull request trigger defined for it
+        next if project.find_triggers_of_type(trigger_type: :pull_request).first.nil?
+
         # TODO: generalize this sort of thing
         credential_type = project.repo_config.provider_credential_type_needed
 
@@ -313,8 +330,9 @@ module FastlaneCI
             # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
             work_queue: FastlaneCI::GitRepo.git_action_queue,
             git_fork_config: git_fork_config,
-            trigger: project.find_triggers_of_type(trigger_type: :commit).first
+            trigger: project.find_triggers_of_type(trigger_type: :pull_request).first
           )
+
           build_runner.setup(parameters: nil)
           Services.build_runner_service.add_build_runner(build_runner: build_runner)
         end

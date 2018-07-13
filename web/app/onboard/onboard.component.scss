@@ -1,0 +1,80 @@
+@import "../../shared/layout";
+.fci-onboard-header {
+    background-color: #E1BEE7;
+    .fci-onboard-welcome {
+        padding: 75px 0 4px 0;
+        .fci-onboard-title {
+            font-family: 'Google Sans', sans-serif;
+            color: rgba(0, 0, 0, 0.87);
+            font-size: 32px;
+            font-weight: 500;
+            line-height: 40px;
+            margin-bottom: 12px;
+        }
+        .fci-onboard-subtitle {
+            color: rgba(0, 0, 0, 0.54);
+            font-size: 18px;
+            font-family: 'Google Sans', sans-serif;
+            line-height: 24px;
+        }
+        button {
+            margin-top: 25px;
+        }
+    }
+}
+
+.mat-stepper-vertical {
+    .fci-substep {
+        font-size: 14px;
+        color: #4a4a4a;
+        .fci-substep-label {
+            margin-bottom: 24px;
+            .fci-substep-letter {
+                color: #9b9b9b;
+                border: 1px solid #9b9b9b;
+                border-radius: 50%;
+                font-size: 12px;
+                margin-right: 16px;
+                padding: 4px 8px;
+            }
+        }
+        .fci-substep-content {
+            padding-left: 40px;
+        }
+    }
+    .fci-input-container {
+        padding-bottom: 24px;
+        .fci-username {
+            font-size: 16px;
+        }
+        .fci-input-status {
+            display: inline-block;
+            padding-left: 8px;
+            .mat-spinner,
+            .mat-icon {
+                vertical-align: middle;
+                display: inline-block;
+            }
+        }
+    }
+    p {
+        margin-top: 8px;
+        margin-bottom: 51px;
+        font-size: 14px;
+        color: #4a4a4a;
+    }
+    button:first-child {
+        margin-right: 8px;
+    }
+}
+
+.fci-github-token-scopes-image {
+    background: url(/assets/github_token_scopes.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+    height: 214px;
+    width: 595px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    margin-top: 16px;
+    margin-bottom: 32px;
+}

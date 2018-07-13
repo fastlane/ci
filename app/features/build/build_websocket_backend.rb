@@ -1,5 +1,6 @@
 require "faye/websocket"
 require_relative "../../shared/logging_module"
+require_relative "../build_runner/web_socket_build_runner_change_listener"
 
 Faye::WebSocket.load_adapter("thin")
 
@@ -24,16 +25,6 @@ module FastlaneCI
       self.websocket_clients = {}
     end
 
-    def fetch_build_details(event)
-      url = event.target.url
-      parameters = Rack::Utils.parse_query(url)
-
-      return {
-        project_id: parameters["project"],
-        build_number: parameters["build"].to_i
-      }
-    end
-
     def call(env)
       unless Faye::WebSocket.websocket?(env)
         # This is a regular HTTP call (no socket connection)
@@ -42,12 +33,14 @@ module FastlaneCI
       end
 
       ws = Faye::WebSocket.new(env, nil, { ping: KEEPALIVE_TIME })
+      web_socket_build_runner_change_listener = WebSocketBuildRunnerChangeListener.new(web_socket: ws)
+
       ws.on(:open) do |event|
         logger.debug([:open, ws.object_id])
 
-        url_details = fetch_build_details(event)
-        build_number = url_details[:build_number]
-        project_id = url_details[:project_id]
+        request_params = Rack::Request.new(env).params
+        build_number = request_params["build_number"].to_i
+        project_id = request_params["project_id"]
 
         websocket_clients[project_id] ||= {}
         websocket_clients[project_id][build_number] ||= []
@@ -61,12 +54,7 @@ module FastlaneCI
 
         # TODO: Think this through, do we properly add new listener, and notify them of line changes, etc.
         #       Also how does the "offboarding" of runners work once the tests are finished
-        current_build_runner.add_listener(proc do |row|
-          # TODO: Add auth check here, so a user isn't able to get the log from another build
-          unless ws.send(row.to_json)
-            logger.error("Something failed when sending the current row via a web socket connection")
-          end
-        end)
+        current_build_runner.add_build_change_listener(web_socket_build_runner_change_listener)
       end
 
       ws.on(:message) do |event|
@@ -77,11 +65,12 @@ module FastlaneCI
       ws.on(:close) do |event|
         logger.debug([:close, ws.object_id, event.code, event.reason])
 
-        url_details = fetch_build_details(event)
-        build_number = url_details[:build_number]
-        project_id = url_details[:project_id]
+        request_params = Rack::Request.new(env).params
+        build_number = request_params["build_number"].to_i
+        project_id = request_params["project_id"]
 
         websocket_clients[project_id][build_number].delete(ws)
+        web_socket_build_runner_change_listener.connection_closed
         ws = nil
       end
 

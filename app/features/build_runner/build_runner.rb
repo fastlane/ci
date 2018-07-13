@@ -41,8 +41,8 @@ module FastlaneCI
     # This is an array of hashes
     attr_accessor :all_build_output_log_rows
 
-    # All blocks listening to changes for this build
-    attr_accessor :build_change_observer_blocks
+    # All build change observers that are listening to changes for this build
+    attr_accessor :build_change_listeners
 
     # Work queue where builds should be run
     attr_reader :work_queue
@@ -50,11 +50,22 @@ module FastlaneCI
     # Array of env variables that were set, that we need to unset after the run
     attr_accessor :environment_variables_set
 
-    def initialize(project:, sha:, github_service:, notification_service:, work_queue:, trigger:, git_fork_config:)
+    # Folder where the code will be checked out to, and where the build will happen
+    attr_reader :local_build_folder
+
+    def initialize(
+      project:,
+      sha:,
+      github_service:,
+      notification_service:,
+      work_queue:,
+      trigger:,
+      git_fork_config:,
+      local_build_folder: nil
+    )
       if trigger.nil?
         raise "No trigger provided, this is probably caused by a build being triggered, " \
               "but then the project not having this particular build trigger associated"
-        # rubocop:enable Metrics/LineLength
       end
 
       if git_fork_config.nil?
@@ -67,9 +78,10 @@ module FastlaneCI
       @project = project
       @sha = sha
       @git_fork_config = git_fork_config
+      @local_build_folder = local_build_folder
 
       self.all_build_output_log_rows = []
-      self.build_change_observer_blocks = []
+      self.build_change_listeners = []
 
       # TODO: provider credential should determine what exact CodeHostingService gets instantiated
       @code_hosting_service = github_service
@@ -78,10 +90,11 @@ module FastlaneCI
 
       prepare_build_object(trigger: trigger)
 
+      local_folder = @local_build_folder || File.join(project.local_repo_path, "builds", sha)
       @repo = GitRepo.new(
         git_config: project.repo_config,
         provider_credential: github_service.provider_credential,
-        local_folder: File.join(project.local_repo_path, "builds", sha),
+        local_folder: local_folder,
         notification_service: notification_service,
         async_start: false
       )
@@ -201,6 +214,13 @@ module FastlaneCI
       @environment_variables_set = []
 
       # Set the CI specific Environment variables first
+      build_url = File.join(
+        Services.dot_keys_variable_service.keys.ci_base_url,
+        "projects",
+        project.id,
+        "builds",
+        current_build_number.to_s
+      )
 
       # We try to follow the existing formats
       # https://wiki.jenkins.io/display/JENKINS/Building+a+software+project
@@ -210,7 +230,8 @@ module FastlaneCI
         WORKSPACE: project.local_repo_path,
         GIT_URL: repo.git_config.git_url,
         GIT_SHA: current_build.sha,
-        BUILD_URL: "https://fastlane.ci", # TODO: actually build the URL, we don't know our own host, right?
+        BUILD_URL: build_url,
+        BUILD_ID: current_build_number.to_s,
         CI_NAME: "fastlane.ci",
         FASTLANE_CI: true,
         CI: true
@@ -365,15 +386,24 @@ module FastlaneCI
       all_build_output_log_rows << row
 
       # 2) Report back to all listeners, usually socket connections
-      build_change_observer_blocks.each do |current_block|
-        current_block.call(row)
+      listeners_done_listening = []
+      build_change_listeners.each do |current_listener|
+        if current_listener.done_listening?
+          listeners_done_listening << current_listener
+          next
+        end
+
+        current_listener.row_received(row)
       end
+
+      # remove any listeners that are done listening
+      self.build_change_listeners -= listeners_done_listening
     end
 
     # Add a listener to get real time updates on new rows (see `new_row`)
     # This is used for the socket connection to the user's browser
-    def add_listener(block)
-      build_change_observer_blocks << block
+    def add_build_change_listener(listener)
+      build_change_listeners << listener
     end
 
     def prepare_build_object(trigger:)

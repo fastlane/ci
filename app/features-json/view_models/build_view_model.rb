@@ -53,6 +53,9 @@ module FastlaneCI
     # @return [String] The git sha
     attr_reader :sha
 
+    # @return [Array] An array of artifacts associated with this build
+    attr_reader :artifacts
+
     def initialize(build:)
       raise "Incorrect object type. Expected Build, got #{build.class}" unless build.kind_of?(Build)
 
@@ -71,6 +74,28 @@ module FastlaneCI
       @branch = build.git_fork_config.branch
       @ref = build.git_fork_config.ref
       @sha = build.git_fork_config.sha
+
+      @artifacts = build.artifacts.collect do |current_artifact|
+        {
+          id: current_artifact.id,
+          type: current_artifact.type,
+          provider: current_artifact.provider.class_name
+        }
+      end
+
+      # artifacts e.g.
+      # [
+      #   {
+      #     "id": "4f15114a-25b2-4072-be56-dafa81b90821",
+      #     "type": "fastlane.log",
+      #     "provider": "FastlaneCI::LocalArtifactProvider"
+      #   },
+      #   {
+      #     "id": "9c8b9bc2-52b6-4e23-b815-83ee7307aada",
+      #     "type": "SCAN_DERIVED_DATA_PATH",
+      #     "provider": "FastlaneCI::LocalArtifactProvider"
+      #   }
+      # ]
     end
   end
 end

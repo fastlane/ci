@@ -1,14 +1,15 @@
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
-import {MatCardModule, MatTableModule} from '@angular/material';
+import {MatButtonModule, MatCardModule, MatIconModule, MatProgressSpinnerModule, MatTableModule} from '@angular/material';
 import {RouterModule} from '@angular/router';
 import {MomentModule} from 'ngx-moment';
 
-import {CommonComponentsModule} from '../common/components/common-components.module';
+import {StatusIconModule} from '../common/components/status-icon/status-icon.module';
 import {ToolbarModule} from '../common/components/toolbar/toolbar.module';
 import {DashboardComponent} from '../dashboard/dashboard.component';
 import {ProjectComponent} from '../project/project.component';
 import {DataService} from '../services/data.service';
+import {SettingsDialogModule} from './settings-dialog/settings-dialog.modules';
 
 @NgModule({
   declarations: [
@@ -19,11 +20,13 @@ import {DataService} from '../services/data.service';
   ],
   imports: [
     /** Angular Library Imports */
+    RouterModule,  // For routerLink directive
     CommonModule,
     /** Internal Imports */
-    CommonComponentsModule, ToolbarModule,
+    StatusIconModule, ToolbarModule, SettingsDialogModule,
     /** Angular Material Imports */
-    MatCardModule, MatTableModule,
+    MatCardModule, MatProgressSpinnerModule, MatTableModule, MatIconModule,
+    MatButtonModule, MatIconModule,
     /** Third-Party Module Imports */
     MomentModule,  // For Date relative time pipes
   ],

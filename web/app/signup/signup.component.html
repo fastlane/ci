@@ -1,0 +1,18 @@
+<form [formGroup]="form" fci-grid class="fci-signup-container">
+  <div fci-cell="12">
+    <h6>NOT WORKING - CURRENTLY IN DEVELOPMENT</h6>
+    <div class="fci-input-container">
+      <label>Token</label>
+      <input formControlName="token" type="text">
+      <span *ngIf="email">Email: {{email}}</span>
+    </div>
+    <div class="fci-input-container">
+      <label>Password</label>
+      <input formControlName="password" type="password">
+    </div>
+
+    <button mat-raised-button color="primary" disabled>Signup</button>
+
+    <span *ngIf="error" class="form-error">{{error}}</span>
+  </div>
+</form>

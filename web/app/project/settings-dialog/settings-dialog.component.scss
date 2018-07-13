@@ -1,0 +1,21 @@
+@import '../../common/components/master-detail-card/master-detail-card-shared-styles';
+.fci-detail-container {
+    h3 {
+        font-size: 20px;
+        color: rgba(0, 0, 0, 0.87);
+        font-weight: 500;
+        margin: 0 0 24px 0;
+    }
+    form {
+        display: flex;
+        flex-direction: column;
+        mat-form-field {
+            max-width: 300px;
+        }
+        .fci-button-container {
+            position: absolute;
+            right: 24px;
+            bottom: 24px;
+        }
+    }
+}

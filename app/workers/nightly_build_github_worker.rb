@@ -11,7 +11,7 @@ module FastlaneCI
     attr_reader :scheduler
     attr_reader :trigger_type
 
-    def initialize(provider_credential: nil, project: nil, notification_service:)
+    def initialize(provider_credential:, project:, notification_service:)
       @trigger_type = FastlaneCI::JobTrigger::TRIGGER_TYPE[:nightly]
       @scheduler = WorkerScheduler.new(cron_schedule: NIGHTLY_CRON_TIME)
       @notification_service = notification_service
@@ -24,7 +24,7 @@ module FastlaneCI
       )
     end
 
-    def work
+    def do_build
       logger.debug("Running nightly build for #{project.project_name} (#{repo_full_name})")
       # TODO: build_service could be injected instead of referenced like this
       build_service = FastlaneCI::Services.build_service
@@ -70,6 +70,12 @@ module FastlaneCI
         trigger: project.find_triggers_of_type(trigger_type: :nightly).first,
         notification_service: notification_service
       )
+    end
+
+    def work
+      self.busy = true
+      do_build
+      self.busy = false
     end
   end
 end

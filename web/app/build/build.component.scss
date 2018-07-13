@@ -11,14 +11,16 @@ $TOOLBAR_HEIGHT:80px;
         .fci-build-logs {
             flex: 1;
             padding: 8px;
-            color: #859900;
+            color: #93a1a1;
             background-color: #073642;
+            font-family: 'Google Sans Monospace', monospace;
             min-width: 926px;
         }
         .fci-build-header {
             margin-bottom: 16px;
             display: flex;
             align-items: center;
+            flex-shrink: 0;
             fci-status-icon {
                 width: 24px;
                 height: 24px;
@@ -35,12 +37,24 @@ $TOOLBAR_HEIGHT:80px;
     }
     .fci-right-container {
         padding-left: 16px;
-        .fci-build-details {
+        .fci-build-details,
+        .fci-artifacts {
             width: 296px;
+            margin-bottom: 25px;
             h5 {
                 margin-bottom: 0;
                 text-transform: uppercase;
             }
+            .fci-artifact {
+                font-size: 14px;
+                &:not(:last-child) {
+                    margin-bottom: 18px;
+                }
+            }
         }
     }
+}
+
+.fci-loading-spinner {
+    margin: 32px auto;
 }

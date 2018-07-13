@@ -3,7 +3,7 @@ import {mockProjectSummaryResponse} from '../common/test_helpers/mock_project_da
 
 import {ProjectSummary} from './project_summary';
 
-describe('Project Model', () => {
+describe('Project Summary Model', () => {
   it('should convert project response successfully', () => {
     const project = new ProjectSummary(mockProjectSummaryResponse);
 
