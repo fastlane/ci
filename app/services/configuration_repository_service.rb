@@ -37,9 +37,9 @@ module FastlaneCI
     #   iii. Creates the necessary remote configuration files as the bot user
     #
     def setup_private_configuration_repo
-      create_private_remote_configuration_repo
-      FastlaneCI::Services.collaborator_service.add_bot_user_as_collaborator(repo_shortform: repo_shortform)
-      create_remote_configuration_files
+      create_private_remote_configuration_repo!
+      FastlaneCI::Services.collaborator_service.add_bot_user_as_collaborator!(repo_shortform: repo_shortform)
+      create_remote_configuration_files!
     end
 
     # Returns `true` if the configuration repository is in proper format:
@@ -87,7 +87,7 @@ module FastlaneCI
 
     # Creates a remote repository if it does not already exist as the onboarding
     # user
-    def create_private_remote_configuration_repo
+    def create_private_remote_configuration_repo!
       logger.debug("Creating private remote configuration repository #{repo_shortform}.")
 
       github_action(onboarding_user_client) do |client|
@@ -98,7 +98,7 @@ module FastlaneCI
 
     # Creates the `users.json` and `projects.json` configuration files to the
     # remote configuration repository as the bot user
-    def create_remote_configuration_files
+    def create_remote_configuration_files!
       logger.debug("Creating remote configuration files `users.json` and `projects.json`")
       create_remote_json_file("users.json", json_string: serialized_users)
       create_remote_json_file("projects.json")

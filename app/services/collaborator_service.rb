@@ -27,10 +27,8 @@ module FastlaneCI
     # Adds the bot user as a collaborator to the GitHub repository corresponding to the given `repo_shortform`
     #
     # @return [Boolean] If the user was added successfully
-    def add_bot_user_as_collaborator(repo_shortform:)
-      already_exists = bot_user_collaborator_on_project?(repo_shortform: repo_shortform)
-
-      if already_exists
+    def add_bot_user_as_collaborator!(repo_shortform:)
+      if bot_user_collaborator_on_project?(repo_shortform: repo_shortform)
         logger.debug("Bot user is already a collaborator to #{repo_shortform}, not adding as collaborator.")
         return true
       end
@@ -40,7 +38,7 @@ module FastlaneCI
       invitation_id = invite_bot_user_to_repository!(repo_shortform: repo_shortform)
 
       if !invitation_id.nil?
-        return accept_invitation_to_repository_as_bot_user(
+        return accept_invitation_to_repository_as_bot_user!(
           repo_shortform: repo_shortform,
           invitation_id: invitation_id
         )
@@ -84,7 +82,7 @@ module FastlaneCI
     # @param  [String] repo_shortform: The name of the repository to accept the bot user's invitation to collaborate
     # @param  [Integer] invitation_id
     # @return [Boolean] `true` if the invitation was successfully accepted
-    def accept_invitation_to_repository_as_bot_user(repo_shortform:, invitation_id:)
+    def accept_invitation_to_repository_as_bot_user!(repo_shortform:, invitation_id:)
       logger.debug("Accepting invitation as bot user for #{repo_shortform}.")
 
       return github_action(bot_user_client) do |client|
