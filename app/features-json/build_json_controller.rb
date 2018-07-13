@@ -59,11 +59,8 @@ module FastlaneCI
         return
       end
 
-      branch_to_trigger = "master" # TODO: how/where do we get the default branch
-
       git_fork_config = GitForkConfig.new(
         sha: current_sha,
-        branch: branch_to_trigger,
         clone_url: project.repo_config.git_url
         # we don't need to pass a `ref`, as the sha and branch is all we need
       )
