@@ -116,7 +116,6 @@ module FastlaneCI
       save_build_status!
     end
 
-    # TODO: append these logs to a log file as artifacts
     def handle_log(log)
       logger.debug("handle log: #{log.inspect}")
       publish_to_all(log: log.to_h)
