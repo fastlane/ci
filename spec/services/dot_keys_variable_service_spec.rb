@@ -11,7 +11,6 @@ describe FastlaneCI::DotKeysVariableService do
   end
 
   before(:each) do
-    stub_environment_variables
     allow(Dir).to receive(:home).and_return(fake_home_path)
   end
 
@@ -42,7 +41,7 @@ describe FastlaneCI::DotKeysVariableService do
 
   describe "#all_dot_variables_non_nil?" do
     it "returns `true` if all environment variables are non-`nil`, and non-'empty'" do
-      # Environment variables are set in the `stub_environment_variables` method
+      # Environment variables are set in the `stub_dot_keys` method called in the `spec_helper.rb` file
       expect(subject.all_dot_variables_non_nil?).to be(true)
     end
 

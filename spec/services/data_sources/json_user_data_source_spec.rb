@@ -7,7 +7,6 @@ describe FastlaneCI::JSONUserDataSource do
     stub_file_io
     stub_git_repos
     stub_services
-    stub_environment_variables
   end
 
   let(:file_path) do
