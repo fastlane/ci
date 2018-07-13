@@ -3,7 +3,7 @@ require "app/features/build_runner/remote_runner"
 
 describe FastlaneCI::RemoteRunner do
   let(:service) { FastlaneCI::Agent::Service.new }
-  let(:grpc_client) { FastlaneCI::Agent::Client.new("localhost") }
+  let(:grpc_client) { FastlaneCI::Agent::Client.new("localhost", timeout: 0.5) }
 
   let(:remote_runner) do
     github_service = double("GithubService")
@@ -48,7 +48,7 @@ describe FastlaneCI::RemoteRunner do
   describe "completions" do
     before do
       # stub out the grpc request, so we immediatly go set `completed`
-      allow(grpc_client).to receive(:request_run_fastlane)
+      allow(grpc_client).to receive(:request_run_fastlane).and_return([])
     end
 
     it "sets completed when #start returns" do
@@ -66,21 +66,16 @@ describe FastlaneCI::RemoteRunner do
       expect(message_box).to eq(["complete"])
     end
 
-    it "calls completion blocks if a subscriber subscribes after the runner completes" do
+    it "subscribe returns with no subscriber if the runner is complete" do
       message_box = []
       remote_runner.start
 
       expect(remote_runner).to be_completed
-
-      remote_runner.on_complete do
-        message_box << "completed"
-      end
-
-      remote_runner.subscribe do
+      subscriber = remote_runner.subscribe do
         # no-op
       end
 
-      expect(message_box).to eq(["completed"])
+      expect(subscriber).to eq(nil)
     end
 
     it "persists the history of events" do

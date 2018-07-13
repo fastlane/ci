@@ -14,6 +14,8 @@ module FastlaneCI
     ##
     # `history` keeps a record of all of the notifications that were published to subscribers during a run.
     # this is used when a new subscriber `#subscribe`s to the Runner, they will be notified of all past messages.
+    #
+    # TODO: consider implications if history becomes really large.
     attr_reader :history
 
     # Reference to the FastlaneCI::Project of this particular build run
@@ -39,11 +41,13 @@ module FastlaneCI
       @current_build = prepare_build_object(trigger: trigger)
       @grpc = grpc
 
-      @history = [] # TODO: consider implications if history becomes really large.
+      @history = []
       @complete = false
       @completion_blocks = [] # TODO(snatchev): does this needs to be a threadsafe array?
     end
 
+    # TODO: consider the implications for users of this method that make the assumption
+    # that the build status has been persisted or not. `start` is an async operation via the build_runner_service
     def start
       save_build_status_locally!
 
@@ -52,15 +56,13 @@ module FastlaneCI
 
       begin
         responses = @grpc.request_run_fastlane("bundle", "exec", "fastlane", project.platform, project.lane, env: env)
-        return if responses.nil?
-
         responses.each do |response|
           # update the build's duration every time we get a message from the runner.
           current_build.duration = Time.now.utc - start_time
 
           # dispatch to handler methods
           handle_log(response.log)           if response.log
-          handle_state(response.state)       if response.state
+          handle_state(response.state)       if response.state != :PENDING
           handle_error(response.error)       if response.error
           handle_artifact(response.artifact) if response.artifact
         end
@@ -70,9 +72,10 @@ module FastlaneCI
       ensure
         @complete = true
         @completion_blocks.each(&:call)
+
+        persist_history!
       end
 
-      persist_history!
       save_build_status!
     end
 
@@ -88,8 +91,6 @@ module FastlaneCI
     # This will get called on every iteration since `state` has a default value of :PENDING.
     # Skip in that case.
     def handle_state(state)
-      return if state == :PENDING
-
       logger.debug("handle state transition: #{state}")
       publish_to_all(state: state)
 
@@ -144,18 +145,21 @@ module FastlaneCI
       File.open(artifact_path, "ab+") { |f| f.write(artifact.chunk) }
     end
 
+    ##
     # subscribe will all send all historic data to the subscriber.
     # the yielded object will be an InvocationResponse object
+    #
+    # if `subscribe` is called after the runner has complete, we do not subscribe, but return nil instead.
     def subscribe(&block)
+      if completed?
+        logger.info("subscribe called after the runner has completed has no effect.")
+        return nil
+      end
+
       logger.debug("subscribing listener to topic `#{topic_name}`")
       subscriber = FastlaneCI::Notifications.subscribe(topic_name, &block)
 
       replay_history_to(subscriber)
-
-      # make sure we call completion blocks if a subscriber joins after we have completed.
-      if completed?
-        @completion_blocks.each(&:call)
-      end
 
       return subscriber
     end

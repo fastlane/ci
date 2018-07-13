@@ -123,6 +123,10 @@ module FastlaneCI
           build_number: build_number.to_i
         )
 
+        if current_build_runner.completed?
+          ws.close(1000, "runner complete.")
+        end
+
         if current_build_runner.nil?
           ws.close(1000, "no runner found for project #{project_id} and build #{build_number}.")
           next
