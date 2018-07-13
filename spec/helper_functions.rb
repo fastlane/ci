@@ -48,4 +48,11 @@ module HelperFunctions
       )
     )
   end
+
+  def expect_json_error(message:, key:, status: nil)
+    expect(last_response.status).to eq(status) if status
+
+    expect(json["message"]).to eq(message)
+    expect(json["key"]).to eq(key)
+  end
 end

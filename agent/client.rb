@@ -1,5 +1,6 @@
 require_relative "agent"
 
+# A module encapsulating fastlane.ci agent code.
 module FastlaneCI
   module Agent
     ##
@@ -20,6 +21,7 @@ module FastlaneCI
       end
     end
   end
+  @file && @file.close
 end
 
 if $0 == __FILE__

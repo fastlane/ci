@@ -24,7 +24,7 @@ module FastlaneCI
       github_client = Octokit::Client.new(access_token: params[:token])
 
       begin
-        #  Note: This fails if the user.email scope is missing from token
+        # Note: This fails if the user.email scope is missing from token
         email = github_client.emails.find(&:primary).email
       rescue Octokit::NotFound
         json_error!(

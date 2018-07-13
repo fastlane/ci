@@ -64,7 +64,7 @@ module FastlaneCI::Agent
     end
 
     def succeed
-      unless state_machine.trigger(:finish)
+      unless state_machine.trigger(:succeed)
         valid = state_machine.triggerable_events.inspect
         logger.error("`succeed` could not transition from `#{state}`. #{valid} are the only valid events.")
         return

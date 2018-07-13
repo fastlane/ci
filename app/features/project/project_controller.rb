@@ -3,6 +3,7 @@ require_relative "../../shared/models/git_repo"
 require_relative "../../shared/models/git_hub_repo_config"
 require_relative "../../shared/fastfile_peeker"
 require_relative "../../shared/fastfile_finder"
+require_relative "../../features/build_runner/remote_runner"
 
 require "pathname"
 require "securerandom"
@@ -66,21 +67,20 @@ module FastlaneCI
         clone_url: project.repo_config.git_url
         # we don't need to pass a `ref`, as the sha and branch is all we need
       )
+      trigger = project.job_triggers.find do |t|
+        t.type == FastlaneCI::JobTrigger::TRIGGER_TYPE[:manual]
+      end
 
-      build_runner = FastlaneBuildRunner.new(
+      remote_runner = RemoteRunner.new(
         project: project,
-        sha: current_sha,
-        github_service: FastlaneCI::GitHubService.new(provider_credential: current_github_provider_credential),
-        notification_service: FastlaneCI::Services.notification_service,
-        work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
-        trigger: project.find_triggers_of_type(trigger_type: :manual).first,
         git_fork_config: git_fork_config,
-        local_build_folder: checkout_folder
+        trigger: trigger,
+        github_service: FastlaneCI::GitHubService.new(provider_credential: current_github_provider_credential)
       )
-      build_runner.setup(parameters: nil)
-      Services.build_runner_service.add_build_runner(build_runner: build_runner)
 
-      redirect("#{HOME}/#{project_id}/builds/#{build_runner.current_build_number}")
+      Services.build_runner_service.add_build_runner(build_runner: remote_runner)
+
+      redirect("#{HOME}/#{project_id}/builds/#{remote_runner.current_build.number}")
     end
 
     post "#{HOME}/:project_id/save" do

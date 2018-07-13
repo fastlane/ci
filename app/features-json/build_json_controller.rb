@@ -68,16 +68,12 @@ module FastlaneCI
         # we don't need to pass a `ref`, as the sha and branch is all we need
       )
 
-      build_runner = FastlaneBuildRunner.new(
+      build_runner = RemoteRunner.new(
         project: project,
-        sha: current_sha,
-        github_service: FastlaneCI::GitHubService.new(provider_credential: current_user_provider_credential),
-        notification_service: FastlaneCI::Services.notification_service,
-        work_queue: FastlaneCI::GitRepo.git_action_queue, # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
+        git_fork_config: git_fork_config,
         trigger: project.find_triggers_of_type(trigger_type: :manual).first,
-        git_fork_config: git_fork_config
+        github_service: FastlaneCI::GitHubService.new(provider_credential: current_user_provider_credential)
       )
-      build_runner.setup(parameters: nil)
       Services.build_runner_service.add_build_runner(build_runner: build_runner)
 
       build_summary_view_model = BuildSummaryViewModel.new(build: build_runner.current_build)

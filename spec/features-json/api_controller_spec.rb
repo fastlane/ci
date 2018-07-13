@@ -27,9 +27,12 @@ describe FastlaneCI::APIController do
     describe "unauthenticated request" do
       it "index is not successful" do
         get("/")
-        expect(last_response.status).to eq(401)
-        expect(json["message"]).to eq("A token must be passed")
-        expect(json["key"]).to eq("Authentication.Token.Missing")
+
+        expect_json_error(
+          message: "A token must be passed",
+          key: "Authentication.Token.Missing",
+          status: 401
+        )
       end
 
       it "public is successful" do
@@ -40,9 +43,11 @@ describe FastlaneCI::APIController do
 
       it "private is not successful" do
         get("/private")
-        expect(last_response.status).to eq(401)
-        expect(json["message"]).to eq("A token must be passed")
-        expect(json["key"]).to eq("Authentication.Token.Missing")
+        expect_json_error(
+          message: "A token must be passed",
+          key: "Authentication.Token.Missing",
+          status: 401
+        )
       end
     end
 
@@ -89,9 +94,11 @@ describe FastlaneCI::APIController do
 
       it "private is not successful" do
         get("/private")
-        expect(last_response.status).to eq(401)
-        expect(json["message"]).to eq("A token must be passed")
-        expect(json["key"]).to eq("Authentication.Token.Missing")
+        expect_json_error(
+          message: "A token must be passed",
+          key: "Authentication.Token.Missing",
+          status: 401
+        )
       end
     end
 

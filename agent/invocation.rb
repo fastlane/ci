@@ -31,12 +31,23 @@ module FastlaneCI::Agent
       # send logs that get put on the output queue.
       # this needs to be on a separate thread since Queue is a threadsafe blocking queue.
       Thread.new do
-        send_log(@output_queue.pop) while state == "running"
+        while state == "running"
+          # pop is blocking, hence we need another check for the state.
+          log_line = @output_queue.pop
+          send_log(log_line) if state == "running"
+        end
       end
 
       git_url = command_env(:GIT_URL)
+      git_sha = command_env(:GIT_SHA)
 
-      setup_repo(git_url)
+      setup_repo(git_url, git_sha)
+
+      @artifact_path = File.expand_path("artifacts")
+      FileUtils.mkdir_p(@artifact_path)
+
+      # TODO: set this properly for the fastlane invocation
+      ENV["FASTLANE_CI_ARTIFACTS"] = @artifact_path
 
       # TODO: ensure we are able to satisfy the request
       # unless has_required_xcode_version?
@@ -44,7 +55,7 @@ module FastlaneCI::Agent
       #   return
       # end
 
-      if run_fastlane(@invocation_request.command.env.to_h)
+      if run_fastlane(@invocation_request.command)
         finish
       else
         # fail is a keyword, so we must call self.
@@ -55,9 +66,7 @@ module FastlaneCI::Agent
     end
 
     def finish
-      artifact_path = command_env(:FASTLANE_CI_ARTIFACTS)
-
-      file_path = archive_artifacts(artifact_path)
+      file_path = archive_artifacts(@artifact_path)
       send_file(file_path)
       succeed
     end
@@ -75,11 +84,12 @@ module FastlaneCI::Agent
     end
 
     def throw(exception)
-      logger.error("Caught Error: #{exception}")
+      logger.error("Caught Error: #{exception.inspect}")
 
       error = FastlaneCI::Proto::InvocationResponse::Error.new
-      error.stacktrace = exception.backtrace.join("\n")
       error.description = exception.message
+      error.stacktrace = exception.backtrace.join("\n")
+      error.exit_status = exception.errno if exception.respond_to?(:errno)
 
       @yielder << FastlaneCI::Proto::InvocationResponse.new(error: error)
     end
