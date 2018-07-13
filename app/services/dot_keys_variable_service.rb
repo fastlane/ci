@@ -17,12 +17,20 @@ module FastlaneCI
         ci_user_api_token: nil,
         repo_url: nil,
         initial_onboarding_user_api_token: nil
-      }
+      },
+      keep_nil_values: false
     )
-      non_nil_new_env_variables = locals.reject { |_k, v| v.nil? }
-                                        .each_with_object({}) { |(k, v), hash| hash[k.to_sym] = v }
+      if keep_nil_values
+        # This is used for reseting invalid dot keys
+        new_dot_key_variables = locals
+      else
+        # This is used when setting a single value
+        non_nil_new_env_variables = locals.reject { |_k, v| v.nil? }
+                                          .each_with_object({}) { |(k, v), hash| hash[k.to_sym] = v }
 
-      new_dot_key_variables = FastlaneCI.dot_keys.all.merge(non_nil_new_env_variables)
+        new_dot_key_variables = FastlaneCI.dot_keys.all.merge(non_nil_new_env_variables)
+      end
+
       KeysWriter.new(path: keys_file_path, locals: new_dot_key_variables).write!
       reload_dot_env!
     end

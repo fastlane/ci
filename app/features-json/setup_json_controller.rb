@@ -94,7 +94,7 @@ module FastlaneCI
           ci_user_api_token: nil,
           repo_url: nil,
           initial_onboarding_user_api_token: nil
-        })
+        }, keep_nil_values: true)
 
         logger.error(ex)
 

@@ -175,7 +175,6 @@ describe FastlaneCI::SetupJSONController do
             expect(FastlaneCI::Services.configuration_repository_service).to receive(:setup_private_configuration_repo).and_return(nil)
             class FastlaneCI::Launch
             end
-            expect(FastlaneCI::Launch).to receive(:start_github_workers)
             expect(FastlaneCI::Services.onboarding_service).to receive(:clone_remote_repository_locally).and_raise("Failed to clone")
 
             keys_writer = "keys_writer"
@@ -193,7 +192,22 @@ describe FastlaneCI::SetupJSONController do
               }
             }
 
-            allow(FastlaneCI::KeysWriter).to receive(:new).with(expected_parameters).and_return(keys_writer)
+            expect(FastlaneCI::KeysWriter).to receive(:new).with(expected_parameters).and_return(keys_writer)
+
+            expected_parameters_cleared = {
+              path: "#{ENV['HOME']}/.fastlane/ci/.keys",
+              locals: {
+                ci_base_url: nil,
+                encryption_key: nil,
+                ci_user_password: nil,
+                ci_user_api_token: nil,
+                repo_url: nil,
+                initial_onboarding_user_api_token: nil
+              }
+            }
+
+            # This is called after cloning has failed
+            expect(FastlaneCI::KeysWriter).to receive(:new).with(expected_parameters_cleared).and_return(keys_writer)
 
             post("/data/setup", {
               encryption_key: "encryption_key",
