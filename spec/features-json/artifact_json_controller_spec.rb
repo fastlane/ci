@@ -54,9 +54,11 @@ describe FastlaneCI::ArtifactJSONController do
       project_id = "project_id"
 
       get("/data/project/#{project_id}/build/#{build_number}/artifact/not_here")
-      expect(last_response.status).to eq(404)
-      expect(json["message"]).to eq("Couldn't find artifact")
-      expect(json["key"]).to eq("Artifact.Missing")
+      expect_json_error(
+        message: "Couldn't find artifact",
+        key: "Artifact.Missing",
+        status: 404
+      )
     end
   end
 end
