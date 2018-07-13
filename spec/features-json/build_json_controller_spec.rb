@@ -21,6 +21,9 @@ describe FastlaneCI::BuildJSONController do
   end
 
   before do
+    stub_git_repos
+    stub_services
+
     header("Authorization", bearer_token)
     allow(FastlaneCI::Services).to receive(:project_service).and_return(project_service)
     allow(FastlaneCI::Services.user_service).to receive(:find_user).and_return(user)
@@ -36,23 +39,23 @@ describe FastlaneCI::BuildJSONController do
   end
 
   describe "POST /data/projects/:project_id/build/:build_number/rebuild" do
+    # TODO(snatchev): complete this spec
     xit "enqueues a Runner and responds with JSON of the build" do
       expect(FastlaneCI::Services.build_runner_service).to receive(:add_build_runner).with(instance_of(FastlaneCI::RemoteRunner))
 
       post("/data/projects/#{project.id}/build/#{build.number}/rebuild")
 
       expect(last_response).to be_ok
-      expect(json).to eq({})
     end
   end
 
   describe "GET /data/projects/:project_id/build/:build_number/logs" do
-    xit "responds with JSON containing logs of the Runner" do
-    end
+    # TODO(snatchev): complete this spec
+    xit "responds with JSON containing logs of the Runner"
   end
 
   describe "GET /data/projects/:project_id/build/:build_number/logs.ws" do
-    xit "uses websocket to stream Runner events" do
-    end
+    # TODO(snatchev): complete this spec
+    xit "uses websocket to stream Runner events"
   end
 end
