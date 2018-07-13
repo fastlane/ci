@@ -12,7 +12,7 @@ module FastlaneCI
     COLOR_MAPPING = {
       30 => :black,
       31 => :red,
-      32 => "#5cf442", # TODO: unify those colors with the front-end
+      32 => "#5cf442",
       33 => :yellow,
       34 => :blue,
       35 => :magenta,

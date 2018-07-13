@@ -18,7 +18,7 @@ module FastlaneCI
     # @return [String]
     attr_reader :provider_name
 
-    # TODO: Document what this value is used for
+    # e.g. "Initial Onboarding User credentials"
     # @return [String]
     attr_reader :full_name
 
