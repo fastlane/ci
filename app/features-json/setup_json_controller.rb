@@ -79,7 +79,7 @@ module FastlaneCI
       begin
         Services.configuration_repository_service.setup_private_configuration_repo
 
-        # TODO: Right now this is a blocking HTTP call
+        # TODO: Right now this is a blocking call
         # as we clone the repo as part of it
         # We should replace this with a simple check if we have access
         # and clone async and have a check API to wait for the clone

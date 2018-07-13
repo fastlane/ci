@@ -163,14 +163,20 @@ describe FastlaneCI::SetupJSONController do
               initial_onboarding_token: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
             }.to_json)
 
-            expect(last_response.status).to eq(400)
-            expect(json["message"]).to eq("The config repo URL has to start with https://")
-            expect(json["key"]).to eq("Onboarding.ConfigRepo.NoHTTPs")
+            expect_json_error(
+              status: 400,
+              message: "The config repo URL has to start with https://",
+              key: "Onboarding.ConfigRepo.NoHTTPs"
+            )
           end
 
           it "returns an error if the ci-config repo can't be cloned" do
             allow(FastlaneCI::Services).to receive(:reset_services!).and_return(nil) # we don't want this, as we stub all the things
             expect(FastlaneCI::Services.configuration_repository_service).to receive(:setup_private_configuration_repo).and_return(nil)
+            class FastlaneCI::Launch
+            end
+            expect(FastlaneCI::Launch).to receive(:start_github_workers)
+            expect(FastlaneCI::Services.onboarding_service).to receive(:clone_remote_repository_locally).and_raise("Failed to clone")
 
             keys_writer = "keys_writer"
             expect(keys_writer).to receive(:write!).and_return(nil).twice
@@ -200,9 +206,11 @@ describe FastlaneCI::SetupJSONController do
             }.to_json)
 
             # Cloning the repo fails because we block the internet connection when running tests
-            expect(last_response.status).to eq(400)
-            expect(json["message"]).to eq("Failed to clone the ci-config repo, please make sure the bot has access to it")
-            expect(json["key"]).to eq("Onboarding.ConfigRepo.NoAccess")
+            expect_json_error(
+              status: 400,
+              message: "Failed to clone the ci-config repo, please make sure the bot has access to it",
+              key: "Onboarding.ConfigRepo.NoAccess"
+            )
           end
         end
       end
