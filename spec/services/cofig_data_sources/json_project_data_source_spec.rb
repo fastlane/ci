@@ -17,6 +17,14 @@ describe FastlaneCI::JSONProjectDataSource do
     project_params.map { |params| FastlaneCI::Project.new(params) }
   end
 
+  let(:collaborator_service) do
+    FastlaneCI::CollaboratorService.new(provider_credential: double("Credentials", api_token: "abc123"))
+  end
+
+  before do
+    allow(FastlaneCI::Services).to receive(:collaborator_service).and_return(collaborator_service)
+  end
+
   describe "#project_exist?" do
     before(:each) do
       allow(subject).to receive(:projects).and_return(projects)
@@ -38,6 +46,7 @@ describe FastlaneCI::JSONProjectDataSource do
   describe "#create_project!" do
     before(:each) do
       allow(subject).to receive(:projects).and_return(projects)
+      allow_any_instance_of(FastlaneCI::CollaboratorService).to receive(:bot_user_collaborator_on_project?).and_return(true)
     end
 
     context "project doesn't exist" do

@@ -29,6 +29,13 @@ module FastlaneCI
       @hidden = hidden
     end
 
+    # Repo shortform in the format "username/reponame". Used by Octokit::Client.
+    #
+    # @return [String]
+    def repo_shortform
+      return git_url.gsub("https://github.com/", "")
+    end
+
     # Public link to remote commit
     def link_to_remote_commit(sha)
       not_implemented(__method__)

@@ -176,6 +176,15 @@ module FastlaneCI
         projects_clone << new_project
         self.projects = projects_clone
         logger.debug("Added project #{new_project.project_name} to projects.json in #{json_folder_path}")
+
+        if FastlaneCI::Services.collaborator_service.bot_user_collaborator_on_project?(
+          repo_shortform: repo_config.repo_shortform
+        )
+          logger.debug("Bot user has access to project #{new_project.project_name}.")
+        else
+          logger.debug("WARNING: Bot user does not have access to project #{new_project.project_name}.")
+        end
+
         return new_project
       else
         logger.debug("Couldn't add project #{new_project.project_name} because it already exists")
