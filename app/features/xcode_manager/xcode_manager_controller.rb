@@ -20,8 +20,7 @@ module FastlaneCI
       erb(:xcode_manager, locals: locals, layout: FastlaneCI.default_layout)
     end
 
-    # TODO: this will be POST of course
-    get "#{HOME}/install" do
+    post "#{HOME}/install" do
       # TODO: add error handling for `version` parameter
       version = Gem::Version.new(params[:version])
 

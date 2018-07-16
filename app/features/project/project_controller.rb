@@ -36,7 +36,7 @@ module FastlaneCI
         checkout_folder = File.join(File.expand_path(project.local_repo_path), "manual_build_#{sha_or_uuid}")
       end
 
-      # TODO: This should be hidden in a service
+      # This could be hidden in a service
       unless current_sha
         # If we still don't know the sha, we'll need to grab the most current because
         # we just triggered a build from the Project page instead of a specific build
@@ -59,7 +59,7 @@ module FastlaneCI
         return
       end
 
-      branch_to_trigger = "master" # TODO: how/where do we get the default branch
+      branch_to_trigger = "master"
 
       git_fork_config = GitForkConfig.new(
         sha: current_sha,
@@ -89,8 +89,6 @@ module FastlaneCI
       project.lane = params["selected_lane"]
       project.project_name = params["project_name"]
 
-      # TODO: what's the best way to store that project in the config?
-      # Wait for Josh' input
       FastlaneCI::Services.project_service.update_project!(project: project)
       redirect("#{HOME}/#{project_id}")
     end
@@ -215,14 +213,14 @@ module FastlaneCI
       hour = params["hour"]
       minute = params["minute"]
 
-      # TODO: Until we make a proper interface to attach JobTriggers to a Project, let's add a manual one for the
+      # Until we make a proper interface to attach JobTriggers to a Project, let's add a manual one for the
       # selected branch.
       triggers_to_add = TriggerFactory.new.create(
         params: { branch: branch, trigger_type: trigger_type, hour: hour, minute: minute }
       )
 
       # We now have enough information to create the new project.
-      # TODO: add job_triggers here
+      # add job_triggers here
       # We shouldn't be blocking manual trigger builds
       # if we do not provide an interface to add them.
       project = Services.project_service.create_project!(
@@ -236,7 +234,7 @@ module FastlaneCI
 
       if !project.nil?
         # Do this so we trigger the clone of the repo.
-        # TODO: Do this wherever it should be done, as we must redirect
+        # Do this wherever it should be done, as we must redirect
         # to the project details only when this task is finished.
         repo = GitRepo.new(
           git_config: repo_config,
@@ -294,9 +292,9 @@ module FastlaneCI
         locals[:available_lanes] = available_lanes
       end
 
-      # TODO: We should think carefully about exposing the value of an existing ENV variable
-      #       as this could potentially introduce a security risk. During development
-      #       the code below will make debugging easier
+      # We should think carefully about exposing the value of an existing ENV variable
+      # as this could potentially introduce a security risk. During development
+      # the code below will make debugging easier
       locals[:global_env_variables] = Services.environment_variable_service.environment_variables
       locals[:project_env_variables] = project.environment_variables
 

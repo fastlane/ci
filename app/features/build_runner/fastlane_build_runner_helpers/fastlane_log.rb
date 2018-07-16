@@ -30,7 +30,6 @@ module FastlaneCI
       return @log
     end
 
-    # TODO: consider removing this unused param `severity`
     def format_string(datetime = Time.now, severity = "")
       return "[#{datetime.strftime('%H:%M:%S')}]: "
     end

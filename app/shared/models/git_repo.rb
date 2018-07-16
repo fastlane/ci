@@ -569,7 +569,6 @@ module FastlaneCI
         if changed.count == 0 && added.count == 0 && deleted.count == 0
           logger.debug("No changes in repo #{git_config.full_name}, skipping commit #{commit_message}")
         else
-
           begin
             git.commit(commit_message)
           rescue StandardError => ex

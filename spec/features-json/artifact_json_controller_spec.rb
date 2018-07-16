@@ -11,7 +11,6 @@ describe FastlaneCI::ArtifactJSONController do
   before do
     header("Authorization", bearer_token)
 
-    # TODO: Think more about how we stub data from the ci-config repo
     project_service = "project_service"
     allow(FastlaneCI::Services).to receive(:project_service).and_return(project_service)
     project = "project"

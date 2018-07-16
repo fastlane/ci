@@ -52,7 +52,9 @@ module FastlaneCI
 
     # @return [Set[Symbol]]
     def post_parameter_list_for_validation
-      # TODO: currently we don't make use of `prefix`
+      # Currently we don't make use of `prefix`
+      # The prefix is used for iTunes Transporter
+      # https://github.com/fastlane/ci/issues/1082
       return Set.new(%w(user password))
     end
   end
