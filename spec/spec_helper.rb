@@ -31,6 +31,10 @@ RSpec.configure do |config|
   config.formatter = :documentation
   config.tty = true
   config.color = true
+
+  config.before(:each) do
+    stub_dot_keys
+  end
 end
 
 # Do not allow reading on STDIN on tests. This will block the test run.

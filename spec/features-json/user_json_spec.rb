@@ -37,9 +37,12 @@ describe FastlaneCI::UserJSONController do
       allow(FastlaneCI::Services.user_service.user_data_source).to receive(:user_exist?).with({ email: fake_email }).and_return(true)
 
       post "/api/user", { github_token: "github_token", password: "password" }.to_json, { "CONTENT_TYPE" => "application/json" }
-      expect(last_response.status).to eq(400)
-      expect(json["key"]).to eq("User.Error")
-      expect(json["message"]).to eq("Error creating new user")
+
+      expect_json_error(
+        message: "Error creating new user",
+        key: "User.Error",
+        status: 400
+      )
     end
   end
 end

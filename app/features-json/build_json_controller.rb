@@ -11,6 +11,10 @@ module FastlaneCI
   class BuildJSONController < APIController
     HOME = "/data/projects/:project_id/build"
 
+    def self.build_url(project_id:, build_number:)
+      return "/project/#{project_id}/build/#{build_number}"
+    end
+
     get "#{HOME}/:build_number" do |project_id, build_number|
       build_view_model = BuildViewModel.new(build: current_build)
 
