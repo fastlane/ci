@@ -12,13 +12,16 @@ fci-master-detail-card {
         padding: 16px 20px 4px 20px;
     }
     .fci-master-section-label {
-        padding: 8px 65px 8px 20px;
+        padding: 8px 20px;
         line-height: 40px;
         height: 40px;
         color: rgba(0, 0, 0, 0.87);
         font-size: 14px;
         font-weight: 400;
         cursor: pointer;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
         &.fci-master-section-selected {
             cursor: default;
             background-color: rgba(0, 0, 0, 0.54);
@@ -29,6 +32,8 @@ fci-master-detail-card {
         max-width: 732px;
         box-sizing: border-box;
         flex: 5;
-        padding: 20px 48px 84px 48px;
+        padding: 20px 48px 0 48px;
+        overflow-y: auto;
+        margin-bottom: 84px;
     }
 }

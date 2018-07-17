@@ -5,6 +5,7 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatButtonModule, MatDialogRef, MatInputModule} from '@angular/material';
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations/src/module';
 import {first} from 'rxjs/operators/first';
 
 import {MasterDetailCardModule} from '../../common/components/master-detail-card/master-detail-card.module';
@@ -32,7 +33,7 @@ describe('SettingsDialogComponent', () => {
           declarations: [SettingsDialogComponent],
           imports: [
             CommonModule, ReactiveFormsModule, MasterDetailCardModule,
-            MatInputModule, MatButtonModule, BrowserAnimationsModule
+            MatInputModule, MatButtonModule, NoopAnimationsModule
           ],
           providers: [
             {provide: MAT_DIALOG_DATA, useValue: {project: getMockProject()}},

@@ -22,6 +22,9 @@ module FastlaneCI
     # @return [Array[BuildSummaryViewModel]]
     attr_reader :builds
 
+    # @return [Array[EnvironmentVariable]] The project specific environment variables
+    attr_reader :environment_variables
+
     def initialize(project:)
       raise "Incorrect object type. Expected Project, got #{project.class}" unless project.kind_of?(Project)
 
@@ -30,6 +33,7 @@ module FastlaneCI
       @lane = project.lane
       @builds = project.builds.map { |build| BuildSummaryViewModel.new(build: build) }
       @repo_name = project.repo_config.name
+      @environment_variables = project.environment_variables
     end
   end
 end

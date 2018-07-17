@@ -25,6 +25,16 @@
           <button mat-raised-button color="primary" type="submit" [disabled]="!generalForm.valid">Done</button>
         </div>
       </form>
+      <form *ngSwitchCase="MasterSection.ENVIRONMENT_VARIABLES" [formGroup]="envVarsForm" class="fci-env-vars-form">
+        <h3>Environment variables
+          <i>(not editable yet)</i>
+        </h3>
+        <fci-key-value-editor [formArray]="envVarsForm.get('envVars')" [initialPairsData]="FAKE_KEY_PAIRS"></fci-key-value-editor>
+        <div class="fci-button-container">
+          <button mat-button (click)="closeDialog()" type="button">Close</button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="!generalForm.valid">Done</button>
+        </div>
+      </form>
     </ng-container>
   </div>
 </fci-master-detail-card>

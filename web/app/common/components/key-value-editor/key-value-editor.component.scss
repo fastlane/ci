@@ -1,0 +1,29 @@
+.fci-pair-container {
+    display: flex;
+    align-items: center;
+    padding-bottom: 24px;
+    .fci-add-remove-button {
+        width: 24px;
+        height: 24px;
+        line-height: 24px;
+        margin-right: 8px;
+    }
+    .fci-equal-sign {
+        margin: 0 8px;
+        font-size: 16px;
+        color: rgba(0, 0, 0, 0.87);
+    }
+    .fci-input-container {
+        padding: 0;
+        input {
+            width: 100%;
+        }
+    }
+    .fci-key-input-container {
+        flex: 1;
+        max-width: 348px;
+    }
+    .fci-value-input-container {
+        width: 120px;
+    }
+}

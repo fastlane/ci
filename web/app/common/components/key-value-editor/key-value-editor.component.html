@@ -1,0 +1,26 @@
+<!-- Empty pair that can be added -->
+<div class="fci-pair-container" [formGroup]="newPairForm">
+  <button class="fci-add-remove-button" (click)="addNewPairControl()" mat-icon-button [disabled]="!newPairForm.valid">
+    <mat-icon>add_circle_outline</mat-icon>
+  </button>
+  <div class="fci-input-container fci-key-input-container">
+    <input formControlName="key" placeholder="Enter key">
+  </div>
+  <div class="fci-equal-sign">=</div>
+  <div class="fci-input-container fci-value-input-container">
+    <input formControlName="value" placeholder="Enter value">
+  </div>
+</div>
+<!-- All the pairs that have been added -->
+<div class="fci-pair-container" *ngFor="let group of this.formArray.controls; let index=index;" [formGroup]="group">
+  <button class="fci-add-remove-button" (click)="removePairControl(index)" mat-icon-button>
+    <mat-icon>remove_circle_outline</mat-icon>
+  </button>
+  <div class="fci-input-container fci-key-input-container">
+    <input formControlName="key" placeholder="Enter key">
+  </div>
+  <div class="fci-equal-sign">=</div>
+  <div class="fci-input-container fci-value-input-container">
+    <input formControlName="value" placeholder="Enter value">
+  </div>
+</div>

@@ -8,6 +8,7 @@
   },
   "exclude": [
     "test.ts",
-    "**/*.spec.ts"
+    "**/*.spec.ts",
+    "app/common/test_helpers/*"
   ]
 }

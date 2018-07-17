@@ -8,6 +8,7 @@ export interface ProjectResponse {
   lane: string;
   repo_name: string;
   builds: BuildSummaryResponse[];
+  environment_variables: {[key: string]: string};
 }
 
 export class Project {
@@ -16,6 +17,7 @@ export class Project {
   readonly repoName: string;
   readonly lane: string;
   readonly builds: BuildSummary[];
+  readonly environmentVariables: {[key: string]: string};
 
   constructor(project: ProjectResponse) {
     this.name = project.name;
@@ -23,6 +25,7 @@ export class Project {
     this.repoName = project.repo_name;
     this.lane = project.lane;
     this.builds = project.builds.map((build) => new BuildSummary(build));
+    this.environmentVariables = project.environment_variables;
   }
 
   lastSuccessfulBuild(): BuildSummary|null {
