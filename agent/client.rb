@@ -24,10 +24,11 @@ module FastlaneCI
 end
 
 if $0 == __FILE__
-  client = FastlaneCI::Agent::Client.new("localhost")
+  client = FastlaneCI::Agent::Client.new("207.254.45.125")
   env = {
     "FASTLANE_CI_ARTIFACTS" => "artifacts",
-    "GIT_URL" => "https://github.com/snatchev/themoji-ios"
+    "GIT_URL" => "https://github.com/snatchev/themoji-ios",
+    "GIT_SHA" => "ab"
   }
   response = client.request_run_fastlane("actions", env: env)
 
