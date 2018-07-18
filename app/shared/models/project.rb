@@ -57,9 +57,6 @@ module FastlaneCI
       @lane = lane
       @environment_variables = environment_variables || []
       @artifact_provider = artifact_provider
-      # TODO: This is fine for now to avoid runtime fails due to lack of triggers.
-      # In the future, the Add Project workflow, should provide the enough interface
-      # in order to add as many JobTriggers as the user wants.
       @job_triggers = job_triggers
     end
 

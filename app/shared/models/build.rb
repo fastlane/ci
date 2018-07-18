@@ -50,7 +50,7 @@ module FastlaneCI
     attr_accessor :platform
 
     # @return [Hash] the parameters that were passed on this particular build
-    # TODO: We currently don't use/store/support parameters (yet) https://github.com/fastlane/ci/issues/783
+    # We currently don't use/store/support parameters (yet) https://github.com/fastlane/ci/issues/783
     attr_accessor :parameters
 
     # @return [Hash] a hash containing the version numbers for each build tool that was used

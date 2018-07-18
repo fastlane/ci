@@ -238,16 +238,16 @@ module FastlaneCI
       }
 
       if git_fork_config.branch.to_s.length > 0
-        env_mapping[:GIT_BRANCH] = git_fork_config.branch.to_s # TODO: does this work?
+        env_mapping[:GIT_BRANCH] = git_fork_config.branch.to_s
       else
-        env_mapping[:GIT_BRANCH] = "master" # TODO: use actual default branch?
+        env_mapping[:GIT_BRANCH] = "master"
       end
 
       # We need to duplicate some ENV variables
       env_mapping[:CI_BUILD_NUMBER] = env_mapping[:BUILD_NUMBER]
       env_mapping[:CI_BUILD_URL] = env_mapping[:BUILD_URL]
       env_mapping[:CI_BRANCH] = env_mapping[:GIT_BRANCH]
-      # env_mapping[:CI_PULL_REQUEST] = nil # TODO: do we have the PR information here?
+      # env_mapping[:CI_PULL_REQUEST] = nil # It seems like we don't have PR information here
 
       # Now that we have the CI specific ENV variables, let's go through the ENV variables
       # the user defined in their configuration
@@ -460,7 +460,7 @@ module FastlaneCI
     def save_build_status_source!
       status_context = project.project_name
 
-      build_path = FastlaneCI::BuildController.build_url(project_id: project.id, build_number: current_build.number)
+      build_path = FastlaneCI::BuildJSONController.build_url(project_id: project.id, build_number: current_build.number)
       build_url = FastlaneCI.dot_keys.ci_base_url + build_path
       code_hosting_service.set_build_status!(
         repo: project.repo_config.git_url,

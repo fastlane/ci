@@ -112,8 +112,6 @@ module FastlaneCI
       )
     end
 
-    # TODO: Check if we can find a good way to not have to
-    #   overwrite all these methods
     def crash!(exception)
       raise FastlaneCrash.new, exception.to_s
     end

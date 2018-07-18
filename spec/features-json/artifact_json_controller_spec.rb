@@ -11,7 +11,6 @@ describe FastlaneCI::ArtifactJSONController do
   before do
     header("Authorization", bearer_token)
 
-    # TODO: Think more about how we stub data from the ci-config repo
     project_service = "project_service"
     allow(FastlaneCI::Services).to receive(:project_service).and_return(project_service)
     project = "project"
@@ -54,9 +53,11 @@ describe FastlaneCI::ArtifactJSONController do
       project_id = "project_id"
 
       get("/data/project/#{project_id}/build/#{build_number}/artifact/not_here")
-      expect(last_response.status).to eq(404)
-      expect(json["message"]).to eq("Couldn't find artifact")
-      expect(json["key"]).to eq("Artifact.Missing")
+      expect_json_error(
+        message: "Couldn't find artifact",
+        key: "Artifact.Missing",
+        status: 404
+      )
     end
   end
 end

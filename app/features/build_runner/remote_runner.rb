@@ -248,7 +248,7 @@ module FastlaneCI
       if git_fork_config.branch.to_s.length > 0
         env_mapping[:GIT_BRANCH] = git_fork_config.branch.to_s # TODO: does this work?
       else
-        env_mapping[:GIT_BRANCH] = "master" # TODO: use actual default branch?
+        env_mapping[:GIT_BRANCH] = "master"
       end
 
       # We need to duplicate some ENV variables

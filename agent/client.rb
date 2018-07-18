@@ -1,5 +1,6 @@
 require_relative "agent"
 
+# A module encapsulating fastlane.ci agent code.
 module FastlaneCI
   module Agent
     ##

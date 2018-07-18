@@ -84,6 +84,6 @@ group :test, :development do
   gem "rack-test", require: "rack/test"
   gem "rake"
   gem "rspec"
-  gem "webmock", ">= 3.4.1", "< 3.5.0"
   gem "timecop", ">= 0.9.1", "< 1.0.0"
+  gem "webmock", ">= 3.4.1", "< 3.5.0"
 end

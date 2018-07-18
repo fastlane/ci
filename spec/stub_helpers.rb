@@ -7,7 +7,7 @@ module StubHelpers
     allow(File).to receive(:write)
   end
 
-  def stub_environment_variables
+  def stub_dot_keys
     allow_any_instance_of(FastlaneCI::DotKeysVariables).to receive(:all).and_return(environment_variables)
     allow_any_instance_of(FastlaneCI::DotKeysVariables).to receive(:encryption_key).and_return("encryption_key")
     allow_any_instance_of(FastlaneCI::DotKeysVariables).to receive(:ci_user_password).and_return("ci_user_password")
