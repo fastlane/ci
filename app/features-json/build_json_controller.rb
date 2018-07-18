@@ -10,6 +10,7 @@ module FastlaneCI
   # Controller for providing all data relating to builds
   class BuildJSONController < APIController
     HOME = "/data/projects/:project_id/build"
+    ANSI_PATTERN = /\033\[([0-9]+);([0-9]+);([0-9]+)m(.+?)\033\[0m|([^\033]+)/m
 
     def self.build_url(project_id:, build_number:)
       return "/project/#{project_id}/build/#{build_number}"
@@ -86,35 +87,6 @@ module FastlaneCI
       json(build_summary_view_model)
     end
 
-    get "#{HOME}/:build_number/logs" do |project_id, build_number|
-      # `current_build_runner` is only defined if the build was just run a while back
-      # if the server was restarted, we're gonna end here in this code block
-      build_log_artifact = current_build.artifacts.find do |current_artifact|
-        # We can improve the detection in the future, to actually mark an artifact as "default output"
-        current_artifact.type.include?("log") && current_artifact.reference.end_with?("runner.log")
-      end
-
-      if build_log_artifact
-        # TODO: This only works for local storage. Add External storage support (ex. Google Cloud Storage)
-        artifact_file_content = File.read(build_log_artifact.provider.retrieve!(artifact: build_log_artifact))
-      else
-        json_error!(
-          error_message: "Logs file missing for build #{build_number}",
-          error_key: "Build.LogsMissing",
-          error_code: 404
-        )
-      end
-
-      plain_artifact_file_content = convert_ansi_to_plain_text(artifact_file_content)
-      log_array = plain_artifact_file_content.split("\n").collect do |log_line|
-        {
-          message: log_line
-        }
-      end
-
-      return json(log_array)
-    end
-
     get "#{HOME}/:build_number/log.ws" do |project_id, build_number|
       halt(415, "unsupported media type") unless Faye::WebSocket.websocket?(request.env)
       ws = Faye::WebSocket.new(request.env, nil, { ping: 30 })
@@ -122,28 +94,53 @@ module FastlaneCI
       ws.on(:open) do |event|
         logger.debug([:open, ws.object_id])
 
+        ## handle the case that the build completes, and runner.log is saved.
+        current_project = FastlaneCI::Services.project_service.project_by_id(project_id)
+        current_build = current_project.builds.find { |b| b.number == build_number.to_i }
+
+        build_log_artifact = current_build.artifacts.find do |current_artifact|
+          # We can improve the detection in the future, to actually mark an artifact as "default output"
+          current_artifact.type.include?("log") && current_artifact.reference.end_with?("runner.log")
+        end
+
+        if build_log_artifact
+          logger.debug("streaming back artifact: #{build_log_artifact.reference}")
+          File.open(build_log_artifact.reference, "r") do |file|
+            file.each_line do |line|
+              ws.send(convert_ansi_to_plain_text(line.chomp))
+            end
+          end
+          ws.close(1000, "runner complete.")
+          next
+        end
+
+        ## if we have no runner.log, then check to see if the build_runner is still working.
+
         current_build_runner = Services.build_runner_service.find_build_runner(
           project_id: project_id,
           build_number: build_number.to_i
         )
-
-        if current_build_runner.completed?
-          ws.close(1000, "runner complete.")
-        end
 
         if current_build_runner.nil?
           ws.close(1000, "no runner found for project #{project_id} and build #{build_number}.")
           next
         end
 
+        # if the build runner has already completed, we can close the connection, and do not proceed
+        if current_build_runner.completed?
+          ws.close(1000, "runner complete.")
+          next
+        end
+
+        # once the build runner completes, close the websocket connection.
+        current_build_runner.on_complete do
+          ws.close(1000, "runner complete.")
+        end
+
         # subscribe the current socket to events from the remote_runner
         # as soon as a subscriber is returned, they will receive all historical items as well.
         @subscriber = current_build_runner.subscribe do |_topic, payload|
-          ws.send(JSON.dump(payload))
-        end
-
-        current_build_runner.on_complete do
-          ws.close(1000, "runner complete.")
+          ws.send(convert_ansi_to_plain_text(JSON.dump(payload)))
         end
       end
 
@@ -157,6 +154,8 @@ module FastlaneCI
         next if current_build_runner.nil?
 
         current_build_runner.unsubscribe(@subscriber)
+
+        Services.build_runner_service.remove_build_runner(build_runner: current_build_runner)
       end
 
       # Return async Rack response
@@ -191,7 +190,9 @@ module FastlaneCI
 
     # convert .log files that include the color information as ANSI code to plain text
     def convert_ansi_to_plain_text(data)
-      return data.gsub(/\e\[[0-9;]*m/, "")
+      data.scan(ANSI_PATTERN).inject("") do |str, match|
+        str << (match[3] || match[4])
+      end
     end
   end
 end

@@ -60,7 +60,13 @@ module FastlaneCI
 
     def retrieve!(artifact:)
       raise "Artifact to store was not provided or wrong type provided" unless artifact&.is_a?(Artifact)
-      artifact_reference = File.join(LocalArtifactProvider.default_root_path, artifact.reference)
+
+      if File.exist?(artifact.reference)
+        artifact_reference = artifact.reference
+      else
+        artifact_reference = File.join(LocalArtifactProvider.default_root_path, artifact.reference)
+      end
+
       unless File.exist?(artifact_reference)
         raise "#{self.class.name} needs an existing file in #{artifact_reference}, but it was not found"
       end

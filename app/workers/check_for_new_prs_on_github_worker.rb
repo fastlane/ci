@@ -116,10 +116,8 @@ module FastlaneCI
           ref: pr.git_ref
         )
         create_and_queue_build_task(
-          sha: pr.current_sha,
           trigger: project.find_triggers_of_type(trigger_type: :pull_request).first,
-          git_fork_config: git_fork_config,
-          notification_service: notification_service
+          git_fork_config: git_fork_config
         )
       end
     end

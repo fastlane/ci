@@ -3,6 +3,7 @@ import {Inject, Injectable} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import {Observer} from 'rxjs/Observer';
 import {Subject} from 'rxjs/Subject';
+import {AuthService} from './auth.service';
 
 export interface BuildLogMessageEvent extends MessageEvent {
   data: string;
@@ -11,8 +12,11 @@ export interface BuildLogMessageEvent extends MessageEvent {
 @Injectable()
 export class BuildLogWebsocketService {
   private readonly API_ROOT: string;
+  private readonly authService: AuthService;
 
-  constructor(@Inject(DOCUMENT) document: Document) {
+  constructor(@Inject(DOCUMENT) document: Document, authService: AuthService) {
+    this.authService = authService;
+    // TODO(snatchev): consider using wss once we have tls setup.
     this.API_ROOT = `ws://${document.location.host}/`;
   }
 
@@ -36,7 +40,7 @@ export class BuildLogWebsocketService {
   }
 
   private createSocketUrl(projectId: string, buildNumber: number) {
-    return `${this.API_ROOT}?project_id=${projectId}&build_number=${
-        buildNumber}`;
+    const token = this.authService.token();
+    return `${this.API_ROOT}/data/projects/${projectId}/build/${buildNumber}/log.ws?bearer_token=${token}`;
   }
 }

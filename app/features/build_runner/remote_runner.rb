@@ -11,6 +11,10 @@ module FastlaneCI
   class RemoteRunner
     include FastlaneCI::Logging
 
+    # this record separator is used to delimit the history file.
+    # if for whatever reason, we can't delimit on newlines, consider \30 the Record Separator char.
+    RECORD_SEPARATOR = "\n".freeze
+
     ##
     # `history` keeps a record of all of the notifications that were published to subscribers during a run.
     # this is used when a new subscriber `#subscribe`s to the Runner, they will be notified of all past messages.
@@ -26,9 +30,6 @@ module FastlaneCI
 
     # Access the FastlaneCI::Build of that specific Runner
     attr_reader :current_build
-
-    # The commit sha we want to run the build for
-    attr_reader :sha
 
     # TODO: extract this thing out of this class.
     attr_reader :github_service
@@ -48,6 +49,7 @@ module FastlaneCI
 
     # TODO: consider the implications for users of this method that make the assumption
     # that the build status has been persisted or not. `start` is an async operation via the build_runner_service
+    # TODO(snatchev): pass the sha of the required checkout from the git_fork_config
     def start
       save_build_status_locally!
 
@@ -207,6 +209,7 @@ module FastlaneCI
       File.open(artifact_path, "w+") do |file|
         @history.each do |payload|
           file.write(JSON.dump(payload))
+          file.write(RECORD_SEPARATOR)
         end
       end
     end

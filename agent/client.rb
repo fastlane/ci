@@ -16,7 +16,7 @@ module FastlaneCI
       def initialize(host, timeout: 3)
         @host = host
         @port = PORT
-        @stub = Proto::Agent::Stub.new("#{@host}:#{@port}", :this_channel_is_insecure, timeout: timeout)
+        @stub = Proto::Agent::Stub.new("#{@host}:#{@port}", :this_channel_is_insecure)
       end
 
       def request_spawn(bin, *params, env: {})
