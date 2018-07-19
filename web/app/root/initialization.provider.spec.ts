@@ -2,23 +2,26 @@ import {TestBed} from '@angular/core/testing';
 import {Router} from '@angular/router';
 import {Subject} from 'rxjs/Subject';
 
+import {ConfiguredSections} from '../models/configured_sections';
 import {DataService} from '../services/data.service';
 
 import {InitializationProvider} from './initialization.provider';
 
 describe('InitiliazationProvider', () => {
   let dataService: jasmine.SpyObj<Partial<DataService>>;
-  let isConfiguredSubject: Subject<boolean>;
+  let configuredSections: jasmine.SpyObj<Partial<ConfiguredSections>>;
   let initializationProvider: InitializationProvider;
   let router: jasmine.SpyObj<Partial<Router>>;
+  let configuredSectionsSubject: Subject<Partial<ConfiguredSections>>;
 
   beforeEach(() => {
-    isConfiguredSubject = new Subject<boolean>();
+    configuredSectionsSubject = new Subject<Partial<ConfiguredSections>>();
     dataService = {
-      isServerConfigured: jasmine.createSpy().and.returnValue(
-          isConfiguredSubject.asObservable())
+      getServerConfiguredSections: jasmine.createSpy().and.returnValue(
+          configuredSectionsSubject.asObservable())
     };
     router = {navigate: jasmine.createSpy()};
+    configuredSections = {areAllSectionsConfigured: jasmine.createSpy()};
 
     TestBed.configureTestingModule({
       imports: [],
@@ -31,19 +34,21 @@ describe('InitiliazationProvider', () => {
     initializationProvider = TestBed.get(InitializationProvider);
   });
 
-  it('should redirect to onboarding erb page if the server is not configured',
+  it('should redirect to onboarding page if the server is not configured',
      () => {
+       configuredSections.areAllSectionsConfigured.and.returnValue(false);
        initializationProvider.initialize();
-       isConfiguredSubject.next(false);
+       configuredSectionsSubject.next(configuredSections);
 
        expect(router.navigate).toHaveBeenCalledWith(['onboard']);
      });
 
 
-  it('should not redirect to onboarding erb page if the server is configured',
+  it('should not redirect to onboarding page if the server is configured',
      () => {
+       configuredSections.areAllSectionsConfigured.and.returnValue(true);
        initializationProvider.initialize();
-       isConfiguredSubject.next(true);
+       configuredSectionsSubject.next(configuredSections);
 
        expect(router.navigate).not.toHaveBeenCalledWith(['onboard']);
      });

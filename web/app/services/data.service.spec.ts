@@ -11,6 +11,7 @@ import {mockRepositoryListResponse, mockRepositoryResponse} from '../common/test
 import {UserDetails} from '../common/types';
 import {Build, BuildLogLine} from '../models/build';
 import {BuildSummary} from '../models/build_summary';
+import {ConfiguredSections} from '../models/configured_sections';
 import {Lane} from '../models/lane';
 import {Project} from '../models/project';
 import {ProjectSummary} from '../models/project_summary';
@@ -196,17 +197,19 @@ describe('DataService', () => {
     });
   });
 
-  describe('#isServerConfigured', () => {
+  describe('#getServerConfiguredSections', () => {
     it('should make request to correct URL', () => {
-      let isConfigured: boolean;
-      dataService.isServerConfigured().subscribe((response) => {
-        isConfigured = response;
+      let configuredSections: ConfiguredSections;
+      dataService.getServerConfiguredSections().subscribe((response) => {
+        configuredSections = response;
       });
 
-      const request = mockHttp.expectOne('/data/setup/configured');
-      request.event(new HttpResponse<boolean>({body: true}));
+      const request = mockHttp.expectOne('/data/setup/configured_sections');
+      request.flush({encryption_key: false, oauth: true, config_repo: false});
 
-      expect(isConfigured).toBe(true);
+      expect(configuredSections.encryptionKey).toBe(false);
+      expect(configuredSections.oAuth).toBe(true);
+      expect(configuredSections.configRepo).toBe(false);
     });
   });
 });
