@@ -13,7 +13,7 @@ module FastlaneCI
       # the port that the client is connecting to
       attr_reader :port
 
-      def initialize(host, timeout: 3)
+      def initialize(host)
         @host = host
         @port = PORT
         @stub = Proto::Agent::Stub.new("#{@host}:#{@port}", :this_channel_is_insecure)
