@@ -22,7 +22,7 @@ module FastlaneCI::Agent
       sh("git clone --depth 1 #{git_url} repo")
       Dir.chdir("repo")
 
-      sh("git checkout #{git_sha}")
+      #sh("git checkout #{git_sha}")
 
       sh("gem install bundler --no-doc")
       sh("bundle install --deployment")
