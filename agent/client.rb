@@ -28,10 +28,12 @@ if $0 == __FILE__
   client = FastlaneCI::Agent::Client.new("207.254.45.125")
   env = {
     "FASTLANE_CI_ARTIFACTS" => "artifacts",
-    "GIT_URL" => "https://github.com/snatchev/themoji-ios",
-    "GIT_SHA" => "ab"
+    "GIT_URL" => "https://github.com/bogdanbrato/ios-themoji",
+    "GIT_SHA" => "03f4779d11595f41bb7f1959c33645724c54aed6"
   }
-  response = client.request_run_fastlane("actions", env: env)
+  response = client.request_run_fastlane(
+    "bundle", "exec", "fastlane", "ios", "test", env: env
+  )
 
   @file = nil
   response.each do |r|
