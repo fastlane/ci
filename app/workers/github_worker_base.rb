@@ -61,7 +61,7 @@ module FastlaneCI
     def create_and_queue_build_task(trigger:, git_fork_config:)
       credential = provider_credential
       current_project = project
-      current_sha = sha
+      current_sha = git_fork_config.sha
 
       unless Services.build_runner_service.find_build_runner(project_id: current_project.id, sha: current_sha).nil?
         return

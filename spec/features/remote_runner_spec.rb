@@ -3,7 +3,8 @@ require "app/features/build_runner/remote_runner"
 
 describe FastlaneCI::RemoteRunner do
   let(:service) { FastlaneCI::Agent::Service.new }
-  let(:grpc_client) { FastlaneCI::Agent::Client.new("localhost", timeout: 0.5) }
+  # using port 9999 here in case you run tests and have an agent aleady running on the default port
+  let(:grpc_client) { FastlaneCI::Agent::Client.new("localhost", 9999) }
 
   let(:remote_runner) do
     github_service = double("GithubService")
@@ -86,7 +87,7 @@ describe FastlaneCI::RemoteRunner do
       remote_runner.start
       artifact = remote_runner.current_build.artifacts.last
       expect(artifact.type).to eq("log")
-      expect(File.read(artifact.reference)).to eq('{"state":"RUNNING"}')
+      expect(File.read(artifact.reference)).to eq(%({"state":"RUNNING"}\n))
     end
   end
 
