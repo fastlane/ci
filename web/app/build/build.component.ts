@@ -1,4 +1,5 @@
 import {Component, HostBinding, OnDestroy, OnInit} from '@angular/core';
+import {DomSanitizer} from '@angular/platform-browser';
 import {ActivatedRoute} from '@angular/router';
 import {ParamMap} from '@angular/router/src/shared';
 import {Observable} from 'rxjs/Observable';
@@ -30,7 +31,8 @@ export class BuildComponent implements OnInit, OnDestroy {
   constructor(
       private readonly dataService: DataService,
       private readonly buildLogSocketService: BuildLogWebsocketService,
-      private readonly route: ActivatedRoute) {}
+      private readonly route: ActivatedRoute,
+      private sanitizer: DomSanitizer) {}
 
   ngOnDestroy(): void {
     this.closeWebsocket();
@@ -58,7 +60,8 @@ export class BuildComponent implements OnInit, OnDestroy {
               // TODO: define a log line model.
               const response = JSON.parse(message.data);
               if (response.log) {
-                this.logs.push(response.log);
+                const message = this.sanitizer.bypassSecurityTrustHtml(response.log.message);
+                this.logs.push( { ...response.log, message } );
               }
             });
   }
