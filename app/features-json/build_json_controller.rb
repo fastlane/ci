@@ -10,7 +10,6 @@ module FastlaneCI
   # Controller for providing all data relating to builds
   class BuildJSONController < APIController
     HOME = "/data/projects/:project_id/build"
-    ANSI_PATTERN = /\033\[([0-9]+);([0-9]+);([0-9]+)m(.+?)\033\[0m|([^\033]+)/m
 
     def self.build_url(project_id:, build_number:)
       return "/project/#{project_id}/build/#{build_number}"
@@ -190,9 +189,7 @@ module FastlaneCI
 
     # convert .log files that include the color information as ANSI code to plain text
     def convert_ansi_to_plain_text(data)
-      data.scan(ANSI_PATTERN).inject("") do |str, match|
-        str << (match[3] || match[4])
-      end
+      return data.gsub(/\e\[[0-9;]*m/, "")
     end
   end
 end
