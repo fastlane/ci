@@ -57,8 +57,8 @@ export class BuildComponent implements OnInit, OnDestroy {
             .subscribe((message) => {
               // TODO: define a log line model.
               const response = JSON.parse(message.data);
-              if(response.log) {
                 this.logs.push(response.log);
+              if (response.log) {
               }
             });
   }
