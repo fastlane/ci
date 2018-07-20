@@ -49,7 +49,6 @@ module FastlaneCI
 
     # TODO: consider the implications for users of this method that make the assumption
     # that the build status has been persisted or not. `start` is an async operation via the build_runner_service
-    # TODO(snatchev): pass the sha of the required checkout from the git_fork_config
     def start
       save_build_status_locally!
 
