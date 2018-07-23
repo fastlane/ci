@@ -17,7 +17,7 @@ export class BuildLogWebsocketService {
   constructor(@Inject(DOCUMENT) document: Document, authService: AuthService) {
     this.authService = authService;
     // TODO(snatchev): consider using wss once we have tls setup.
-    this.API_ROOT = `ws://${document.location.host}/`;
+    this.API_ROOT = `ws://${document.location.host}`;
   }
 
   connect(projectId: string, buildNumber: number):

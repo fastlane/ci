@@ -92,10 +92,10 @@ describe('BuildComponent', () => {
       fixture.detectChanges();
       expect(component.logs).toEqual([]);
       socketSubject.next(
-          new MessageEvent('type', {data: '{"message": "log1"}'}));
+          new MessageEvent('type', {data: '{"log":{"message": "log1"}}'}));
       expect(component.logs).toEqual([{message: 'log1'}]);
       socketSubject.next(
-          new MessageEvent('type', {data: '{"message": "log2"}'}));
+          new MessageEvent('type', {data: '{"log":{"message": "log2"}}'}));
       expect(component.logs).toEqual([{message: 'log1'}, {message: 'log2'}]);
     });
 
@@ -129,30 +129,12 @@ describe('BuildComponent', () => {
       expect(component.breadcrumbs[2].hint).toBe('Build');
     });
 
-    it('should unsubscribe websocket if the build is complete', () => {
-      fixture.detectChanges();  // onInit()
-      expect(component.websocketSubscription.closed).toBe(false);
-      buildSubject.next(mockBuild);
-
-      expect(component.websocketSubscription.closed).toBe(true);
-    });
-
     it('should unsubscribe websocket on destroy', () => {
       fixture.detectChanges();  // onInit()
       expect(component.websocketSubscription.closed).toBe(false);
       fixture.destroy();
 
       expect(component.websocketSubscription.closed).toBe(true);
-    });
-
-    it('should get build logs if build is complete ', () => {
-      fixture.detectChanges();  // onInit()
-      expect(component.websocketSubscription.closed).toBe(false);
-      buildSubject.next(mockBuild);
-      buildLogsSubject.next([{message: 'some logs'}]);
-
-      expect(component.logs.length).toBe(1);
-      expect(component.logs[0].message).toBe('some logs');
     });
 
     it('should not get build logs if build is incomplete ', () => {
@@ -178,7 +160,7 @@ describe('BuildComponent', () => {
       expect(logsEl.innerText).toBe('Connecting...');
 
       socketSubject.next(
-          new MessageEvent('type', {data: '{"message": "this is a log"}'}));
+          new MessageEvent('type', {data: '{"log":{"message": "this is a log"}}'}));
       fixture.detectChanges();
 
       expect(logsEl.innerText.trim()).toBe('this is a log');
