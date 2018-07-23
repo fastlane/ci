@@ -13,6 +13,8 @@ import {ProjectComponent} from '../project/project.component';
 import {ProjectModule} from '../project/project.module';
 import {SignupComponent} from '../signup/signup.component';
 import {SignupModule} from '../signup/signup.module';
+import {PageNotFoundComponent} from '../system/pagenotfound.component';
+import {SystemModule} from '../system/system.module';
 
 const routes: Routes = [
   {path: '', redirectTo: '/dashboard', pathMatch: 'full'},
@@ -22,11 +24,13 @@ const routes: Routes = [
   {path: 'login', component: LoginComponent},
   {path: 'signup', component: SignupComponent},
   {path: 'onboard', component: OnboardComponent},
+  {path: '404', component: PageNotFoundComponent},
+  {path: '**', redirectTo: '/404'}
 ];
 
 @NgModule({
   imports: [
-    DashboardModule, ProjectModule, BuildModule, LoginModule, SignupModule, OnboardModule,
+    DashboardModule, ProjectModule, BuildModule, LoginModule, SignupModule, OnboardModule, SystemModule,
     RouterModule.forRoot(routes)
   ],
   exports: [RouterModule]
