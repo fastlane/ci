@@ -1,5 +1,5 @@
 import {Component, HostBinding, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {ParamMap} from '@angular/router/src/shared';
 import {Observable} from 'rxjs/Observable';
 import {Subject} from 'rxjs/Subject';
@@ -30,6 +30,7 @@ export class BuildComponent implements OnInit, OnDestroy {
   constructor(
       private readonly dataService: DataService,
       private readonly buildLogSocketService: BuildLogWebsocketService,
+      private readonly router: Router,
       private readonly route: ActivatedRoute) {}
 
   ngOnDestroy(): void {
@@ -57,6 +58,9 @@ export class BuildComponent implements OnInit, OnDestroy {
             this.closeWebsocket();
           }
           this.updateBreadcrumbsLabels(build.projectId, build.number);
+        }, (error) => {
+          // @TODO check what type of error we get from api and act accordingly
+          this.router.navigate(['/404']);
         });
   }
 

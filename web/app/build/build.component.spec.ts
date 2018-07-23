@@ -1,5 +1,6 @@
-import {DebugElement} from '@angular/core';
-import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {DebugElement, Component} from '@angular/core';
+import {Location} from '@angular/common';
+import {async, ComponentFixture, TestBed, tick, fakeAsync} from '@angular/core/testing';
 import {MatCardModule, MatProgressSpinnerModule} from '@angular/material';
 import {By} from '@angular/platform-browser';
 import {ActivatedRoute, convertToParamMap} from '@angular/router';
@@ -19,7 +20,13 @@ import {DataService} from '../services/data.service';
 
 import {BuildComponent} from './build.component';
 
+@Component({
+  template: ''
+})
+export class MockComponent { }
+
 describe('BuildComponent', () => {
+  let location: Location;
   let component: BuildComponent;
   let fixture: ComponentFixture<BuildComponent>;
   let fixtureEl: DebugElement;
@@ -47,10 +54,12 @@ describe('BuildComponent', () => {
 
     TestBed
         .configureTestingModule({
-          declarations: [BuildComponent],
+          declarations: [BuildComponent, MockComponent],
           imports: [
-            ToolbarModule, RouterTestingModule, StatusIconModule, MatCardModule,
-            MatProgressSpinnerModule, MomentModule
+            ToolbarModule, StatusIconModule, RouterTestingModule.withRoutes(
+              [{path: '404', component: MockComponent} ]
+            ),
+            MatCardModule, MatProgressSpinnerModule, MomentModule
           ],
           providers: [
             {
@@ -71,6 +80,8 @@ describe('BuildComponent', () => {
     fixture = TestBed.createComponent(BuildComponent);
     fixtureEl = fixture.debugElement;
     component = fixture.componentInstance;
+
+    location = TestBed.get(Location);
   });
 
   describe('unit tests', () => {
@@ -87,6 +98,16 @@ describe('BuildComponent', () => {
 
       expect(component.build).toBe(mockBuild);
     });
+
+    it('should redirect if build returns 404', fakeAsync(() => {
+      fixture.detectChanges();
+      expect(dataService.getBuild).toHaveBeenCalledWith('123', 3);
+
+      buildSubject.error({});
+      tick();
+
+      expect(location.path()).toBe('/404');
+    }));
 
     it('should update logs as they come in', () => {
       fixture.detectChanges();
