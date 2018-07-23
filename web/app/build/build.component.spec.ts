@@ -19,11 +19,7 @@ import {BuildLogMessageEvent, BuildLogWebsocketService} from '../services/build-
 import {DataService} from '../services/data.service';
 
 import {BuildComponent} from './build.component';
-
-@Component({
-  template: ''
-})
-export class MockComponent { }
+import {DummyComponent} from '../common/test_helpers/dummy.component';
 
 describe('BuildComponent', () => {
   let location: Location;
@@ -54,10 +50,10 @@ describe('BuildComponent', () => {
 
     TestBed
         .configureTestingModule({
-          declarations: [BuildComponent, MockComponent],
+          declarations: [BuildComponent, DummyComponent],
           imports: [
             ToolbarModule, StatusIconModule, RouterTestingModule.withRoutes(
-              [{path: '404', component: MockComponent} ]
+              [{path: '404', component: DummyComponent} ]
             ),
             MatCardModule, MatProgressSpinnerModule, MomentModule
           ],
@@ -84,7 +80,7 @@ describe('BuildComponent', () => {
     location = TestBed.get(Location);
   });
 
-  describe('unit tests', () => {
+  describe('Unit tests', () => {
     it('should start socket connection with correct project/build IDs', () => {
       fixture.detectChanges();
       expect(buildLogWebsocketService.connect).toHaveBeenCalledWith('123', 3);
@@ -99,7 +95,7 @@ describe('BuildComponent', () => {
       expect(component.build).toBe(mockBuild);
     });
 
-    it('should redirect if build returns 404', fakeAsync(() => {
+    it('should redirect if API returns an error', fakeAsync(() => {
       fixture.detectChanges();
       expect(dataService.getBuild).toHaveBeenCalledWith('123', 3);
 
