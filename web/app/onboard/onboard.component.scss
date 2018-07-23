@@ -24,37 +24,14 @@
 }
 
 .mat-stepper-vertical {
-    .fci-substep {
-        font-size: 14px;
-        color: #4a4a4a;
-        .fci-substep-label {
-            margin-bottom: 24px;
-            .fci-substep-letter {
-                color: #9b9b9b;
-                border: 1px solid #9b9b9b;
-                border-radius: 50%;
-                font-size: 12px;
-                margin-right: 16px;
-                padding: 4px 8px;
-            }
-        }
-        .fci-substep-content {
-            padding-left: 40px;
-        }
-    }
     .fci-input-container {
         padding-bottom: 24px;
-        .fci-username {
-            font-size: 16px;
-        }
-        .fci-input-status {
+    }
+    .fci-step-button-container {
+        display: flex;
+        align-items: center;
+        .mat-spinner {
             display: inline-block;
-            padding-left: 8px;
-            .mat-spinner,
-            .mat-icon {
-                vertical-align: middle;
-                display: inline-block;
-            }
         }
     }
     p {
@@ -66,15 +43,4 @@
     button:first-child {
         margin-right: 8px;
     }
-}
-
-.fci-github-token-scopes-image {
-    background: url(/assets/github_token_scopes.png);
-    background-repeat: no-repeat;
-    background-size: contain;
-    height: 214px;
-    width: 595px;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    margin-top: 16px;
-    margin-bottom: 32px;
 }

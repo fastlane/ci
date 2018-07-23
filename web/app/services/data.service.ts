@@ -92,4 +92,10 @@ export class DataService {
     return this.http.get<ConfiguredSectionsResponse>(url).pipe(map(
         (configuredSections) => new ConfiguredSections(configuredSections)));
   }
+
+  setEncryptionKey(encryptionKey: string): Observable<void> {
+    const url = `${HOSTNAME}/setup/encryption_key`;
+
+    return this.http.post<void>(url, {encryption_key: encryptionKey});
+  }
 }

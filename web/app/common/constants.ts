@@ -32,9 +32,3 @@ export function fastlaneStatusToEnum(status: FastlaneStatus): BuildStatus {
       throw new Error(`Unknown status type ${status}`);
   }
 }
-
-/**
- * This is what is defined by GitHub to be their token length, but it can be
- * modified.
- */
-export const GITHUB_API_TOKEN_LENGTH = 40;
