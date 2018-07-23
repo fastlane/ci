@@ -1,6 +1,5 @@
 import {DOCUMENT} from '@angular/common';
 import {ChangeDetectorRef, Component, Inject, OnInit, ViewChild} from '@angular/core';
-import {AfterViewInit} from '@angular/core/src/metadata/lifecycle_hooks';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {MatVerticalStepper} from '@angular/material';
 
