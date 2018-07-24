@@ -65,19 +65,21 @@ module FastlaneCI::Agent
     #
     # this command will either execute successfully or raise an exception.
     def sh(*params, env: {})
-      @output_queue.push(params.join(" "))
-      stdin, stdouterr, thread = Open3.popen2e(*params, chdir: Dir.pwd)
-      stdin.close
+      Bundler.with_clean_env do
+        @output_queue.push(params.join(" "))
+        stdin, stdouterr, thread = Open3.popen2e(*params)
+        stdin.close
 
-      # `gets` on a pipe will block until the pipe is closed, then returns nil.
-      while (line = stdouterr.gets)
-        logger.debug(line)
-        @output_queue.push(line)
-      end
+        # `gets` on a pipe will block until the pipe is closed, then returns nil.
+        while (line = stdouterr.gets)
+          logger.debug(line)
+          @output_queue.push(line)
+        end
 
-      exit_status = thread.value.exitstatus
-      if exit_status != 0
-        raise SystemCallError.new(line, exit_status)
+        exit_status = thread.value.exitstatus
+        if exit_status != 0
+          raise SystemCallError.new(line, exit_status)
+        end
       end
     end
   end
