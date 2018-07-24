@@ -14,5 +14,31 @@ module FastlaneCI
         config_repo: !FastlaneCI.dot_keys.repo_url.nil?
       })
     end
+
+    post "#{HOME}/encryption_key", authenticate: false do
+      key = params["encryption_key"]
+
+      if key.nil?
+        json_error!(
+          error_message: "Must provide encryption key",
+          error_key: "EncryptionKey.Missing",
+          error_code: 400
+        )
+      end
+
+      unless FastlaneCI.dot_keys.encryption_key.nil?
+        json_error!(
+          error_message: "The encryption key has already been set",
+          error_key: "EncryptionKey.AlreadyExists",
+          error_code: 403
+        )
+      end
+
+      Services.dot_keys_variable_service.write_keys_file!(
+        locals: {
+          encryption_key: key
+        }
+      )
+    end
   end
 end

@@ -212,4 +212,20 @@ describe('DataService', () => {
       expect(configuredSections.configRepo).toBe(false);
     });
   });
+
+  describe('#setEncryptionKey', () => {
+    it('should set server encryption key', () => {
+      let hasResponded = false;
+      dataService.setEncryptionKey('some-key').subscribe(() => {
+        hasResponded = true;
+      });
+
+      const setKeyRequest = mockHttp.expectOne('/data/setup/encryption_key');
+      expect(setKeyRequest.request.body).toEqual({encryption_key: 'some-key'});
+      expect(setKeyRequest.request.method).toBe('POST');
+      setKeyRequest.flush({});
+
+      expect(hasResponded).toBe(true);
+    });
+  });
 });
