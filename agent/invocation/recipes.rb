@@ -33,8 +33,7 @@ module FastlaneCI::Agent
     def run_fastlane(command)
       command_string = "#{command.bin} #{command.parameters.join(' ')}"
       logger.debug("invoking #{command_string}")
-      # TODO: send the env to fastlane.
-      sh(command_string)
+      sh(command_string, env: command.env.to_h)
 
       true
     end
@@ -69,7 +68,7 @@ module FastlaneCI::Agent
       # ensure our command is executed without the config of fastlane.ci
       Bundler.with_clean_env do
         @output_queue.push(params.join(" "))
-        stdin, stdouterr, thread = Open3.popen2e(*params)
+        stdin, stdouterr, thread = Open3.popen2e(env, *params)
         stdin.close
 
         # `gets` on a pipe will block until the pipe is closed, then returns nil.
