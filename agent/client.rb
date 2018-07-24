@@ -25,7 +25,7 @@ module FastlaneCI
       end
 
       def request_run_fastlane(bin, *params, env: {})
-        command = Proto::Command.new(bin: bin, parameters: params, env: env)
+        command = Proto::Command.new(bin: bin, parameters: params.compact, env: env)
         @stub.run_fastlane(Proto::InvocationRequest.new(command: command))
       end
     end

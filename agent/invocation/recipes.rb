@@ -17,7 +17,7 @@ module FastlaneCI::Agent
       dir = Dir.mktmpdir("fastlane-ci")
       logger.debug("Changing into working directory #{dir}.")
 
-      # TOOD: need Git Credentials for private repos.
+      # TODO: need Git Credentials for private repos.
       Dir.mkdir(File.join(dir, "repo"))
       Dir.chdir(File.join(dir, "repo"))
 
@@ -27,7 +27,6 @@ module FastlaneCI::Agent
       sh("git fetch --depth=1 origin #{git_sha}")
       sh("git checkout FETCH_HEAD")
 
-      sh("gem install bundler --no-doc")
       sh("bundle install --deployment")
     end
 
@@ -67,7 +66,7 @@ module FastlaneCI::Agent
     # this command will either execute successfully or raise an exception.
     def sh(*params, env: {})
       @output_queue.push(params.join(" "))
-      stdin, stdouterr, thread = Open3.popen2e(*params)
+      stdin, stdouterr, thread = Open3.popen2e(*params, chdir: Dir.pwd)
       stdin.close
 
       # `gets` on a pipe will block until the pipe is closed, then returns nil.

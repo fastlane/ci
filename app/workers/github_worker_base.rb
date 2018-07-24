@@ -69,7 +69,6 @@ module FastlaneCI
 
       build_runner = RemoteRunner.new(
         project: current_project,
-        sha: current_sha,
         github_service: github_service,
         git_fork_config: git_fork_config,
         trigger: trigger
