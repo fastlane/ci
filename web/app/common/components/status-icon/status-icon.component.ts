@@ -41,6 +41,8 @@ export class StatusIconComponent {
         return 'Installing XCode';
       case BuildStatus.INTERNAL_ISSUE:
         return 'Internal CI Issue';
+      case BuildStatus.RUNNING:
+        return 'Pending';
       case BuildStatus.PENDING:
         return 'Pending';
       default:
