@@ -65,6 +65,8 @@ module FastlaneCI::Agent
     #
     # this command will either execute successfully or raise an exception.
     def sh(*params, env: {})
+      ##
+      # ensure our command is executed without the config of fastlane.ci
       Bundler.with_clean_env do
         @output_queue.push(params.join(" "))
         stdin, stdouterr, thread = Open3.popen2e(*params)
