@@ -15,24 +15,25 @@ module FastlaneCI::Agent
 
     def setup_repo(git_url, git_sha)
       dir = Dir.mktmpdir("fastlane-ci")
-      Dir.chdir(dir)
       logger.debug("Changing into working directory #{dir}.")
 
-      # TOOD: need Git Credentials for private repos.
-      sh("git clone --depth 1 #{git_url} repo")
-      Dir.chdir("repo")
+      # TODO: need Git Credentials for private repos.
+      Dir.mkdir(File.join(dir, "repo"))
+      Dir.chdir(File.join(dir, "repo"))
 
-      sh("git checkout #{git_sha}")
+      # We only want to fetch a single sha. This is how we can do that:
+      sh("git init .")
+      sh("git remote add origin #{git_url}")
+      sh("git fetch --depth=1 origin #{git_sha}")
+      sh("git checkout FETCH_HEAD")
 
-      sh("gem install bundler --no-doc")
       sh("bundle install --deployment")
     end
 
     def run_fastlane(command)
       command_string = "#{command.bin} #{command.parameters.join(' ')}"
       logger.debug("invoking #{command_string}")
-      # TODO: send the env to fastlane.
-      sh(command_string)
+      sh(command_string, env: command.env.to_h)
 
       true
     end
@@ -63,19 +64,23 @@ module FastlaneCI::Agent
     #
     # this command will either execute successfully or raise an exception.
     def sh(*params, env: {})
-      @output_queue.push(params.join(" "))
-      stdin, stdouterr, thread = Open3.popen2e(*params)
-      stdin.close
+      ##
+      # ensure our command is executed without the config of fastlane.ci
+      Bundler.with_clean_env do
+        @output_queue.push(params.join(" "))
+        stdin, stdouterr, thread = Open3.popen2e(env, *params)
+        stdin.close
 
-      # `gets` on a pipe will block until the pipe is closed, then returns nil.
-      while (line = stdouterr.gets)
-        logger.debug(line)
-        @output_queue.push(line)
-      end
+        # `gets` on a pipe will block until the pipe is closed, then returns nil.
+        while (line = stdouterr.gets)
+          logger.debug(line)
+          @output_queue.push(line)
+        end
 
-      exit_status = thread.value.exitstatus
-      if exit_status != 0
-        raise SystemCallError.new(line, exit_status)
+        exit_status = thread.value.exitstatus
+        if exit_status != 0
+          raise SystemCallError.new(line, exit_status)
+        end
       end
     end
   end
