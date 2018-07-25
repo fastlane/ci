@@ -33,6 +33,9 @@ gem "octokit", ">= 4.8.0", "< 5.0.0"
 # Load the `.keys` dotenv file we use to store encryption data
 gem "dotenv", ">= 2.4.0", "< 3.0.0"
 
+## Simplified HTTP client library
+gem "faraday", ">= 0.15.2", "< 1.0"
+
 # Caching for octokit operations
 gem "faraday-http-cache", ">= 2.0.0", "< 3.0.0"
 

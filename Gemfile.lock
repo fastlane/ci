@@ -363,6 +363,7 @@ DEPENDENCIES
   bundler (>= 1.16.0, < 2.0.0)
   coveralls
   dotenv (>= 2.4.0, < 3.0.0)
+  faraday (>= 0.15.2, < 1.0)
   faraday-http-cache (>= 2.0.0, < 3.0.0)
   fastfile-parser!
   fastlane!
@@ -393,4 +394,4 @@ DEPENDENCIES
   xcode-install (>= 2.4.0, < 3.0.0)
 
 BUNDLED WITH
-   1.16.2
+   1.16.3

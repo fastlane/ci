@@ -6,12 +6,13 @@ module FastlaneCI
     HOME = "/data/setup"
 
     get "#{HOME}/configured_sections", authenticate: false do
+      # Setting the OAuth keys without a provider type is not robust, we should
+      # find a way to differentiate client ID/Secret by provider type (Ex. GitHub)
+      is_oauth_configured = !FastlaneCI.dot_keys.oauth_client_id.nil? && !FastlaneCI.dot_keys.oauth_client_secret.nil?
       return json({
         encryption_key: !FastlaneCI.dot_keys.encryption_key.nil?,
-        # Setting the OAuth keys without a provider type is not robust, we should
-        # find a way to differentiate client ID/Secret by provider type (Ex. GitHub)
-        oauth: !FastlaneCI.dot_keys.oauth_client_id.nil? && !FastlaneCI.dot_keys.oauth_client_secret.nil?,
-        config_repo: !FastlaneCI.dot_keys.repo_url.nil?
+        oauth: is_oauth_configured,
+        config_repo: is_oauth_configured && !FastlaneCI.dot_keys.repo_url.nil?
       })
     end
 
@@ -42,8 +43,8 @@ module FastlaneCI
     end
 
     post "#{HOME}/oauth", authenticate: false do
-      client_id = params["client_id"]
-      client_secret = params["client_secret"]
+      client_id = params["client_id"].to_s
+      client_secret = params["client_secret"].to_s
 
       if client_id.nil? || client_secret.nil?
         json_error!(

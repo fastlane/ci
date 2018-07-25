@@ -4,57 +4,38 @@ import * as moment from 'moment';
 import {Observable} from 'rxjs/Observable';
 import {shareReplay, tap} from 'rxjs/operators';
 import {LocalStorageKeys} from '../common/constants';
+import {GitHubScope} from '../common/types';
 
 // Auth server is currently locally hosted.
 const API_ROOT = '/api';
-
+const DEFAULT_SCOPES: GitHubScope[] = ['repo'];
 export interface LoginResponse {
-  token: string;
-}
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-interface DecodedJwt {
-  exp: number;   // Token Expiry date in seconds
-  iat: number;   // Token Issue date in seconds
-  iss: string;   // Token Issuer
-  user: string;  // User ID
-}
-
-function getTokenExpiryDate(token: string): Date {
-  const base64Url = token.split('.')[1];
-  const base64 = base64Url.replace('-', '+').replace('_', '/');
-  const decodedJwt: DecodedJwt = JSON.parse(window.atob(base64));
-
-  // Need to convert from seconds to milliseconds
-  return new Date(decodedJwt.exp * 1000);
+  oauth_key: string;
 }
 
 @Injectable()
 export class AuthService {
   constructor(private http: HttpClient) {}
 
-  login(loginRequest: LoginRequest): Observable<LoginResponse> {
-    const url = `${API_ROOT}/login`;
-    return this.http.post<LoginResponse>(url, loginRequest)
-        .pipe(tap(this.setSession), shareReplay());
+  login(scopes: GitHubScope[] = DEFAULT_SCOPES): Observable<LoginResponse> {
+    // TODO: github UI workflow
+    const code = 'placeholder';
+    const url = `${API_ROOT}/user/oauth?code=${code}`;
+    return this.http.get<LoginResponse>(url).pipe(
+        tap(this.setSession), shareReplay());
   }
 
-  // manage the expiry without having to make a request.
+  // preserve the token in the local storage
   private setSession(loginResponse: LoginResponse) {
-    localStorage.setItem(LocalStorageKeys.AUTH_TOKEN, loginResponse.token);
+    localStorage.setItem(LocalStorageKeys.AUTH_TOKEN, loginResponse.oauth_key);
   }
 
   logout(): void {
     localStorage.removeItem(LocalStorageKeys.AUTH_TOKEN);
   }
 
-  /** Checks if the user has a token and if the token is still valid */
+  /** Checks if the user has a token */
   isLoggedIn(): boolean {
-    const token = localStorage.getItem(LocalStorageKeys.AUTH_TOKEN);
-    return !!token && getTokenExpiryDate(token) > new Date(Date.now());
+    return !!localStorage.getItem(LocalStorageKeys.AUTH_TOKEN);
   }
 }
