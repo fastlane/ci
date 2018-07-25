@@ -98,6 +98,10 @@ module FastlaneCI
         authorization = request.env["HTTP_AUTHORIZATION"]
         bearer_token = authorization && authorization.slice(7..-1) # strip off the `Bearer `
 
+        # give the option to pass the bearer token as a query param.
+        # this is used when making websocket connections which do not allow us to set http headers
+        bearer_token ||= request.params["bearer_token"]
+
         payload, _header = JWT.decode(
           bearer_token,
           settings.jwt_secret,

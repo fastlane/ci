@@ -52,9 +52,12 @@ export class AuthService {
     localStorage.removeItem(LocalStorageKeys.AUTH_TOKEN);
   }
 
+  token(): string {
+    return localStorage.getItem(LocalStorageKeys.AUTH_TOKEN);
+  }
+
   /** Checks if the user has a token and if the token is still valid */
   isLoggedIn(): boolean {
-    const token = localStorage.getItem(LocalStorageKeys.AUTH_TOKEN);
-    return !!token && getTokenExpiryDate(token) > new Date(Date.now());
+    return !!this.token() && getTokenExpiryDate(this.token()) > new Date(Date.now());
   }
 }

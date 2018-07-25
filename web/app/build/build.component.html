@@ -9,10 +9,7 @@
     <div class="fci-build-logs">
       <ng-container *ngIf="logs.length <= 0">Connecting...</ng-container>
       <ng-container *ngIf="logs.length > 0">
-        <ng-container *ngFor="let log of logs">
-          {{log.message}}
-          <br>
-        </ng-container>
+        <ng-container *ngFor="let log of logs"><pre>{{log.message}}</pre></ng-container>
       </ng-container>
     </div>
   </div>

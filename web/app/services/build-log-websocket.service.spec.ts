@@ -1,6 +1,7 @@
 import {DOCUMENT} from '@angular/common';
 import {async, TestBed} from '@angular/core/testing';
 import {Subject} from 'rxjs/Subject';
+import {AuthService} from './auth.service';
 
 import {BuildLogWebsocketService} from './build-log-websocket.service';
 
@@ -12,6 +13,7 @@ describe('BuildLogWebsocketService', () => {
       providers: [
         BuildLogWebsocketService,
         {provide: DOCUMENT, useValue: {location: {host: 'host'}}},
+        {provide: AuthService, useValue: new AuthService(null)},
       ]
     });
 
@@ -21,7 +23,7 @@ describe('BuildLogWebsocketService', () => {
   it('should attempt to connect to correct socket', () => {
     const socket = buildLogWebsocketService.createSocket('pId', 3);
     socket.close();
-    expect(socket.url).toBe('ws://host/?project_id=pId&build_number=3');
+    expect(socket.url).toBe('ws://host/data/projects/pId/build/3/log.ws?bearer_token=null')
   });
 
   describe('socket connection', () => {

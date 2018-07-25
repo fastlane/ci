@@ -11,7 +11,7 @@ export enum LocalStorageKeys {
   AUTH_TOKEN = 'auth_token'
 }
 
-export type FastlaneStatus = 'failure'|'success'|'ci_problem'|'pending'|
+export type FastlaneStatus = 'failure'|'success'|'ci_problem'|'pending'|'running'|
     'missing_fastfile'|'installing_xcode';
 
 export function fastlaneStatusToEnum(status: FastlaneStatus): BuildStatus {
@@ -21,6 +21,8 @@ export function fastlaneStatusToEnum(status: FastlaneStatus): BuildStatus {
     case 'failure':
       return BuildStatus.FAILED;
     case 'pending':
+      return BuildStatus.PENDING;
+    case 'running':
       return BuildStatus.PENDING;
     case 'missing_fastfile':
       return BuildStatus.MISSING_FASTFILE;

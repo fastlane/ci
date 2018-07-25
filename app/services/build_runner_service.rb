@@ -44,7 +44,7 @@ module FastlaneCI
     def find_build_runner(project_id:, sha: nil, build_number: nil)
       return build_runners.find do |build_runner|
         build_runner.project.id == project_id &&
-        (build_runner.sha == sha || build_runner.current_build.number == build_number)
+        (build_runner.current_build.sha == sha || build_runner.current_build.number == build_number)
       end
     end
   end

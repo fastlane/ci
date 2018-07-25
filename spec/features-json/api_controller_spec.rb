@@ -35,6 +35,11 @@ describe FastlaneCI::APIController do
         )
       end
 
+      it "index is successful via query params" do
+        get("/", bearer_token: bearer_token.sub("Bearer ", ""))
+        expect(last_response).to be_ok
+      end
+
       it "public is successful" do
         get("/public")
         expect(last_response.status).to eq(200)

@@ -47,15 +47,6 @@ export class BuildComponent implements OnInit, OnDestroy {
         })
         .subscribe((build: Build) => {
           this.build = build;
-          if (build.isComplete()) {
-            this.dataService
-                .getBuildLogs(this.build.projectId, this.build.number)
-                .subscribe((buildLogs => {
-                  this.logs = buildLogs;
-                }));
-
-            this.closeWebsocket();
-          }
           this.updateBreadcrumbsLabels(build.projectId, build.number);
         });
   }
@@ -65,7 +56,10 @@ export class BuildComponent implements OnInit, OnDestroy {
         this.buildLogSocketService.connect(projectId, buildNumber)
             .subscribe((message) => {
               // TODO: define a log line model.
-              this.logs.push(JSON.parse(message.data));
+              const response = JSON.parse(message.data);
+              if (response.log) {
+                this.logs.push(response.log);
+              }
             });
   }
 

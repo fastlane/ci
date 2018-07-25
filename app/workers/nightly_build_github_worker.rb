@@ -65,10 +65,14 @@ module FastlaneCI
       logger.debug(
         "Creating a build task for commit: #{newest_commit} from #{project.project_name} (#{repo_full_name})"
       )
-      create_and_queue_build_task(
+
+      git_fork_config = GitForkConfig.new(
         sha: newest_commit,
-        trigger: project.find_triggers_of_type(trigger_type: :nightly).first,
-        notification_service: notification_service
+        clone_url: project.repo_config.git_url
+      )
+      create_and_queue_build_task(
+        git_fork_config: git_fork_config,
+        trigger: project.find_triggers_of_type(trigger_type: :nightly).first
       )
     end
 

@@ -263,20 +263,12 @@ module FastlaneCI
             ref: matching_open_pr.git_ref
           )
 
-          # TODO: should make sure we don't already have a checkout, if we do, we need to adjust
-          # the local_build_folder for the BuildRunner
-          build_runner = FastlaneBuildRunner.new(
+          build_runner = RemoteRunner.new(
             project: project,
-            sha: sha,
             github_service: github_service,
-            notification_service: Services.notification_service,
-            # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
-            work_queue: FastlaneCI::GitRepo.git_action_queue,
             git_fork_config: git_fork_config,
             trigger: project.find_triggers_of_type(trigger_type: :pull_request).first
           )
-
-          build_runner.setup(parameters: nil)
           Services.build_runner_service.add_build_runner(build_runner: build_runner)
         end
       end
@@ -322,18 +314,13 @@ module FastlaneCI
             ref: open_pr.git_ref
           )
 
-          build_runner = FastlaneBuildRunner.new(
+          build_runner = RemoteRunner.new(
             project: project,
-            sha: open_pr.current_sha,
             github_service: github_service,
-            notification_service: Services.notification_service,
-            # using the git repo queue because of https://github.com/ruby-git/ruby-git/issues/355
-            work_queue: FastlaneCI::GitRepo.git_action_queue,
             git_fork_config: git_fork_config,
             trigger: project.find_triggers_of_type(trigger_type: :pull_request).first
           )
 
-          build_runner.setup(parameters: nil)
           Services.build_runner_service.add_build_runner(build_runner: build_runner)
         end
       end

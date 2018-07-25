@@ -136,10 +136,8 @@ module FastlaneCI
           )
 
           create_and_queue_build_task(
-            sha: commit.sha,
             trigger: project.find_triggers_of_type(trigger_type: :commit).first,
-            git_fork_config: new_git_fork_config,
-            notification_service: notification_service
+            git_fork_config: new_git_fork_config
           )
         end
       end
