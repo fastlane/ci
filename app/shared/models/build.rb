@@ -5,6 +5,8 @@ module FastlaneCI
     # Note, BUILD_STATUSES determine how a build is persisted and how the information is pushed to remote.
     # Example: on success/failure/pending, we automatically update status local + remote
     # With missing_fastfile, we ultimately set a `:failure` when we send a status update to github
+
+    # TODO: consider pulling in protos/agent_pb FastlaneCI.Proto.InvocationResponse.State
     BUILD_STATUSES = [
       :success,
       :pending,
