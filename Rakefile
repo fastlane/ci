@@ -1,9 +1,15 @@
 task :dev do
-  sh "bundle exec rackup --host 0.0.0.0 --port 8080 --env development"
+  unless system("which foreman", out: File::NULL)
+    raise "`foreman` is now required for process management. `sudo gem install foreman`"
+  end
+  sh "foreman start -f Procfile.dev"
 end
 
 task :prod do
-  sh "bundle exec rackup --host 0.0.0.0 --port 8080 --env production"
+  unless system("which foreman", out: File::NULL)
+    raise "`foreman` is now required for process management. `sudo gem install foreman`"
+  end
+  sh "foreman start"
 end
 
 task :dev_bootstrap do
