@@ -6,8 +6,17 @@ module FastlaneCI
     ##
     # A sample client that can be used to make a request to the service.
     class Client
-      def initialize(host)
-        @stub = Proto::Agent::Stub.new("#{host}:#{PORT}", :this_channel_is_insecure)
+      ##
+      # the host that the client is connecting to
+      attr_reader :host
+
+      # the port that the client is connecting to
+      attr_reader :port
+
+      def initialize(host, port = PORT)
+        @host = host
+        @port = port
+        @stub = Proto::Agent::Stub.new("#{@host}:#{@port}", :this_channel_is_insecure)
       end
 
       def request_spawn(bin, *params, env: {})
@@ -16,12 +25,11 @@ module FastlaneCI
       end
 
       def request_run_fastlane(bin, *params, env: {})
-        command = Proto::Command.new(bin: bin, parameters: params, env: env)
+        command = Proto::Command.new(bin: bin, parameters: params.compact, env: env)
         @stub.run_fastlane(Proto::InvocationRequest.new(command: command))
       end
     end
   end
-  @file && @file.close
 end
 
 if $0 == __FILE__
