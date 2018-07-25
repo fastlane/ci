@@ -216,7 +216,7 @@ module FastlaneCI
       case state
       when "success"
         "All green"
-      when "pending"
+      when "pending", "running"
         "Still running"
       when "installing_xcode"
         "Installing Xcode"
@@ -243,6 +243,7 @@ module FastlaneCI
         "error",
         "failure",
         "pending",
+        "running",
         "success",
         "ci_problem",
         "missing_fastfile",

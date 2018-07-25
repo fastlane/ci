@@ -32,6 +32,13 @@ const EXPECTED_STATUSES = new Map<BuildStatus, ExpectedIcon>([
     }
   ],
   [
+    BuildStatus.RUNNING, {
+      iconString: 'directions_run',
+      class: 'fci-status-icon-running',
+      tooltipString: 'Running'
+    }
+  ],
+  [
     BuildStatus.FAILED, {
       iconString: 'cancel',
       class: 'fci-status-icon-failed',

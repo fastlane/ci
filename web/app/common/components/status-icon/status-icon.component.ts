@@ -5,7 +5,7 @@ import {BuildStatus} from '../../constants';
 const FAILED_STATUSES: BuildStatus[] =
     [BuildStatus.FAILED, BuildStatus.MISSING_FASTFILE];
 
-const RUNNING_STATUSES: BuildStatus[] = [BuildStatus.INSTALLING_XCODE];
+const RUNNING_STATUSES: BuildStatus[] = [BuildStatus.INSTALLING_XCODE, BuildStatus.RUNNING];
 
 @Component({
   selector: 'fci-status-icon',
@@ -43,6 +43,8 @@ export class StatusIconComponent {
         return 'Internal CI Issue';
       case BuildStatus.PENDING:
         return 'Pending';
+      case BuildStatus.RUNNING:
+        return 'Running';
       default:
         throw new Error(`Unknown status type ${this.status}`);
     }
