@@ -13,7 +13,9 @@ module FastlaneCI
         ci_user_password: ci_user_password,
         ci_user_api_token: ci_user_api_token,
         repo_url: repo_url,
-        initial_onboarding_user_api_token: initial_onboarding_user_api_token
+        initial_onboarding_user_api_token: initial_onboarding_user_api_token,
+        oauth_client_id: oauth_client_id,
+        oauth_client_secret: oauth_client_secret
       }
     end
 
@@ -26,6 +28,17 @@ module FastlaneCI
     # Randomly generated key, that's used to encrypt the user passwords
     def encryption_key
       ENV["FASTLANE_CI_ENCRYPTION_KEY"]
+    end
+
+    # ID representing the oauth client specific to a provider (Ex. GitHub)
+    def oauth_client_id
+      ENV["FASTLANE_CI_OAUTH_CLIENT_ID"]
+    end
+
+    # Secret representing the oauth client specific to a provider (Ex. GitHub)
+    # Should always be kept confidential.
+    def oauth_client_secret
+      ENV["FASTLANE_CI_OAUTH_CLIENT_SECRET"]
     end
 
     # The password for your fastlane CI bot account

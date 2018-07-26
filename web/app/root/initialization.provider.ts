@@ -17,9 +17,9 @@ export class InitializationProvider {
    * @returns a promise. This is needed to have the app init wait on this call.
    */
   initialize(): Promise<void> {
-    return this.dataService.isServerConfigured()
-        .map((isConfigured) => {
-          if (!isConfigured) {
+    return this.dataService.getServerConfiguredSections()
+        .map((configuredSections) => {
+          if (!configuredSections.areAllSectionsConfigured()) {
             this.router.navigate(['onboard']);
           }
         })

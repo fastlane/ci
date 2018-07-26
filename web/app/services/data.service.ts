@@ -6,6 +6,7 @@ import {map} from 'rxjs/operators';
 import {UserDetails} from '../common/types';
 import {Build, BuildLogLine, BuildResponse} from '../models/build';
 import {BuildSummary, BuildSummaryResponse} from '../models/build_summary';
+import {ConfiguredSections, ConfiguredSectionsResponse} from '../models/configured_sections';
 import {Lane, LaneResponse} from '../models/lane';
 import {Project, ProjectResponse} from '../models/project';
 import {ProjectSummary, ProjectSummaryResponse} from '../models/project_summary';
@@ -86,8 +87,15 @@ export class DataService {
         map((repos) => repos.map((repo) => new Repository(repo))));
   }
 
-  isServerConfigured(): Observable<boolean> {
-    const url = `${HOSTNAME}/setup/configured`;
-    return this.http.get<boolean>(url);
+  getServerConfiguredSections(): Observable<ConfiguredSections> {
+    const url = `${HOSTNAME}/setup/configured_sections`;
+    return this.http.get<ConfiguredSectionsResponse>(url).pipe(map(
+        (configuredSections) => new ConfiguredSections(configuredSections)));
+  }
+
+  setEncryptionKey(encryptionKey: string): Observable<void> {
+    const url = `${HOSTNAME}/setup/encryption_key`;
+
+    return this.http.post<void>(url, {encryption_key: encryptionKey});
   }
 }

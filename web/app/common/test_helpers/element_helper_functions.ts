@@ -1,4 +1,6 @@
 import {DebugElement} from '@angular/core';
+import {ComponentFixture} from '@angular/core/testing';
+import {FormGroup} from '@angular/forms/src/model';
 import {By} from '@angular/platform-browser';
 
 function doesElementExist(context: DebugElement, selector: string): boolean {
@@ -45,4 +47,23 @@ export function expectElementNotToExist(
           false,
           `An element was expected NOT to exist, but was found\nSelector: '${
               selector}'`);
+}
+
+export function expectInputControlToBeAttachedToForm(
+    fixture: ComponentFixture<any>, formControlName: string, form: FormGroup) {
+  const controlEl: HTMLInputElement =
+      getElement(
+          fixture.debugElement, `input[formcontrolname="${formControlName}"]`)
+          .nativeElement;
+
+  controlEl.value = '10';
+  controlEl.dispatchEvent(new Event('input'));
+  fixture.detectChanges();
+
+  expect(form.get(formControlName).value).toBe('10');
+
+  form.patchValue({[formControlName]: '12'});
+  fixture.detectChanges();
+
+  expect(controlEl.value).toBe('12');
 }

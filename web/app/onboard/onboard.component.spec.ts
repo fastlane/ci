@@ -6,30 +6,30 @@ import {MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatStepperModu
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {Subject} from 'rxjs/Subject';
-
-import {expectElementNotToExist, expectElementToExist, getElement, getElementText} from '../common/test_helpers/element_helper_functions';
+// tslint:disable-next-line:max-line-length
+import {expectElementNotToExist, expectElementToExist, expectInputControlToBeAttachedToForm, getAllElements, getElement, getElementText} from '../common/test_helpers/element_helper_functions';
 import {UserDetails} from '../common/types';
+import {ConfiguredSections} from '../models/configured_sections';
 import {DataService} from '../services/data.service';
 
 import {OnboardComponent} from './onboard.component';
-
-const FORM_CONTROL_IDS: string[] =
-    ['encryptionKey', 'botToken', 'botPassword', 'configRepo'];
-const FORTY_CHAR_STRING: string = new Array(40 + 1).join('a');
-const THIRY_NINE_CHAR_STRING: string = new Array(39 + 1).join('a');
 
 describe('OnboardComponent', () => {
   let fixture: ComponentFixture<OnboardComponent>;
   let fixtureEl: DebugElement;
   let component: OnboardComponent;
   let dataService: jasmine.SpyObj<Partial<DataService>>;
-  let userDetailsSubject: Subject<UserDetails>;
+  let configuredSectionsSubject: Subject<ConfiguredSections>;
+  let encryptionKeySubject: Subject<void>;
 
   beforeEach(() => {
-    userDetailsSubject = new Subject<UserDetails>();
+    configuredSectionsSubject = new Subject<ConfiguredSections>();
+    encryptionKeySubject = new Subject<void>();
     dataService = {
-      getUserDetails:
-          jasmine.createSpy().and.returnValue(userDetailsSubject.asObservable())
+      getServerConfiguredSections: jasmine.createSpy().and.returnValue(
+          configuredSectionsSubject.asObservable()),
+      setEncryptionKey: jasmine.createSpy().and.returnValue(
+          encryptionKeySubject.asObservable())
     };
 
     TestBed
@@ -53,137 +53,140 @@ describe('OnboardComponent', () => {
     fixture.detectChanges();
   });
 
-  describe('Unit tests', () => {
-    it('should not get user details when the bot token is 39 chars', () => {
-      component.form.patchValue({botToken: THIRY_NINE_CHAR_STRING});
+  function expectStepIndexContentToBeShown(index: number) {
+    const stepEl = getAllElements(fixtureEl, '.mat-step')[index];
+    expectElementToExist(stepEl, '.mat-vertical-content-container');
+  }
 
-      expect(dataService.getUserDetails).not.toHaveBeenCalled();
-    });
+  it('should redirect to old onboarding when button is clicked', () => {
+    spyOn(component, 'goToOldOnboarding');
+    getElement(fixtureEl, '.fci-onboard-welcome button').nativeElement.click();
 
-    it('should get user details when the bot token is 40 chars', () => {
-      component.form.patchValue({botToken: FORTY_CHAR_STRING});
-
-      expect(dataService.getUserDetails)
-          .toHaveBeenCalledWith(FORTY_CHAR_STRING);
-    });
-
-    it('should clear email if the token is changed', () => {
-      component.botEmail = 'fake@email.com';
-      component.form.patchValue({botToken: 'new value'});
-
-      expect(component.botEmail).toBeUndefined();
-    });
-
-    it('should clear password if the token is changed', () => {
-      component.form.patchValue({botPassword: 'password'});
-      component.form.patchValue({botToken: 'new value'});
-
-      expect(component.form.get('botPassword').value).toBe(null);
-    });
-
-    it('should set email from user details request', () => {
-      component.form.patchValue({botToken: FORTY_CHAR_STRING});
-      userDetailsSubject.next({github: {email: 'best@gmail.com'}});
-
-      expect(component.botEmail).toBe('best@gmail.com');
-    });
-
-    it('should set isFetchingBotEmail to false after getting user details',
-       () => {
-         component.form.patchValue({botToken: FORTY_CHAR_STRING});
-         expect(component.isFetchingBotEmail).toBe(true);
-
-         userDetailsSubject.next({github: {email: 'best@gmail.com'}});
-
-         expect(component.isFetchingBotEmail).toBe(false);
-       });
+    expect(component.goToOldOnboarding).toHaveBeenCalled();
   });
 
-  describe('Shallow tests', () => {
-    let tokenInputEl: HTMLInputElement;
+  describe('Stepper', () => {
+    it('should navigate to OAuth section if Encryption key is complete', () => {
+      configuredSectionsSubject.next(new ConfiguredSections(
+          {encryption_key: true, oauth: false, config_repo: false}));
+      fixture.detectChanges();
+
+      expectStepIndexContentToBeShown(1);
+    });
+
+    it('should navigate to Config Repo section if other sections are complete',
+       () => {
+         configuredSectionsSubject.next(new ConfiguredSections(
+             {encryption_key: true, oauth: true, config_repo: false}));
+         fixture.detectChanges();
+
+         expectStepIndexContentToBeShown(2);
+       });
+
+    it('should not be able to click ahead to another step', () => {
+      configuredSectionsSubject.next(new ConfiguredSections(
+          {encryption_key: false, oauth: false, config_repo: false}));
+      fixture.detectChanges();
+
+      const secondStepEl = getAllElements(fixtureEl, '.mat-step')[1];
+      getElement(secondStepEl, '.mat-step-header').nativeElement.click();
+
+      // still on first step
+      expectStepIndexContentToBeShown(0);
+    });
+
+    it('should not be able to click back on completed step', () => {
+      configuredSectionsSubject.next(new ConfiguredSections(
+          {encryption_key: true, oauth: false, config_repo: false}));
+      fixture.detectChanges();
+
+      const firstStepEl = getAllElements(fixtureEl, '.mat-step')[0];
+      getElement(firstStepEl, '.mat-step-header').nativeElement.click();
+
+      // still on second step
+      expectStepIndexContentToBeShown(1);
+    });
+  });
+
+  describe('Encryption Key Section', () => {
     let submitButtonEl: HTMLButtonElement;
 
     beforeEach(() => {
-      component.botEmail = 'fake@email.com';
+      configuredSectionsSubject.next(new ConfiguredSections(
+          {encryption_key: false, oauth: false, config_repo: false}));
       fixture.detectChanges();
 
-      tokenInputEl = getElement(fixtureEl, 'input[formcontrolname="botToken"]')
-                         .nativeElement;
       submitButtonEl =
-          fixture.debugElement.query(By.css('.fci-form-submit-button'))
+          getElement(
+              fixtureEl, '.fci-step-button-container button[type="submit"]')
               .nativeElement;
     });
 
-    for (const control_id of FORM_CONTROL_IDS) {
-      it(`should have the ${control_id} control properly attached`, () => {
-        const controlEl: HTMLInputElement =
-            getElement(fixtureEl, `input[formcontrolname="${control_id}"]`)
-                .nativeElement;
+    function submitEncryptionKey() {
+      component.encryptionKeyForm.patchValue({encryptionKey: 'some-key'});
+      fixture.detectChanges();  // enable submit button
 
-        controlEl.value = '10';
-        controlEl.dispatchEvent(new Event('input'));
-        fixture.detectChanges();
-
-        expect(component.form.get(control_id).value).toBe('10');
-
-        component.form.patchValue({[control_id]: '12'});
-        fixture.detectChanges();
-
-        expect(controlEl.value).toBe('12');
-      });
+      submitButtonEl.click();
+      fixture.detectChanges();
     }
 
-    it('should show success check mark if bot email exists', () => {
-      expect(component.botEmail).toBeDefined();
-      expectElementToExist(fixtureEl, '.fci-input-status .fci-success-icon');
+    it('should have the key control properly attached', () => {
+      expectInputControlToBeAttachedToForm(
+          fixture, 'encryptionKey', component.encryptionKeyForm);
     });
 
-    it('should hide bot email and password if token changes', () => {
-      expectElementToExist(fixtureEl, 'input[formcontrolname="botPassword"]');
-      expect(getElementText(fixtureEl, '.fci-username')).toBe('fake@email.com');
+    it('should show spinner when saving encryption key', () => {
+      expectElementNotToExist(
+          fixtureEl, '.fci-step-button-container .mat-spinner');
+      submitEncryptionKey();
 
-      tokenInputEl.value = FORTY_CHAR_STRING;
-      tokenInputEl.dispatchEvent(new Event('input'));
+      expectElementToExist(
+          fixtureEl, '.fci-step-button-container .mat-spinner');
+    });
+
+    it('should stop showing spinner saving encryption key is complete', () => {
+      submitEncryptionKey();
+      expectElementToExist(
+          fixtureEl, '.fci-step-button-container .mat-spinner');
+
+      encryptionKeySubject.next();
       fixture.detectChanges();
 
       expectElementNotToExist(
-          fixtureEl, 'input[formcontrolname="botPassword"]');
-      expectElementNotToExist(fixtureEl, '.fci-username');
-    });
-
-    it('should show spinner when looking for bot email', () => {
-      expectElementNotToExist(fixtureEl, '.fci-input-status .mat-spinner');
-      tokenInputEl.value = FORTY_CHAR_STRING;
-      tokenInputEl.dispatchEvent(new Event('input'));
-      fixture.detectChanges();
-
-      expectElementToExist(fixtureEl, '.fci-input-status .mat-spinner');
-    });
-
-    it('should redirect to old onboarding when button is clicked', () => {
-      spyOn(component, 'goToOldOnboarding');
-      getElement(fixtureEl, '.fci-onboard-welcome button')
-          .nativeElement.click();
-
-      expect(component.goToOldOnboarding).toHaveBeenCalled();
+          fixtureEl, '.fci-step-button-container .mat-spinner');
     });
 
     it('should have submit button disabled when form is invalid', () => {
-      expect(component.form.valid).toBe(false);
+      expect(component.encryptionKeyForm.valid).toBe(false);
       expect(submitButtonEl.disabled).toBe(true);
     });
 
     it('should have submit button enabled when form is valid', () => {
-      component.form.patchValue({
-        botToken: '123',
-        botPassword: '234',
-        configRepo: 'repo',
-        encryptionKey: 'key'
-      });
+      component.encryptionKeyForm.patchValue({encryptionKey: 'key'});
       fixture.detectChanges();
 
-      expect(component.form.valid).toBe(true);
+      expect(component.encryptionKeyForm.valid).toBe(true);
       expect(submitButtonEl.disabled).toBe(false);
     });
+
+    it('should navigate to OAuth when encryption has just been set', () => {
+      submitEncryptionKey();
+      encryptionKeySubject.next();
+      fixture.detectChanges();
+
+      expectStepIndexContentToBeShown(1);
+    });
+
+    it('should navigate to Config Repo section when OAuth is set, and encryption has just been set',
+       () => {
+         configuredSectionsSubject.next(new ConfiguredSections(
+             {encryption_key: false, oauth: true, config_repo: false}));
+         fixture.detectChanges();
+         submitEncryptionKey();
+         encryptionKeySubject.next();
+         fixture.detectChanges();
+
+         expectStepIndexContentToBeShown(2);
+       });
   });
 });
