@@ -1,5 +1,4 @@
 import {Component, HostBinding, OnDestroy, OnInit} from '@angular/core';
-import {DomSanitizer} from '@angular/platform-browser';
 import {ActivatedRoute} from '@angular/router';
 import {ParamMap} from '@angular/router/src/shared';
 import {Observable} from 'rxjs/Observable';
@@ -59,7 +58,7 @@ export class BuildComponent implements OnInit, OnDestroy {
               // TODO: define a log line model.
               const response = JSON.parse(message.data);
               if (response.log) {
-                this.logs.push( response.log );
+                this.logs.push(response.log);
               }
             });
   }
