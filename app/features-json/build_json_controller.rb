@@ -187,10 +187,5 @@ module FastlaneCI
 
       return current_project
     end
-
-    # convert .log files that include the color information as ANSI code to plain text
-    def convert_ansi_to_plain_text(data)
-      return data.gsub(/\e\[[0-9;]*m/, "")
-    end
   end
 end
