@@ -48,7 +48,8 @@ describe('AuthService', () => {
       loginResponse = response;
     });
 
-    const loginRequest = mockHttp.expectOne('/api/user/oauth?code=placeholder');
+    const loginRequest =
+        mockHttp.expectOne('/api/auth/github?code=placeholder');
     loginRequest.flush(mockLoginResponse);
 
     expect(loginResponse.oauth_key).toBe('12345');
@@ -57,7 +58,8 @@ describe('AuthService', () => {
   it('should store the token in local storage', () => {
     authService.login().subscribe();
 
-    const loginRequest = mockHttp.expectOne('/api/user/oauth?code=placeholder');
+    const loginRequest =
+        mockHttp.expectOne('/api/auth/github?code=placeholder');
     loginRequest.flush(mockLoginResponse);
 
     expect(mockLocalStorage.getItem('auth_token')).toBe('12345');

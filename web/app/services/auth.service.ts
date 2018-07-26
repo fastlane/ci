@@ -7,7 +7,7 @@ import {LocalStorageKeys} from '../common/constants';
 import {GitHubScope} from '../common/types';
 
 // Auth server is currently locally hosted.
-const API_ROOT = '/api';
+const API_ROOT = '/api/auth';
 const DEFAULT_SCOPES: GitHubScope[] = ['repo'];
 export interface LoginResponse {
   oauth_key: string;
@@ -20,7 +20,7 @@ export class AuthService {
   login(scopes: GitHubScope[] = DEFAULT_SCOPES): Observable<LoginResponse> {
     // TODO: github UI workflow
     const code = 'placeholder';
-    const url = `${API_ROOT}/user/oauth?code=${code}`;
+    const url = `${API_ROOT}/github?code=${code}`;
     return this.http.get<LoginResponse>(url).pipe(
         tap(this.setSession), shareReplay());
   }

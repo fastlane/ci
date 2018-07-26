@@ -365,6 +365,7 @@ DEPENDENCIES
   dotenv (>= 2.4.0, < 3.0.0)
   faraday (>= 0.15.2, < 1.0)
   faraday-http-cache (>= 2.0.0, < 3.0.0)
+  faraday_middleware (>= 0.12.2, < 1.0)
   fastfile-parser!
   fastlane!
   faye-websocket (>= 0.10.7, < 1.0.0)

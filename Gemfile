@@ -35,6 +35,7 @@ gem "dotenv", ">= 2.4.0", "< 3.0.0"
 
 ## Simplified HTTP client library
 gem "faraday", ">= 0.15.2", "< 1.0"
+gem "faraday_middleware", ">= 0.12.2", "< 1.0"
 
 # Caching for octokit operations
 gem "faraday-http-cache", ">= 2.0.0", "< 3.0.0"

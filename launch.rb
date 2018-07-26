@@ -154,6 +154,7 @@ module FastlaneCI
       require_relative "app/features-json/artifact_json_controller"
       require_relative "app/features-json/setup_json_controller"
       require_relative "app/features-json/setting_json_controller"
+      require_relative "app/features-json/auth_json_controller"
 
       FastlaneCI::FastlaneApp.use(FastlaneCI::LoginJSONController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::ProjectJSONController)
@@ -163,6 +164,7 @@ module FastlaneCI
       FastlaneCI::FastlaneApp.use(FastlaneCI::SetupJSONController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::SettingJSONController)
       FastlaneCI::FastlaneApp.use(FastlaneCI::UserJSONController)
+      FastlaneCI::FastlaneApp.use(FastlaneCI::AuthJSONController)
     end
 
     def self.start_github_workers
