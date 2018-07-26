@@ -2,6 +2,7 @@ export enum BuildStatus {
   SUCCESS = 'success',
   FAILED = 'failure',
   PENDING = 'pending',
+  RUNNING = 'running',
   MISSING_FASTFILE = 'missing_fastfile',
   INTERNAL_ISSUE = 'ci_problem',
   INSTALLING_XCODE = 'installing_xcode'
@@ -23,7 +24,7 @@ export function fastlaneStatusToEnum(status: FastlaneStatus): BuildStatus {
     case 'pending':
       return BuildStatus.PENDING;
     case 'running':
-      return BuildStatus.PENDING;
+      return BuildStatus.RUNNING;
     case 'missing_fastfile':
       return BuildStatus.MISSING_FASTFILE;
     case 'ci_problem':
