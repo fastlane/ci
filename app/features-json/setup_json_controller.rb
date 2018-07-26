@@ -53,7 +53,7 @@ module FastlaneCI
         )
       end
 
-      unless FastlaneCI.dot_keys.oauth_client_id.nil? || FastlaneCI.dot_keys.oauth_client_secret.nil?
+      if !FastlaneCI.dot_keys.oauth_client_id.nil? && !FastlaneCI.dot_keys.oauth_client_secret.nil?
         json_error!(
           error_message: "The OAuth client has already been set",
           error_key: "OAuth.AlreadyExists",
