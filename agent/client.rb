@@ -20,7 +20,7 @@ module FastlaneCI
           "grpc.keepalive_timeout_ms" => 3600000,
           "grpc.keepalive_permit_without_calls" => 1,
           "grpc.initial_reconnect_backoff_ms" => 1000 
-        }        
+        }
         @channel = GRPC::Core::Channel.new("#{host}:#{PORT}", channel_params, :this_channel_is_insecure)
         @stub = Proto::Agent::Stub.new("#{host}:#{PORT}", :this_channel_is_insecure, channel_override:@channel)
       end

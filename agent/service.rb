@@ -12,7 +12,19 @@ module FastlaneCI
       ##
       # returns a configured GRPC server ready to listen for connections.
       def self.server
-        GRPC::RpcServer.new.tap do |server|
+        channel_params = {
+          "grpc.enable_retries" => 1,
+          "grpc.dns_min_time_between_resolutions_ms" => 150,
+          "grpc.grpclb_call_timeout_ms" => 3600000,
+          "grpc.grpclb_fallback_timeout_ms" => 3600000,
+          "grpc.min_reconnect_backoff_ms" => 200,
+          "grpc.max_reconnect_backoff_ms" => 250,
+          "grpc.keepalive_time_ms" => 1000,
+          "grpc.keepalive_timeout_ms" => 3600000,
+          "grpc.keepalive_permit_without_calls" => 1,
+          "grpc.initial_reconnect_backoff_ms" => 1000 
+        }
+        GRPC::RpcServer.new(server_args: channel_params).tap do |server|
           server.add_http2_port("#{HOST}:#{PORT}", :this_port_is_insecure)
           server.handle(new)
         end
@@ -44,6 +56,16 @@ module FastlaneCI
           ensure
             @busy = false
           end
+          begin
+            while true do
+              puts ".."
+              log = FastlaneCI::Proto::Log.new(message: "..", timestamp: Time.now.to_i)
+              yielder << FastlaneCI::Proto::InvocationResponse.new(log: log)
+              sleep(1)
+            end
+          rescue StandardError => exception
+            puts exception
+          end          
         end
       end
       # Service
