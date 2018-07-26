@@ -14,6 +14,11 @@ module FastlaneCI
       def self.server
         channel_params = {
           "grpc.enable_retries" => 1,
+          "grpc.http2.max_pings_without_data" => 0,
+          "grpc.http2.max_ping_strikes" => 0,
+          "grpc.max_concurrent_streams" => 1,
+          "grpc.max_connection_idle_ms" => 3600000,
+          "grpc.max_connection_age_ms" => 3600000,
           "grpc.dns_min_time_between_resolutions_ms" => 150,
           "grpc.grpclb_call_timeout_ms" => 3600000,
           "grpc.grpclb_fallback_timeout_ms" => 3600000,
