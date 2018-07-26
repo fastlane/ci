@@ -26,6 +26,13 @@ module FastlaneCI
         # bot user to the corresponding repository so it may perform actions on
         # it
         FASTLANE_CI_INITIAL_ONBOARDING_USER_API_TOKEN='#{locals[:initial_onboarding_user_api_token]}'
+
+        # ID representing the oauth client specific to a provider (Ex. GitHub)
+        FASTLANE_CI_OAUTH_CLIENT_ID='#{locals[:oauth_client_id]}'
+
+        # Secret representing the oauth client specific to a provider (Ex. GitHub)
+        # Should always be kept confidential.
+        FASTLANE_CI_OAUTH_CLIENT_SECRET='#{locals[:oauth_client_secret]}'
       FILE
     end
   end

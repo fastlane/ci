@@ -21,15 +21,18 @@ describe('OnboardComponent', () => {
   let dataService: jasmine.SpyObj<Partial<DataService>>;
   let configuredSectionsSubject: Subject<ConfiguredSections>;
   let encryptionKeySubject: Subject<void>;
+  let oAuthSubject: Subject<void>;
 
   beforeEach(() => {
     configuredSectionsSubject = new Subject<ConfiguredSections>();
     encryptionKeySubject = new Subject<void>();
+    oAuthSubject = new Subject<void>();
     dataService = {
       getServerConfiguredSections: jasmine.createSpy().and.returnValue(
           configuredSectionsSubject.asObservable()),
       setEncryptionKey: jasmine.createSpy().and.returnValue(
-          encryptionKeySubject.asObservable())
+          encryptionKeySubject.asObservable()),
+      setOAuth: jasmine.createSpy().and.returnValue(oAuthSubject.asObservable())
     };
 
     TestBed
@@ -110,16 +113,18 @@ describe('OnboardComponent', () => {
 
   describe('Encryption Key Section', () => {
     let submitButtonEl: HTMLButtonElement;
+    let encryptionKeySectionEl: DebugElement;
 
     beforeEach(() => {
       configuredSectionsSubject.next(new ConfiguredSections(
           {encryption_key: false, oauth: false, config_repo: false}));
       fixture.detectChanges();
 
-      submitButtonEl =
-          getElement(
-              fixtureEl, '.fci-step-button-container button[type="submit"]')
-              .nativeElement;
+      encryptionKeySectionEl = getAllElements(fixtureEl, '.mat-step')[0];
+      submitButtonEl = getElement(
+                           encryptionKeySectionEl,
+                           '.fci-step-button-container button[type="submit"]')
+                           .nativeElement;
     });
 
     function submitEncryptionKey() {
@@ -137,23 +142,23 @@ describe('OnboardComponent', () => {
 
     it('should show spinner when saving encryption key', () => {
       expectElementNotToExist(
-          fixtureEl, '.fci-step-button-container .mat-spinner');
+          encryptionKeySectionEl, '.fci-step-button-container .mat-spinner');
       submitEncryptionKey();
 
       expectElementToExist(
-          fixtureEl, '.fci-step-button-container .mat-spinner');
+          encryptionKeySectionEl, '.fci-step-button-container .mat-spinner');
     });
 
     it('should stop showing spinner saving encryption key is complete', () => {
       submitEncryptionKey();
       expectElementToExist(
-          fixtureEl, '.fci-step-button-container .mat-spinner');
+          encryptionKeySectionEl, '.fci-step-button-container .mat-spinner');
 
       encryptionKeySubject.next();
       fixture.detectChanges();
 
       expectElementNotToExist(
-          fixtureEl, '.fci-step-button-container .mat-spinner');
+          encryptionKeySectionEl, '.fci-step-button-container .mat-spinner');
     });
 
     it('should have submit button disabled when form is invalid', () => {
@@ -184,6 +189,85 @@ describe('OnboardComponent', () => {
          fixture.detectChanges();
          submitEncryptionKey();
          encryptionKeySubject.next();
+         fixture.detectChanges();
+
+         expectStepIndexContentToBeShown(2);
+       });
+  });
+
+  describe('OAuth Section', () => {
+    let submitButtonEl: HTMLButtonElement;
+    let oAuthSectionEl: DebugElement;
+
+    beforeEach(() => {
+      configuredSectionsSubject.next(new ConfiguredSections(
+          {encryption_key: true, oauth: false, config_repo: false}));
+      fixture.detectChanges();
+      oAuthSectionEl = getAllElements(fixtureEl, '.mat-step')[1];
+      submitButtonEl = getElement(
+                           oAuthSectionEl,
+                           '.fci-step-button-container button[type="submit"]')
+                           .nativeElement;
+    });
+
+    function submitOAuth() {
+      component.oAuthForm.patchValue(
+          {clientId: 'some-id', clientSecret: 'some-secret'});
+      fixture.detectChanges();  // enable submit button
+
+      submitButtonEl.click();
+      fixture.detectChanges();
+    }
+
+    it('should have the client id control properly attached', () => {
+      expectInputControlToBeAttachedToForm(
+          fixture, 'clientId', component.oAuthForm);
+    });
+
+    it('should have the client secret control properly attached', () => {
+      expectInputControlToBeAttachedToForm(
+          fixture, 'clientSecret', component.oAuthForm);
+    });
+
+    it('should show spinner when saving oAuth', () => {
+      expectElementNotToExist(
+          oAuthSectionEl, '.fci-step-button-container .mat-spinner');
+      submitOAuth();
+
+      expectElementToExist(
+          oAuthSectionEl, '.fci-step-button-container .mat-spinner');
+    });
+
+    it('should stop showing spinner saving OAuth is complete', () => {
+      submitOAuth();
+      expectElementToExist(
+          oAuthSectionEl, '.fci-step-button-container .mat-spinner');
+
+      oAuthSubject.next();
+      fixture.detectChanges();
+
+      expectElementNotToExist(
+          oAuthSectionEl, '.fci-step-button-container .mat-spinner');
+    });
+
+    it('should have submit button disabled when form is invalid', () => {
+      expect(component.oAuthForm.valid).toBe(false);
+      expect(submitButtonEl.disabled).toBe(true);
+    });
+
+    it('should have submit button enabled when form is valid', () => {
+      component.oAuthForm.patchValue(
+          {clientId: 'some-id', clientSecret: 'some-secret'});
+      fixture.detectChanges();
+
+      expect(component.oAuthForm.valid).toBe(true);
+      expect(submitButtonEl.disabled).toBe(false);
+    });
+
+    it('should navigate to config repo when encryption has just been set',
+       () => {
+         submitOAuth();
+         oAuthSubject.next();
          fixture.detectChanges();
 
          expectStepIndexContentToBeShown(2);

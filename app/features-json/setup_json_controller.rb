@@ -40,5 +40,33 @@ module FastlaneCI
         }
       )
     end
+
+    post "#{HOME}/oauth", authenticate: false do
+      client_id = params["client_id"]
+      client_secret = params["client_secret"]
+
+      if client_id.nil? || client_secret.nil?
+        json_error!(
+          error_message: "Must provide both the OAuth client ID and client secret",
+          error_key: "OAuth.Missing",
+          error_code: 400
+        )
+      end
+
+      if !FastlaneCI.dot_keys.oauth_client_id.nil? && !FastlaneCI.dot_keys.oauth_client_secret.nil?
+        json_error!(
+          error_message: "The OAuth client has already been set",
+          error_key: "OAuth.AlreadyExists",
+          error_code: 403
+        )
+      end
+
+      Services.dot_keys_variable_service.write_keys_file!(
+        locals: {
+          oauth_client_id: client_id,
+          oauth_client_secret: client_secret
+        }
+      )
+    end
   end
 end

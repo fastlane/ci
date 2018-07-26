@@ -98,4 +98,11 @@ export class DataService {
 
     return this.http.post<void>(url, {encryption_key: encryptionKey});
   }
+
+  setOAuth(clientId: string, clientSecret: string): Observable<void> {
+    const url = `${HOSTNAME}/setup/oauth`;
+
+    return this.http.post<void>(
+        url, {client_id: clientId, client_secret: clientSecret});
+  }
 }

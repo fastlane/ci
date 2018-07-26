@@ -29,7 +29,9 @@ describe FastlaneCI::KeysWriter do
         ci_user_password: "ci_user_password",
         ci_user_api_token: "bot_api_token",
         repo_url: "https://github.com/user/repo",
-        initial_onboarding_user_api_token: "initial_onboarding_user_api_token"
+        initial_onboarding_user_api_token: "initial_onboarding_user_api_token",
+        oauth_client_id: "oauth_client_id",
+        oauth_client_secret: "oauth_client_secret"
       }
     )
   end

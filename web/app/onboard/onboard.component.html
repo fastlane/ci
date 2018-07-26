@@ -31,9 +31,27 @@
         </form>
       </mat-step>
       <mat-step label="Set Up your OAuth App" editable="false" [completed]="configuredSections.oAuth">
-        <p>
-          <b>IN DEVELOPMENT</b>
-        </p>
+        <form [formGroup]="oAuthForm" (ngSubmit)="submitOAuthConfig()">
+          <p>
+            <b>fastlane.ci</b> needs you to set up an OAuth app for us to be authorized to verify what repos you have access
+            to.
+            <br>
+            <br> You can
+            <a href="https://github.com/settings/applications/new" target="_blank">create an OAuth app on GitHub</a>
+          </p>
+          <div class="fci-input-container">
+            <label>Client ID</label>
+            <input formControlName="clientId" placeholder="GitHub Client ID">
+          </div>
+          <div class="fci-input-container">
+            <label>Client Secret</label>
+            <input formControlName="clientSecret" placeholder="GitHub Client Secret">
+          </div>
+          <div class="fci-step-button-container">
+            <button mat-button mat-raised-button color="primary" type="submit" [disabled]="!oAuthForm.valid || isSettingOAuth">Set</button>
+            <mat-spinner *ngIf="isSettingOAuth" mode="indeterminate" diameter="20"></mat-spinner>
+          </div>
+        </form>
       </mat-step>
       <mat-step label="Create private repository for ci-config" editable="false" [completed]="configuredSections.configRepo">
         <p>

@@ -228,4 +228,21 @@ describe('DataService', () => {
       expect(hasResponded).toBe(true);
     });
   });
+
+  describe('#setOAuth', () => {
+    it('should set oauth id and secret', () => {
+      let hasResponded = false;
+      dataService.setOAuth('some-id', 'some-secret').subscribe(() => {
+        hasResponded = true;
+      });
+
+      const setKeyRequest = mockHttp.expectOne('/data/setup/oauth');
+      expect(setKeyRequest.request.body)
+          .toEqual({client_id: 'some-id', client_secret: 'some-secret'});
+      expect(setKeyRequest.request.method).toBe('POST');
+      setKeyRequest.flush({});
+
+      expect(hasResponded).toBe(true);
+    });
+  });
 });
