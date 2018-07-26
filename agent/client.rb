@@ -12,6 +12,7 @@ module FastlaneCI
         channel_params = {
           "grpc.enable_retries" => 1,
           "grpc.http2.max_pings_without_data" => 0,
+          "grpc.http2.max_ping_strikes" => 0,
           "grpc.max_concurrent_streams" => 1,
           "grpc.max_connection_idle_ms" => 3600000,
           "grpc.max_connection_age_ms" => 3600000,
@@ -57,6 +58,13 @@ if $0 == __FILE__
   thread = Thread.new do
     while true do
       puts "=== Channel Watcher: connectivity_state = #{client.channel.connectivity_state}"
+      sleep(1.0)
+    end
+  end
+  
+  thread = Thread.new do
+    while true do
+      client.request_spawn("echo", "healthcheck")
       sleep(1.0)
     end
   end
