@@ -18,6 +18,7 @@ import {BuildLogMessageEvent, BuildLogWebsocketService} from '../services/build-
 import {DataService} from '../services/data.service';
 
 import {BuildComponent} from './build.component';
+import {SafeHtmlPipe} from './safehtml.pipe';
 
 describe('BuildComponent', () => {
   let component: BuildComponent;
@@ -47,7 +48,7 @@ describe('BuildComponent', () => {
 
     TestBed
         .configureTestingModule({
-          declarations: [BuildComponent],
+          declarations: [BuildComponent, SafeHtmlPipe],
           imports: [
             ToolbarModule, RouterTestingModule, StatusIconModule, MatCardModule,
             MatProgressSpinnerModule, MomentModule

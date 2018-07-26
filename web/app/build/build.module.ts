@@ -8,9 +8,10 @@ import {ToolbarModule} from '../common/components/toolbar/toolbar.module';
 import {BuildLogWebsocketService} from '../services/build-log-websocket.service';
 
 import {BuildComponent} from './build.component';
+import {SafeHtmlPipe} from './safehtml.pipe';
 
 @NgModule({
-  declarations: [BuildComponent],
+  declarations: [BuildComponent, SafeHtmlPipe],
   entryComponents: [BuildComponent],
   imports: [
     /** Angular Library Imports */

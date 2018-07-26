@@ -31,8 +31,7 @@ export class BuildComponent implements OnInit, OnDestroy {
   constructor(
       private readonly dataService: DataService,
       private readonly buildLogSocketService: BuildLogWebsocketService,
-      private readonly route: ActivatedRoute,
-      private sanitizer: DomSanitizer) {}
+      private readonly route: ActivatedRoute) {}
 
   ngOnDestroy(): void {
     this.closeWebsocket();
@@ -60,8 +59,7 @@ export class BuildComponent implements OnInit, OnDestroy {
               // TODO: define a log line model.
               const response = JSON.parse(message.data);
               if (response.log) {
-                const message = this.sanitizer.bypassSecurityTrustHtml(response.log.message);
-                this.logs.push( { ...response.log, message } );
+                this.logs.push( response.log );
               }
             });
   }
