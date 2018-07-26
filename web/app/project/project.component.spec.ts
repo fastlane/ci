@@ -28,6 +28,7 @@ import {SettingsDialogComponent} from './settings-dialog/settings-dialog.compone
 import {SettingsDialogModule} from './settings-dialog/settings-dialog.modules';
 
 describe('ProjectComponent', () => {
+  let location: Location;
   let component: ProjectComponent;
   let fixture: ComponentFixture<ProjectComponent>;
   let fixtureEl: DebugElement;
@@ -57,6 +58,10 @@ describe('ProjectComponent', () => {
                 path: 'project/:projectId/build/:buildId',
                 component: DummyComponent
               },
+              {
+                path: '404',
+                component: DummyComponent
+              }
             ])
           ],
           declarations: [ProjectComponent, DummyComponent],
@@ -74,6 +79,8 @@ describe('ProjectComponent', () => {
     fixture = TestBed.createComponent(ProjectComponent);
     fixtureEl = fixture.debugElement;
     component = fixture.componentInstance;
+
+    location = TestBed.get(Location);
   }));
 
   describe('Unit tests', () => {
@@ -90,6 +97,16 @@ describe('ProjectComponent', () => {
       expect(component.project.builds.length).toBe(2);
       expect(component.project.builds[0].sha).toBe('asdfshzdggfdhdfh4');
     });
+
+    it('should redirect if API returns an error', fakeAsync(() => {
+      fixture.detectChanges();
+      expect(dataService.getProject).toHaveBeenCalledWith('123');
+
+      projectSubject.error({});
+      tick();
+
+      expect(location.path()).toBe('/404');
+    }));
 
     it('should update breadcrumbs after loading project', () => {
       fixture.detectChanges();  // onInit()
@@ -222,11 +239,10 @@ describe('ProjectComponent', () => {
         });
 
         it('should go to build when clicked', fakeAsync(() => {
-             const location = TestBed.get(Location);
-             rowEls[0].nativeElement.click();
-             tick();
-             expect(location.path()).toBe('/project/12/build/2');
-           }));
+          rowEls[0].nativeElement.click();
+          tick();
+          expect(location.path()).toBe('/project/12/build/2');
+        }));
 
         it('should not show rebuild button on successful builds', () => {
           // First row is successful build
