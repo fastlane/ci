@@ -349,7 +349,7 @@ module FastlaneCI
     def save_build_status_source!
       status_context = project.project_name
 
-      build_path = FastlaneCI::BuildController.build_url(project_id: project.id, build_number: current_build.number)
+      build_path = FastlaneCI::BuildJSONController.build_url(project_id: project.id, build_number: current_build.number)
       build_url = FastlaneCI.dot_keys.ci_base_url + build_path
       github_service.set_build_status!(
         repo: project.repo_config.git_url,
