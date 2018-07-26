@@ -6,8 +6,23 @@ module FastlaneCI
     ##
     # A sample client that can be used to make a request to the service.
     class Client
+
+      attr_reader :channel
       def initialize(host)
-        @stub = Proto::Agent::Stub.new("#{host}:#{PORT}", :this_channel_is_insecure)
+        channel_params = {
+          "grpc.enable_retries" => 1,
+          "grpc.dns_min_time_between_resolutions_ms" => 150,
+          "grpc.grpclb_call_timeout_ms" => 3600000,
+          "grpc.grpclb_fallback_timeout_ms" => 3600000,
+          "grpc.min_reconnect_backoff_ms" => 200,
+          "grpc.max_reconnect_backoff_ms" => 250,
+          "grpc.keepalive_time_ms" => 1000,
+          "grpc.keepalive_timeout_ms" => 3600000,
+          "grpc.keepalive_permit_without_calls" => 1,
+          "grpc.initial_reconnect_backoff_ms" => 1000 
+        }        
+        @channel = GRPC::Core::Channel.new("#{host}:#{PORT}", channel_params, :this_channel_is_insecure)
+        @stub = Proto::Agent::Stub.new("#{host}:#{PORT}", :this_channel_is_insecure, channel_override:@channel)
       end
 
       def request_spawn(bin, *params, env: {})
@@ -35,6 +50,13 @@ if $0 == __FILE__
     "bundle", "exec", "fastlane", "ios", "test", env: env
   )
 
+  thread = Thread.new do
+    while true do
+      puts "=== Channel Watcher: connectivity_state = #{client.channel.connectivity_state}"
+      sleep(1.0)
+    end
+  end
+
   @file = nil
   response.each do |r|
     puts("Log: #{r.log.message}") if r.log
@@ -49,4 +71,5 @@ if $0 == __FILE__
     @file.write(r.artifact.chunk)
   end
   @file && @file.close
+  thread.exit
 end
