@@ -60,7 +60,7 @@ Right now, `fastlane.ci` is in Alpha, we'd love for you to give it a try. Gettin
 1. `gem install bundler`
 1. `bundle install`
 1. `bundle exec rake prod`
-1. Up at running at [localhost:8080](http://localhost:8080/)
+1. Up and running at [localhost:8080](http://localhost:8080/)
 
 ### Using the `fastlane.ci` Angular frontend
 
