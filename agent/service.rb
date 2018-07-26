@@ -42,7 +42,7 @@ module FastlaneCI
       def run_fastlane(invocation_request, _call)
         command = invocation_request.command
         logger.info("RPC run_fastlane: #{command.bin} #{command.parameters}, env: #{command.env.to_h}")
-        Enumerator.new do |yielder|
+        results = Enumerator.new do |yielder|
           invocation = Invocation.new(invocation_request, yielder)
           if busy?
             invocation.reject(RuntimeError.new("I am busy"))
@@ -68,6 +68,7 @@ module FastlaneCI
           end          
         end
         puts "run_fastlane call complete!"
+        return results
       end
       # Service
     end
