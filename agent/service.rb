@@ -67,6 +67,7 @@ module FastlaneCI
             puts exception
           end          
         end
+        puts "run_fastlane call complete!"
       end
       # Service
     end
