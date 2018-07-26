@@ -1,7 +1,7 @@
 import {LoginResponse} from '../../services/auth.service';
 
 export const mockLoginResponse: LoginResponse = {
-  token: '12345'
+  oauth_key: '12345'
 };
 
 export const mockTokenNotExpired =

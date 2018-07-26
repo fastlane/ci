@@ -1,12 +1,8 @@
 import {HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
 import {inject, TestBed} from '@angular/core/testing';
 import {mockLoginResponse, mockTokenExpired, mockTokenNotExpired} from '../common/test_helpers/mock_login_data';
-import {AuthService, LoginRequest, LoginResponse} from './auth.service';
+import {AuthService, LoginResponse} from './auth.service';
 
-const FAKE_LOGIN_REQUEST: LoginRequest = {
-  email: 'tacoRocat@fastlane.com',
-  password: 'wholetthedogsout'
-};
 
 describe('AuthService', () => {
   let mockHttp: HttpTestingController;
@@ -44,37 +40,34 @@ describe('AuthService', () => {
     mockLocalStorage.clear();
   });
 
-  it('should should make login request to backend', () => {
+  it('should go to github oauth UI webflow on login', () => {});
+
+  it('should should request access token from backend using code', () => {
     let loginResponse: LoginResponse;
-    authService.login(FAKE_LOGIN_REQUEST).subscribe((response) => {
+    authService.login().subscribe((response) => {
       loginResponse = response;
     });
 
-    const loginRequest = mockHttp.expectOne('/api/login');
-    expect(loginRequest.request.body).toBe(FAKE_LOGIN_REQUEST);
+    const loginRequest =
+        mockHttp.expectOne('/api/auth/github?code=placeholder');
     loginRequest.flush(mockLoginResponse);
 
-    expect(loginResponse.token).toBe('12345');
+    expect(loginResponse.oauth_key).toBe('12345');
   });
 
   it('should store the token in local storage', () => {
-    authService.login(FAKE_LOGIN_REQUEST).subscribe();
+    authService.login().subscribe();
 
-    const loginRequest = mockHttp.expectOne('/api/login');
+    const loginRequest =
+        mockHttp.expectOne('/api/auth/github?code=placeholder');
     loginRequest.flush(mockLoginResponse);
 
     expect(mockLocalStorage.getItem('auth_token')).toBe('12345');
   });
 
-  it('should be logged in if token exists in local storage and not Expired',
-     () => {
-       mockLocalStorage.setItem('auth_token', mockTokenNotExpired);
-       expect(authService.isLoggedIn()).toBe(true);
-     });
-
-  it('should not be logged in if stored token is expired', () => {
-    mockLocalStorage.setItem('auth_token', mockTokenExpired);
-    expect(authService.isLoggedIn()).toBe(false);
+  it('should be logged in if token exists in local storage', () => {
+    mockLocalStorage.setItem('auth_token', mockTokenNotExpired);
+    expect(authService.isLoggedIn()).toBe(true);
   });
 
   it('should not be logged in if no stored token', () => {

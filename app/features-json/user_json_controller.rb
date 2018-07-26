@@ -1,6 +1,8 @@
 require_relative "../services/user_service"
 require_relative "api_controller"
 require_relative "json_params"
+require "faraday"
+require "faraday_middleware"
 
 module FastlaneCI
   # Controller responsible for handling users
