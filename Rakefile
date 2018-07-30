@@ -1,3 +1,6 @@
+# foreman is not included in the Gemfile, more context
+# https://github.com/ddollar/foreman/pull/678#issuecomment-398211757
+
 task :dev do
   unless system("which foreman", out: File::NULL)
     raise "`foreman` is now required for process management. `sudo gem install foreman`"
