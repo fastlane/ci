@@ -260,9 +260,10 @@ module FastlaneCI
       # to use the official GitHub terms
       #
       # All available states https://developer.github.com/v3/repos/statuses/
-      if state == "missing_fastfile" || state == "ci_problem"
+      case state
+      when "missing_fastfile", "ci_problem"
         state = "failure"
-      elsif state == "installing_xcode"
+      when "installing_xcode", "running"
         state = "pending"
       end
 
