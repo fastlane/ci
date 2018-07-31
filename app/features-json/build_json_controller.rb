@@ -2,7 +2,6 @@ require_relative "api_controller"
 require_relative "../features/build_runner/remote_runner"
 require_relative "./view_models/build_summary_view_model"
 require_relative "./view_models/build_view_model"
-require_relative "../../lib/ansi"
 
 require "faye/websocket"
 Faye::WebSocket.load_adapter("thin")
@@ -107,7 +106,7 @@ module FastlaneCI
           logger.debug("streaming back artifact: #{build_log_artifact.reference}")
           File.open(build_log_artifact.reference, "r") do |file|
             file.each_line do |line|
-              ws.send(Ansi.to_html(line.chomp))
+              ws.send(line.chomp)
             end
           end
           ws.close(1000, "runner complete.")
@@ -140,7 +139,7 @@ module FastlaneCI
         # subscribe the current socket to events from the remote_runner
         # as soon as a subscriber is returned, they will receive all historical items as well.
         @subscriber = current_build_runner.subscribe do |_topic, payload|
-          ws.send(Ansi.to_html(JSON.dump(payload)))
+          ws.send(JSON.dump(payload))
         end
       end
 

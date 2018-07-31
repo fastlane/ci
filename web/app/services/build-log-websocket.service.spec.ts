@@ -23,7 +23,7 @@ describe('BuildLogWebsocketService', () => {
   it('should attempt to connect to correct socket', () => {
     const socket = buildLogWebsocketService.createSocket('pId', 3);
     socket.close();
-    expect(socket.url).toBe('ws://host/data/projects/pId/build/3/log.ws?bearer_token=null')
+    expect(socket.url).toBe('ws://host/data/projects/pId/build/3/log.ws?bearer_token=null');
   });
 
   describe('socket connection', () => {

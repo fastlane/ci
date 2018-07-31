@@ -8,16 +8,16 @@ import {ToolbarModule} from '../common/components/toolbar/toolbar.module';
 import {BuildLogWebsocketService} from '../services/build-log-websocket.service';
 
 import {BuildComponent} from './build.component';
-import {SafeHtmlPipe} from './safehtml.pipe';
+import {LogViewerModule} from '../common/components/log-viewer/log-viewer.module';
 
 @NgModule({
-  declarations: [BuildComponent, SafeHtmlPipe],
+  declarations: [BuildComponent],
   entryComponents: [BuildComponent],
   imports: [
     /** Angular Library Imports */
     CommonModule,
     /** Internal Imports */
-    ToolbarModule, StatusIconModule,
+    ToolbarModule, StatusIconModule, LogViewerModule,
     /** Angular Material Imports */
     MatCardModule, MatProgressSpinnerModule,
     /** Third-Party Module Imports */

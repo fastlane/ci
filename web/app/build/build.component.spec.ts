@@ -10,6 +10,7 @@ import {Subject} from 'rxjs/Subject';
 
 import {StatusIconModule} from '../common/components/status-icon/status-icon.module';
 import {ToolbarModule} from '../common/components/toolbar/toolbar.module';
+import {LogViewerModule} from '../common/components/log-viewer/log-viewer.module';
 import {BuildStatus} from '../common/constants';
 import {expectElementNotToExist, expectElementToExist, getAllElements, getElement} from '../common/test_helpers/element_helper_functions';
 import {mockBuild, mockBuildResponse} from '../common/test_helpers/mock_build_data';
@@ -18,7 +19,6 @@ import {BuildLogMessageEvent, BuildLogWebsocketService} from '../services/build-
 import {DataService} from '../services/data.service';
 
 import {BuildComponent} from './build.component';
-import {SafeHtmlPipe} from './safehtml.pipe';
 
 describe('BuildComponent', () => {
   let component: BuildComponent;
@@ -48,9 +48,9 @@ describe('BuildComponent', () => {
 
     TestBed
         .configureTestingModule({
-          declarations: [BuildComponent, SafeHtmlPipe],
+          declarations: [BuildComponent],
           imports: [
-            ToolbarModule, RouterTestingModule, StatusIconModule, MatCardModule,
+            ToolbarModule, RouterTestingModule, StatusIconModule, MatCardModule, LogViewerModule,
             MatProgressSpinnerModule, MomentModule
           ],
           providers: [

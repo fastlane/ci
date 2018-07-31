@@ -7,10 +7,7 @@
       <span *ngIf="build && build.description" class="fci-build-description">{{build.description}}</span>
     </div>
     <div class="fci-build-logs">
-      <ng-container *ngIf="logs.length <= 0">Connecting...</ng-container>
-      <ng-container *ngIf="logs.length > 0">
-        <ng-container *ngFor="let log of logs"><pre [innerHTML]="log.message | safeHtml"></pre></ng-container>
-      </ng-container>
+      <fci-log-viewer [logLines]="logs"></fci-log-viewer>
     </div>
   </div>
   <div class="fci-right-container">
