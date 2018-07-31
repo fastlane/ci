@@ -97,20 +97,22 @@ module FastlaneCI
         current_project = FastlaneCI::Services.project_service.project_by_id(project_id)
         current_build = current_project.builds.find { |b| b.number == build_number.to_i }
 
-        build_log_artifact = current_build.artifacts.find do |current_artifact|
-          # We can improve the detection in the future, to actually mark an artifact as "default output"
-          current_artifact.type.include?("log") && current_artifact.reference.end_with?("runner.log")
-        end
-
-        if build_log_artifact
-          logger.debug("streaming back artifact: #{build_log_artifact.reference}")
-          File.open(build_log_artifact.reference, "r") do |file|
-            file.each_line do |line|
-              ws.send(line.chomp)
-            end
+        if current_build
+          build_log_artifact = current_build.artifacts.find do |current_artifact|
+            # We can improve the detection in the future, to actually mark an artifact as "default output"
+            current_artifact.type.include?("log") && current_artifact.reference.end_with?("runner.log")
           end
-          ws.close(1000, "runner complete.")
-          next
+
+          if build_log_artifact
+            logger.debug("streaming back artifact: #{build_log_artifact.reference}")
+            File.open(build_log_artifact.reference, "r") do |file|
+              file.each_line do |line|
+                ws.send(line.chomp)
+              end
+            end
+            ws.close(1000, "runner complete.")
+            next
+          end
         end
 
         ## if we have no runner.log, then check to see if the build_runner is still working.

@@ -2,7 +2,7 @@ import 'rxjs/add/operator/switchMap';
 
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {MatDialog, MatDialogConfig, MatTable} from '@angular/material';
-import {ActivatedRoute, ParamMap} from '@angular/router';
+import {ActivatedRoute, ParamMap, Router} from '@angular/router';
 
 import {Breadcrumb} from '../common/components/toolbar/toolbar.component';
 import {Build} from '../models/build';
@@ -30,6 +30,7 @@ export class ProjectComponent implements OnInit {
 
   constructor(
       private readonly dataService: DataService,
+      private readonly router: Router,
       private readonly route: ActivatedRoute,
       private readonly dialog: MatDialog) {}
 
@@ -42,6 +43,9 @@ export class ProjectComponent implements OnInit {
           this.tableDataSource = this.project.builds;
           this.updateBreadcrumbs(this.project.name);
           this.isLoading = false;
+        }, (error) => {
+          // @TODO check what type of error we get from api and act accordingly
+          this.router.navigate(['/404']);
         });
   }
 

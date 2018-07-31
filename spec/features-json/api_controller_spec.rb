@@ -137,26 +137,26 @@ describe FastlaneCI::APIController do
     end
 
     describe "jwt authentication" do
+      before do
+        app.helpers.response = Sinatra::Response.new
+      end
+
       it "will successfully decode a token" do
         payload = app.helpers.authenticate!(via: :jwt)
         expect(payload).to include("iss", "sub", "user", "iat")
       end
 
-      # TODO: These tests need to be fixed, as they broke with https://github.com/fastlane/ci/pull/1004
-      # @KrauseFx couldn't figure out how to properly stub those methods, we're waiting for @snatchev to come
-      # back and help out
-      #
-      # it "will halt with an error if the token is not valid" do
-      #   app.helpers.request = Sinatra::Request.new(Rack::MockRequest.env_for("/", { "HTTP_AUTHORIZATION" => "Bearer something-else" }))
-      #   expect do
-      #     app.helpers.authenticate!(via: :jwt)
-      #   end.to throw_symbol(:halt)
+      it "will halt with an error if the token is not valid" do
+        app.helpers.request = Sinatra::Request.new(Rack::MockRequest.env_for("/", { "HTTP_AUTHORIZATION" => "Bearer something-else" }))
+        expect do
+          app.helpers.authenticate!(via: :jwt)
+        end.to throw_symbol(:halt)
 
-      #   app.helpers.request = Sinatra::Request.new(Rack::MockRequest.env_for("/", {}))
-      #   expect do
-      #     app.helpers.authenticate!(via: :jwt)
-      #   end.to throw_symbol(:halt)
-      # end
+        app.helpers.request = Sinatra::Request.new(Rack::MockRequest.env_for("/", {}))
+        expect do
+          app.helpers.authenticate!(via: :jwt)
+        end.to throw_symbol(:halt)
+      end
     end
 
     describe "user authentication methods" do
