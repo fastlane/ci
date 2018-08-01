@@ -1,6 +1,8 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 
+import {AuthComponent, authPathMatcher} from '../auth/auth.component';
+import {AuthModule} from '../auth/auth.module';
 import {BuildComponent} from '../build/build.component';
 import {BuildModule} from '../build/build.module';
 import {DashboardComponent} from '../dashboard/dashboard.component';
@@ -16,11 +18,12 @@ const routes: Routes = [
   {path: 'project/:id', component: ProjectComponent},
   {path: 'project/:projectId/build/:buildId', component: BuildComponent},
   {path: 'onboard', component: OnboardComponent},
+  {matcher: authPathMatcher, component: AuthComponent},
 ];
 
 @NgModule({
   imports: [
-    DashboardModule, ProjectModule, BuildModule, OnboardModule,
+    DashboardModule, ProjectModule, BuildModule, OnboardModule, AuthModule,
     RouterModule.forRoot(routes)
   ],
   exports: [RouterModule]

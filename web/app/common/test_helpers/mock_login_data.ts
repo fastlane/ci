@@ -1,6 +1,6 @@
-import {LoginResponse} from '../../services/auth.service';
+import {AuthResponse} from '../../services/auth.service';
 
-export const mockLoginResponse: LoginResponse = {
+export const mockLoginResponse: AuthResponse = {
   oauth_key: '12345'
 };
 

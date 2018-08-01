@@ -63,5 +63,17 @@ module FastlaneCI
 
       return json({ token: res.body["access_token"] })
     end
+
+    get "#{HOME}/client_id" do
+      if FastlaneCI.dot_keys.oauth_client_id.nil? || FastlaneCI.dot_keys.oauth_client_secret.nil?
+        json_error!(
+          error_message: "OAuth client has not been configured",
+          error_key: "UserOAuth.Unconfigured",
+          error_code: 403
+        )
+      end
+
+      return json({ id: FastlaneCI.dot_keys.oauth_client_id })
+    end
   end
 end

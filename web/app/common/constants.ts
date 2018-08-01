@@ -8,7 +8,8 @@ export enum BuildStatus {
 }
 
 export enum LocalStorageKeys {
-  AUTH_TOKEN = 'auth_token'
+  AUTH_TOKEN = 'auth_token',
+  OAUTH_CLIENT_ID = 'oauth_client_id'
 }
 
 export type FastlaneStatus = 'failure'|'success'|'ci_problem'|'pending'|
