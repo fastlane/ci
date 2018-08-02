@@ -62,9 +62,9 @@ if $0 == __FILE__
     end
   end
   
-  thread = Thread.new do
+  thread2 = Thread.new do
     while true do
-      client.request_spawn("echo", "healthcheck")
+      client.request_run_fastlane("echo", "healthcheck")
       sleep(1.0)
     end
   end
@@ -84,4 +84,5 @@ if $0 == __FILE__
   end
   @file && @file.close
   thread.exit
+  thread2.exit
 end
