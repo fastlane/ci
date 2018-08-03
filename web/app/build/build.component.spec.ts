@@ -11,6 +11,7 @@ import {Subject} from 'rxjs/Subject';
 
 import {StatusIconModule} from '../common/components/status-icon/status-icon.module';
 import {ToolbarModule} from '../common/components/toolbar/toolbar.module';
+import {LogViewerModule} from '../common/components/log-viewer/log-viewer.module';
 import {BuildStatus} from '../common/constants';
 import {expectElementNotToExist, expectElementToExist, getAllElements, getElement} from '../common/test_helpers/element_helper_functions';
 import {mockBuild, mockBuildResponse} from '../common/test_helpers/mock_build_data';
@@ -50,12 +51,13 @@ describe('BuildComponent', () => {
 
     TestBed
         .configureTestingModule({
+
           declarations: [BuildComponent, DummyComponent],
           imports: [
             ToolbarModule, StatusIconModule, RouterTestingModule.withRoutes(
               [{path: '404', component: DummyComponent} ]
             ),
-            MatCardModule, MatProgressSpinnerModule, MomentModule
+            MatCardModule, MatProgressSpinnerModule, MomentModule, LogViewerModule
           ],
           providers: [
             {

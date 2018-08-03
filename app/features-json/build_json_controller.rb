@@ -107,7 +107,7 @@ module FastlaneCI
             logger.debug("streaming back artifact: #{build_log_artifact.reference}")
             File.open(build_log_artifact.reference, "r") do |file|
               file.each_line do |line|
-                ws.send(convert_ansi_to_plain_text(line.chomp))
+                ws.send(line.chomp)
               end
             end
             ws.close(1000, "runner complete.")
@@ -141,7 +141,7 @@ module FastlaneCI
         # subscribe the current socket to events from the remote_runner
         # as soon as a subscriber is returned, they will receive all historical items as well.
         @subscriber = current_build_runner.subscribe do |_topic, payload|
-          ws.send(convert_ansi_to_plain_text(JSON.dump(payload)))
+          ws.send(JSON.dump(payload))
         end
       end
 
@@ -187,11 +187,6 @@ module FastlaneCI
       end
 
       return current_project
-    end
-
-    # convert .log files that include the color information as ANSI code to plain text
-    def convert_ansi_to_plain_text(data)
-      return data.gsub(/\e\[[0-9;]*m/, "")
     end
   end
 end

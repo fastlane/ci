@@ -1,0 +1,4 @@
+<ng-container *ngIf="logLines.length <= 0">Connecting...</ng-container>
+<ng-container class="fci-log-viewer" *ngFor="let log of logLines">
+  <fci-log-line [log]="log"></fci-log-line>
+</ng-container>
