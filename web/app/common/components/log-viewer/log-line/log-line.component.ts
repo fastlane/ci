@@ -1,6 +1,11 @@
-import { Component, AfterViewInit, ViewChild, ElementRef, Input, ViewEncapsulation } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, AfterViewInit, ViewChild, ElementRef, Input, Inject, ViewEncapsulation } from '@angular/core';
 
 const ANSI_PATTERN = /\u001b\[([0-9;]+)?m/;
+const ANSI_RESET_CODE = '0';
+
+type AnsiCode = string;
+type AnsiTuple = [AnsiCode, string];
 
 export interface LogLine {
   timestamp: number;
@@ -20,21 +25,22 @@ export class LogLineComponent implements AfterViewInit {
   @Input() log: LogLine;
   @ViewChild('logLine', { read: ElementRef }) logLineEl: ElementRef;
 
+  constructor(@Inject(DOCUMENT) private readonly document: any) {}
+
   ngAfterViewInit() {
     const parentEl = this.logLineEl.nativeElement;
     let currentSpanEl = parentEl;
     const stack = this.tokenize(this.log.message);
 
-    stack.forEach(tuple => {
+    for (const tuple of stack) {
       const [code, text] = tuple;
-      if (code === '0') {
+      if (code === ANSI_RESET_CODE) {
         parentEl.innerHTML += text;
         currentSpanEl = parentEl;
-      }
-      else {
+      } else {
         currentSpanEl = this.injectSpan(currentSpanEl, text, code);
       }
-    });
+    }
   }
 
   /**
@@ -43,20 +49,19 @@ export class LogLineComponent implements AfterViewInit {
    * this method will split and group the result into an array of tuples [ansi code, text]
    * NOTE: that the capture comes after the string, so we transpose them.
    **/
-  private tokenize(text: string): [string, string][] {
-    const tuples = text.split(ANSI_PATTERN);
+  private tokenize(ansiText: string): AnsiTuple[] {
+    const tuples = ansiText.split(ANSI_PATTERN);
 
     // if the text starts with a match capture (and thus returning empty string as [0]),
     // use that captured ansi code as the beginning style
     if (tuples[0] === '') {
       tuples.shift();
-    }
-    // otherwise, we must assume we are starting each line as the default '0'
-    else {
-      tuples.unshift('0');
+    } else {
+      // otherwise, we must assume we are starting each line as the default '0'
+      tuples.unshift(ANSI_RESET_CODE);
     }
 
-    const stack = [];
+    const stack: AnsiTuple[] = [];
 
     for (let i = 0; i < tuples.length; i += 2) {
       const code = tuples[i];
@@ -66,8 +71,8 @@ export class LogLineComponent implements AfterViewInit {
     return stack;
   }
 
-  private injectSpan(parent: HTMLElement, text: string, ansiCode: string): HTMLSpanElement {
-    const span = document.createElement('span');
+  private injectSpan(parent: HTMLElement, text: string, ansiCode: AnsiCode): HTMLSpanElement {
+    const span = this.document.createElement('span');
     const classNames = ansiCode.split(';').map(c => `fci-ansi-${c}`).join(' ');
     span.className = classNames;
     span.innerText = text;

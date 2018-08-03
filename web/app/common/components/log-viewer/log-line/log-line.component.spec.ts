@@ -23,7 +23,7 @@ describe('LogLineComponent', () => {
       timestamp: 1531944769
     };
 
-    fixture.detectChanges(); //onInit
+    fixture.detectChanges(); // onInit
   }));
 
   it('should create the correct span dom tree of ansi codes', () => {
