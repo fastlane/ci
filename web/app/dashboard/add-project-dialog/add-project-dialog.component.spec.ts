@@ -10,7 +10,7 @@ import {Subject} from 'rxjs/Subject';
 
 import {FormSpinnerModule} from '../../common/components/form-spinner/form-spinner.module';
 // tslint:disable-next-line:max-line-length
-import {expectElementNotToExist, expectElementToExist, getElement, getElementText} from '../../common/test_helpers/element_helper_functions';
+import {expectElementNotToExist, expectElementToExist, expectInputControlToBeAttachedToForm, getElement, getElementText} from '../../common/test_helpers/element_helper_functions';
 import {mockLanes, mockLanesResponse} from '../../common/test_helpers/mock_lane_data';
 import {mockProjectSummary} from '../../common/test_helpers/mock_project_data';
 import {mockRepositoryList} from '../../common/test_helpers/mock_repository_data';
@@ -131,13 +131,8 @@ describe('AddProjectDialogComponent', () => {
          fixture.detectChanges();
 
          fixture.whenStable().then(() => {
-           expect(projectNameEl.value).toBe('ProjectX');
-
-           projectNameEl.value = 'ProjectY';
-           projectNameEl.dispatchEvent(new Event('input'));
-           fixture.detectChanges();
-
-           expect(component.form.get('name').value).toBe('ProjectY');
+           expectInputControlToBeAttachedToForm(
+               fixture, 'name', component.form);
          });
        }));
 

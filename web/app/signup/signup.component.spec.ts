@@ -6,7 +6,7 @@ import {By} from '@angular/platform-browser';
 import {Router} from '@angular/router';
 import {Subject} from 'rxjs/Subject';
 
-import {getElement, getElementText} from '../common/test_helpers/element_helper_functions';
+import {expectInputControlToBeAttachedToForm, getElement, getElementText} from '../common/test_helpers/element_helper_functions';
 import {UserDetails} from '../common/types';
 import {AuthService} from '../services/auth.service';
 import {DataService} from '../services/data.service';
@@ -68,32 +68,14 @@ describe('SignupComponent', () => {
   });
 
   describe('after OnInit', () => {
-    let tokenEl: HTMLInputElement;
-
     beforeEach(() => {
       fixture.detectChanges();
-      tokenEl =
-          getElement(fixture.debugElement, 'input[formcontrolname="token"]')
-              .nativeElement;
     });
 
     for (const control_id of FORM_CONTROL_IDS) {
       it(`should have all the ${control_id} control properly attached`, () => {
-        const controlEl: HTMLInputElement =
-            getElement(
-                fixture.debugElement, `input[formcontrolname="${control_id}"]`)
-                .nativeElement;
-
-        controlEl.value = '10';
-        controlEl.dispatchEvent(new Event('input'));
-        fixture.detectChanges();
-
-        expect(component.form.get(control_id).value).toBe('10');
-
-        component.form.patchValue({[control_id]: '12'});
-        fixture.detectChanges();
-
-        expect(controlEl.value).toBe('12');
+        expectInputControlToBeAttachedToForm(
+            fixture, control_id, component.form);
       });
     }
 
