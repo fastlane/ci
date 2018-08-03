@@ -1,0 +1,2 @@
+web: bundle exec rackup --host 0.0.0.0 --port 8080 --env development
+worker: bundle exec ruby agent/service.rb
