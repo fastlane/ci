@@ -48,16 +48,6 @@ module FastlaneCI
           ensure
             @busy = false
           end
-          begin
-            while true do
-              puts ".."
-              log = FastlaneCI::Proto::Log.new(message: "..", timestamp: Time.now.to_i)
-              yielder << FastlaneCI::Proto::InvocationResponse.new(log: log)
-              sleep(1)
-            end
-          rescue StandardError => exception
-            puts exception
-          end          
         end
         puts "run_fastlane call complete!"
         return results

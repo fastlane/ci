@@ -54,21 +54,7 @@ if $0 == __FILE__
   response = client.request_run_fastlane(
     "bundle", "exec", "fastlane", "ios", "test", env: env
   )
-
-  thread = Thread.new do
-    while true do
-      puts "=== Channel Watcher: connectivity_state = #{client.channel.connectivity_state}"
-      sleep(1.0)
-    end
-  end
   
-  thread2 = Thread.new do
-    while true do
-      client.request_run_fastlane("echo", "healthcheck")
-      sleep(1.0)
-    end
-  end
-
   @file = nil
   response.each do |r|
     puts("Log: #{r.log.message}") if r.log
