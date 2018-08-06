@@ -69,6 +69,4 @@ if $0 == __FILE__
     @file.write(r.artifact.chunk)
   end
   @file && @file.close
-  thread.exit
-  thread2.exit
 end
