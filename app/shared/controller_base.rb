@@ -1,7 +1,6 @@
 require "sinatra/base"
 require "sinatra/reloader"
 require "sinatra/custom_logger"
-require "sinatra/flash"
 require "set"
 require "logger"
 
@@ -18,7 +17,6 @@ module FastlaneCI
     enable :sessions
 
     register SetupChecker
-    register Sinatra::Flash
 
     include FastlaneCI::Logging
 
