@@ -145,6 +145,8 @@ GEM
       eventmachine (>= 0.12.0)
       websocket-driver (>= 0.5.1)
     ffi (1.9.25)
+    foreman (0.85.0)
+      thor (~> 0.19.1)
     fugit (1.1.1)
       et-orbi (~> 1.1, >= 1.1.1)
       raabro (~> 1.1)
@@ -366,6 +368,7 @@ DEPENDENCIES
   fastfile-parser!
   fastlane!
   faye-websocket (>= 0.10.7, < 1.0.0)
+  foreman
   git!
   google-cloud-storage!
   grpc (>= 1.11.0, < 2.0.0)

@@ -77,6 +77,7 @@ gem "git", git: "https://github.com/fastlane/ruby-git", require: false # Interac
 
 group :test, :development do
   gem "coveralls"
+  gem "foreman"
   gem "grpc-tools"
   gem "overcommit"
   gem "pry"
