@@ -368,7 +368,7 @@ DEPENDENCIES
   fastfile-parser!
   fastlane!
   faye-websocket (>= 0.10.7, < 1.0.0)
-  foreman
+  foreman (>= 0.82.0)
   git!
   google-cloud-storage!
   grpc (>= 1.11.0, < 2.0.0)
