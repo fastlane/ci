@@ -36,9 +36,6 @@ gem "dotenv", ">= 2.4.0", "< 3.0.0"
 # Caching for octokit operations
 gem "faraday-http-cache", ">= 2.0.0", "< 3.0.0"
 
-# Add foreman for `bundle exec rake <prod, dev>` command
-gem "foreman", ">= 0.82.0"
-
 # We have rubocop as runtime dependency for now
 # as we run code style verification for fastlane.ci
 # TODO: We should remove this before the public release

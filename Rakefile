@@ -21,6 +21,7 @@ task :dev_bootstrap do
   end
 
   sh("bundle install")
+  sh("gem install foreman")
   sh("brew install node") unless system("which npm")
   sh("npm install")
   sh("ln -sf ../../.pre-commit .git/hooks/pre-commit")
