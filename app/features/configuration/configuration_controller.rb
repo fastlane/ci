@@ -30,9 +30,9 @@ module FastlaneCI
     post "#{HOME}/keys" do
       if valid_params?(params, post_parameter_list_for_validation)
         Services.dot_keys_variable_service.write_keys_file!(locals: params)
-        flash[:success] = "#{Services.dot_keys_variable_service.keys_file_path_relative_to_home} file written."
+        logger.debug("#{Services.dot_keys_variable_service.keys_file_path_relative_to_home} file written.")
       else
-        flash[:error] = "#{Services.dot_keys_variable_service.keys_file_path_relative_to_home} file NOT written."
+        logger.debug("#{Services.dot_keys_variable_service.keys_file_path_relative_to_home} file NOT written.")
       end
 
       locals = { title: "Configuration" }
